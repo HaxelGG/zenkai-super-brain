@@ -1,0 +1,14 @@
+---
+interface Props {
+  icon?: string;
+  title: string;
+  message: string;
+}
+const { icon = "🔌", title, message } = Astro.props;
+---
+
+<div class="card-base p-6 text-center">
+  <div class="text-2xl mb-2" aria-hidden="true">{icon}</div>
+  <div class="text-h3 text-text mb-1">{title}</div>
+  <div class="text-small text-text-muted max-w-md mx-auto">{message}</div>
+</div>

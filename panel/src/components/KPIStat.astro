@@ -1,0 +1,22 @@
+---
+interface Props {
+  label: string;
+  value: string | number;
+  caption?: string;
+  variant?: "default" | "muted";
+}
+const { label, value, caption, variant = "default" } = Astro.props;
+---
+
+<div class="card-base p-4 sm:p-5">
+  <div class="label-micro">{label}</div>
+  <div class:list={[
+    "mt-1 text-[28px] font-semibold tracking-tight leading-none",
+    variant === "muted" ? "text-text-faint" : "text-text",
+  ]}>
+    {value}
+  </div>
+  {caption && (
+    <div class="mt-1 text-micro text-text-faint normal-case tracking-normal">{caption}</div>
+  )}
+</div>

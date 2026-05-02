@@ -1,0 +1,18 @@
+---
+interface Props {
+  href?: string;
+  class?: string;
+}
+const { href, class: className = "" } = Astro.props;
+const baseClasses = "inline-flex items-center px-2.5 py-1 text-small rounded-full bg-bg-muted text-text-muted hover:bg-accent-soft hover:text-accent transition-colors no-underline";
+---
+
+{href ? (
+  <a href={href} class:list={[baseClasses, className]}>
+    <slot />
+  </a>
+) : (
+  <span class:list={[baseClasses, "cursor-default", className]}>
+    <slot />
+  </span>
+)}
