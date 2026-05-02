@@ -1,0 +1,81 @@
+---
+import { getCollection } from "astro:content";
+import PanelLayout from "../layouts/PanelLayout.astro";
+import PageHeader from "../components/PageHeader.astro";
+import KPIStat from "../components/KPIStat.astro";
+import KPIStrip from "../components/KPIStrip.astro";
+import EmptyState from "../components/EmptyState.astro";
+
+const [agentes, sectores, workflows, sops, conexiones] = await Promise.all([
+  getCollection("agentes"),
+  getCollection("sectores"),
+  getCollection("workflows"),
+  getCollection("sops"),
+  getCollection("conexiones"),
+]);
+
+const conexionesActivas = conexiones.filter((c) => c.data.estado_conexion === "activo").length;
+
+const fases = [
+  { num: 1, nombre: "Anthropic Claude API", estado: "pendiente" },
+  { num: 2, nombre: "Airtable + 6 bases", estado: "pendiente" },
+  { num: 3, nombre: "Make + connections", estado: "pendiente" },
+  { num: 4, nombre: "WhatsApp Cloud API + BSP", estado: "pendiente" },
+  { num: 5, nombre: "Cal.com + Stripe/Wompi", estado: "pendiente" },
+  { num: 6, nombre: "Docuseal + Notion + Drive", estado: "pendiente" },
+  { num: 7, nombre: "Monitoreo (Sentry + BetterStack)", estado: "pendiente" },
+];
+---
+
+<PanelLayout title="Rendimiento">
+  <PageHeader
+    eyebrow="Estado operativo"
+    title="Rendimiento"
+    description="Capacidad construida vs métricas operativas. En v1 mostramos lo que sabemos de la plataforma; las métricas reales se conectan en Fases 1-7."
+  />
+
+  <section class="mb-12">
+    <h2 class="text-h2 mb-4">Capacidad construida</h2>
+    <KPIStrip>
+      <KPIStat label="Agentes" value={`${agentes.length} / 12`} caption="documentados" />
+      <KPIStat label="Sectores" value={`${sectores.length} / 11`} caption="con KPIs y dolores" />
+      <KPIStat label="Workflows" value={`${workflows.length} / 6`} caption="end-to-end" />
+      <KPIStat label="SOPs" value={`${sops.length} / 5`} caption="con SLA" />
+    </KPIStrip>
+    <div class="mt-4">
+      <KPIStrip>
+        <KPIStat label="Conexiones activas" value={`${conexionesActivas} / ${conexiones.length}`} caption="planeadas" variant={conexionesActivas === 0 ? "muted" : "default"} />
+        <KPIStat label="Stack actual" value="Eco" caption="hasta primer cliente Pro" />
+        <KPIStat label="Clientes activos" value="—" caption="🔌 conecta Airtable" variant="muted" />
+        <KPIStat label="Facturado 2026" value="$0" caption="objetivo $100,000 USD" variant="muted" />
+      </KPIStrip>
+    </div>
+  </section>
+
+  <section class="mb-12">
+    <h2 class="text-h2 mb-4">Métricas operativas</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <EmptyState title="Conversión de leads" message="Conecta Airtable + WhatsApp Cloud API (Fases 2 y 4) para ver el embudo lead → cliente." />
+      <EmptyState title="Tiempo de delivery" message="Conecta Airtable (Fase 2) para medir tiempo desde firma de contrato a entrega." />
+      <EmptyState title="CSAT post-entrega" message="Conecta el SOP de cierre para capturar satisfacción del cliente." />
+      <EmptyState title="Margen por proyecto" message="Requiere Airtable + Stripe/Wompi (Fases 2 y 5) para cruzar costo operativo vs precio cobrado." />
+    </div>
+  </section>
+
+  <section>
+    <h2 class="text-h2 mb-4">Próximas fases · roadmap de conexión</h2>
+    <ol class="card-base divide-y divide-border">
+      {fases.map((f) => (
+        <li class="flex items-center justify-between p-4">
+          <div>
+            <div class="text-small text-text-faint font-mono">Fase {f.num}</div>
+            <div class="text-body text-text">{f.nombre}</div>
+          </div>
+          <span class="text-micro uppercase tracking-wide text-warning bg-warning/10 px-2 py-0.5 rounded-chip">
+            {f.estado}
+          </span>
+        </li>
+      ))}
+    </ol>
+  </section>
+</PanelLayout>
