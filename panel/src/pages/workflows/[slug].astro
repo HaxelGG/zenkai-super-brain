@@ -1,0 +1,46 @@
+---
+import { getCollection, render } from "astro:content";
+import DetalleLayout from "../../layouts/DetalleLayout.astro";
+import Badge from "../../components/Badge.astro";
+
+export async function getStaticPaths() {
+  const workflows = await getCollection("workflows");
+  return workflows.map((workflow) => ({
+    params: { slug: workflow.data.slug },
+    props: { workflow },
+  }));
+}
+
+const { workflow } = Astro.props;
+const { Content } = await render(workflow);
+const { name, tiempo_objetivo, agentes_principales, categoria } = workflow.data;
+---
+
+<DetalleLayout title={name} eyebrow={`Workflow · ${categoria}`}>
+  <Content />
+
+  <aside slot="sidebar">
+    <section class="card-base p-5 space-y-4">
+      <div>
+        <div class="label-micro mb-1.5">Categoría</div>
+        <Badge>{categoria}</Badge>
+      </div>
+
+      <div>
+        <div class="label-micro mb-1.5">Tiempo objetivo</div>
+        <div class="text-body font-mono">{tiempo_objetivo}</div>
+      </div>
+
+      <div>
+        <div class="label-micro mb-2">Agentes principales</div>
+        <div class="flex flex-col gap-1">
+          {agentes_principales.map((nombre) => (
+            <a href={`/agentes/${nombre.toLowerCase()}`} class="text-small text-accent hover:underline">
+              {nombre}
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  </aside>
+</DetalleLayout>

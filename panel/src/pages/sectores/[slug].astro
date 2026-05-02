@@ -1,0 +1,66 @@
+---
+import { getCollection, render } from "astro:content";
+import DetalleLayout from "../../layouts/DetalleLayout.astro";
+import Badge from "../../components/Badge.astro";
+import Chip from "../../components/Chip.astro";
+import { agentesDeSector } from "../../lib/cross-refs";
+
+export async function getStaticPaths() {
+  const sectores = await getCollection("sectores");
+  return sectores.map((sector) => ({
+    params: { slug: sector.data.slug },
+    props: { sector },
+  }));
+}
+
+const { sector } = Astro.props;
+const { Content } = await render(sector);
+const { name, fase, prioridad, mercados_objetivo } = sector.data;
+const agentes = await agentesDeSector(sector.data.slug);
+
+const faseLabel = fase === 1 ? "Fase 1" : fase === 2 ? "Fase 2" : "Futuro";
+const faseVariant: "success" | "warning" | "neutral" =
+  fase === 1 ? "success" : fase === 2 ? "warning" : "neutral";
+---
+
+<DetalleLayout title={name} eyebrow="Sector · vertical">
+  <Content />
+
+  <aside slot="sidebar">
+    <section class="card-base p-5 space-y-4">
+      <div>
+        <div class="label-micro mb-1.5">Fase</div>
+        <Badge variant={faseVariant}>{faseLabel}</Badge>
+      </div>
+
+      <div>
+        <div class="label-micro mb-1.5">Prioridad</div>
+        <div class="text-body capitalize">{prioridad}</div>
+      </div>
+
+      <div>
+        <div class="label-micro mb-1.5">Mercados objetivo</div>
+        <div class="flex flex-wrap gap-1">
+          {mercados_objetivo.map((m) => <Chip>{m}</Chip>)}
+        </div>
+      </div>
+    </section>
+
+    {agentes.length > 0 && (
+      <section class="card-base p-5">
+        <div class="label-micro mb-2">Agentes prioritarios</div>
+        <div class="flex flex-col gap-2">
+          {agentes.map((a, i) => (
+            <a href={`/agentes/${a.id}`} class="flex items-center justify-between text-small hover:underline">
+              <span class="flex items-center gap-2">
+                <span class="font-mono text-text-faint">{i + 1}.</span>
+                <span class="text-accent font-medium">{a.data.name}</span>
+              </span>
+              <span class="text-text-faint text-micro">{a.data.modelo_label}</span>
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+  </aside>
+</DetalleLayout>
