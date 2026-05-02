@@ -1,0 +1,35 @@
+---
+import "../styles/global.css";
+import TopNav from "../components/TopNav.astro";
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = "Panel interno de control · ZENKAI Growth Systems" } = Astro.props;
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title} · ZENKAI</title>
+  </head>
+  <body class="bg-bg text-text">
+    <TopNav />
+    <main class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      <slot />
+    </main>
+    <footer class="border-t border-border mt-16">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 text-small text-text-faint flex flex-col sm:flex-row justify-between items-center gap-2">
+        <span>ZENKAI Growth Systems · Super Cerebro v2.0 · Capa 1</span>
+        <span class="font-mono text-micro">localhost dev · privado</span>
+      </div>
+    </footer>
+  </body>
+</html>

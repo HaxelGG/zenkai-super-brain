@@ -1,0 +1,15 @@
+---
+interface Props {
+  withText?: boolean;
+}
+const { withText = true } = Astro.props;
+---
+
+<a href="/" class="flex items-center gap-2.5 text-text hover:text-text no-underline">
+  <span class="inline-block w-6 h-6 bg-text rounded-[6px] flex-shrink-0"></span>
+  {withText && (
+    <span class="font-semibold text-[15px] tracking-tight whitespace-nowrap">
+      ZENKAI <span class="text-text-faint hidden md:inline">· Super Cerebro</span>
+    </span>
+  )}
+</a>

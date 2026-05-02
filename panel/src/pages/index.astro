@@ -1,16 +1,8 @@
 ---
-import "../styles/global.css";
+import PanelLayout from "../layouts/PanelLayout.astro";
 ---
 
-<html lang="es">
-  <head>
-    <meta charset="utf-8" />
-    <title>ZENKAI · Panel</title>
-  </head>
-  <body class="bg-bg text-text">
-    <main class="p-8">
-      <h1 class="text-h1">Panel ZENKAI · scaffold OK</h1>
-      <p class="text-body text-text-muted mt-4">Tipografía Inter + paleta cargadas.</p>
-    </main>
-  </body>
-</html>
+<PanelLayout title="Home">
+  <h1 class="text-h1">Panel ZENKAI</h1>
+  <p class="text-body text-text-muted mt-2">Layout y nav OK.</p>
+</PanelLayout>
