@@ -1,0 +1,66 @@
+---
+import { getCollection, render } from "astro:content";
+import PanelLayout from "../layouts/PanelLayout.astro";
+import PageHeader from "../components/PageHeader.astro";
+import Badge from "../components/Badge.astro";
+
+const finanzas = await getCollection("finanzas");
+const stacks = finanzas
+  .filter((f) => f.data.tipo === "stack")
+  .sort((a, b) => (a.data.costo_mensual_usd ?? 0) - (b.data.costo_mensual_usd ?? 0));
+
+const calculadora = finanzas.find((f) => f.data.slug === "calculadora-precios");
+const proyeccion = finanzas.find((f) => f.data.slug === "proyeccion-facturacion");
+
+const stackContents = await Promise.all(
+  stacks.map(async (s) => ({ entry: s, ...(await render(s)) })),
+);
+
+const calculadoraRender = calculadora ? await render(calculadora) : null;
+const proyeccionRender = proyeccion ? await render(proyeccion) : null;
+---
+
+<PanelLayout title="Finanzas">
+  <PageHeader
+    eyebrow="Capa 1 · Costos y precios"
+    title="Finanzas"
+    description="Tres stacks · una fórmula sagrada · un objetivo de $100K USD para 2026."
+  />
+
+  <section class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-10">
+    {stackContents.map(({ entry, Content }) => (
+      <article class="card-base p-6">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-h3">{entry.data.name}</h3>
+          <Badge variant={entry.data.tier === "eco" ? "success" : entry.data.tier === "pro" ? "warning" : "accent"}>
+            {entry.data.tier?.toUpperCase()}
+          </Badge>
+        </div>
+        <div class="font-mono text-h2 text-text mb-4">
+          ${entry.data.costo_mensual_usd ?? 0}<span class="text-small text-text-faint"> / mes</span>
+        </div>
+        <div class="prose-zenkai text-small">
+          <Content />
+        </div>
+      </article>
+    ))}
+  </section>
+
+  {calculadoraRender && (
+    <section class="mb-10">
+      <h2 class="text-h2 mb-4">Calculadora de precios</h2>
+      <article class="prose-zenkai card-base p-6 sm:p-8">
+        <calculadoraRender.Content />
+      </article>
+    </section>
+  )}
+
+  {proyeccionRender && (
+    <section>
+      <h2 class="text-h2 mb-4">Proyección 2026</h2>
+      <article class="prose-zenkai card-base p-6 sm:p-8">
+        <proyeccionRender.Content />
+      </article>
+    </section>
+  )}
+</PanelLayout>
