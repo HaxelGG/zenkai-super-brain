@@ -1,0 +1,93 @@
+---
+import { getCollection, render } from "astro:content";
+import DetalleLayout from "../../layouts/DetalleLayout.astro";
+import Badge from "../../components/Badge.astro";
+import Chip from "../../components/Chip.astro";
+import { workflowsDeAgente, sectoresDeAgente } from "../../lib/cross-refs";
+
+export async function getStaticPaths() {
+  const agentes = await getCollection("agentes");
+  return agentes.map((agente) => ({
+    params: { slug: agente.id },
+    props: { agente },
+  }));
+}
+
+const { agente } = Astro.props;
+const { Content } = await render(agente);
+const { name, numero, departamento, modelo_label, modelo, sectores_lidera, subagentes, skills_default, estado } = agente.data;
+
+const [workflowsParticipa, sectoresAparece] = await Promise.all([
+  workflowsDeAgente(name),
+  sectoresDeAgente(name),
+]);
+
+const modeloVariant = modelo === "claude-opus-4-7" ? "accent" : "neutral";
+---
+
+<DetalleLayout
+  title={name}
+  eyebrow={`Departamento ${String(numero).padStart(2, "0")} · ${departamento}`}
+>
+  <Content />
+
+  <aside slot="sidebar">
+    <section class="card-base p-5 space-y-4">
+      <div>
+        <div class="label-micro mb-1.5">Modelo</div>
+        <Badge variant={modeloVariant}>{modelo_label}</Badge>
+        <div class="text-micro text-text-faint mt-1 font-mono normal-case tracking-normal">{modelo}</div>
+      </div>
+
+      <div>
+        <div class="label-micro mb-1.5">Estado</div>
+        <Badge variant={estado === "activo" ? "success" : "neutral"}>{estado}</Badge>
+      </div>
+
+      {subagentes.length > 0 && (
+        <div>
+          <div class="label-micro mb-1.5">Subagentes</div>
+          <div class="flex flex-wrap gap-1">
+            {subagentes.map((s) => <Chip>{s}</Chip>)}
+          </div>
+        </div>
+      )}
+
+      {skills_default.length > 0 && (
+        <div>
+          <div class="label-micro mb-1.5">Skills default</div>
+          <div class="flex flex-wrap gap-1">
+            {skills_default.map((s) => <Chip>{s}</Chip>)}
+          </div>
+        </div>
+      )}
+    </section>
+
+    {sectoresAparece.length > 0 && (
+      <section class="card-base p-5">
+        <div class="label-micro mb-2">Sectores donde participa</div>
+        <div class="flex flex-col gap-1">
+          {sectoresAparece.map((s) => (
+            <a href={`/sectores/${s.data.slug}`} class="text-small text-accent hover:underline flex items-center gap-1.5">
+              {sectores_lidera.includes(s.data.slug) && <span class="text-warning" title="Lidera">★</span>}
+              {s.data.name}
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+
+    {workflowsParticipa.length > 0 && (
+      <section class="card-base p-5">
+        <div class="label-micro mb-2">Workflows donde participa</div>
+        <div class="flex flex-col gap-1">
+          {workflowsParticipa.map((w) => (
+            <a href={`/workflows/${w.data.slug}`} class="text-small text-accent hover:underline">
+              {w.data.name}
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+  </aside>
+</DetalleLayout>

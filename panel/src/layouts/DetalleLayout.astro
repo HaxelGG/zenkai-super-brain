@@ -1,0 +1,22 @@
+---
+import PanelLayout from "./PanelLayout.astro";
+
+interface Props {
+  title: string;
+  eyebrow?: string;
+}
+const { title, eyebrow } = Astro.props;
+---
+
+<PanelLayout title={title}>
+  {eyebrow && <div class="label-micro mb-2">{eyebrow}</div>}
+  <h1 class="text-h1 mb-8">{title}</h1>
+  <div class="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-8 lg:gap-12">
+    <article class="prose-zenkai min-w-0">
+      <slot />
+    </article>
+    <aside class="lg:sticky lg:top-20 lg:self-start space-y-6">
+      <slot name="sidebar" />
+    </aside>
+  </div>
+</PanelLayout>
