@@ -1,3 +1,12 @@
+---
+name: "Clínicas & Salud"
+slug: salud
+fase: 2
+prioridad: alta
+agentes_prioritarios: [ATLAS, ECHO, LEX, NEXUS]
+mercados_objetivo: [colombia, latam]
+---
+
 # SECTOR · CLÍNICAS & SALUD
 ## Fase 2 nicho de ZENKAI (mes 4+ del 2026)
 

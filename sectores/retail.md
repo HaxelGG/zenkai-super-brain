@@ -1,3 +1,12 @@
+---
+name: "Retail"
+slug: retail
+fase: futuro
+prioridad: media
+agentes_prioritarios: [ARES, HERMES, MUSE, ATLAS]
+mercados_objetivo: [colombia, latam]
+---
+
 # SECTOR · RETAIL & TIENDA FÍSICA
 ## Tiendas físicas con presencia digital · omnicanal
 

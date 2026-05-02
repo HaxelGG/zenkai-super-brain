@@ -1,3 +1,12 @@
+---
+name: "Manufactura"
+slug: manufactura
+fase: futuro
+prioridad: baja
+agentes_prioritarios: [ATLAS, FORGE, ORACLE, HIVE]
+mercados_objetivo: [colombia, latam]
+---
+
 # SECTOR · MANUFACTURA & INDUSTRIA
 ## B2B · ciclos largos · integraciones complejas
 

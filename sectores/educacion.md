@@ -1,3 +1,12 @@
+---
+name: "Educación"
+slug: educacion
+fase: futuro
+prioridad: media
+agentes_prioritarios: [ARES, MUSE, ATLAS, ECHO]
+mercados_objetivo: [colombia, latam]
+---
+
 # SECTOR · EDUCACIÓN & ACADEMIA
 ## Cursos online · Academias · Coaches educativos · Universidades
 

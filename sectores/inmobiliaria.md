@@ -1,3 +1,12 @@
+---
+name: "Inmobiliaria"
+slug: inmobiliaria
+fase: futuro
+prioridad: media
+agentes_prioritarios: [HERMES, ARES, LEX, APOLLO]
+mercados_objetivo: [colombia, latam]
+---
+
 # SECTOR · INMOBILIARIA & CONSTRUCCIÓN
 
 ---

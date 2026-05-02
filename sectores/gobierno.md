@@ -1,3 +1,12 @@
+---
+name: "Gobierno"
+slug: gobierno
+fase: futuro
+prioridad: baja
+agentes_prioritarios: [LEX, ATLAS, FORGE, ECHO]
+mercados_objetivo: [colombia, latam]
+---
+
 # SECTOR · GOBIERNO & SECTOR PÚBLICO
 ## Trámites · servicios ciudadanos · entidades públicas
 

@@ -1,3 +1,12 @@
+---
+name: "ONG & Fundaciones"
+slug: ong
+fase: futuro
+prioridad: baja
+agentes_prioritarios: [ARES, MUSE, ORACLE, LEX]
+mercados_objetivo: [colombia, latam, españa]
+---
+
 # SECTOR · ONG & FUNDACIONES
 ## Tercer sector · presupuestos limitados · alto impacto
 

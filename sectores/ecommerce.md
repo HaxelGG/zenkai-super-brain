@@ -1,3 +1,12 @@
+---
+name: "E-commerce"
+slug: ecommerce
+fase: 1
+prioridad: alta
+agentes_prioritarios: [ARES, HERMES, NEXUS, APOLLO]
+mercados_objetivo: [colombia, españa, usa]
+---
+
 # SECTOR · E-COMMERCE
 ## Fase 1 nicho prioritario de ZENKAI 2026
 

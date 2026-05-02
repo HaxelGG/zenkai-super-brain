@@ -1,3 +1,12 @@
+---
+name: "Startups & Tech"
+slug: startups
+fase: futuro
+prioridad: media
+agentes_prioritarios: [ZEUS, FORGE, NEXUS, ARES]
+mercados_objetivo: [colombia, usa, europa]
+---
+
 # SECTOR · STARTUPS & TECNOLOGÍA
 ## Early/growth-stage · MVP · pivot-friendly
 

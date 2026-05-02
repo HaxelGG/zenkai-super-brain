@@ -1,3 +1,12 @@
+---
+name: "Servicios Profesionales"
+slug: servicios-profesionales
+fase: futuro
+prioridad: media
+agentes_prioritarios: [LEX, HERMES, MUSE, ATLAS]
+mercados_objetivo: [colombia, latam, españa]
+---
+
 # SECTOR · SERVICIOS PROFESIONALES
 ## Abogados · Contadores · Consultores · Coaches · Arquitectos
 

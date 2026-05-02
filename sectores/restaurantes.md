@@ -1,3 +1,12 @@
+---
+name: "Restaurantes & Food"
+slug: restaurantes
+fase: futuro
+prioridad: media
+agentes_prioritarios: [ARES, MUSE, ATLAS, HERMES]
+mercados_objetivo: [colombia, latam]
+---
+
 # SECTOR · RESTAURANTES & FOOD
 
 ---
