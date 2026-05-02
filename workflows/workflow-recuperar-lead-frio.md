@@ -1,3 +1,11 @@
+---
+name: "Recuperar Lead Frío"
+slug: workflow-recuperar-lead-frio
+tiempo_objetivo: "30-90 días"
+agentes_principales: [HERMES, ARES, MUSE]
+categoria: recuperacion
+---
+
 # WORKFLOW · Recuperar Lead Frío
 ## Reactivación sistemática de leads perdidos o inactivos
 

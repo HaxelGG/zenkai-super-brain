@@ -39,4 +39,23 @@ const sectores = defineCollection({
   }),
 });
 
-export const collections = { agentes, sectores };
+const CATEGORIA_WORKFLOW = z.enum([
+  "ventas",
+  "onboarding",
+  "delivery",
+  "reporting",
+  "recuperacion",
+]);
+
+const workflows = defineCollection({
+  loader: glob({ pattern: ["*.md", "!README.md"], base: "../workflows" }),
+  schema: z.object({
+    name: z.string(),
+    slug: z.string(),
+    tiempo_objetivo: z.string(),
+    agentes_principales: z.array(z.string()),
+    categoria: CATEGORIA_WORKFLOW,
+  }),
+});
+
+export const collections = { agentes, sectores, workflows };

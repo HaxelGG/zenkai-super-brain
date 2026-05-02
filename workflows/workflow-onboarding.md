@@ -1,3 +1,11 @@
+---
+name: "Onboarding del Cliente"
+slug: workflow-onboarding
+tiempo_objetivo: "3-7 días"
+agentes_principales: [ATLAS, HERMES, FORGE, ECHO]
+categoria: onboarding
+---
+
 # WORKFLOW · Onboarding
 ## De contrato firmado a primer entregable visible
 

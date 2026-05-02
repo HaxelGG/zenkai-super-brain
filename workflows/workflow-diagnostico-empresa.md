@@ -1,3 +1,11 @@
+---
+name: "Diagnóstico de Empresa"
+slug: workflow-diagnostico-empresa
+tiempo_objetivo: "1-3 días"
+agentes_principales: [ZEUS, ATLAS, ORACLE, NEXUS]
+categoria: delivery
+---
+
 # WORKFLOW · Diagnóstico de Empresa
 ## De primera llamada a propuesta basada en diagnóstico
 

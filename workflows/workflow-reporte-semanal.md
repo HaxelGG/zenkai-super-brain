@@ -1,3 +1,11 @@
+---
+name: "Reporte Semanal al Cliente"
+slug: workflow-reporte-semanal
+tiempo_objetivo: "Recurrente · semanal"
+agentes_principales: [ORACLE, ATLAS, ECHO]
+categoria: reporting
+---
+
 # WORKFLOW · Reporte Semanal
 ## Generación automática de reportes para clientes y para ZENKAI interno
 

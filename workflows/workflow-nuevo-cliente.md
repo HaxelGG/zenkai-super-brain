@@ -1,3 +1,11 @@
+---
+name: "Nuevo Cliente"
+slug: workflow-nuevo-cliente
+tiempo_objetivo: "7-21 días"
+agentes_principales: [ARES, HERMES, ORACLE, LEX, ATLAS]
+categoria: ventas
+---
+
 # WORKFLOW · Nuevo Cliente
 ## De lead entrante a contrato firmado y primer pago
 

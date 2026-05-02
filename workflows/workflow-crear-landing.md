@@ -1,3 +1,11 @@
+---
+name: "Crear Landing Page"
+slug: workflow-crear-landing
+tiempo_objetivo: "2-5 días"
+agentes_principales: [APOLLO, MUSE, FORGE, NEXUS]
+categoria: delivery
+---
+
 # WORKFLOW · Crear Landing Page
 ## De brief a landing publicada con integraciones activas
 
