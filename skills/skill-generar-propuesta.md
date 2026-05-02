@@ -1,8 +1,8 @@
 ---
-name: skill-generar-propuesta
-description: Estructura de propuesta comercial profesional · listo para PDF · 8 secciones · variables marcadas
-type: flexible
-agentes_principales: [LEX, HERMES]
+name: "Generar Propuesta"
+slug: skill-generar-propuesta
+agentes_que_usan: [HERMES, LEX, ORACLE]
+tipo: flexible
 ---
 
 # Skill — Generar Propuesta Comercial

@@ -1,3 +1,11 @@
+---
+name: "Propuesta Comercial"
+slug: template-propuesta-comercial
+categoria: ventas
+agentes_dueños: [HERMES, LEX, ORACLE]
+variables_principales: [CLIENTE_NOMBRE, PRECIO_USD, ALCANCE, FECHA_INICIO]
+---
+
 # PROPUESTA COMERCIAL
 ## ZENKAI Growth Systems → [CLIENTE_NOMBRE]
 

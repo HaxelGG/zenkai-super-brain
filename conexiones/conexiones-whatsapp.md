@@ -1,3 +1,12 @@
+---
+name: "WhatsApp Cloud API"
+slug: whatsapp
+servicios_dependientes: [Meta, BSP]
+criticidad: alta
+estado_conexion: pendiente
+fase_conexion: 4
+---
+
 # CONEXIONES · WHATSAPP
 ## Cloud API + BSP + plantillas HSM aprobadas
 

@@ -1,3 +1,11 @@
+---
+name: "Reporte Semanal al Cliente"
+slug: template-reporte-cliente
+categoria: reporting
+agentes_dueños: [ORACLE, ATLAS]
+variables_principales: [CLIENTE_NOMBRE, SEMANA, KPIS, AVANCES, BLOQUEOS, PROXIMA_SEMANA]
+---
+
 # REPORTE SEMANAL · [CLIENTE_NOMBRE]
 ## Semana [SEMANA_N] de [SEMANAS_TOTALES]
 **Periodo:** [FECHA_INICIO] al [FECHA_FIN]

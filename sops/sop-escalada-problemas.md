@@ -1,3 +1,12 @@
+---
+name: "Escalada de Problemas"
+slug: sop-escalada-problemas
+sla: "<1 hora desde detección"
+agentes_responsables: [ZEUS, ECHO, FORGE]
+frecuencia: por_evento
+criticidad: alta
+---
+
 # SOP · Escalada de Problemas
 ## Cuándo y cómo escalar · qué se decide a qué nivel
 

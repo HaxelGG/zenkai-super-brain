@@ -1,3 +1,11 @@
+---
+name: "Brief de Proyecto"
+slug: template-brief-proyecto
+categoria: brief
+agentes_dueños: [ZEUS, HERMES]
+variables_principales: [CLIENTE_NOMBRE, OBJETIVO, KPIS_CRITICOS, RESTRICCIONES, BUDGET]
+---
+
 # BRIEF DE PROYECTO
 ## [CLIENTE_NOMBRE] · [PROYECTO_NOMBRE]
 

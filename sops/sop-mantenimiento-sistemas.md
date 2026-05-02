@@ -1,3 +1,12 @@
+---
+name: "Mantenimiento de Sistemas"
+slug: sop-mantenimiento-sistemas
+sla: "Recurrente · semanal"
+agentes_responsables: [FORGE, NEXUS]
+frecuencia: semanal
+criticidad: media
+---
+
 # SOP · Mantenimiento de Sistemas en Producción
 ## Cómo mantener vivo lo que entregamos sin sorpresas
 

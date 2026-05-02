@@ -1,3 +1,11 @@
+---
+name: "Stack Eco"
+slug: stack-eco
+tipo: stack
+tier: eco
+costo_mensual_usd: 0
+---
+
 # STACK ECO · ZENKAI
 ## Costos reales · herramientas free y básicas · capacidad 3-5 clientes simultáneos máx
 

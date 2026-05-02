@@ -1,3 +1,12 @@
+---
+name: "Entrega de Proyecto"
+slug: sop-entrega-proyecto
+sla: "Según contrato (típico 2-4 semanas)"
+agentes_responsables: [ATLAS, FORGE]
+frecuencia: por_evento
+criticidad: alta
+---
+
 # SOP · Entrega de Proyecto
 ## Cómo cerrar un proyecto sin dejar dudas y dejando al cliente queriendo más
 

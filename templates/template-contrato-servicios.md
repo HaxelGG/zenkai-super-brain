@@ -1,3 +1,11 @@
+---
+name: "Contrato de Servicios"
+slug: template-contrato-servicios
+categoria: legal
+agentes_dueños: [LEX]
+variables_principales: [CLIENTE_NOMBRE, RAZON_SOCIAL, NIT, MONTO_TOTAL, ENTREGABLES]
+---
+
 # CONTRATO DE PRESTACIÓN DE SERVICIOS
 ## ZENKAI Growth Systems · [CLIENTE_NOMBRE]
 

@@ -1,3 +1,12 @@
+---
+name: "Respuesta a Lead"
+slug: sop-respuesta-lead
+sla: "<10 min"
+agentes_responsables: [HERMES]
+frecuencia: por_evento
+criticidad: alta
+---
+
 # SOP · Respuesta a Lead Nuevo
 ## Estándar SLA: <10 minutos en horario laboral
 

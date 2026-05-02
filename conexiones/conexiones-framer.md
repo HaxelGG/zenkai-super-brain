@@ -1,3 +1,12 @@
+---
+name: "Framer"
+slug: framer
+servicios_dependientes: []
+criticidad: media
+estado_conexion: pendiente
+fase_conexion: 5
+---
+
 # CONEXIONES · FRAMER
 ## Tool primaria de landings en Tier Pro
 

@@ -1,8 +1,8 @@
 ---
-name: skill-diagnostico-empresa
-description: Diagnóstico estructurado de empresa para input [DIAGNÓSTICO] · 7 dimensiones · output ejecutivo
-type: flexible
-agentes_principales: [ZEUS, ATLAS, HERMES]
+name: "Diagnóstico de Empresa"
+slug: skill-diagnostico-empresa
+agentes_que_usan: [ZEUS, ATLAS, ORACLE]
+tipo: flexible
 ---
 
 # Skill — Diagnóstico de Empresa

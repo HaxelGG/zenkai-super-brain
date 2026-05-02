@@ -1,8 +1,8 @@
 ---
-name: skill-onboarding-cliente
-description: Protocolo de 48h post-firma · kit de bienvenida · kickoff · brief detallado · primer entregable a vista
-type: flexible
-agentes_principales: [ATLAS]
+name: "Onboarding del Cliente"
+slug: skill-onboarding-cliente
+agentes_que_usan: [ATLAS, ECHO, FORGE]
+tipo: flexible
 ---
 
 # Skill — Onboarding de Cliente

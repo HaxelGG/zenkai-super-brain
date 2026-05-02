@@ -1,3 +1,11 @@
+---
+name: "Diagnóstico de Empresa"
+slug: template-diagnostico-empresa
+categoria: diagnostico
+agentes_dueños: [ZEUS, ATLAS, ORACLE]
+variables_principales: [EMPRESA_NOMBRE, SECTOR, TAMAÑO_EQUIPO, MADUREZ_DIGITAL]
+---
+
 # DIAGNÓSTICO DE DIGITALIZACIÓN
 ## ZENKAI Growth Systems → [CLIENTE_NOMBRE]
 

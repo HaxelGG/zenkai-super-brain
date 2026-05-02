@@ -1,3 +1,11 @@
+---
+name: "Landing Page Universal · 9 secciones"
+slug: template-landing-universal
+categoria: landing
+agentes_dueños: [APOLLO, MUSE, ARES]
+variables_principales: [PRODUCTO_NOMBRE, PROPUESTA_VALOR, CTA_PRINCIPAL, TESTIMONIOS, PRECIO]
+---
+
 # TEMPLATE · Landing Universal de 9 Secciones
 ## Estructura ZENKAI estándar · adaptable a cualquier sector
 

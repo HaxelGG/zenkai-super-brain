@@ -1,3 +1,9 @@
+---
+name: "Proyección de Facturación 2026"
+slug: proyeccion-facturacion
+tipo: proyeccion
+---
+
 # PROYECCIÓN DE FACTURACIÓN · ZENKAI
 ## Modelo hacia $100,000 USD facturados antes de diciembre 2026
 

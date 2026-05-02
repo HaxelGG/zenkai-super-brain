@@ -1,8 +1,8 @@
 ---
-name: skill-calcular-precio
-description: Aplicar la fórmula ZENKAI de precio (costo trimestral × 2) con ajuste por mercado · output COP+USD
-type: flexible
-agentes_principales: [ORACLE]
+name: "Calcular Precio"
+slug: skill-calcular-precio
+agentes_que_usan: [ORACLE, HERMES]
+tipo: rigid
 ---
 
 # Skill — Calcular Precio

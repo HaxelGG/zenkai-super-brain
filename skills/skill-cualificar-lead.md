@@ -1,8 +1,8 @@
 ---
-name: skill-cualificar-lead
-description: Score 1-10 con rúbrica · clasificación de lead · brief listo para humano que cierra
-type: flexible
-agentes_principales: [HERMES]
+name: "Cualificar Lead"
+slug: skill-cualificar-lead
+agentes_que_usan: [HERMES]
+tipo: rigid
 ---
 
 # Skill — Cualificar Lead

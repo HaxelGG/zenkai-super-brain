@@ -1,8 +1,8 @@
 ---
-name: skill-crear-landing
-description: Protocolo APOLLO-LANDING en 5 fases · estructura universal de 9 secciones · WhatsApp como CTA primario en mercado hispanohablante
-type: flexible
-agentes_principales: [APOLLO]
+name: "Crear Landing"
+slug: skill-crear-landing
+agentes_que_usan: [APOLLO, FORGE]
+tipo: flexible
 ---
 
 # Skill — Crear Landing Page

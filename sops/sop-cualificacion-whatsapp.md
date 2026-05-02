@@ -1,3 +1,12 @@
+---
+name: "Cualificación por WhatsApp"
+slug: sop-cualificacion-whatsapp
+sla: "<2 horas"
+agentes_responsables: [HERMES, ECHO]
+frecuencia: por_evento
+criticidad: alta
+---
+
 # SOP · Cualificación por WhatsApp
 ## Conversación que cualifica sin sonar a interrogatorio
 

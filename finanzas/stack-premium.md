@@ -1,3 +1,11 @@
+---
+name: "Stack Premium"
+slug: stack-premium
+tipo: stack
+tier: premium
+costo_mensual_usd: 1200
+---
+
 # STACK PREMIUM · ZENKAI
 ## Infraestructura enterprise · sin límite de stack · Opus orquesta
 

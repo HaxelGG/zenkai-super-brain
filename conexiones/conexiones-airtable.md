@@ -1,3 +1,12 @@
+---
+name: "Airtable"
+slug: airtable
+servicios_dependientes: [Make, agentes]
+criticidad: alta
+estado_conexion: pendiente
+fase_conexion: 2
+---
+
 # CONEXIONES · AIRTABLE
 ## Estructura de bases · fuente única de verdad
 

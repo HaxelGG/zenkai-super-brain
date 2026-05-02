@@ -1,3 +1,12 @@
+---
+name: "Make"
+slug: make
+servicios_dependientes: [Airtable, WhatsApp, Stripe]
+criticidad: alta
+estado_conexion: pendiente
+fase_conexion: 3
+---
+
 # CONEXIONES · MAKE
 ## Motor de automatización · todos los flows documentados
 

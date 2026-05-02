@@ -1,3 +1,11 @@
+---
+name: "Stack Pro"
+slug: stack-pro
+tipo: stack
+tier: pro
+costo_mensual_usd: 250
+---
+
 # STACK PRO · ZENKAI
 ## Costos reales · profesional controlado · 90% de los clientes ZENKAI
 

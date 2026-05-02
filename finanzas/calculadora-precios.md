@@ -1,3 +1,9 @@
+---
+name: "Calculadora de Precios"
+slug: calculadora-precios
+tipo: calculadora
+---
+
 # CALCULADORA DE PRECIOS · ZENKAI
 ## Fórmula sagrada · ningún proyecto se cotiza sin pasar por aquí
 
