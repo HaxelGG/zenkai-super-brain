@@ -1,115 +1,113 @@
 # ESTADO ACTUAL · ZENKAI Super Cerebro
 ## Punto de continuación entre sesiones de Claude Code
 
-**Última sesión cerrada:** 2026-05-01 (sesión 2 · brainstorming + plan del panel)
+**Última sesión cerrada:** 2026-05-01 (sesión 3 · build del panel + deploy)
 **Modo recomendado para continuar:** `claude --dangerously-skip-permissions` desde `C:\Users\jordy\Desktop\Kenzai Super Brain\`
 
 ---
 
 ## DÓNDE ESTAMOS
 
-✅ **BUILD DE LA PLATAFORMA COMPLETO (Capa 1)** — sin cambios, todo intacto
-- 12 agentes · 11 sectores · 6 skills nativos · 6 workflows · 6 templates
-- Estructura de cliente · finanzas · 5 SOPs · 5 mapas de conexiones
-- `CLAUDE.md`, `README.md`, `.env.example`, `.gitignore`, `credenciales.md`
+✅ **PANEL DE CONTROL CONSTRUIDO (v1)**
+- Astro 5 + Tailwind + TypeScript estricto en `panel/`
+- 7 páginas visibles · **37 páginas estáticas generadas**
+- Frontmatter en los ~55 markdown del repo · validación Zod en build
+- 8 content collections: agentes · sectores · workflows · sops · conexiones · finanzas · templates · skills_zenkai
+- Cross-references automáticas agentes ↔ sectores ↔ workflows ↔ sops (gate en build via `validateCrossRefs`)
+- Diseño "ejecutivo limpio": paleta índigo · Inter Variable · JetBrains Mono Variable
+- Responsive (mobile · tablet · desktop) · sticky top nav con menú hamburguesa
+- Repo en GitHub: https://github.com/HaxelGG/zenkai-super-brain
 
-✅ **DISEÑO DEL PANEL DE CONTROL · BRAINSTORMING + PLAN COMPLETOS**
-- Spec de diseño aprobado en `docs/specs/2026-05-01-panel-zenkai-design.md`
-- Plan de implementación bite-sized en `docs/plans/2026-05-01-panel-zenkai-implementation.md`
-- Stack decidido: Astro 5 + TypeScript + Tailwind + frontmatter Zod-validated
-- Estética: ejecutivo limpio (Linear/Vercel/Notion)
-- Deploy plan: GitHub + Vercel estático + Vercel Authentication
+⏸️ **PENDIENTE (Task 6.2 manual): deploy a Vercel + Vercel Authentication + invitar socio**
+Pasos en navegador: ver instrucciones más abajo.
 
-✅ **TASK 0.1 EJECUTADA** — Node v24.15.0 + npm 11.12.1 verificados (≥ requisito 20+)
-
-⏸️ **PAUSADO ANTES DE Task 0.2 (`git init`)** — el usuario va a relanzar la sesión con `--dangerously-skip-permissions` para evitar permission prompts durante las ~28 tareas de ejecución encadenadas con subagentes.
-
-⏸️ **TAMBIÉN PAUSADO: Fases 1-7 de conexión de APIs** (Anthropic, Airtable, Make, WhatsApp, etc.) — se retoman después de que el panel esté en producción.
+⏸️ **PAUSADO: Fases 1-7 de conexión de APIs** (Anthropic, Airtable, Make, WhatsApp, etc.) — se retoman después del deploy del panel.
 
 ---
 
-## QUÉ HACER EN LA NUEVA SESIÓN (con --dangerously-skip-permissions)
+## QUÉ HACER EN LA NUEVA SESIÓN
+
+### Si el deploy de Vercel ya se hizo
+
+Continuar con **Fase 1 (Anthropic Claude API)** según la guía original. El panel ya muestra el estado de cada conexión · al activar una API hay que actualizar el frontmatter de la conexión correspondiente:
+
+```yaml
+# conexiones/conexiones-airtable.md
+estado_conexion: activo  # antes era "pendiente"
+```
+
+Esto actualiza automáticamente la página `/conexiones`, los KPIs del Home y el panel `/rendimiento`.
+
+### Si el deploy aún no se hizo
 
 Lanzar Claude Code así:
-
 ```powershell
 cd "C:\Users\jordy\Desktop\Kenzai Super Brain"
 claude --dangerously-skip-permissions
 ```
 
-Y pegar este mensaje al inicio:
-
+Y pegar:
 ```
-Lee ESTADO-ACTUAL.md y CLAUDE.md para ponerte al día.
-
-Ejecuta el plan en docs/plans/2026-05-01-panel-zenkai-implementation.md
-usando el skill superpowers:subagent-driven-development.
-
-Empieza por Task 0.2 (`git init`).
-Task 0.1 ya está hecha (Node v24.15.0 + npm 11.12.1 verificados).
-
-Las Tasks 0.3 (crear repo en GitHub) y 6.2 (configurar Vercel + auth + invitar
-socio) requieren mi acción en navegador — pausa cuando lleguemos y dame
-instrucciones paso a paso.
-
-Idioma del proyecto: español. Trabaja con commits frecuentes y descriptivos.
+Continuá la Task 6.2 del plan en docs/plans/2026-05-01-panel-zenkai-implementation.md
 ```
 
 ---
 
-## ORDEN DE EJECUCIÓN DEL PLAN
+## DEPLOY · INSTRUCCIONES PASO A PASO (Task 6.2)
 
-| Fase | Tareas | Acción | Tiempo |
-|------|--------|--------|--------|
-| **0** Setup | 0.1 ✅ Node · 0.2 git init · 0.3 GitHub repo (manual) · 0.4 Astro scaffold · 0.5 Tailwind+fonts | mixto | 30-45 min |
-| **1** Frontmatter + schemas | 1.1-1.6 (8 colecciones · ~55 markdown · helpers cross-refs) | subagentes | 60-90 min |
-| **2** Sistema visual base | 2.1 PanelLayout · 2.2 TopNav · 2.3 6 componentes base | subagentes | 30 min |
-| **3** Páginas de listado | 3.1 agentes · 3.2 sectores · 3.3 workflows · 3.4 conexiones · 3.5 finanzas · 3.6 rendimiento | subagentes | 60 min |
-| **4** Páginas de detalle | 4.1 agente · 4.2 sector · 4.3 workflow | subagentes | 30-45 min |
-| **5** Home + 404 | 5.1 home · 5.2 404 | subagentes | 20 min |
-| **6** QA + Deploy | 6.1 QA responsive · 6.2 Vercel (manual) · 6.3 update ESTADO-ACTUAL | mixto | 30-45 min |
-
-**Total estimado: 4-6 horas wall clock con subagent overhead.**
+1. **Login en Vercel:** https://vercel.com/signup con el email de GitHub.
+2. **Importar repo:** Dashboard → Add New → Project → Import `zenkai-super-brain`.
+3. **Configuración crítica:**
+   - Framework Preset: Astro (auto-detectado)
+   - **Root Directory:** click "Edit" → escribir `panel` → Continue
+   - Build Command: dejar default (`astro build`)
+   - Output Directory: dejar default (`dist`)
+   - Click **Deploy**
+4. **Esperar ~1-2 min** · Vercel da una URL `zenkai-panel-<hash>-<usuario>.vercel.app`.
+5. **Activar Vercel Authentication:** Settings → Deployment Protection → activar Vercel Authentication para "Production Deployments". Save.
+6. **Verificar incógnito:** abrir URL sin sesión → redirect a login Vercel ✓
+7. **Invitar socio:** Settings → Members → invitar email del socio como Member.
+8. **Documentar URL final** en `panel/README.md` (campo "Producción").
 
 ---
 
-## DECISIONES CERRADAS · NO REABRIR
+## TAREAS EN PROGRESO
 
-- Audiencia: Jordy + socio (interno privado · sin vitrina pública)
-- Stack: Astro 5 + TypeScript + Tailwind
-- Datos v1: lectura del repo · sin APIs (Fases 1-7 aparte)
-- Páginas: 7 visibles · ~37 estáticas generadas
-- Estética: Linear/Vercel/Notion limpio · paleta indígo · Inter + JetBrains Mono
-- Deploy: Vercel Hobby · root dir `panel/` · Vercel Authentication
-- Repo: mismo repo de ZENKAI (no separado)
-- Custom domain: difiere a v1.1
-- Frontmatter: schema-validated en build · `panel/src/content.config.ts`
+| # | Tarea | Estado |
+|---|-------|--------|
+| 6.2 | Deploy Vercel + auth + invitar socio | **manual pendiente** |
+| 11 | Fase 1 · Anthropic Claude API | pending — empezar después del deploy |
+| 12 | Fase 2 · Airtable + 6 bases | pending |
+| 13 | Fase 3 · Make + connections | pending |
+| 14 | Fase 4 · WhatsApp Cloud API + BSP | pending |
+| 15 | Fase 5 · Cal.com + Stripe/Wompi | pending |
+| 16 | Fase 6 · Docuseal + Notion + Drive | pending |
+| 17 | Fase 7 · Monitoreo (Sentry + BetterStack) | pending |
 
 ---
 
 ## NO REHACER
 
-❌ No reconstruir agentes/sectores/skills/workflows/templates/SOPs/conexiones — ya están.
-❌ No regenerar `CLAUDE.md`, `README.md`, `.env.example`.
-❌ No volver a hacer brainstorming · spec · plan · ya aprobados y guardados en `docs/`.
-❌ No empezar las Fases 1-7 de APIs antes del panel · están pausadas a propósito.
+❌ Panel de control · ya construido y commiteado (29 commits desde init).
+❌ Frontmatter de los markdown · ya añadido y validado.
+❌ Schemas Zod · ya definidos en `panel/src/content.config.ts`.
+❌ No empezar las Fases 1-7 de APIs antes del deploy del panel.
 
 ---
 
-## TASKLIST DE LA SESIÓN ANTERIOR (para referencia · la nueva sesión arranca limpia)
-
-| # | Tarea | Estado |
-|---|-------|--------|
-| 1-7 | Fases 1-7 de APIs | pending |
-| 8-16 | Brainstorming + writing-plans | completed |
-
-La nueva sesión va a generar su propia TaskList con las 28 tareas del plan de implementación.
-
----
-
-## ARCHIVOS CLAVE PARA QUE LEA LA NUEVA SESIÓN
+## ARCHIVOS CLAVE
 
 1. `ESTADO-ACTUAL.md` (este archivo)
 2. `CLAUDE.md` (cerebro central)
 3. `docs/specs/2026-05-01-panel-zenkai-design.md` (spec del panel)
-4. `docs/plans/2026-05-01-panel-zenkai-implementation.md` (plan ejecutable)
+4. `docs/plans/2026-05-01-panel-zenkai-implementation.md` (plan ejecutable · 28 tareas · 27 ✅ + 1 pendiente manual)
+5. `panel/README.md` (instrucciones de dev y deploy)
+
+---
+
+## STACK ACTUAL
+
+- **Hosting:** GitHub (privado) → Vercel (pendiente)
+- **Stack actual:** Eco · $0/mes
+- **Clientes activos:** 0
+- **Facturado 2026:** $0 / objetivo $100K USD
