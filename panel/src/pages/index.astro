@@ -1,8 +1,86 @@
 ---
+import { getCollection } from "astro:content";
 import PanelLayout from "../layouts/PanelLayout.astro";
+import KPIStat from "../components/KPIStat.astro";
+import KPIStrip from "../components/KPIStrip.astro";
+import { validateCrossRefs } from "../lib/cross-refs";
+
+// Build-time gate: si las referencias cruzadas están rotas, el build falla aquí
+// con mensaje claro. Solo se ejecuta una vez al renderizar Home (la página raíz).
+await validateCrossRefs();
+
+const [agentes, sectores, workflows, conexiones] = await Promise.all([
+  getCollection("agentes"),
+  getCollection("sectores"),
+  getCollection("workflows"),
+  getCollection("conexiones"),
+]);
+
+const sectoresAlta = sectores.filter((s) => s.data.prioridad === "alta").length;
+const conexionesActivas = conexiones.filter((c) => c.data.estado_conexion === "activo").length;
+
+const quickCards = [
+  { href: "/agentes",     titulo: "12 Agentes Master",    desc: "1 con Opus · 11 con Sonnet · capacidad multi-departamento" },
+  { href: "/sectores",    titulo: "11 Sectores",          desc: `${sectoresAlta} de prioridad alta · 1 fase 1 · 1 fase 2 · 9 futuro` },
+  { href: "/workflows",   titulo: "6 Workflows end-to-end", desc: "Lead → contrato → delivery → reporte semanal" },
+  { href: "/finanzas",    titulo: "Finanzas y stacks",    desc: "Calculadora · 3 tiers · proyección a $100K USD" },
+];
+
+const checklistPlatform = [
+  { label: "12 / 12 Agentes Master documentados", done: agentes.length === 12 },
+  { label: "11 / 11 Sectores con KPIs y dolores", done: sectores.length === 11 },
+  { label: "6 / 6 Workflows end-to-end mapeados", done: workflows.length === 6 },
+  { label: "5 / 5 SOPs con SLA definido",         done: true },
+  { label: "Conexiones APIs activas",             done: conexionesActivas > 0, partial: `${conexionesActivas} / ${conexiones.length}` },
+  { label: "Primer cliente activo",               done: false },
+];
 ---
 
 <PanelLayout title="Home">
-  <h1 class="text-h1">Panel ZENKAI</h1>
-  <p class="text-body text-text-muted mt-2">Layout y nav OK.</p>
+  <header class="mb-10 sm:mb-12">
+    <div class="label-micro mb-2">Capa 1 · Plataforma interna</div>
+    <h1 class="text-h1">ZENKAI · Super Cerebro</h1>
+    <p class="mt-3 text-body text-text-muted max-w-2xl">
+      Panel de control de la plataforma. La fábrica que produce soluciones para clientes.
+    </p>
+  </header>
+
+  <section class="mb-10">
+    <KPIStrip>
+      <KPIStat label="Clientes activos" value="—" caption="🔌 conecta Airtable" variant="muted" />
+      <KPIStat label="Facturado 2026"   value="$0" caption="objetivo $100K USD" variant="muted" />
+      <KPIStat label="Agentes listos"   value={`${agentes.length} / 12`} caption="documentados" />
+      <KPIStat label="Stack actual"     value="Eco" caption="$0 / mes" />
+    </KPIStrip>
+  </section>
+
+  <section class="mb-12">
+    <h2 class="text-h2 mb-4">Áreas del Super Cerebro</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {quickCards.map((c) => (
+        <a href={c.href} class="card-base p-6 block hover:shadow-sm no-underline">
+          <h3 class="text-h3 font-semibold tracking-tight mb-1.5">{c.titulo}</h3>
+          <p class="text-small text-text-muted">{c.desc}</p>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <section>
+    <h2 class="text-h2 mb-4">Estado de la plataforma</h2>
+    <ul class="card-base divide-y divide-border">
+      {checklistPlatform.map((c) => (
+        <li class="flex items-center justify-between p-4">
+          <span class={c.done ? "text-text" : "text-text-muted"}>{c.label}</span>
+          {c.done ? (
+            <span class="text-success font-medium" title="Completo">✓</span>
+          ) : c.partial ? (
+            <span class="text-warning font-mono text-small">{c.partial}</span>
+          ) : (
+            <span class="text-text-faint" title="Pendiente">—</span>
+          )}
+        </li>
+      ))}
+    </ul>
+  </section>
 </PanelLayout>
