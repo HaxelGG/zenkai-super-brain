@@ -1,7 +1,7 @@
 # ZENKAI Growth Systems · Plataforma Interna (Capa 1)
 ## Super Cerebro v2.0 · Mayo 2026
 
-> **Esta carpeta es la plataforma interna de ZENKAI.** Es la fábrica que produce soluciones para clientes — no es lo que se vende. Lo que se vende es la Capa 2 (servicios construidos sobre esta plataforma).
+> **Esta carpeta es la plataforma interna de ZENKAI.** Es la fábrica que produce soluciones para clientes — no es lo que se vende. Lo que se vende es la Capa 2 (servicios construidos sobre esta plataforma), es el entendiemiento, ejecucion, sistematizacion y mejora constante del negocio de nuestros clientes empresariales.
 
 ---
 
