@@ -1,0 +1,32 @@
+# Credenciales · NUNCA commitear
+.env
+.env.local
+.env.production
+secrets/
+*.pem
+*.key
+google-service-account.json
+
+# Datos sensibles de clientes · NUNCA commitear
+clientes/*/contrato-firmado.pdf
+clientes/*/datos-sensibles/
+
+# Logs y temporales
+*.log
+.cache/
+node_modules/
+__pycache__/
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/settings.json
+.idea/
+
+# Build artifacts
+dist/
+build/
+.next/
+
+# Superpowers · sesiones de brainstorming visual (mockups locales · no commitear)
+.superpowers/
