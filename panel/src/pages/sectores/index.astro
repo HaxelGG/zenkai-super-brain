@@ -1,0 +1,28 @@
+---
+import { getCollection } from "astro:content";
+import PanelLayout from "../../layouts/PanelLayout.astro";
+import PageHeader from "../../components/PageHeader.astro";
+import SectorCard from "../../components/SectorCard.astro";
+
+const PRIORIDAD_ORDER = { alta: 0, media: 1, baja: 2 } as const;
+const FASE_ORDER: Record<string | number, number> = { 1: 0, 2: 1, futuro: 2 };
+
+const sectores = (await getCollection("sectores")).sort((a, b) => {
+  const pa = PRIORIDAD_ORDER[a.data.prioridad];
+  const pb = PRIORIDAD_ORDER[b.data.prioridad];
+  if (pa !== pb) return pa - pb;
+  return FASE_ORDER[String(a.data.fase)] - FASE_ORDER[String(b.data.fase)];
+});
+---
+
+<PanelLayout title="Sectores">
+  <PageHeader
+    eyebrow="Capa 1 · Verticales"
+    title="Los 11 Sectores"
+    description="Sectores donde ZENKAI puede operar. Ordenados por prioridad y fase. El sector ajusta vocabulario y agentes prioritarios — no la estructura."
+  />
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    {sectores.map((s) => <SectorCard sector={s} />)}
+  </div>
+</PanelLayout>

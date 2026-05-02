@@ -1,0 +1,31 @@
+---
+import Badge from "./Badge.astro";
+import Chip from "./Chip.astro";
+import type { CollectionEntry } from "astro:content";
+
+interface Props {
+  workflow: CollectionEntry<"workflows">;
+}
+
+const { workflow } = Astro.props;
+const { name, slug, tiempo_objetivo, agentes_principales, categoria } = workflow.data;
+---
+
+<a href={`/workflows/${slug}`} class="card-base p-5 block hover:shadow-sm no-underline">
+  <div class="flex items-center justify-between gap-2 mb-3">
+    <h3 class="text-h3 font-semibold tracking-tight">{name}</h3>
+    <Badge variant="neutral">{categoria}</Badge>
+  </div>
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-small">
+    <div>
+      <div class="label-micro mb-1">Tiempo objetivo</div>
+      <div class="text-text font-mono">{tiempo_objetivo}</div>
+    </div>
+    <div>
+      <div class="label-micro mb-1">Agentes principales</div>
+      <div class="flex flex-wrap gap-1">
+        {agentes_principales.map((nombre) => <Chip>{nombre}</Chip>)}
+      </div>
+    </div>
+  </div>
+</a>

@@ -1,0 +1,31 @@
+---
+import Badge from "./Badge.astro";
+import type { CollectionEntry } from "astro:content";
+
+interface Props {
+  sector: CollectionEntry<"sectores">;
+}
+
+const { sector } = Astro.props;
+const { name, slug, fase, prioridad, agentes_prioritarios } = sector.data;
+
+const faseLabel = fase === 1 ? "Fase 1" : fase === 2 ? "Fase 2" : "Futuro";
+const faseVariant: "success" | "warning" | "neutral" =
+  fase === 1 ? "success" : fase === 2 ? "warning" : "neutral";
+
+const prioridadVariant: "danger" | "warning" | "neutral" =
+  prioridad === "alta" ? "danger" : prioridad === "media" ? "warning" : "neutral";
+---
+
+<a href={`/sectores/${slug}`} class="card-base p-5 block hover:shadow-sm no-underline">
+  <div class="flex items-center justify-between gap-2 mb-2">
+    <h3 class="text-h3 font-semibold tracking-tight">{name}</h3>
+    <div class="flex gap-1.5 flex-shrink-0">
+      <Badge variant={faseVariant}>{faseLabel}</Badge>
+    </div>
+  </div>
+  <div class="text-small text-text-muted mb-3 capitalize">Prioridad <span class="font-medium">{prioridad}</span></div>
+  <div class="text-micro text-text-faint">
+    Agentes top: {agentes_prioritarios.slice(0, 4).join(" · ")}
+  </div>
+</a>
