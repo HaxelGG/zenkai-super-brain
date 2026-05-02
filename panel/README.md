@@ -4,7 +4,8 @@ Panel interno de control · Capa 1 del Super Cerebro.
 
 ## URLs
 
-- **Producción:** _pendiente · se completa después del deploy en Vercel_ (requiere login Vercel · solo miembros del equipo)
+- **Producción (URL estable):** https://zenkaibrain-git-main-mrhaxel26-sketchs-projects.vercel.app/ (siempre apunta al último deploy de `main` · requiere login Vercel · solo miembros del team `mrhaxel26-sketchs-projects`)
+- **Custom domain:** https://zenkai.systems (mismo contenido · puede requerir verificar configuración de auth)
 - **Local dev:** http://localhost:4321 después de `npm run dev`
 
 ## Comandos
