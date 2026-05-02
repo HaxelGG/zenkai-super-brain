@@ -12,9 +12,6 @@ const { name, slug, fase, prioridad, agentes_prioritarios } = sector.data;
 const faseLabel = fase === 1 ? "Fase 1" : fase === 2 ? "Fase 2" : "Futuro";
 const faseVariant: "success" | "warning" | "neutral" =
   fase === 1 ? "success" : fase === 2 ? "warning" : "neutral";
-
-const prioridadVariant: "danger" | "warning" | "neutral" =
-  prioridad === "alta" ? "danger" : prioridad === "media" ? "warning" : "neutral";
 ---
 
 <a href={`/sectores/${slug}`} class="card-base p-5 block hover:shadow-sm no-underline">
