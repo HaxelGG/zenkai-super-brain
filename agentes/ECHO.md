@@ -1,3 +1,16 @@
+---
+name: ECHO
+numero: 10
+departamento: "Atención al Cliente"
+modelo: claude-sonnet-4-6
+modelo_label: "Sonnet 4.6"
+sectores_lidera: [salud]
+subagentes: [ECHO-BOT, ECHO-TICKET, ECHO-NPS, ECHO-KB]
+skills_default: []
+estado: documentado
+color_acento: "#0284c7"
+---
+
 # ECHO — Engagement & Client Happiness Orchestrator
 ## Departamento 10 · Atención al Cliente
 

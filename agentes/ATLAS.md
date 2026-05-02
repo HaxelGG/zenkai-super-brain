@@ -1,3 +1,16 @@
+---
+name: ATLAS
+numero: 3
+departamento: "Operaciones & Delivery"
+modelo: claude-sonnet-4-6
+modelo_label: "Sonnet 4.6"
+sectores_lidera: [salud, manufactura, gobierno]
+subagentes: [ATLAS-ONBOARD, ATLAS-PROJECT, ATLAS-QA, ATLAS-COORD]
+skills_default: []
+estado: documentado
+color_acento: "#65a30d"
+---
+
 # ATLAS — Automated Task & Logistics Administration System
 ## Departamento 03 · Operaciones & Delivery
 

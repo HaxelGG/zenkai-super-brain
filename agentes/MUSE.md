@@ -1,3 +1,16 @@
+---
+name: MUSE
+numero: 6
+departamento: "Contenido & Social Media"
+modelo: claude-sonnet-4-6
+modelo_label: "Sonnet 4.6"
+sectores_lidera: [restaurantes, educacion, ong]
+subagentes: [MUSE-COPY, MUSE-SCRIPT, MUSE-CALENDAR, MUSE-ANALYTICS]
+skills_default: []
+estado: documentado
+color_acento: "#db2777"
+---
+
 # MUSE — Media Unification & Social Engagement System
 ## Departamento 06 · Contenido & Social Media
 

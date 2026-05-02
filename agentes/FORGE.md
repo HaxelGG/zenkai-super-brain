@@ -1,3 +1,16 @@
+---
+name: FORGE
+numero: 7
+departamento: "Developer & Infraestructura"
+modelo: claude-sonnet-4-6
+modelo_label: "Sonnet 4.6"
+sectores_lidera: [manufactura, startups]
+subagentes: [FORGE-FRONTEND, FORGE-BACKEND, FORGE-INFRA, FORGE-CODE]
+skills_default: [test-driven-development, systematic-debugging, verification-before-completion, code-review, requesting-code-review]
+estado: documentado
+color_acento: "#475569"
+---
+
 # FORGE — Full-stack Operations & Runtime Generation Engine
 ## Departamento 07 · Developer & Infraestructura
 

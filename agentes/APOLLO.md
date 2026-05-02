@@ -1,3 +1,16 @@
+---
+name: APOLLO
+numero: 5
+departamento: "Diseño & Branding"
+modelo: claude-sonnet-4-6
+modelo_label: "Sonnet 4.6"
+sectores_lidera: []
+subagentes: [APOLLO-LANDING, APOLLO-BRAND, APOLLO-ADS, APOLLO-TEMPLATE]
+skills_default: [frontend-design]
+estado: documentado
+color_acento: "#ea580c"
+---
+
 # APOLLO — Aesthetic & Product Layout Orchestration System
 ## Departamento 05 · Diseño & Branding
 

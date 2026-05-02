@@ -1,3 +1,16 @@
+---
+name: HERMES
+numero: 2
+departamento: "Ventas & CRM"
+modelo: claude-sonnet-4-6
+modelo_label: "Sonnet 4.6"
+sectores_lidera: [inmobiliaria, ecommerce, retail, servicios-profesionales]
+subagentes: [HERMES-WA, HERMES-QUALIFY, HERMES-FOLLOW, HERMES-CLOSE]
+skills_default: []
+estado: documentado
+color_acento: "#0891b2"
+---
+
 # HERMES — Human-Enhanced Revenue & Market Engagement System
 ## Departamento 02 · Ventas & CRM
 

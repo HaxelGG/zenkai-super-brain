@@ -1,3 +1,16 @@
+---
+name: ZEUS
+numero: 12
+departamento: "Estrategia & Decisiones"
+modelo: claude-opus-4-7
+modelo_label: "Opus 4.7"
+sectores_lidera: [startups]
+subagentes: [ZEUS-OKR, ZEUS-MARKET, ZEUS-DECIDE, ZEUS-TREND]
+skills_default: [brainstorming, writing-plans, verification-before-completion]
+estado: documentado
+color_acento: "#4f46e5"
+---
+
 # ZEUS — Zero-assumption Executive Understanding System
 ## Departamento 12 · Estrategia & Decisiones
 

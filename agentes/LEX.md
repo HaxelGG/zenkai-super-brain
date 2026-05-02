@@ -1,3 +1,16 @@
+---
+name: LEX
+numero: 11
+departamento: "Legal & Contratos"
+modelo: claude-sonnet-4-6
+modelo_label: "Sonnet 4.6"
+sectores_lidera: [servicios-profesionales, gobierno]
+subagentes: [LEX-CONTRACT, LEX-PROPOSAL, LEX-PRIVACY, LEX-SIGN]
+skills_default: [security-review]
+estado: documentado
+color_acento: "#1e40af"
+---
+
 # LEX — Legal Execution & Contract System
 ## Departamento 11 · Legal & Contratos
 

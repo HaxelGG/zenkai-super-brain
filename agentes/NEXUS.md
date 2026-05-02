@@ -1,3 +1,16 @@
+---
+name: NEXUS
+numero: 4
+departamento: "IA & Automatización"
+modelo: claude-sonnet-4-6
+modelo_label: "Sonnet 4.6"
+sectores_lidera: []
+subagentes: [NEXUS-MAKE, NEXUS-AGENT, NEXUS-API, NEXUS-MONITOR]
+skills_default: []
+estado: documentado
+color_acento: "#7c3aed"
+---
+
 # NEXUS — Neural Execution & Cross-system Unification System
 ## Departamento 04 · IA & Automatización
 

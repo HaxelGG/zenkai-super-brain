@@ -1,3 +1,16 @@
+---
+name: ORACLE
+numero: 8
+departamento: "Finanzas & Métricas"
+modelo: claude-sonnet-4-6
+modelo_label: "Sonnet 4.6"
+sectores_lidera: []
+subagentes: [ORACLE-COST, ORACLE-PRICE, ORACLE-REPORT, ORACLE-FORECAST]
+skills_default: []
+estado: documentado
+color_acento: "#0d9488"
+---
+
 # ORACLE — Operational Revenue Analytics & Cost-Ledger Engine
 ## Departamento 08 · Finanzas & Métricas
 

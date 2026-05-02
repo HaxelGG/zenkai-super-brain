@@ -1,3 +1,16 @@
+---
+name: ARES
+numero: 1
+departamento: "Marketing Digital"
+modelo: claude-sonnet-4-6
+modelo_label: "Sonnet 4.6"
+sectores_lidera: [ecommerce, restaurantes, educacion, retail, ong, inmobiliaria]
+subagentes: [ARES-ADS, ARES-SEO, ARES-EMAIL, ARES-REPORT]
+skills_default: []
+estado: documentado
+color_acento: "#dc2626"
+---
+
 # ARES — Acquisition & Revenue Engine System
 ## Departamento 01 · Marketing Digital
 

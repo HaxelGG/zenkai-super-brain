@@ -1,3 +1,16 @@
+---
+name: HIVE
+numero: 9
+departamento: "RRHH & Equipo"
+modelo: claude-sonnet-4-6
+modelo_label: "Sonnet 4.6"
+sectores_lidera: []
+subagentes: [HIVE-RECRUIT, HIVE-ONBOARD, HIVE-TASKS, HIVE-EVAL]
+skills_default: []
+estado: documentado
+color_acento: "#ca8a04"
+---
+
 # HIVE — Human Intelligence & Venture Enablement System
 ## Departamento 09 · RRHH & Equipo
 
