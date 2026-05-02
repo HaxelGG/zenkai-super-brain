@@ -1,0 +1,22 @@
+---
+import { getCollection } from "astro:content";
+import PanelLayout from "../../layouts/PanelLayout.astro";
+import PageHeader from "../../components/PageHeader.astro";
+import AgenteCard from "../../components/AgenteCard.astro";
+
+const agentes = (await getCollection("agentes")).sort(
+  (a, b) => a.data.numero - b.data.numero,
+);
+---
+
+<PanelLayout title="Agentes">
+  <PageHeader
+    eyebrow="Capa 1 · Departamentos"
+    title="Los 12 Agentes Master"
+    description="Cada agente representa un departamento. ZEUS razona · los otros 11 ejecutan. Modelo default por agente y sectores donde lidera."
+  />
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    {agentes.map((a) => <AgenteCard agente={a} />)}
+  </div>
+</PanelLayout>

@@ -1,0 +1,33 @@
+---
+import Badge from "./Badge.astro";
+import type { CollectionEntry } from "astro:content";
+
+interface Props {
+  agente: CollectionEntry<"agentes">;
+}
+
+const { agente } = Astro.props;
+const { name, numero, departamento, modelo_label, modelo, sectores_lidera } = agente.data;
+
+const modeloVariant =
+  modelo === "claude-opus-4-7" ? "accent" :
+  modelo === "claude-sonnet-4-6" ? "neutral" :
+  "mono";
+---
+
+<a href={`/agentes/${agente.id}`} class="card-base p-5 block hover:shadow-sm no-underline">
+  <div class="flex items-start justify-between gap-3 mb-2">
+    <div class="flex items-baseline gap-2 min-w-0">
+      <span class="font-mono text-micro text-text-faint">#{String(numero).padStart(2, "0")}</span>
+      <span class="text-h3 font-semibold tracking-tight truncate">{name}</span>
+    </div>
+    <Badge variant={modeloVariant}>{modelo_label}</Badge>
+  </div>
+  <div class="text-small text-text-muted mb-3">{departamento}</div>
+  {sectores_lidera.length > 0 && (
+    <div class="text-micro text-text-faint">
+      Lidera: {sectores_lidera.slice(0, 3).join(" · ")}
+      {sectores_lidera.length > 3 && ` +${sectores_lidera.length - 3}`}
+    </div>
+  )}
+</a>
