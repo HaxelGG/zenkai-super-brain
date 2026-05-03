@@ -6,7 +6,9 @@
   "type": "module",
   "scripts": {
     "clasificar": "tsx scripts/anthropic/clasificar.ts",
-    "test:clasificar": "tsx scripts/anthropic/test-clasificar.ts"
+    "test:clasificar": "tsx scripts/anthropic/test-clasificar.ts",
+    "protocolo": "tsx scripts/anthropic/protocolo.ts",
+    "test:protocolo": "tsx scripts/anthropic/test-protocolo.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.92.0",
