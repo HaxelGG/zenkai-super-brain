@@ -331,3 +331,27 @@ ${recomendacion.justificacion}
 ${proximo_paso}
 `;
 }
+
+const isMain =
+  process.argv[1] !== undefined &&
+  import.meta.url === pathToFileURL(process.argv[1]).href;
+
+if (isMain) {
+  const args = process.argv.slice(2);
+  const jsonMode = args.includes("--json");
+  const inputArgs = args.filter((a) => a !== "--json");
+  const input = inputArgs.join(" ").trim();
+
+  if (!input) {
+    console.error('Uso: npm run protocolo -- "[CLIENTE] tu input acá"');
+    console.error('       npm run protocolo -- --json "[CLIENTE] ..."');
+    process.exit(1);
+  }
+
+  const result = await protocolo(input);
+  if (jsonMode) {
+    console.log(JSON.stringify(result, null, 2));
+  } else {
+    console.log(render(result));
+  }
+}
