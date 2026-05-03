@@ -1,0 +1,20 @@
+{
+  "name": "zenkai-superbrain-scripts",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Scripts ejecutables del Super Cerebro ZENKAI · Capa 1 · Anthropic + integraciones",
+  "type": "module",
+  "scripts": {
+    "clasificar": "tsx scripts/anthropic/clasificar.ts",
+    "test:clasificar": "tsx scripts/anthropic/test-clasificar.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.92.0",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.5.0"
+  }
+}
