@@ -2,6 +2,9 @@
 // Toma input [CLIENTE]/[BUILD]/[DIAGNÓSTICO] y devuelve los 6 pasos
 // como JSON estructurado. Modelo: Sonnet 4.6.
 
+import { pathToFileURL } from "node:url";
+import { anthropic, MODEL_SONNET } from "./client.js";
+import { clasificar } from "./clasificar.js";
 import { loadSectorContext, loadStackContext } from "./contexto.js";
 import type { ClasificacionResult, Sector } from "./types.js";
 
@@ -207,4 +210,58 @@ ${stacks.eco}
 ═══ STACK PRO (referencia de herramientas y precios) ═══
 
 ${stacks.pro}`;
+}
+
+const TIPOS_VALIDOS_PROTOCOLO = ["CLIENTE", "BUILD", "DIAGNOSTICO"] as const;
+
+export async function protocolo(
+  input: string,
+  classification?: ClasificacionResult,
+): Promise<ProtocoloResult> {
+  const clasificacion = classification ?? (await clasificar(input));
+
+  // Protocolo §8 solo aplica a CLIENTE, BUILD y DIAGNOSTICO.
+  // Cualquier otro tipo es un misuse del API consumer.
+  if (!TIPOS_VALIDOS_PROTOCOLO.includes(clasificacion.tipo as never)) {
+    throw new Error(
+      `Protocolo §8 no aplica al tipo "${clasificacion.tipo}". Solo CLIENTE, BUILD, DIAGNOSTICO.`,
+    );
+  }
+
+  const systemPrompt = buildSystemPrompt(clasificacion.sector_detectado);
+
+  const userMessage = `INPUT ORIGINAL:
+${input}
+
+CLASIFICACIÓN PRE-COMPUTADA:
+${JSON.stringify(clasificacion, null, 2)}
+
+Generá los pasos 2-6 del Protocolo §8 según las reglas del system prompt.`;
+
+  const response = await anthropic.messages.create({
+    model: MODEL_SONNET,
+    max_tokens: 4096,
+    system: systemPrompt,
+    output_config: {
+      format: {
+        type: "json_schema",
+        schema: PROTOCOLO_SCHEMA,
+      },
+    },
+    messages: [{ role: "user", content: userMessage }],
+  });
+
+  const textBlock = response.content.find((b) => b.type === "text");
+  if (!textBlock || textBlock.type !== "text") {
+    throw new Error(
+      `Respuesta de Sonnet sin bloque de texto. stop_reason=${response.stop_reason}`,
+    );
+  }
+
+  const llmOutput = JSON.parse(textBlock.text) as ProtocoloLLMOutput;
+
+  return {
+    clasificacion,
+    ...llmOutput,
+  };
 }
