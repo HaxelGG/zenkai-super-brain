@@ -29,7 +29,20 @@
 - Invitar socio como Member del team Vercel (Settings → Members → Invite)
 - Verificar acceso de `zenkai.systems` con auth (si sigue dando 403, configurar custom domain en Settings → Domains)
 
-⏸️ **PAUSADO: Fases 1-7 de conexión de APIs** — empezar después de validar el panel en uso real
+✅ **FASE 1 · CLAUDE API · v0.1 OPERATIVA**
+- Clasificador de inputs §7 (Haiku 4.5) · 10/10 tests · commit `48e7d11`
+- Protocolo §8 generador (Sonnet 4.6) · 4/4 tests · commit `c8eb1d9`
+- CLI: `npm run clasificar` · `npm run protocolo` · `npm run protocolo -- --json`
+- Función exportable: `protocolo(input)` desde `scripts/anthropic/protocolo.ts`
+
+⏸️ **PENDIENTE FASE 1 (post-v0.1)**
+- Exponer `protocolo()` como Vercel serverless function `/api/protocolo` (~1h)
+- Página `/sandbox` en panel Astro para probar con UI (~1.5h)
+- Migrar render a "propuesta-ready" con branding ZENKAI (~30 min)
+- Anthropic prompt caching (bajar costo de $0.08 a ~$0.02 por call)
+- Caso de test ECO claro para validar que el modelo no tenga bias hacia PRO
+
+⏸️ **PAUSADO: Fases 2-7** — empezar después de validar Fase 1 en uso real
 
 ---
 
@@ -44,10 +57,10 @@
 
 ## QUÉ HACER EN LA NUEVA SESIÓN
 
-Empezar **Fase 1 · Anthropic Claude API**. Ya tenés `ANTHROPIC_API_KEY` en Vercel. La Fase 1 consiste en:
-- Crear primer agente que efectivamente llame a Claude (probablemente NEXUS o ZEUS)
-- Construir endpoint o función que use el API key
-- Probar con un caso real (clasificación de input, generación de propuesta, etc.)
+Fase 1 v0.1 está operativa. Para continuar, opciones:
+1. **Path 2 — Endpoint HTTP:** convertir `protocolo()` en Vercel serverless function `/api/protocolo`. Habilita Make/Airtable/landing para llamarlo. ~1h.
+2. **Path 3 — UI sandbox:** página `/sandbox` en panel Astro para probar con interfaz. Convierte el panel en herramienta usable. ~1.5h.
+3. **Fase 2 — Airtable:** crear las 6 bases internas de ZENKAI y persistir cada call de protocolo en `propuestas`. Empieza la trazabilidad.
 
 Cuando una conexión se active, actualizar el frontmatter:
 ```yaml
@@ -55,6 +68,10 @@ Cuando una conexión se active, actualizar el frontmatter:
 estado_conexion: activo  # antes era "pendiente"
 ```
 Esto refresca automáticamente `/conexiones` y los KPIs de `/rendimiento` y Home.
+
+**Spec + plan de Fase 1 v0.1:**
+- `docs/specs/2026-05-03-fase1-protocolo-cliente-design.md`
+- `docs/plans/2026-05-03-fase1-protocolo-cliente.md`
 
 ---
 
