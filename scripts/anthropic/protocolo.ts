@@ -265,3 +265,69 @@ Generá los pasos 2-6 del Protocolo §8 según las reglas del system prompt.`;
     ...llmOutput,
   };
 }
+
+// Render markdown de los 6 pasos · debug-friendly (no propuesta-ready visual).
+// Función pura: solo lee result, no toca I/O.
+export function render(result: ProtocoloResult): string {
+  const { clasificacion, diagnostico, ruta_a_eco, ruta_b_pro, recomendacion, proximo_paso } = result;
+
+  const fmtUSD = (n: number) => `\$${n.toLocaleString("en-US")} USD`;
+  const fmtCOP = (n: number) => `\$${n.toLocaleString("es-CO")} COP`;
+  const lista = (items: string[]) => items.map((x) => `  - ${x}`).join("\n");
+
+  return `# Protocolo §8 · Respuesta del Super Cerebro
+
+## PASO 1 · CLASIFICACIÓN
+
+- **Tipo:** ${clasificacion.tipo}
+- **Sector:** ${clasificacion.sector_detectado}
+- **Departamentos:** ${clasificacion.departamentos_involucrados.join(", ")}
+- **Agentes a activar:** ${clasificacion.agentes_a_activar.join(", ") || "(ninguno)"}
+- **Confianza:** ${clasificacion.confianza}
+- **Razonamiento:** ${clasificacion.razonamiento}
+
+## PASO 2 · DIAGNÓSTICO
+
+- **Tier:** ${diagnostico.tier}
+- **Nivel de complejidad:** ${diagnostico.nivel}
+- **Celda de matriz:** ${diagnostico.celda_matriz}
+- **Costo operativo mensual:** ${fmtUSD(diagnostico.costo_operativo_mensual_USD)} · ${fmtCOP(diagnostico.costo_operativo_mensual_COP)}
+- **Precio mínimo del servicio:** ${fmtUSD(diagnostico.precio_minimo_servicio_USD)} · ${fmtCOP(diagnostico.precio_minimo_servicio_COP)}
+
+## PASO 3 · RUTA A (ECO · mínimo)
+
+**Stack:**
+${lista(ruta_a_eco.stack)}
+
+**Agentes activos:** ${ruta_a_eco.agentes_activos.join(", ")}
+
+**Limitaciones reales:**
+${lista(ruta_a_eco.limitaciones)}
+
+- **Tiempo de implementación:** ${ruta_a_eco.tiempo_implementacion}
+- **Precio sugerido:** ${fmtUSD(ruta_a_eco.precio_USD)} · ${fmtCOP(ruta_a_eco.precio_COP)}
+
+## PASO 4 · RUTA B (PRO · óptimo)
+
+**Stack:**
+${lista(ruta_b_pro.stack)}
+
+**Agentes activos:** ${ruta_b_pro.agentes_activos.join(", ")}
+
+**Capacidades adicionales vs Ruta A:**
+${lista(ruta_b_pro.capacidades_extra)}
+
+- **Tiempo de implementación:** ${ruta_b_pro.tiempo_implementacion}
+- **Precio sugerido:** ${fmtUSD(ruta_b_pro.precio_USD)} · ${fmtCOP(ruta_b_pro.precio_COP)}
+
+## PASO 5 · RECOMENDACIÓN ZENKAI
+
+**Ruta ${recomendacion.ruta}.**
+
+${recomendacion.justificacion}
+
+## PASO 6 · PRÓXIMO PASO ACCIONABLE
+
+${proximo_paso}
+`;
+}
