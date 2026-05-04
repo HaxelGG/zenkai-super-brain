@@ -1,0 +1,11 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "npm install && cd panel && npm install",
+  "buildCommand": "cd panel && npm run build",
+  "outputDirectory": "panel/dist",
+  "functions": {
+    "api/*.ts": {
+      "maxDuration": 30
+    }
+  }
+}
