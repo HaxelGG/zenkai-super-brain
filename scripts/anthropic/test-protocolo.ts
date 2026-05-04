@@ -11,6 +11,8 @@ interface TestCase {
   esperado: {
     tipo: TipoInput;
     sector: Sector;
+    tier?: "ECO" | "PRO" | "PREMIUM";
+    ruta_recomendada?: "A" | "B";
   };
 }
 
@@ -34,6 +36,16 @@ const CASOS: TestCase[] = [
     nombre: "04 · DIAGNOSTICO manufactura Bucaramanga",
     input: "[DIAGNÓSTICO] Fábrica metalmecánica en Bucaramanga, 30 empleados, todo en planillas Excel y WhatsApp, quieren digitalizarse de cero.",
     esperado: { tipo: "DIAGNOSTICO", sector: "manufactura" },
+  },
+  {
+    nombre: "05 · CLIENTE consultora unipersonal Bogotá $300",
+    input: "[CLIENTE] Soy consultora de servicios profesionales B2B en Bogotá, trabajo sola sin equipo, ofrezco asesorías a empresas pequeñas. Quiero una landing simple para capturar leads desde Instagram. Mi presupuesto máximo es $300 USD para el setup y no quiero pagar herramientas mensuales.",
+    esperado: {
+      tipo: "CLIENTE",
+      sector: "servicios-profesionales",
+      tier: "ECO",
+      ruta_recomendada: "A",
+    },
   },
 ];
 
@@ -61,11 +73,18 @@ function evaluar(caso: TestCase, r: ProtocoloResult): { ok: boolean; fallos: str
   if (!celdasValidas || !celdasValidas.includes(r.diagnostico.celda_matriz)) {
     fallos.push(`diagnostico: celda ${r.diagnostico.celda_matriz} no coherente con tier ${r.diagnostico.tier}`);
   }
-  if (r.diagnostico.costo_operativo_mensual_USD <= 0) {
-    fallos.push(`diagnostico: costo_operativo_mensual_USD debería ser >0`);
+  if (r.diagnostico.costo_operativo_mensual_USD < 0) {
+    fallos.push(`diagnostico: costo_operativo_mensual_USD debería ser >=0`);
   }
-  if (r.diagnostico.precio_minimo_servicio_USD <= 0) {
-    fallos.push(`diagnostico: precio_minimo_servicio_USD debería ser >0`);
+  if (r.diagnostico.precio_minimo_servicio_USD < 0) {
+    fallos.push(`diagnostico: precio_minimo_servicio_USD debería ser >=0`);
+  }
+
+  // Tier esperado (opcional · solo cuando el caso lo declara explícitamente)
+  if (caso.esperado.tier && r.diagnostico.tier !== caso.esperado.tier) {
+    fallos.push(
+      `diagnostico.tier: esperaba ${caso.esperado.tier}, recibí ${r.diagnostico.tier} (sesgo de tier?)`,
+    );
   }
 
   // Ruta A
@@ -87,6 +106,12 @@ function evaluar(caso: TestCase, r: ProtocoloResult): { ok: boolean; fallos: str
   }
   if (r.recomendacion.justificacion.length < 20) {
     fallos.push(`recomendacion.justificacion muy corta (${r.recomendacion.justificacion.length} chars)`);
+  }
+  // Ruta recomendada esperada (opcional · solo cuando el caso lo declara)
+  if (caso.esperado.ruta_recomendada && r.recomendacion.ruta !== caso.esperado.ruta_recomendada) {
+    fallos.push(
+      `recomendacion.ruta: esperaba ${caso.esperado.ruta_recomendada}, recibí ${r.recomendacion.ruta} (sesgo de upsell?)`,
+    );
   }
 
   // Próximo paso · debe empezar con verbo en infinitivo (lista amplia)

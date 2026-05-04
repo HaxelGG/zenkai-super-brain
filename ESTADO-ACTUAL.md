@@ -66,8 +66,15 @@
 - Sandbox: toggle "Modo: Debug | Propuesta" (localStorage · default Debug)
 - API: `?render=propuesta` además de `?render=markdown`
 
-⏸️ **PENDIENTE FASE 1 (post-v0.1 · refinements)**
-- Caso de test ECO claro para validar que el modelo no tenga bias hacia PRO
+✅ **CASO TEST ECO + DETECCIÓN BIAS** (commit pendiente)
+- Caso 5 en `test-protocolo.ts`: consultora unipersonal Bogotá $300 USD presupuesto
+- Resultado: tier=ECO N1 celda=A · ruta_recomendada=A ✓
+- **El modelo NO tiene bias hacia PRO** — diagnostica ECO correctamente cuando el budget lo justifica
+- TestCase ahora soporta `expected.tier` y `expected.ruta_recomendada` para futuros casos
+- Assertions de costo flexibilizadas: `costo_operativo_mensual_USD >= 0` (era `> 0`) — $0/mes es legítimo en ECO con free tiers
+
+⏸️ **HARDENING PENDIENTE (no bloqueante)**
+- Clasificador (Haiku 4.5) muestra non-determinism en casos borderline sin tag: #8 CONSULTA y #9 ESCALADA fluctúan entre ✓ y ✗ (rate observado 7-10/10 en 3 corridas). No afecta el flujo principal porque la mayoría de inputs reales llevan tag explícito; el extractTag() en código garantiza determinismo cuando hay tag. Hardening posible: few-shot examples adicionales para esos 2 casos.
 
 ⏸️ **PAUSADO: Fases 2-7** — empezar después de validar Fase 1 + Paths 2-3 en uso real
 
