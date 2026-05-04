@@ -122,6 +122,19 @@ export async function clasificar(input: string): Promise<ClasificacionResult> {
   return result;
 }
 
+// Render markdown corto · útil para UI o /api/clasificar?render=markdown
+export function render(r: ClasificacionResult): string {
+  return `# Clasificación · §7
+
+- **Tipo:** ${r.tipo}
+- **Sector:** ${r.sector_detectado}
+- **Departamentos:** ${r.departamentos_involucrados.join(", ") || "(ninguno)"}
+- **Agentes a activar:** ${r.agentes_a_activar.join(", ") || "(ninguno)"}
+- **Confianza:** ${r.confianza}
+- **Razonamiento:** ${r.razonamiento}
+`;
+}
+
 // CLI runner · sólo se ejecuta cuando este archivo es el entry point
 const isMain =
   process.argv[1] !== undefined &&

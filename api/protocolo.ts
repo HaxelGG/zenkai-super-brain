@@ -2,7 +2,7 @@
 // Modelo: Sonnet 4.6 · costo ~$0.08 por call
 
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { protocolo } from "../scripts/anthropic/protocolo.js";
+import { protocolo, render } from "../scripts/anthropic/protocolo.js";
 import { requireBearer } from "./_auth.js";
 
 export default async function handler(
@@ -24,6 +24,11 @@ export default async function handler(
 
   try {
     const result = await protocolo(body.input);
+    if (req.query.render === "markdown") {
+      res.setHeader("Content-Type", "text/markdown; charset=utf-8");
+      res.status(200).send(render(result));
+      return;
+    }
     res.status(200).json(result);
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);

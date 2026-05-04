@@ -1,0 +1,213 @@
+---
+import PanelLayout from "../layouts/PanelLayout.astro";
+import PageHeader from "../components/PageHeader.astro";
+---
+
+<PanelLayout title="Sandbox">
+  <PageHeader
+    eyebrow="Capa 1 · Pruebas en vivo"
+    title="Sandbox del Super Cerebro"
+    description="Probá los endpoints HTTP de Fase 1 contra la API de Anthropic. Tu ZENKAI_API_KEY queda guardada solo en este browser (localStorage) — no sale del cliente."
+  />
+
+  <section class="card-base p-5 sm:p-6 mb-6">
+    <div class="label-micro mb-2">1 · Credenciales</div>
+    <label for="api-key" class="block text-small text-text-muted mb-1">
+      ZENKAI_API_KEY (Bearer token · Settings → Env Vars en Vercel)
+    </label>
+    <input
+      id="api-key"
+      type="password"
+      autocomplete="off"
+      spellcheck="false"
+      placeholder="pegá acá tu key (queda en localStorage)"
+      class="w-full font-mono text-small px-3 py-2 rounded-chip border border-border focus:outline-none focus:border-accent transition-colors bg-bg"
+    />
+  </section>
+
+  <section class="card-base p-5 sm:p-6 mb-6">
+    <div class="label-micro mb-2">2 · Request</div>
+
+    <fieldset class="mb-4">
+      <legend class="block text-small text-text-muted mb-2">Endpoint</legend>
+      <div class="flex flex-col sm:flex-row gap-3 sm:gap-6">
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input type="radio" name="endpoint" value="clasificar" class="accent-accent" />
+          <span class="text-body">
+            <code class="font-mono text-small">/api/clasificar</code>
+            <span class="text-text-faint text-micro ml-2">~$0.002 · ~3s</span>
+          </span>
+        </label>
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input type="radio" name="endpoint" value="protocolo" class="accent-accent" checked />
+          <span class="text-body">
+            <code class="font-mono text-small">/api/protocolo</code>
+            <span class="text-text-faint text-micro ml-2">~$0.08 · ~10-15s</span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+
+    <label for="input" class="block text-small text-text-muted mb-1">Input</label>
+    <textarea
+      id="input"
+      rows="5"
+      placeholder="[CLIENTE] Tengo una clínica dental en Medellín, 4 odontólogos, agendamiento por WhatsApp manual."
+      class="w-full font-mono text-small px-3 py-2 rounded-chip border border-border focus:outline-none focus:border-accent transition-colors bg-bg resize-y"
+    ></textarea>
+
+    <div class="mt-4 flex items-center gap-3">
+      <button
+        id="run"
+        type="button"
+        class="px-4 py-2 rounded-chip bg-accent text-white text-body font-medium hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
+      >
+        Ejecutar
+      </button>
+      <span id="status" class="text-small text-text-muted"></span>
+    </div>
+  </section>
+
+  <section class="card-base p-5 sm:p-6">
+    <div class="flex items-center justify-between mb-3">
+      <div class="label-micro">3 · Resultado</div>
+      <div id="meta" class="text-micro font-mono text-text-faint"></div>
+    </div>
+    <div
+      id="result"
+      class="prose-zenkai min-h-[100px] text-text-faint text-small italic"
+    >
+      Esperando primer request…
+    </div>
+  </section>
+</PanelLayout>
+
+<script src="https://cdn.jsdelivr.net/npm/marked@12.0.0/marked.min.js" is:inline></script>
+
+<script>
+  const STORAGE_KEY = "zenkai_api_key";
+
+  const $key = document.getElementById("api-key") as HTMLInputElement;
+  const $input = document.getElementById("input") as HTMLTextAreaElement;
+  const $run = document.getElementById("run") as HTMLButtonElement;
+  const $status = document.getElementById("status") as HTMLSpanElement;
+  const $result = document.getElementById("result") as HTMLDivElement;
+  const $meta = document.getElementById("meta") as HTMLDivElement;
+
+  // Cargar key guardada
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) $key.value = saved;
+
+  // Persistir key cada vez que cambia
+  $key.addEventListener("input", () => {
+    localStorage.setItem(STORAGE_KEY, $key.value);
+  });
+
+  function selectedEndpoint(): string {
+    const radio = document.querySelector<HTMLInputElement>(
+      'input[name="endpoint"]:checked',
+    );
+    return radio?.value ?? "protocolo";
+  }
+
+  function setBusy(busy: boolean): void {
+    $run.disabled = busy;
+    $key.disabled = busy;
+    $input.disabled = busy;
+    document.querySelectorAll<HTMLInputElement>('input[name="endpoint"]').forEach((r) => {
+      r.disabled = busy;
+    });
+  }
+
+  $run.addEventListener("click", async () => {
+    const key = $key.value.trim();
+    const input = $input.value.trim();
+    const endpoint = selectedEndpoint();
+
+    if (!key) {
+      $status.textContent = "Falta la API key.";
+      $status.className = "text-small text-danger";
+      return;
+    }
+    if (!input) {
+      $status.textContent = "Falta el input.";
+      $status.className = "text-small text-danger";
+      return;
+    }
+
+    setBusy(true);
+    $status.textContent = "Llamando…";
+    $status.className = "text-small text-text-muted";
+    $meta.textContent = "";
+    $result.className = "prose-zenkai min-h-[100px] text-text-faint text-small italic";
+    $result.textContent = "Procesando…";
+
+    const startedAt = performance.now();
+    let elapsed = 0;
+    const ticker = window.setInterval(() => {
+      elapsed = (performance.now() - startedAt) / 1000;
+      $status.textContent = `Llamando… ${elapsed.toFixed(1)}s`;
+    }, 100);
+
+    try {
+      const url = `/api/${endpoint}?render=markdown`;
+      const res = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${key}`,
+        },
+        body: JSON.stringify({ input }),
+      });
+
+      const totalSec = ((performance.now() - startedAt) / 1000).toFixed(2);
+      window.clearInterval(ticker);
+
+      if (!res.ok) {
+        const errText = await res.text();
+        let errMsg = errText;
+        try {
+          const parsed = JSON.parse(errText) as { error?: string };
+          if (parsed.error) errMsg = parsed.error;
+        } catch {
+          // not JSON · keep raw text
+        }
+        $status.textContent = `HTTP ${res.status}`;
+        $status.className = "text-small text-danger";
+        $meta.textContent = `${totalSec}s · /api/${endpoint}`;
+        $result.className = "prose-zenkai min-h-[100px]";
+        $result.innerHTML = `<pre>${escapeHtml(errMsg)}</pre>`;
+        return;
+      }
+
+      const markdown = await res.text();
+      $status.textContent = `HTTP ${res.status} OK`;
+      $status.className = "text-small text-success";
+      $meta.textContent = `${totalSec}s · /api/${endpoint} · ${markdown.length}B`;
+      $result.className = "prose-zenkai min-h-[100px]";
+      // marked.parse devuelve HTML escapado de raw HTML por default · ok para nuestro markdown
+      const w = window as unknown as { marked: { parse: (md: string) => string } };
+      $result.innerHTML = w.marked.parse(markdown);
+    } catch (e) {
+      window.clearInterval(ticker);
+      const totalSec = ((performance.now() - startedAt) / 1000).toFixed(2);
+      $status.textContent = "Error de red";
+      $status.className = "text-small text-danger";
+      $meta.textContent = `${totalSec}s · /api/${endpoint}`;
+      $result.className = "prose-zenkai min-h-[100px]";
+      const msg = e instanceof Error ? e.message : String(e);
+      $result.innerHTML = `<pre>${escapeHtml(msg)}</pre>`;
+    } finally {
+      setBusy(false);
+    }
+  });
+
+  function escapeHtml(s: string): string {
+    return s
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+</script>
