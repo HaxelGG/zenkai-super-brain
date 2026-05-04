@@ -42,7 +42,27 @@ import PageHeader from "../components/PageHeader.astro";
           <input type="radio" name="endpoint" value="protocolo" class="accent-accent" checked />
           <span class="text-body">
             <code class="font-mono text-small">/api/protocolo</code>
-            <span class="text-text-faint text-micro ml-2">~$0.08 · ~10-15s</span>
+            <span class="text-text-faint text-micro ml-2">~$0.025-0.08 · ~10-15s</span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+
+    <fieldset class="mb-4" id="mode-fieldset">
+      <legend class="block text-small text-text-muted mb-2">Modo de output (solo aplica a /api/protocolo)</legend>
+      <div class="flex flex-col sm:flex-row gap-3 sm:gap-6">
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input type="radio" name="mode" value="markdown" class="accent-accent" checked />
+          <span class="text-body">
+            Debug
+            <span class="text-text-faint text-micro ml-1">— 6 pasos crudos · uso interno</span>
+          </span>
+        </label>
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input type="radio" name="mode" value="propuesta" class="accent-accent" />
+          <span class="text-body">
+            Propuesta
+            <span class="text-text-faint text-micro ml-1">— enviable a cliente · sin jargon</span>
           </span>
         </label>
       </div>
@@ -86,6 +106,7 @@ import PageHeader from "../components/PageHeader.astro";
 
 <script>
   const STORAGE_KEY = "zenkai_api_key";
+  const MODE_KEY = "zenkai_sandbox_mode";
 
   const $key = document.getElementById("api-key") as HTMLInputElement;
   const $input = document.getElementById("input") as HTMLTextAreaElement;
@@ -103,11 +124,32 @@ import PageHeader from "../components/PageHeader.astro";
     localStorage.setItem(STORAGE_KEY, $key.value);
   });
 
+  // Cargar modo guardado · default markdown (debug)
+  const savedMode = localStorage.getItem(MODE_KEY);
+  if (savedMode === "markdown" || savedMode === "propuesta") {
+    const radio = document.querySelector<HTMLInputElement>(
+      `input[name="mode"][value="${savedMode}"]`,
+    );
+    if (radio) radio.checked = true;
+  }
+  document.querySelectorAll<HTMLInputElement>('input[name="mode"]').forEach((r) => {
+    r.addEventListener("change", () => {
+      if (r.checked) localStorage.setItem(MODE_KEY, r.value);
+    });
+  });
+
   function selectedEndpoint(): string {
     const radio = document.querySelector<HTMLInputElement>(
       'input[name="endpoint"]:checked',
     );
     return radio?.value ?? "protocolo";
+  }
+
+  function selectedMode(): string {
+    const radio = document.querySelector<HTMLInputElement>(
+      'input[name="mode"]:checked',
+    );
+    return radio?.value ?? "markdown";
   }
 
   function setBusy(busy: boolean): void {
@@ -150,7 +192,10 @@ import PageHeader from "../components/PageHeader.astro";
     }, 100);
 
     try {
-      const url = `/api/${endpoint}?render=markdown`;
+      // /api/clasificar siempre usa render=markdown (no soporta propuesta).
+      // /api/protocolo respeta el modo seleccionado.
+      const renderParam = endpoint === "protocolo" ? selectedMode() : "markdown";
+      const url = `/api/${endpoint}?render=${renderParam}`;
       const res = await fetch(url, {
         method: "POST",
         headers: {

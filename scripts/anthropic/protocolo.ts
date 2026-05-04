@@ -52,6 +52,8 @@ export interface Recomendacion {
 
 // El JSON que devuelve Sonnet (sin la clasificación, que se inyecta después)
 export interface ProtocoloLLMOutput {
+  // Inferencia del nombre de la empresa cliente desde el input · "" si no se puede inferir
+  nombre_empresa_inferido: string;
   diagnostico: Diagnostico;
   ruta_a_eco: RutaEco;
   ruta_b_pro: RutaPro;
@@ -78,6 +80,11 @@ export interface ProtocoloResult extends ProtocoloLLMOutput {
 export const PROTOCOLO_SCHEMA = {
   type: "object",
   properties: {
+    nombre_empresa_inferido: {
+      type: "string",
+      description:
+        "Nombre de la empresa cliente inferido del input (ej. 'Clínica Dental Sonríe', 'Restaurante Casa Marbella'). String vacío si el input no nombra la empresa o es genérico.",
+    },
     diagnostico: {
       type: "object",
       properties: {
@@ -140,6 +147,7 @@ export const PROTOCOLO_SCHEMA = {
     proximo_paso: { type: "string" },
   },
   required: [
+    "nombre_empresa_inferido",
     "diagnostico", "ruta_a_eco", "ruta_b_pro",
     "recomendacion", "proximo_paso",
   ],
@@ -181,6 +189,15 @@ PASO 5 · RECOMENDACIÓN ZENKAI
 
 PASO 6 · PRÓXIMO PASO ACCIONABLE
   Una sola acción que el equipo ZENKAI debe ejecutar HOY. Empezás con verbo en infinitivo (agendar, enviar, llamar, cotizar, cerrar, validar, contactar, redactar, etc.).
+
+═══ NOMBRE DE LA EMPRESA INFERIDO ═══
+
+Adicional a los 6 pasos: extraés el campo nombre_empresa_inferido del input. Patrones típicos:
+  - "Clínica dental Sonríe en Medellín..." → "Clínica Dental Sonríe"
+  - "Restaurante Casa Marbella, menú..." → "Restaurante Casa Marbella"
+  - "Tengo un ecommerce de ropa femenina..." (sin nombre) → "" (string vacío)
+  - "[BUILD] Crear landing para evento corporativo..." (sin empresa nombrada) → ""
+Si NO podés inferir un nombre concreto con confianza alta, devolvés string vacío. NO inventás nombres ni usás genéricos como "Cliente" o "Empresa".
 
 ═══ CONVERSIÓN COP/USD ═══
 
@@ -372,6 +389,101 @@ ${recomendacion.justificacion}
 ## PASO 6 · PRÓXIMO PASO ACCIONABLE
 
 ${proximo_paso}
+`;
+}
+
+// Render propuesta-ready · markdown listo para enviar al cliente.
+// Diferencias con render(): sin jargon interno (tier/celda/ruta), nombres comerciales
+// (Plan Esencial / Plan Profesional), rangos de precio (+20% techo), header con nombre
+// de empresa + fecha, footer con firma ZENKAI.
+export function renderPropuesta(result: ProtocoloResult): string {
+  const { nombre_empresa_inferido, ruta_a_eco, ruta_b_pro, recomendacion, proximo_paso } = result;
+
+  const empresa = nombre_empresa_inferido.trim() || "[Cliente]";
+  const fecha = new Date().toLocaleDateString("es-CO", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
+  const fmtRango = (precioBase: number, currency: "USD" | "COP") => {
+    const piso = precioBase;
+    const techo = Math.round(precioBase * 1.2);
+    const fmt =
+      currency === "USD"
+        ? (n: number) => `\$${n.toLocaleString("en-US")} USD`
+        : (n: number) => `\$${n.toLocaleString("es-CO")} COP`;
+    return `${fmt(piso)} – ${fmt(techo)}`;
+  };
+
+  const lista = (items: string[]) => items.map((x) => `- ${x}`).join("\n");
+  const recomendado = recomendacion.ruta === "A" ? "Plan Esencial" : "Plan Profesional";
+
+  return `# Propuesta de Solución
+
+**Para:** ${empresa}
+**De:** ZENKAI Growth Systems · Pereira, Colombia
+**Fecha:** ${fecha}
+
+---
+
+## Plan Esencial
+
+> Versión más compacta de la solución. Ideal para validar resultados con inversión mínima antes de escalar.
+
+**Componentes incluidos:**
+
+${lista(ruta_a_eco.stack)}
+
+**Tiempo de implementación:** ${ruta_a_eco.tiempo_implementacion}
+
+**Inversión:**
+- ${fmtRango(ruta_a_eco.precio_USD, "USD")}
+- ${fmtRango(ruta_a_eco.precio_COP, "COP")}
+
+**Limitaciones honestas:**
+
+${lista(ruta_a_eco.limitaciones)}
+
+---
+
+## Plan Profesional
+
+> Solución completa con automatización end-to-end y capacidades adicionales que aceleran resultados.
+
+**Componentes incluidos:**
+
+${lista(ruta_b_pro.stack)}
+
+**Capacidades adicionales sobre el Plan Esencial:**
+
+${lista(ruta_b_pro.capacidades_extra)}
+
+**Tiempo de implementación:** ${ruta_b_pro.tiempo_implementacion}
+
+**Inversión:**
+- ${fmtRango(ruta_b_pro.precio_USD, "USD")}
+- ${fmtRango(ruta_b_pro.precio_COP, "COP")}
+
+---
+
+## Recomendación de ZENKAI
+
+> **${recomendado}**
+
+${recomendacion.justificacion}
+
+---
+
+## Próximo paso
+
+${proximo_paso}
+
+---
+
+*Propuesta válida 21 días desde la fecha de emisión. Tarifas en USD y COP a tasa de referencia COP 4,200/USD; ajustables al cierre. Esta propuesta no constituye contrato — el alcance final se formaliza en la llamada de cierre.*
+
+*ZENKAI Growth Systems · contacto@zenkai.systems · zenkai.systems*
 `;
 }
 
