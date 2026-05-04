@@ -104,6 +104,10 @@ async function main(): Promise<void> {
 
   let okCount = 0;
   let failCount = 0;
+  let totalCacheCreation = 0;
+  let totalCacheRead = 0;
+  let totalInputUncached = 0;
+  let totalOutput = 0;
   const renders: { caso: string; markdown: string }[] = [];
 
   for (const caso of CASOS) {
@@ -112,18 +116,29 @@ async function main(): Promise<void> {
     try {
       const r = await protocolo(caso.input);
       const { ok, fallos } = evaluar(caso, r);
+      const u = r.usage;
+      const cacheStatus =
+        u.cache_read_input_tokens > 0
+          ? `cache HIT (${u.cache_read_input_tokens}t)`
+          : u.cache_creation_input_tokens > 0
+            ? `cache WRITE (${u.cache_creation_input_tokens}t)`
+            : `no cache`;
 
       if (ok) {
         console.log(
-          `✓  tier=${r.diagnostico.tier} N${r.diagnostico.nivel} celda=${r.diagnostico.celda_matriz} ruta=${r.recomendacion.ruta} precio_A=${r.ruta_a_eco.precio_USD} precio_B=${r.ruta_b_pro.precio_USD}`,
+          `✓  tier=${r.diagnostico.tier} N${r.diagnostico.nivel} celda=${r.diagnostico.celda_matriz} ruta=${r.recomendacion.ruta} · ${cacheStatus} · in=${u.input_tokens}t out=${u.output_tokens}t`,
         );
         okCount++;
       } else {
-        console.log(`✗`);
+        console.log(`✗ · ${cacheStatus}`);
         for (const f of fallos) console.log(`     · ${f}`);
         failCount++;
       }
 
+      totalCacheCreation += u.cache_creation_input_tokens;
+      totalCacheRead += u.cache_read_input_tokens;
+      totalInputUncached += u.input_tokens;
+      totalOutput += u.output_tokens;
       renders.push({ caso: caso.nombre, markdown: render(r) });
     } catch (e) {
       console.log(`✗ ERROR: ${e instanceof Error ? e.message : String(e)}`);
@@ -133,6 +148,20 @@ async function main(): Promise<void> {
 
   console.log(`\n──────────────────────────────────────────────`);
   console.log(`Resultado: ${okCount}/${CASOS.length} OK · ${failCount} fallos`);
+  console.log(`──────────────────────────────────────────────`);
+  console.log(`Tokens · uncached_input=${totalInputUncached} · cache_write=${totalCacheCreation} · cache_read=${totalCacheRead} · output=${totalOutput}`);
+  // Sonnet 4.6 pricing: $3/M input · $15/M output · cache write ×1.25 · cache read ×0.1
+  const cost =
+    (totalInputUncached / 1_000_000) * 3 +
+    (totalCacheCreation / 1_000_000) * 3 * 1.25 +
+    (totalCacheRead / 1_000_000) * 3 * 0.1 +
+    (totalOutput / 1_000_000) * 15;
+  console.log(`Costo aprox de esta corrida: \$${cost.toFixed(4)} USD`);
+  if (totalCacheRead > 0) {
+    const savedTokens = totalCacheRead;
+    const savedCost = (savedTokens / 1_000_000) * 3 * 0.9;
+    console.log(`Ahorro vs sin caching: ~\$${savedCost.toFixed(4)} USD (${savedTokens} tokens leídos al 10%)`);
+  }
   console.log(`──────────────────────────────────────────────\n`);
 
   console.log("\n========== RENDERS PARA REVISIÓN HUMANA ==========\n");

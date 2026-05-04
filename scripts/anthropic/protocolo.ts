@@ -59,9 +59,19 @@ export interface ProtocoloLLMOutput {
   proximo_paso: string;
 }
 
+// Stats de uso del LLM · espejo de response.usage del SDK Anthropic.
+// Útil para verificar cache hits y para cost tracking downstream.
+export interface UsageStats {
+  input_tokens: number;
+  output_tokens: number;
+  cache_creation_input_tokens: number;
+  cache_read_input_tokens: number;
+}
+
 // El resultado completo que devuelve protocolo() al consumidor
 export interface ProtocoloResult extends ProtocoloLLMOutput {
   clasificacion: ClasificacionResult;
+  usage: UsageStats;
 }
 
 // JSON schema enforced por output_config.format
@@ -136,15 +146,10 @@ export const PROTOCOLO_SCHEMA = {
   additionalProperties: false,
 } as const;
 
-export function buildSystemPrompt(sector: Sector): string {
-  const sectorContent = loadSectorContext(sector);
-  const stacks = loadStackContext();
-
-  const sectorBlock = sectorContent
-    ? `\n═══ MÓDULO DE SECTOR · ${sector.toUpperCase()} ═══\n\n${sectorContent}\n`
-    : "";
-
-  return `Sos el generador del Protocolo §8 del Super Cerebro de ZENKAI Growth Systems.
+// Bloque estático del system prompt · NO depende del input ni del sector.
+// Se aísla para que el cache de Anthropic (cache_control: ephemeral) lo
+// reutilice entre calls dentro de la ventana de 5 minutos.
+const STATIC_PROTOCOL_BLOCK = `Sos el generador del Protocolo §8 del Super Cerebro de ZENKAI Growth Systems.
 
 Recibís un input clasificado como [CLIENTE], [BUILD] o [DIAGNÓSTICO] y devolvés JSON estructurado con los 6 pasos canónicos del protocolo §8 de CLAUDE.md.
 
@@ -201,15 +206,45 @@ Si el input menciona ubicación, aplicar multiplicador en precio del servicio (N
 
 ARES (Marketing) · HERMES (Ventas) · ATLAS (Operaciones) · NEXUS (IA) · APOLLO (Diseño) · MUSE (Contenido) · FORGE (Developer) · ORACLE (Finanzas) · HIVE (RRHH) · ECHO (AtenciónCliente) · LEX (Legal) · ZEUS (Estrategia · solo N3-N4).
 
-En agentes_activos de cada ruta listá solo los que efectivamente trabajan en esa ruta (típicamente 2-4 por ruta).
-${sectorBlock}
-═══ STACK ECO (referencia de herramientas y precios) ═══
+En agentes_activos de cada ruta listá solo los que efectivamente trabajan en esa ruta (típicamente 2-4 por ruta).`;
+
+export interface SystemBlock {
+  type: "text";
+  text: string;
+  cache_control?: { type: "ephemeral" };
+}
+
+// Devuelve los bloques del system prompt en orden de estabilidad descendente:
+//   1. STATIC_PROTOCOL — invariante · cache_control
+//   2. stacksBlock      — invariante · cache_control
+//   3. sectorBlock      — varía según input · sin cache (queda al final por
+//                          la regla "el cambio en posición N invalida posiciones >N")
+// Render order de la API: tools → system → messages. Sin tools, system está al inicio.
+export function buildSystemPrompt(sector: Sector): SystemBlock[] {
+  const sectorContent = loadSectorContext(sector);
+  const stacks = loadStackContext();
+
+  const stacksBlock = `═══ STACK ECO (referencia de herramientas y precios) ═══
 
 ${stacks.eco}
 
 ═══ STACK PRO (referencia de herramientas y precios) ═══
 
 ${stacks.pro}`;
+
+  const blocks: SystemBlock[] = [
+    { type: "text", text: STATIC_PROTOCOL_BLOCK, cache_control: { type: "ephemeral" } },
+    { type: "text", text: stacksBlock, cache_control: { type: "ephemeral" } },
+  ];
+
+  if (sectorContent) {
+    blocks.push({
+      type: "text",
+      text: `═══ MÓDULO DE SECTOR · ${sector.toUpperCase()} ═══\n\n${sectorContent}`,
+    });
+  }
+
+  return blocks;
 }
 
 const TIPOS_VALIDOS_PROTOCOLO = ["CLIENTE", "BUILD", "DIAGNOSTICO"] as const;
@@ -228,7 +263,7 @@ export async function protocolo(
     );
   }
 
-  const systemPrompt = buildSystemPrompt(clasificacion.sector_detectado);
+  const systemBlocks = buildSystemPrompt(clasificacion.sector_detectado);
 
   const userMessage = `INPUT ORIGINAL:
 ${input}
@@ -241,7 +276,7 @@ Generá los pasos 2-6 del Protocolo §8 según las reglas del system prompt.`;
   const response = await anthropic.messages.create({
     model: MODEL_SONNET,
     max_tokens: 4096,
-    system: systemPrompt,
+    system: systemBlocks,
     output_config: {
       format: {
         type: "json_schema",
@@ -260,9 +295,17 @@ Generá los pasos 2-6 del Protocolo §8 según las reglas del system prompt.`;
 
   const llmOutput = JSON.parse(textBlock.text) as ProtocoloLLMOutput;
 
+  const usage: UsageStats = {
+    input_tokens: response.usage.input_tokens,
+    output_tokens: response.usage.output_tokens,
+    cache_creation_input_tokens: response.usage.cache_creation_input_tokens ?? 0,
+    cache_read_input_tokens: response.usage.cache_read_input_tokens ?? 0,
+  };
+
   return {
     clasificacion,
     ...llmOutput,
+    usage,
   };
 }
 

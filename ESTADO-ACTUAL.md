@@ -52,11 +52,16 @@
 - Loading state con timer · status HTTP + tiempo + size · errores muestran JSON del handler
 - Commit: `6c8ee44`
 
+✅ **PROMPT CACHING ACTIVO** (2026-05-04)
+- `buildSystemPrompt()` devuelve 3 bloques: STATIC + stacks (cached) + sector (volátil)
+- `cache_control: ephemeral` en los 2 estáticos · 6998 tokens cacheados constantes
+- Costo per call medido: **$0.025 en cache hit · $0.08 en cache write**
+- Test runner reporta cache stats + costo por corrida
+- Ahorro real medido: 60% en corridas con sectores variados dentro de la ventana de 5 min
+
 ⏸️ **PENDIENTE FASE 1 (post-v0.1 · refinements)**
 - Migrar render a "propuesta-ready" con branding ZENKAI (~30 min)
-- Anthropic prompt caching (bajar costo de $0.08 a ~$0.02 por call)
 - Caso de test ECO claro para validar que el modelo no tenga bias hacia PRO
-- (Panel ya tiene `<meta robots noindex,nofollow>` desde antes · descartar de la lista)
 
 ⏸️ **PAUSADO: Fases 2-7** — empezar después de validar Fase 1 + Paths 2-3 en uso real
 
