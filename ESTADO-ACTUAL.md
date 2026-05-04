@@ -101,10 +101,17 @@ Si en uso real cae mucho en path inferido, escalar a Sonnet 4.6 para el classifi
 - Sandbox UI: campo opcional "Link a Lead" visible solo cuando persist=true
 - Backward compatible: sin `lead_id` la propuesta se persiste normal (sin link)
 
-⏸️ **PAUSADO: Fases 2.2 y 3-7**
-- Fase 2.2: las otras 6 bases (OPERACIONES · FINANZAS · MARKETING · SOPORTE · EQUIPO · LEGAL)
-- Fase 3-7: Make · WhatsApp Cloud API · Cal.com/Stripe · Docuseal/Notion/Drive · Sentry/BetterStack
-- objeciones/contratos: no se hicieron como tablas separadas en Fase 2.1 — la tabla `Deals` que ya tenés sirve para contratos cuando llegue · objeciones es mejor como endpoint separado/manual cuando arme HERMES-CLOSE
+✅ **FASE 2.2 · SCAFFOLDING MULTI-BASE** (commit `e9db55e`)
+- `client.ts` refactor: tipos `InternalBaseName` (7) + `SectorBaseName` (6 hechas, 5 pendientes) + helper genérico `getBase(name)`
+- Helper bonus `sectorToBaseName(sector)` mapea output del clasificador → base template (ej. "restaurantes" → "FOOD")
+- 6 sector bases creadas (Salud, Food, Ecommerce, Servicios, Educación, Inmobiliaria)
+- Pendiente del usuario: 6 internas (Operaciones, Finanzas, Marketing, Soporte, Equipo, Legal) + Inmobiliaria + 5 sector restantes (manufactura, retail, startups, gobierno, ong)
+- Cambio puramente scaffolding: no afecta runtime hasta que algo use las nuevas bases
+
+⏸️ **PAUSADO: Fases 3-7**
+- Fase 3: Make · webhook landing → crear Lead → /api/protocolo?persist=true&lead_id
+- Fases 4-7: WhatsApp Cloud API · Cal.com/Stripe · Docuseal/Notion/Drive · Sentry/BetterStack
+- objeciones/contratos: pueden vivir en Deals (existing) cuando llegue el momento; objeciones mejor como endpoint manual de HERMES-CLOSE
 
 ---
 
