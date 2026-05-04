@@ -85,7 +85,18 @@ Decisión: **aceptar 85-90% rate en path inferido**. Razones:
 
 Si en uso real cae mucho en path inferido, escalar a Sonnet 4.6 para el classifier (10× costo · ~$0.02/call · viola CLAUDE.md §1 pero justificable por accuracy). Documentado pero NO ejecutado.
 
-⏸️ **PAUSADO: Fases 2-7** — empezar después de validar Fase 1 + Paths 2-3 en uso real
+✅ **FASE 2 v0.1 · PERSISTENCIA EN AIRTABLE** (commits `14a949b` `211224f`)
+- Base **ZENKAI · VENTAS** (`appmiicsbFsvRfxQ9`) · tabla `propuestas` (14 campos)
+- `POST /api/protocolo?persist=true` guarda el ProtocoloResult automáticamente
+- Header `X-Airtable-Record-Id` en respuesta · `X-Airtable-Error` si falla
+- Non-blocking: si Airtable falla, responde 200 con la propuesta intacta + header de error
+- Sandbox: checkbox "Persistir en Airtable" (localStorage · default OFF)
+- Stack: SDK oficial `airtable` 0.12 · auth con `AIRTABLE_TOKEN` (Personal Access Token)
+
+⏸️ **PAUSADO: Fases 2.1+ y 3-7**
+- Fase 2.1: tablas `leads` + `contratos` + `objeciones` en VENTAS · linked records con `propuestas`
+- Fase 2.2: las otras 6 bases (OPERACIONES · FINANZAS · MARKETING · SOPORTE · EQUIPO · LEGAL)
+- Fase 3-7: Make · WhatsApp Cloud API · Cal.com/Stripe · Docuseal/Notion/Drive · Sentry/BetterStack
 
 ---
 
@@ -93,7 +104,8 @@ Si en uso real cae mucho en path inferido, escalar a Sonnet 4.6 para el classifi
 
 - `ANTHROPIC_API_KEY` ✓ (en uso por `/api/clasificar` y `/api/protocolo`)
 - `ZENKAI_API_KEY` ✓ (Bearer token para auth de los endpoints · ver `.env.example`)
-- `AIRTABLE_TOKEN` ✓ (lista para Fase 2 · falta crear las bases y agregar `AIRTABLE_BASE_*`)
+- `AIRTABLE_TOKEN` ✓ (en uso por persistirPropuesta · Personal Access Token)
+- `AIRTABLE_BASE_VENTAS=appmiicsbFsvRfxQ9` ✓ (Fase 2 v0.1 · base de propuestas)
 
 **.env local** tiene los mismos valores · `.env.example` documenta cómo regenerar `ZENKAI_API_KEY`.
 
@@ -101,11 +113,11 @@ Si en uso real cae mucho en path inferido, escalar a Sonnet 4.6 para el classifi
 
 ## QUÉ HACER EN LA NUEVA SESIÓN
 
-Paths 2-3 cerrados. Opciones para continuar:
-1. **Fase 2 — Airtable:** crear las 6 bases internas de ZENKAI y persistir cada call de `/api/protocolo` en `propuestas`. Empieza la trazabilidad real (cada propuesta queda guardada para análisis y follow-up).
-2. **Refinements del protocolo:** prompt caching (-75% costo · ~$0.08 → ~$0.02), caso de test ECO claro, render propuesta-ready con branding ZENKAI.
-3. **Fase 3 — Make:** workflows automatizados que consumen `/api/protocolo` desde leads entrantes. Requiere Fase 2 antes (trazabilidad).
-4. **Validación con cliente real:** usar el sandbox + protocolo para preparar la primera propuesta comercial. Es el "primer cliente cerrado" del objetivo 2026.
+Fase 2 v0.1 cerrada. Opciones para continuar:
+1. **Fase 2.1 — más tablas en VENTAS:** `leads` (entran formularios/landings) + `contratos` (post-cierre) + `objeciones` (insumo para ARES) · todas linked al `propuestas`. Empieza el pipeline de ventas real.
+2. **Fase 2.2 — bases adicionales:** OPERACIONES (clientes_activos · proyectos · tareas) cuando haya primer cliente. FINANZAS cuando haya primera factura. Crecen con la operación.
+3. **Fase 3 — Make:** workflow que recibe webhook de Tally/Typeform/landing → llama a `/api/protocolo?persist=true` con Bearer · genera respuesta auto + queda en Airtable. Cero intervención humana hasta el HERMES-CLOSE.
+4. **Validación con cliente real:** usar el sandbox para preparar la primera propuesta comercial. Camino al "primer cliente cerrado" del objetivo 2026.
 
 **Smoke test de los endpoints (verificar que siguen vivos):**
 ```bash
