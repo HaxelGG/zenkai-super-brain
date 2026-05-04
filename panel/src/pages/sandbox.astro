@@ -90,6 +90,21 @@ import PageHeader from "../components/PageHeader.astro";
       </label>
       <span id="status" class="text-small text-text-muted"></span>
     </div>
+
+    <div class="mt-3 flex items-center gap-2" id="lead-row" hidden>
+      <label for="lead-id" class="text-small text-text-muted whitespace-nowrap">
+        Link a Lead (opcional)
+      </label>
+      <input
+        id="lead-id"
+        type="text"
+        autocomplete="off"
+        spellcheck="false"
+        placeholder="recXXXXXXXXXX"
+        class="flex-1 max-w-xs font-mono text-small px-2 py-1 rounded-chip border border-border focus:outline-none focus:border-accent transition-colors bg-bg"
+      />
+      <span class="text-text-faint text-micro">— record ID de la tabla Leads (opcional)</span>
+    </div>
   </section>
 
   <section class="card-base p-5 sm:p-6">
@@ -117,6 +132,8 @@ import PageHeader from "../components/PageHeader.astro";
   const $input = document.getElementById("input") as HTMLTextAreaElement;
   const $run = document.getElementById("run") as HTMLButtonElement;
   const $persist = document.getElementById("persist") as HTMLInputElement;
+  const $leadId = document.getElementById("lead-id") as HTMLInputElement;
+  const $leadRow = document.getElementById("lead-row") as HTMLDivElement;
   const $status = document.getElementById("status") as HTMLSpanElement;
   const $result = document.getElementById("result") as HTMLDivElement;
   const $meta = document.getElementById("meta") as HTMLDivElement;
@@ -160,9 +177,16 @@ import PageHeader from "../components/PageHeader.astro";
 
   // Cargar checkbox persist guardado · default OFF
   $persist.checked = localStorage.getItem(PERSIST_KEY) === "true";
+  syncLeadRowVisibility();
   $persist.addEventListener("change", () => {
     localStorage.setItem(PERSIST_KEY, $persist.checked ? "true" : "false");
+    syncLeadRowVisibility();
   });
+  // Lead ID row visible solo cuando persist=true · NO persistimos el ID en
+  // localStorage (es por-caso, no por-sesión).
+  function syncLeadRowVisibility(): void {
+    $leadRow.hidden = !$persist.checked;
+  }
 
   function setBusy(busy: boolean): void {
     $run.disabled = busy;
@@ -207,8 +231,13 @@ import PageHeader from "../components/PageHeader.astro";
       // /api/clasificar siempre usa render=markdown (no soporta propuesta).
       // /api/protocolo respeta el modo seleccionado.
       const renderParam = endpoint === "protocolo" ? selectedMode() : "markdown";
-      const persistParam = endpoint === "protocolo" && $persist.checked ? "&persist=true" : "";
-      const url = `/api/${endpoint}?render=${renderParam}${persistParam}`;
+      const persistEnabled = endpoint === "protocolo" && $persist.checked;
+      const persistParam = persistEnabled ? "&persist=true" : "";
+      const leadValue = $leadId.value.trim();
+      const leadParam = persistEnabled && leadValue.startsWith("rec")
+        ? `&lead_id=${encodeURIComponent(leadValue)}`
+        : "";
+      const url = `/api/${endpoint}?render=${renderParam}${persistParam}${leadParam}`;
       const res = await fetch(url, {
         method: "POST",
         headers: {
@@ -243,8 +272,9 @@ import PageHeader from "../components/PageHeader.astro";
       $status.className = "text-small text-success";
       const recId = res.headers.get("X-Airtable-Record-Id");
       const recErr = res.headers.get("X-Airtable-Error");
+      const linkedLead = res.headers.get("X-Airtable-Linked-Lead");
       const persistMeta = recId
-        ? ` · 💾 Airtable: ${recId}`
+        ? ` · 💾 Airtable: ${recId}${linkedLead ? ` (linked → ${linkedLead})` : ""}`
         : recErr
           ? ` · ⚠️ Airtable error: ${recErr}`
           : "";

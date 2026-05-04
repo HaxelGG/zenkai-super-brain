@@ -26,12 +26,18 @@ export default async function handler(
   try {
     const result = await protocolo(body.input);
 
-    // Persistencia opt-in en Airtable (Fase 2 v0.1).
+    // Persistencia opt-in en Airtable (Fase 2 v0.1+).
     // Non-blocking: si Airtable falla, loguea pero no rompe la respuesta.
+    // Si ?lead_id=recXXX está presente, linkea la propuesta a ese Lead.
     if (req.query.persist === "true") {
+      const leadId =
+        typeof req.query.lead_id === "string" && req.query.lead_id.startsWith("rec")
+          ? req.query.lead_id
+          : undefined;
       try {
-        const { airtable_record_id } = await persistirPropuesta(body.input, result);
+        const { airtable_record_id } = await persistirPropuesta(body.input, result, leadId);
         res.setHeader("X-Airtable-Record-Id", airtable_record_id);
+        if (leadId) res.setHeader("X-Airtable-Linked-Lead", leadId);
       } catch (persistErr) {
         const msg = persistErr instanceof Error ? persistErr.message : String(persistErr);
         console.error("[airtable] Persistencia falló:", msg);
