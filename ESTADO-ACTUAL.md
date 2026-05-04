@@ -93,10 +93,18 @@ Si en uso real cae mucho en path inferido, escalar a Sonnet 4.6 para el classifi
 - Sandbox: checkbox "Persistir en Airtable" (localStorage · default OFF)
 - Stack: SDK oficial `airtable` 0.12 · auth con `AIRTABLE_TOKEN` (Personal Access Token)
 
-⏸️ **PAUSADO: Fases 2.1+ y 3-7**
-- Fase 2.1: tablas `leads` + `contratos` + `objeciones` en VENTAS · linked records con `propuestas`
+✅ **FASE 2.1 · LINKAGE LEADS ↔ PROPUESTAS** (commit `12e2385`)
+- Campo `lead` (Link to record · single) en tabla `propuestas` · auto-creado inverso en `Leads`
+- API: `POST /api/protocolo?persist=true&lead_id=recXXX` linkea automático
+- Filtro defensivo: solo IDs que empiecen con "rec" se aceptan (evita basura del cliente)
+- Header `X-Airtable-Linked-Lead` cuando el link se aplicó
+- Sandbox UI: campo opcional "Link a Lead" visible solo cuando persist=true
+- Backward compatible: sin `lead_id` la propuesta se persiste normal (sin link)
+
+⏸️ **PAUSADO: Fases 2.2 y 3-7**
 - Fase 2.2: las otras 6 bases (OPERACIONES · FINANZAS · MARKETING · SOPORTE · EQUIPO · LEGAL)
 - Fase 3-7: Make · WhatsApp Cloud API · Cal.com/Stripe · Docuseal/Notion/Drive · Sentry/BetterStack
+- objeciones/contratos: no se hicieron como tablas separadas en Fase 2.1 — la tabla `Deals` que ya tenés sirve para contratos cuando llegue · objeciones es mejor como endpoint separado/manual cuando arme HERMES-CLOSE
 
 ---
 
@@ -113,11 +121,21 @@ Si en uso real cae mucho en path inferido, escalar a Sonnet 4.6 para el classifi
 
 ## QUÉ HACER EN LA NUEVA SESIÓN
 
-Fase 2 v0.1 cerrada. Opciones para continuar:
-1. **Fase 2.1 — más tablas en VENTAS:** `leads` (entran formularios/landings) + `contratos` (post-cierre) + `objeciones` (insumo para ARES) · todas linked al `propuestas`. Empieza el pipeline de ventas real.
-2. **Fase 2.2 — bases adicionales:** OPERACIONES (clientes_activos · proyectos · tareas) cuando haya primer cliente. FINANZAS cuando haya primera factura. Crecen con la operación.
-3. **Fase 3 — Make:** workflow que recibe webhook de Tally/Typeform/landing → llama a `/api/protocolo?persist=true` con Bearer · genera respuesta auto + queda en Airtable. Cero intervención humana hasta el HERMES-CLOSE.
-4. **Validación con cliente real:** usar el sandbox para preparar la primera propuesta comercial. Camino al "primer cliente cerrado" del objetivo 2026.
+Fases 2 + 2.1 cerradas. Opciones para continuar:
+1. **Fase 3 — Make:** workflow que recibe webhook de Tally/Typeform/landing → crea Lead en Airtable → llama a `/api/protocolo?persist=true&lead_id=recXXX` → propuesta queda guardada y linkeada al lead. Cero intervención humana hasta el HERMES-CLOSE. Es el primer flujo end-to-end realmente automatizado.
+2. **Fase 2.2 — más bases:** OPERACIONES (clientes_activos · proyectos) cuando haya primer cliente. FINANZAS cuando haya primera factura. Crecen con la operación.
+3. **Validación con cliente real:** usar el sandbox para preparar tu primera propuesta comercial · linkeala a un Lead real en Airtable · seguimiento manual por ahora · camino al "primer cliente cerrado" del objetivo 2026.
+
+**Smoke test del pipeline completo (verificar que sigue vivo):**
+```bash
+curl -X POST "https://zenkaibrain-git-main-mrhaxel26-sketchs-projects.vercel.app/api/protocolo?persist=true&lead_id=recXXX" \
+  -H "Authorization: Bearer $ZENKAI_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"input":"[CLIENTE] Tu input acá..."}'
+# Headers esperados: X-Airtable-Record-Id + X-Airtable-Linked-Lead
+```
+
+**Sandbox UI:** `https://zenkaibrain-git-main-mrhaxel26-sketchs-projects.vercel.app/sandbox`
 
 **Smoke test de los endpoints (verificar que siguen vivos):**
 ```bash
