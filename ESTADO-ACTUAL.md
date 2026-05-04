@@ -59,8 +59,14 @@
 - Test runner reporta cache stats + costo por corrida
 - Ahorro real medido: 60% en corridas con sectores variados dentro de la ventana de 5 min
 
+✅ **RENDER PROPUESTA-READY** (commit `c498611`)
+- `renderPropuesta(result)` paralela a `render()` debug-friendly · sin jargon interno
+- Schema extendido: `nombre_empresa_inferido` se infiere del input
+- Rangos de precio (piso = precio_USD · techo = +20%) en lugar de exacto
+- Sandbox: toggle "Modo: Debug | Propuesta" (localStorage · default Debug)
+- API: `?render=propuesta` además de `?render=markdown`
+
 ⏸️ **PENDIENTE FASE 1 (post-v0.1 · refinements)**
-- Migrar render a "propuesta-ready" con branding ZENKAI (~30 min)
 - Caso de test ECO claro para validar que el modelo no tenga bias hacia PRO
 
 ⏸️ **PAUSADO: Fases 2-7** — empezar después de validar Fase 1 + Paths 2-3 en uso real
