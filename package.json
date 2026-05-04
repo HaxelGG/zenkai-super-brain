@@ -12,9 +12,11 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.92.0",
+    "airtable": "^0.12.2",
     "dotenv": "^16.4.5"
   },
   "devDependencies": {
+    "@types/airtable": "^0.10.0",
     "@types/node": "^22.0.0",
     "@vercel/node": "^5.7.15",
     "tsx": "^4.19.0",

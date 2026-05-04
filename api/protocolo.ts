@@ -3,6 +3,7 @@
 
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { protocolo, render, renderPropuesta } from "../scripts/anthropic/protocolo.js";
+import { persistirPropuesta } from "../scripts/airtable/persistir.js";
 import { requireBearer } from "./_auth.js";
 
 export default async function handler(
@@ -24,6 +25,20 @@ export default async function handler(
 
   try {
     const result = await protocolo(body.input);
+
+    // Persistencia opt-in en Airtable (Fase 2 v0.1).
+    // Non-blocking: si Airtable falla, loguea pero no rompe la respuesta.
+    if (req.query.persist === "true") {
+      try {
+        const { airtable_record_id } = await persistirPropuesta(body.input, result);
+        res.setHeader("X-Airtable-Record-Id", airtable_record_id);
+      } catch (persistErr) {
+        const msg = persistErr instanceof Error ? persistErr.message : String(persistErr);
+        console.error("[airtable] Persistencia falló:", msg);
+        res.setHeader("X-Airtable-Error", msg.slice(0, 200));
+      }
+    }
+
     const renderMode = req.query.render;
     if (renderMode === "markdown") {
       res.setHeader("Content-Type", "text/markdown; charset=utf-8");

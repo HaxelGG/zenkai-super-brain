@@ -76,7 +76,7 @@ import PageHeader from "../components/PageHeader.astro";
       class="w-full font-mono text-small px-3 py-2 rounded-chip border border-border focus:outline-none focus:border-accent transition-colors bg-bg resize-y"
     ></textarea>
 
-    <div class="mt-4 flex items-center gap-3">
+    <div class="mt-4 flex items-center gap-3 flex-wrap">
       <button
         id="run"
         type="button"
@@ -84,6 +84,10 @@ import PageHeader from "../components/PageHeader.astro";
       >
         Ejecutar
       </button>
+      <label class="flex items-center gap-2 cursor-pointer text-small text-text-muted" id="persist-label">
+        <input type="checkbox" id="persist" class="accent-accent" />
+        <span>Persistir en Airtable <span class="text-text-faint text-micro">(VENTAS · solo /api/protocolo)</span></span>
+      </label>
       <span id="status" class="text-small text-text-muted"></span>
     </div>
   </section>
@@ -107,10 +111,12 @@ import PageHeader from "../components/PageHeader.astro";
 <script>
   const STORAGE_KEY = "zenkai_api_key";
   const MODE_KEY = "zenkai_sandbox_mode";
+  const PERSIST_KEY = "zenkai_sandbox_persist";
 
   const $key = document.getElementById("api-key") as HTMLInputElement;
   const $input = document.getElementById("input") as HTMLTextAreaElement;
   const $run = document.getElementById("run") as HTMLButtonElement;
+  const $persist = document.getElementById("persist") as HTMLInputElement;
   const $status = document.getElementById("status") as HTMLSpanElement;
   const $result = document.getElementById("result") as HTMLDivElement;
   const $meta = document.getElementById("meta") as HTMLDivElement;
@@ -151,6 +157,12 @@ import PageHeader from "../components/PageHeader.astro";
     );
     return radio?.value ?? "markdown";
   }
+
+  // Cargar checkbox persist guardado · default OFF
+  $persist.checked = localStorage.getItem(PERSIST_KEY) === "true";
+  $persist.addEventListener("change", () => {
+    localStorage.setItem(PERSIST_KEY, $persist.checked ? "true" : "false");
+  });
 
   function setBusy(busy: boolean): void {
     $run.disabled = busy;
@@ -195,7 +207,8 @@ import PageHeader from "../components/PageHeader.astro";
       // /api/clasificar siempre usa render=markdown (no soporta propuesta).
       // /api/protocolo respeta el modo seleccionado.
       const renderParam = endpoint === "protocolo" ? selectedMode() : "markdown";
-      const url = `/api/${endpoint}?render=${renderParam}`;
+      const persistParam = endpoint === "protocolo" && $persist.checked ? "&persist=true" : "";
+      const url = `/api/${endpoint}?render=${renderParam}${persistParam}`;
       const res = await fetch(url, {
         method: "POST",
         headers: {
@@ -228,7 +241,14 @@ import PageHeader from "../components/PageHeader.astro";
       const markdown = await res.text();
       $status.textContent = `HTTP ${res.status} OK`;
       $status.className = "text-small text-success";
-      $meta.textContent = `${totalSec}s · /api/${endpoint} · ${markdown.length}B`;
+      const recId = res.headers.get("X-Airtable-Record-Id");
+      const recErr = res.headers.get("X-Airtable-Error");
+      const persistMeta = recId
+        ? ` · 💾 Airtable: ${recId}`
+        : recErr
+          ? ` · ⚠️ Airtable error: ${recErr}`
+          : "";
+      $meta.textContent = `${totalSec}s · /api/${endpoint} · ${markdown.length}B${persistMeta}`;
       $result.className = "prose-zenkai min-h-[100px]";
       // marked.parse devuelve HTML escapado de raw HTML por default · ok para nuestro markdown
       const w = window as unknown as { marked: { parse: (md: string) => string } };
