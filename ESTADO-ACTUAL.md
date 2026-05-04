@@ -73,8 +73,17 @@
 - TestCase ahora soporta `expected.tier` y `expected.ruta_recomendada` para futuros casos
 - Assertions de costo flexibilizadas: `costo_operativo_mensual_USD >= 0` (era `> 0`) — $0/mes es legítimo en ECO con free tiers
 
-⏸️ **HARDENING PENDIENTE (no bloqueante)**
-- Clasificador (Haiku 4.5) muestra non-determinism en casos borderline sin tag: #8 CONSULTA y #9 ESCALADA fluctúan entre ✓ y ✗ (rate observado 7-10/10 en 3 corridas). No afecta el flujo principal porque la mayoría de inputs reales llevan tag explícito; el extractTag() en código garantiza determinismo cuando hay tag. Hardening posible: few-shot examples adicionales para esos 2 casos.
+⏸️ **HARDENING DEL CLASIFICADOR · INTENTADO 2026-05-04 · NO MOVIÓ AGUJA**
+Probé refinar el prompt del clasificador (2 ejemplos extra + sección "REVISIÓN FINAL" forzando self-check). 5 corridas dieron 8/9/8/8/10 (avg 8.6/10) vs baseline 7-10/10 sin cambios — sin mejora medible.
+
+Diagnóstico: Haiku 4.5 con `json_schema` tiene un bug estructural — el razonamiento puede ser correcto ("celda D✗ inviable", "patrón CONSULTA puro") pero el campo `tipo` se llena con otro enum. Prompt engineering no lo resuelve.
+
+Decisión: **aceptar 85-90% rate en path inferido**. Razones:
+- Inputs reales suelen llevar tag explícito → extractTag() en código garantiza 100%
+- Path inferido afecta sólo casos exploratorios (sandbox)
+- Cases #8 (CONSULTA Make) y #9 (ESCALADA budget) son los flakers persistentes — edge cases honestos
+
+Si en uso real cae mucho en path inferido, escalar a Sonnet 4.6 para el classifier (10× costo · ~$0.02/call · viola CLAUDE.md §1 pero justificable por accuracy). Documentado pero NO ejecutado.
 
 ⏸️ **PAUSADO: Fases 2-7** — empezar después de validar Fase 1 + Paths 2-3 en uso real
 
