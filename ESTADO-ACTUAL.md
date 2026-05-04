@@ -38,20 +38,27 @@
 ✅ **PATH 2 · HTTP ENDPOINTS LIVE EN PRODUCCIÓN**
 - `POST /api/clasificar` · Haiku 4.5 · ~3s · ~$0.002/call
 - `POST /api/protocolo` · Sonnet 4.6 · ~10-15s · ~$0.08/call
+- Ambos aceptan `?render=markdown` para devolver `text/markdown` (en lugar de JSON)
 - Auth: `Authorization: Bearer <ZENKAI_API_KEY>` (timing-safe compare)
 - Errores: 400 (input) · 401 (auth) · 405 (method) · 500 (LLM)
 - vercel.json en raíz · Vercel root cambiado de `panel/` a raíz del repo
 - Vercel Authentication: **DISABLED** (panel ahora público; API protegida por Bearer)
 - Commits: `c05e4eb` (código) + `42af759` (trigger redeploy env vars)
 
-⏸️ **PENDIENTE FASE 1 (post-v0.1)**
-- Página `/sandbox` en panel Astro para probar con UI (~1.5h · Path 3)
+✅ **PATH 3 · SANDBOX UI LIVE EN PRODUCCIÓN**
+- `https://zenkaibrain-git-main-mrhaxel26-sketchs-projects.vercel.app/sandbox`
+- Form interno: API key (localStorage del browser, no toca server) · radio endpoint · textarea input
+- Llama a `?render=markdown` y renderiza con `marked.js` (CDN · sin nuevas deps)
+- Loading state con timer · status HTTP + tiempo + size · errores muestran JSON del handler
+- Commit: `6c8ee44`
+
+⏸️ **PENDIENTE FASE 1 (post-v0.1 · refinements)**
 - Migrar render a "propuesta-ready" con branding ZENKAI (~30 min)
 - Anthropic prompt caching (bajar costo de $0.08 a ~$0.02 por call)
 - Caso de test ECO claro para validar que el modelo no tenga bias hacia PRO
-- Indexación: agregar `<meta name="robots" content="noindex">` al panel si querés evitar SEO
+- (Panel ya tiene `<meta robots noindex,nofollow>` desde antes · descartar de la lista)
 
-⏸️ **PAUSADO: Fases 2-7** — empezar después de validar Fase 1 en uso real
+⏸️ **PAUSADO: Fases 2-7** — empezar después de validar Fase 1 + Paths 2-3 en uso real
 
 ---
 
@@ -67,10 +74,11 @@
 
 ## QUÉ HACER EN LA NUEVA SESIÓN
 
-Path 2 cerrado. Opciones para continuar:
-1. **Path 3 — UI sandbox** en panel Astro: página `/sandbox` que llama al endpoint HTTP en lugar de duplicar lógica server-side. Convierte el panel en herramienta usable. ~1.5h.
-2. **Fase 2 — Airtable:** crear las 6 bases internas de ZENKAI y persistir cada call de `/api/protocolo` en `propuestas`. Empieza la trazabilidad real.
-3. **Refinements del protocolo:** prompt caching (-75% costo), caso de test ECO, render propuesta-ready visual.
+Paths 2-3 cerrados. Opciones para continuar:
+1. **Fase 2 — Airtable:** crear las 6 bases internas de ZENKAI y persistir cada call de `/api/protocolo` en `propuestas`. Empieza la trazabilidad real (cada propuesta queda guardada para análisis y follow-up).
+2. **Refinements del protocolo:** prompt caching (-75% costo · ~$0.08 → ~$0.02), caso de test ECO claro, render propuesta-ready con branding ZENKAI.
+3. **Fase 3 — Make:** workflows automatizados que consumen `/api/protocolo` desde leads entrantes. Requiere Fase 2 antes (trazabilidad).
+4. **Validación con cliente real:** usar el sandbox + protocolo para preparar la primera propuesta comercial. Es el "primer cliente cerrado" del objetivo 2026.
 
 **Smoke test de los endpoints (verificar que siguen vivos):**
 ```bash
@@ -79,6 +87,8 @@ curl -X POST https://zenkaibrain-git-main-mrhaxel26-sketchs-projects.vercel.app/
   -H "Content-Type: application/json" \
   -d '{"input":"[CLIENTE] Tengo una clínica..."}'
 ```
+
+**Sandbox UI:** `https://zenkaibrain-git-main-mrhaxel26-sketchs-projects.vercel.app/sandbox`
 
 Cuando una conexión se active, actualizar el frontmatter:
 ```yaml
