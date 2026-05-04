@@ -35,12 +35,21 @@
 - CLI: `npm run clasificar` · `npm run protocolo` · `npm run protocolo -- --json`
 - Función exportable: `protocolo(input)` desde `scripts/anthropic/protocolo.ts`
 
+✅ **PATH 2 · HTTP ENDPOINTS LIVE EN PRODUCCIÓN**
+- `POST /api/clasificar` · Haiku 4.5 · ~3s · ~$0.002/call
+- `POST /api/protocolo` · Sonnet 4.6 · ~10-15s · ~$0.08/call
+- Auth: `Authorization: Bearer <ZENKAI_API_KEY>` (timing-safe compare)
+- Errores: 400 (input) · 401 (auth) · 405 (method) · 500 (LLM)
+- vercel.json en raíz · Vercel root cambiado de `panel/` a raíz del repo
+- Vercel Authentication: **DISABLED** (panel ahora público; API protegida por Bearer)
+- Commits: `c05e4eb` (código) + `42af759` (trigger redeploy env vars)
+
 ⏸️ **PENDIENTE FASE 1 (post-v0.1)**
-- Exponer `protocolo()` como Vercel serverless function `/api/protocolo` (~1h)
-- Página `/sandbox` en panel Astro para probar con UI (~1.5h)
+- Página `/sandbox` en panel Astro para probar con UI (~1.5h · Path 3)
 - Migrar render a "propuesta-ready" con branding ZENKAI (~30 min)
 - Anthropic prompt caching (bajar costo de $0.08 a ~$0.02 por call)
 - Caso de test ECO claro para validar que el modelo no tenga bias hacia PRO
+- Indexación: agregar `<meta name="robots" content="noindex">` al panel si querés evitar SEO
 
 ⏸️ **PAUSADO: Fases 2-7** — empezar después de validar Fase 1 en uso real
 
@@ -48,19 +57,28 @@
 
 ## ENV VARS YA CONFIGURADAS EN VERCEL
 
-- `ANTHROPIC_API_KEY` ✓ (lista para Fase 1)
+- `ANTHROPIC_API_KEY` ✓ (en uso por `/api/clasificar` y `/api/protocolo`)
+- `ZENKAI_API_KEY` ✓ (Bearer token para auth de los endpoints · ver `.env.example`)
 - `AIRTABLE_TOKEN` ✓ (lista para Fase 2 · falta crear las bases y agregar `AIRTABLE_BASE_*`)
 
-**Importante:** ninguna de estas env vars se usa en el panel v1 actual (es estático puro). Quedan listas para cuando empiecen las Fases 1-7.
+**.env local** tiene los mismos valores · `.env.example` documenta cómo regenerar `ZENKAI_API_KEY`.
 
 ---
 
 ## QUÉ HACER EN LA NUEVA SESIÓN
 
-Fase 1 v0.1 está operativa. Para continuar, opciones:
-1. **Path 2 — Endpoint HTTP:** convertir `protocolo()` en Vercel serverless function `/api/protocolo`. Habilita Make/Airtable/landing para llamarlo. ~1h.
-2. **Path 3 — UI sandbox:** página `/sandbox` en panel Astro para probar con interfaz. Convierte el panel en herramienta usable. ~1.5h.
-3. **Fase 2 — Airtable:** crear las 6 bases internas de ZENKAI y persistir cada call de protocolo en `propuestas`. Empieza la trazabilidad.
+Path 2 cerrado. Opciones para continuar:
+1. **Path 3 — UI sandbox** en panel Astro: página `/sandbox` que llama al endpoint HTTP en lugar de duplicar lógica server-side. Convierte el panel en herramienta usable. ~1.5h.
+2. **Fase 2 — Airtable:** crear las 6 bases internas de ZENKAI y persistir cada call de `/api/protocolo` en `propuestas`. Empieza la trazabilidad real.
+3. **Refinements del protocolo:** prompt caching (-75% costo), caso de test ECO, render propuesta-ready visual.
+
+**Smoke test de los endpoints (verificar que siguen vivos):**
+```bash
+curl -X POST https://zenkaibrain-git-main-mrhaxel26-sketchs-projects.vercel.app/api/clasificar \
+  -H "Authorization: Bearer $ZENKAI_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"input":"[CLIENTE] Tengo una clínica..."}'
+```
 
 Cuando una conexión se active, actualizar el frontmatter:
 ```yaml
