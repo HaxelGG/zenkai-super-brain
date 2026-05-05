@@ -3,7 +3,7 @@ name: "Framer"
 slug: framer
 servicios_dependientes: []
 criticidad: media
-estado_conexion: pendiente
+estado_conexion: activo
 fase_conexion: 5
 ---
 
@@ -14,6 +14,19 @@ fase_conexion: 5
 **Plan recomendado:**
 - Pro: Mini ($15) o Basic ($25)
 - Premium: Pro ($40) o Business ($65) · custom Next.js si requiere más
+
+---
+
+## PROYECTO ACTIVO DE ZENKAI (interno · no de cliente)
+
+**Proyecto:** `Zenkai`
+**Editor:** https://framer.com/projects/Zenkai--Au6wxt8ezQ1Qj7tevWYd
+**Plan:** Basic ($15/mes USD · ver `FINANZAS · gastos` record `recW4rPlb9WfqWBmF`)
+**Custom domain:** zenkai.systems (en Hostinger · ver record `recEaBiSYlDVzWdG6`)
+**Uso:** mockups internos de ZENKAI + landing comercial pre-Vercel
+**Acceso:** únicamente Jordy (owner de la cuenta Framer)
+
+> Cuando se construyan landings de clientes, NO duplicar en este proyecto. Crear sitio en cuenta del cliente y dar acceso editor a ZENKAI (regla en sección "Cuenta de Framer" abajo).
 
 ---
 

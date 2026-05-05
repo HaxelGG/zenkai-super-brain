@@ -115,6 +115,18 @@ Si en uso real cae mucho en path inferido, escalar a Sonnet 4.6 para el classifi
 - Pendiente sector (5): manufactura · retail · startups · gobierno · ong
 - ⚠️ **TODO usuario:** agregar `AIRTABLE_BASE_LEGAL`, `AIRTABLE_BASE_FINANZAS`, `AIRTABLE_BASE_INMOBILIARIA` en Vercel env vars (Project Settings → Environment Variables) si llega a usarlas algún endpoint en producción. Hoy no hay endpoint que las consuma, así que es opcional hasta que se necesite.
 
+✅ **FINANZAS · BASELINE OPERATIVO SEMBRADO** (2026-05-05)
+- 8 records en `FINANZAS · gastos`: Vercel Hobby · Airtable Free · GitHub Free · Make Free · Anthropic API (placeholder) · **Claude Max $100** · **Framer Basic $15** · **Dominio zenkai.systems $40/año** (Hostinger · renueva 2027-05-04)
+- **Overhead operativo confirmado: $118.33/mes USD** ($100 Claude Max + $15 Framer + $3.33 dominio prorrateado)
+- **Trimestral: ~$355 USD** · **Piso §4 (×2): ~$710 USD** = baseline para sanity check al cotizar
+- ⚠️ Recurrentes: actualizar record `Anthropic API` el último día de cada mes con uso real desde `console.anthropic.com/settings/usage`
+- ⚠️ Recordatorio renovación dominio: 2027-04-20 (decidir renovar Hostinger o migrar a Cloudflare $25-30/año)
+
+✅ **CONEXIONES-FRAMER ACTIVADO** (2026-05-05)
+- `conexiones/conexiones-framer.md` · `estado_conexion: pendiente → activo`
+- Documentado proyecto activo: https://framer.com/projects/Zenkai--Au6wxt8ezQ1Qj7tevWYd (interno · NO duplicar para clientes)
+- Nota: Framer no publica MCP server. Si en el futuro hace falta automatización Claude ↔ Framer, requiere construir wrapper custom sobre Framer Plugin API (proyecto FORGE · no priorizado).
+
 ⏸️ **PAUSADO: Fases 3-7**
 - Fase 3: Make · webhook landing → crear Lead → /api/protocolo?persist=true&lead_id
 - Fases 4-7: WhatsApp Cloud API · Cal.com/Stripe · Docuseal/Notion/Drive · Sentry/BetterStack
