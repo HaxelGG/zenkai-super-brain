@@ -1,7 +1,7 @@
 # ESTADO ACTUAL · ZENKAI Super Cerebro
 ## Punto de continuación entre sesiones de Claude Code
 
-**Última sesión cerrada:** 2026-05-02 (sesión 3 · build del panel + deploy completo)
+**Última sesión cerrada:** 2026-05-05 (Fase 2.2 alcance A · LEGAL + FINANZAS + INMOBILIARIA conectadas)
 **Modo recomendado para continuar:** `claude --dangerously-skip-permissions` desde `C:\Users\jordy\Desktop\Kenzai Super Brain\`
 
 ---
@@ -105,8 +105,15 @@ Si en uso real cae mucho en path inferido, escalar a Sonnet 4.6 para el classifi
 - `client.ts` refactor: tipos `InternalBaseName` (7) + `SectorBaseName` (6 hechas, 5 pendientes) + helper genérico `getBase(name)`
 - Helper bonus `sectorToBaseName(sector)` mapea output del clasificador → base template (ej. "restaurantes" → "FOOD")
 - 6 sector bases creadas (Salud, Food, Ecommerce, Servicios, Educación, Inmobiliaria)
-- Pendiente del usuario: 6 internas (Operaciones, Finanzas, Marketing, Soporte, Equipo, Legal) + Inmobiliaria + 5 sector restantes (manufactura, retail, startups, gobierno, ong)
-- Cambio puramente scaffolding: no afecta runtime hasta que algo use las nuevas bases
+
+✅ **FASE 2.2 ALCANCE A · LEGAL + FINANZAS + INMOBILIARIA** (2026-05-05)
+- **LEGAL** creada (`appy9s8qJ9TP98HYS`) · 2 tablas: `contratos` (tipo NDA/MSA/SOW/SA · status borrador→firmado→expirado · valor_USD · documento attachments) + `templates_legales` (idioma es/en · version · archivo)
+- **FINANZAS** creada (`appyZf10t2OmfJvrp`) · 2 tablas: `gastos` (categoria AI APIs/Hosting/SaaS · proveedor enum Anthropic/Vercel/Airtable/etc · monto USD+COP · frecuencia · factura) + `ingresos` (cliente · monto · status cotizado→facturado→cobrado→perdido · metodo_pago Wompi/Stripe/PayU)
+- **INMOBILIARIA** conectada (`appjyT85koBY6odNk` · ya existía en Airtable, sólo faltaba env var) · cierra el bug latente del SECTOR_BASE_NAMES
+- 9/9 bases resuelven OK en smoke test de `getBase()`
+- Pendiente JIT (4 internas): OPERACIONES (primer cliente) · MARKETING (ARES en prod) · SOPORTE (ECHO en prod) · EQUIPO (>2 personas)
+- Pendiente sector (5): manufactura · retail · startups · gobierno · ong
+- ⚠️ **TODO usuario:** agregar `AIRTABLE_BASE_LEGAL`, `AIRTABLE_BASE_FINANZAS`, `AIRTABLE_BASE_INMOBILIARIA` en Vercel env vars (Project Settings → Environment Variables) si llega a usarlas algún endpoint en producción. Hoy no hay endpoint que las consuma, así que es opcional hasta que se necesite.
 
 ⏸️ **PAUSADO: Fases 3-7**
 - Fase 3: Make · webhook landing → crear Lead → /api/protocolo?persist=true&lead_id
@@ -122,15 +129,21 @@ Si en uso real cae mucho en path inferido, escalar a Sonnet 4.6 para el classifi
 - `AIRTABLE_TOKEN` ✓ (en uso por persistirPropuesta · Personal Access Token)
 - `AIRTABLE_BASE_VENTAS=appmiicsbFsvRfxQ9` ✓ (Fase 2 v0.1 · base de propuestas)
 
+**Disponibles en `.env` local pero NO sincronizadas a Vercel** (sólo `getBase("VENTAS")` se usa en producción hoy · agregar en Vercel cuando algún endpoint las consuma):
+- `AIRTABLE_BASE_LEGAL=appy9s8qJ9TP98HYS`
+- `AIRTABLE_BASE_FINANZAS=appyZf10t2OmfJvrp`
+- `AIRTABLE_BASE_INMOBILIARIA=appjyT85koBY6odNk`
+- `AIRTABLE_BASE_SALUD/FOOD/ECOMMERCE/SERVICIOS/EDUCACION` (sector templates)
+
 **.env local** tiene los mismos valores · `.env.example` documenta cómo regenerar `ZENKAI_API_KEY`.
 
 ---
 
 ## QUÉ HACER EN LA NUEVA SESIÓN
 
-Fases 2 + 2.1 cerradas. Opciones para continuar:
+Fases 2 + 2.1 + 2.2 (alcance A) cerradas. Opciones para continuar:
 1. **Fase 3 — Make:** workflow que recibe webhook de Tally/Typeform/landing → crea Lead en Airtable → llama a `/api/protocolo?persist=true&lead_id=recXXX` → propuesta queda guardada y linkeada al lead. Cero intervención humana hasta el HERMES-CLOSE. Es el primer flujo end-to-end realmente automatizado.
-2. **Fase 2.2 — más bases:** OPERACIONES (clientes_activos · proyectos) cuando haya primer cliente. FINANZAS cuando haya primera factura. Crecen con la operación.
+2. **Sembrar FINANZAS con gastos actuales:** registrar Anthropic API · Vercel · Airtable · GitHub (todos $0 hoy excepto Anthropic, que ya está cobrando por las llamadas a `/api/protocolo`). Da baseline para calcular costo operativo trimestral según fórmula §4 CLAUDE.md.
 3. **Validación con cliente real:** usar el sandbox para preparar tu primera propuesta comercial · linkeala a un Lead real en Airtable · seguimiento manual por ahora · camino al "primer cliente cerrado" del objetivo 2026.
 
 **Smoke test del pipeline completo (verificar que sigue vivo):**
