@@ -1,0 +1,57 @@
+---
+interface Props {
+  title?: string;
+  description?: string;
+  canonical?: string;
+  ogImage?: string;
+  lang?: string;
+}
+
+const {
+  title = 'ZENKAI · AI Growth Systems',
+  description = 'Digitalizamos tu empresa con IA. Más ventas, menos costos, procesos automatizados.',
+  ogImage = '/brand/og-image.png',
+  canonical = Astro.url.href,
+  lang = 'es',
+} = Astro.props;
+
+const organizationJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'ZENKAI Growth Systems',
+  url: 'https://zenkai.systems',
+  logo: 'https://zenkai.systems/brand/zenkai-logo-square.png',
+  email: 'hola@zenkai.systems',
+  areaServed: ['CO', 'ES', 'MX', 'AR', 'CL', 'PE'],
+  description:
+    'Digitalizamos empresas con inteligencia artificial. Desde una landing page hasta operación completa con IA.',
+};
+---
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="generator" content={Astro.generator} />
+
+<title>{title}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonical} />
+
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="icon" href="/favicon.ico" />
+
+<!-- Open Graph -->
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={ogImage} />
+<meta property="og:type" content="website" />
+<meta property="og:url" content={canonical} />
+<meta property="og:locale" content="es_ES" />
+<meta property="og:site_name" content="ZENKAI Growth Systems" />
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImage} />
+
+{/* TODO: replace zenkai-logo-square.png with actual square version (currently using horizontal as fallback) */}
+<script type="application/ld+json" set:html={JSON.stringify(organizationJsonLd)} />

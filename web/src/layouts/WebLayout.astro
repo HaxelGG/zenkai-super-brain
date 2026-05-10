@@ -1,0 +1,29 @@
+---
+import '@fontsource-variable/inter';
+import '@fontsource-variable/jetbrains-mono';
+import '../styles/tokens.css';
+import SeoHead from '../components/SeoHead.astro';
+import NavBar from '../components/NavBar.astro';
+import Footer from '../components/Footer.astro';
+import WhatsAppFloat from '../components/WhatsAppFloat.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  canonical?: string;
+  ogImage?: string;
+}
+const { title, description, canonical, ogImage } = Astro.props;
+---
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <SeoHead {title} {description} {canonical} {ogImage} />
+  </head>
+  <body class="antialiased">  <!-- bg + color heredados de tokens.css (dark theme por defecto) -->
+    <NavBar />
+    <main><slot /></main>
+    <Footer />
+    <WhatsAppFloat />
+  </body>
+</html>
