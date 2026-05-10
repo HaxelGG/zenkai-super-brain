@@ -29,7 +29,7 @@
 | 4 | Logo cuadrado (favicon) | disponible localmente · path por confirmar en Tarea 0.0 |
 | 5 | Email comercial | `hola@zenkai.systems` (Hostinger Starter Business Email · creado) |
 | 6 | WhatsApp E.164 | `+573226272302` (display: `+57 322 627 2302`) |
-| 7 | Cal.com event link | `https://cal.com/jordycapital-wwdnjm/30min` |
+| 7 | Cal.com event link | `https://cal.com/zenkai-growth-systems/strategy-call` |
 | 8 | Resend API key | en `.env` local + Vercel env vars |
 | 9 | Resend dominio | `zenkai.systems` verificado · Enable Sending ON · Receiving OFF |
 | 10 | DNS provider | Hostinger directo (Cloudflare diferido a Sprint 2) |
@@ -278,7 +278,7 @@ ZENKAI_NOTIFY_EMAIL=jordycapital@gmail.com
 ZENKAI_FROM_EMAIL=contacto@zenkai.systems
 PUBLIC_WA_NUMBER=573000000000
 PUBLIC_API_BASE=https://zenkaibrain-git-main-mrhaxel26-sketchs-projects.vercel.app
-PUBLIC_CALCOM_LINK=https://cal.com/jordy-zenkai/conversacion
+PUBLIC_CALCOM_LINK=https://cal.com/zenkai-growth-systems/strategy-call
 ```
 
 - [ ] **Step 7:** Commit:
@@ -958,7 +958,7 @@ git commit -m "feat(web): WhatsApp FAB con mensaje contextual por sector · Fase
   (function (C, A, L) { let p = function (a, ar) { a.q.push(ar); }; let d = C.document; C.Cal = C.Cal || function () {
     let cal = C.Cal; let ar = arguments; if (!cal.loaded) { cal.ns = {}; cal.q = cal.q || []; d.head.appendChild(d.createElement("script")).src = A; cal.loaded = true; } if (ar[0] === L) { const api = function () { p(api, arguments); }; const namespace = ar[1]; api.q = api.q || []; if(typeof namespace === "string"){cal.ns[namespace] = cal.ns[namespace] || api;p(cal.ns[namespace], ar);p(cal, ["initNamespace", namespace]);} else p(cal, ar); return;} p(cal, ar); }; })(window, "https://app.cal.com/embed/embed.js", "init");
   Cal("init", "conversacion", {origin:"https://cal.com"});
-  Cal.ns.conversacion("inline", { elementOrSelector:"#my-cal-inline", config: {"layout":"month_view"}, calLink: "jordy-zenkai/conversacion-estrategica" });
+  Cal.ns.conversacion("inline", { elementOrSelector:"#my-cal-inline", config: {"layout":"month_view"}, calLink: "zenkai-growth-systems/strategy-call" });
 </script>
 ```
 
