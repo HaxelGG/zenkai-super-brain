@@ -1122,19 +1122,48 @@ git add web
 git commit -m "perf(web): lighthouse polish · ≥90 en 4 categorías · Fase 5.2"
 ```
 
-### Tarea 5.3 · DNS Hostinger + custom domains Vercel (1h)
+### Tarea 5.3-pre · Domain swap orchestration · Vercel admin (30 min)
+
+**Bloqueante de Tarea 5.3.** Hoy el apex `zenkai.systems` está asignado al project `zenkaibrain` (panel interno). Vercel **rechaza** asignar el mismo apex a dos projects, así que hay que remover primero del panel antes de agregar a `zenkai-web`. Esta tarea hace solo el lado Vercel (admin de domains) — el DNS Hostinger se configura en 5.3.
+
+**Sin nuevos archivos. Vercel CLI o dashboard.**
+
+- [ ] **Step 1 — Remover apex del panel:** En Vercel, project `zenkaibrain` → Settings → Domains → Remove `zenkai.systems`. Confirmar que el panel sigue accesible vía su URL fallback `https://zenkaibrain-git-main-mrhaxel26-sketchs-projects.vercel.app/` (no debe haber downtime visible · el alias Vercel siempre responde).
+- [ ] **Step 2 — Agregar subdominio al panel:** project `zenkaibrain` → Add `panel.zenkai.systems`. Vercel mostrará un valor CNAME requerido (típicamente `cname.vercel-dns.com`) — **anotar exacto** para usar en 5.3 Step 2.
+- [ ] **Step 3 — Agregar apex a la landing:** project `zenkai-web` → Add `zenkai.systems`. Vercel mostrará uno o más A records requeridos (típicamente `76.76.21.21` u otro IP — Vercel decide en el momento) — **anotar exacto** para usar en 5.3 Step 1.
+- [ ] **Step 4 — Marcar Production:** project `zenkai-web` → marcar `zenkai.systems` como Production domain (sustituye al `*.vercel.app` temporal generado en Tarea 0.2). Opcional: agregar `www.zenkai.systems` como redirect a apex (Vercel lo configura solo · CNAME en DNS).
+- [ ] **Step 5 — Smoke check:** ambos projects en Vercel deben mostrar sus nuevos domains en estado "Invalid Configuration" (esperable hasta que DNS propague en 5.3) · ningún proyecto debe mostrar conflicto duplicado · panel sigue respondiendo en su URL Vercel.
+
+**Criterios de done:**
+- ✅ `zenkaibrain` ya no tiene `zenkai.systems` en su lista de domains
+- ✅ `zenkaibrain` tiene `panel.zenkai.systems` (estado pending DNS)
+- ✅ `zenkai-web` tiene `zenkai.systems` como Production (estado pending DNS)
+- ✅ Valores DNS exactos (A record para apex · CNAME para subdominio) anotados para 5.3
+- ✅ Panel sigue accesible vía URL fallback Vercel sin interrupción
+
+⚠️ **Crítico:** **NO ejecutar 5.3 (DNS Hostinger) hasta tener los valores exactos del Step 2 y Step 3 arriba**. Vercel puede rotar IPs o cambiar el CNAME — usar los valores que muestra hoy, no asumir.
+
+---
+
+### Tarea 5.3 · DNS Hostinger + propagación (30 min)
+
+**Pre: Tarea 5.3-pre completa** (los Add/Remove de Vercel ya están hechos · Steps 1, 3 y 4 originales quedan subsumidos por 5.3-pre).
 
 **Bloqueante:** acceso al panel Hostinger (usuario lo tiene · asistir si requiere apoyo).
 
-- [ ] **Step 1:** Vercel `zenkai-web` → Settings → Domains → Add `zenkai.systems` (apex). Vercel pedirá un A record o ALIAS/ANAME. Para apex en Hostinger, usar registros A: `76.76.21.21` (o los que Vercel indique en ese momento).
-- [ ] **Step 2:** Hostinger DNS panel:
-  - Tipo A · Host @ · Valor 76.76.21.21 · TTL 14400
-  - Tipo CNAME · Host www · Valor cname.vercel-dns.com · TTL 14400 (para `www.zenkai.systems` redirect)
-  - Tipo CNAME · Host panel · Valor cname.vercel-dns.com · TTL 14400 (para `panel.zenkai.systems`)
-- [ ] **Step 3:** Vercel `zenkai-web` → marcar `zenkai.systems` como Production · `www.zenkai.systems` como redirect a apex
-- [ ] **Step 4:** Vercel `zenkaibrain` → Settings → Domains → Add `panel.zenkai.systems`
-- [ ] **Step 5:** Esperar propagación (5-30min) · `dig zenkai.systems` debe responder con IP Vercel
-- [ ] **Step 6:** Verificar HTTPS válido (Vercel emite Let's Encrypt automático)
+- [ ] **Step 1 — Hostinger DNS panel:** usando los valores **exactos** anotados en 5.3-pre (Vercel puede rotar IPs · no asumir):
+  - Tipo A · Host @ · Valor `<IP que dio Vercel en 5.3-pre Step 3>` · TTL 14400 (para apex `zenkai.systems` → `zenkai-web`)
+  - Tipo CNAME · Host www · Valor `cname.vercel-dns.com` · TTL 14400 (redirect `www.zenkai.systems` → apex)
+  - Tipo CNAME · Host panel · Valor `<CNAME que dio Vercel en 5.3-pre Step 2>` (típico: `cname.vercel-dns.com`) · TTL 14400 (para `panel.zenkai.systems` → `zenkaibrain`)
+- [ ] **Step 2 — Esperar propagación** (5-30 min):
+
+```bash
+dig zenkai.systems +short          # debe devolver IP Vercel
+dig panel.zenkai.systems +short    # debe devolver alias cname.vercel-dns.com → IP Vercel
+```
+
+- [ ] **Step 3 — Verificar HTTPS válido** en ambos: `curl -sI https://zenkai.systems/` y `curl -sI https://panel.zenkai.systems/` deben retornar `200` con `strict-transport-security` header (Vercel emite Let's Encrypt automático tras propagación).
+- [ ] **Step 4 — Smoke check ambos sitios:** abrir en browser `https://zenkai.systems/` (debe servir landing default de Astro · contenido real llega en Fase 2) y `https://panel.zenkai.systems/` (debe servir el panel interno sin regresiones · auth Vercel intacta si está activa).
 
 ### Tarea 5.4 · setup-deploy + smoke production (45min)
 
@@ -1196,10 +1225,10 @@ git commit -m "docs: cerrar landing pública zenkai.systems v0.1 LIVE · Fase 5"
 | 2 · Secciones públicas | 2.1 - 2.8 | 9-11h | pending |
 | 3 · Formulario + integración API (incluye 3.7-pre · CVE) | 3.1 - 3.8 (+3.7-pre) | 8.5-10.5h | pending |
 | 4 · WhatsApp FAB + Cal.com | 4.1 - 4.4 | 3-4h | pending |
-| 5 · QA + Deploy producción | 5.1 - 5.5 | 3.5-4.5h | pending |
-| **TOTAL** | **29 tareas** | **32.5-40.5h** | **pending** |
+| 5 · QA + Deploy producción (incluye 5.3-pre · domain swap) | 5.1 - 5.5 (+5.3-pre) | 3.5-4.5h | pending |
+| **TOTAL** | **30 tareas** | **32.5-40.5h** | **pending** |
 
-Reducción de horas vs v1.0 (34-44h → 32.5-40.5h) viene de: assets + env ya confirmados (menos discovery en Fase 1 y 2) · DNS Hostinger directo sin Cloudflare en Fase 5. Compensado por +30min de Tarea 3.7-pre (mitigación CVE `@astrojs/vercel`).
+Reducción de horas vs v1.0 (34-44h → 32.5-40.5h) viene de: assets + env ya confirmados (menos discovery en Fase 1 y 2) · DNS Hostinger directo sin Cloudflare en Fase 5. Compensado por +30min de Tarea 3.7-pre (mitigación CVE `@astrojs/vercel`). Tarea 5.3-pre (domain swap orchestration) es neutra en tiempo: 30min nuevos + 5.3 simplificado de 1h a 30min.
 
 **Camino crítico:** Fase 0 → 1 → 2 (puede paralelizarse algo de 1.4 con 2.1) → 3 → 4 → 5. Fases 3 y 4 dependen de prerrequisitos del usuario (Resend, WA, Cal.com), pueden retrasarse si esos no están listos.
 
