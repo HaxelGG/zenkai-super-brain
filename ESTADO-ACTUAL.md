@@ -16,6 +16,7 @@
 - **Domain swap en Fase 5:** panel actual → `panel.zenkai.systems` · landing `zenkai-web` → apex `zenkai.systems` · panel sigue vivo, NO se elimina (orquestación en Tarea 5.3-pre)
 - **CVE pendiente:** `GHSA-mr6q-rp88-fx84` · mitigación en Tarea 3.7-pre · doc en `docs/security/2026-05-10-cve-astrojs-vercel-x-astro-path.md`
 - **Email comercial activo:** `hola@zenkai.systems` (Hostinger Starter Business · Resend dominio verified · Receiving OFF)
+- **TODO técnico:** sector hogar tiene `agentes_prioritarios` inferidos en `web/src/content/sectores/hogar.md`. Cuando se cree `sectores/hogar.md` raíz (Fase 2 o primer cliente del sector), sincronizar agentes y campos modulares.
 
 ---
 

@@ -13,8 +13,8 @@ features:
   - "Escalación automática a humano"
   - "2 voces clonadas"
   - "Capacitación 2h + revisión de logs primer mes"
-cta_label: "Hablar con un asesor"
-cta_action: "form"
+cta_label: "Agendar conversación"
+cta_action: "calcom"
 limitaciones: []
 tiempo_implementacion: "12 días"
 modulos_por_sector:
