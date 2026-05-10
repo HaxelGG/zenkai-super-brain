@@ -337,14 +337,122 @@ git commit -m "docs(web): registrar web/ en mapa de plataforma · Fase 0.3"
 - Tailwind preview muestra paleta índigo idéntica al panel
 - Lighthouse desktop home ≥ 95 en Performance, Accessibility, Best Practices, SEO
 
-### Tarea 1.1 · Design tokens + WebLayout (2h)
+### Tarea 1.1 · Design tokens + WebLayout (2.5-3h)
 
 **Files:**
 - Create: `web/src/styles/tokens.css`
 - Create: `web/src/layouts/WebLayout.astro`
 - Create: `web/src/components/SeoHead.astro`
 
-- [ ] **Step 1:** Copiar `panel/src/styles/tokens.css` a `web/src/styles/tokens.css` (mantiene paleta índigo, spacing, type scale). Importar en layout.
+- [ ] **Step 1:** Crear `web/src/styles/tokens.css` desde cero con design system propio de la landing pública. Paleta basada en el logo ZENKAI (dark + accent azul). **NO copiar del panel** — la landing tiene identidad visual independiente. Importar en layout (Step 3).
+
+  **Contenido completo del archivo (10 grupos de tokens · CSS custom properties bajo `:root`):**
+
+  ```css
+  :root {
+    /* === 1. Color · neutrales === */
+    --color-bg-base: #0A0A0A;          /* default page bg · evita fatiga visual del #000 puro */
+    --color-bg-elevated: #1A1A1A;       /* cards, modals, popovers */
+    --color-bg-subtle: #141414;         /* sections alternadas, fondos secundarios */
+    --color-border-default: #2A2A2A;
+    --color-border-subtle: #1F1F1F;
+    --color-text-primary: #FFFFFF;
+    --color-text-secondary: #B3B3B3;    /* subtítulos, body secundario */
+    --color-text-tertiary: #808080;     /* placeholders, labels deshabilitados */
+    --color-text-disabled: #4D4D4D;
+
+    /* === 2. Color · accent azul (variants del logo) === */
+    --color-accent-default: #1E6FFF;    /* botón primario, links, focus rings */
+    --color-accent-hover: #4A8AFF;      /* hover state */
+    --color-accent-active: #1556CC;     /* pressed state */
+    --color-accent-subtle: rgba(30, 111, 255, 0.08);   /* ~15% perceptual · fondos suaves de hover/selección */
+    --color-accent-glow: rgba(30, 111, 255, 0.25);     /* ~40% perceptual · shadows/glows del CTA */
+
+    /* === 3. Color · semánticos (validación en Fase 3) === */
+    --color-success: #10B981;
+    --color-success-subtle: rgba(16, 185, 129, 0.08);
+    --color-warning: #F59E0B;
+    --color-warning-subtle: rgba(245, 158, 11, 0.08);
+    --color-error: #EF4444;
+    --color-error-subtle: rgba(239, 68, 68, 0.08);
+
+    /* === 4. Typography === */
+    --font-sans: 'Inter Variable', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono Variable', monospace;
+    --text-xs: 0.75rem;     /* 12px · line-height 1rem */
+    --text-sm: 0.875rem;    /* 14px · line-height 1.25rem */
+    --text-base: 1rem;      /* 16px · line-height 1.5rem */
+    --text-lg: 1.125rem;    /* 18px · line-height 1.75rem */
+    --text-xl: 1.25rem;     /* 20px · line-height 1.75rem */
+    --text-2xl: 1.5rem;     /* 24px · line-height 2rem */
+    --text-3xl: 1.875rem;   /* 30px · line-height 2.25rem */
+    --text-4xl: 2.25rem;    /* 36px · line-height 2.5rem */
+    --text-5xl: 3rem;       /* 48px · line-height 1.1 */
+    --text-6xl: 3.75rem;    /* 60px · line-height 1.05 */
+    --text-7xl: 4.5rem;     /* 72px · line-height 1 · hero headline */
+    --font-weight-regular: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+
+    /* === 5. Spacing === */
+    --space-1: 0.25rem;    /* 4px */
+    --space-2: 0.5rem;     /* 8px */
+    --space-3: 0.75rem;    /* 12px */
+    --space-4: 1rem;       /* 16px */
+    --space-6: 1.5rem;     /* 24px */
+    --space-8: 2rem;       /* 32px */
+    --space-12: 3rem;      /* 48px */
+    --space-16: 4rem;      /* 64px */
+    --space-24: 6rem;      /* 96px */
+    --space-32: 8rem;      /* 128px */
+
+    /* === 6. Border radius === */
+    --radius-sm: 0.25rem;       /* 4px · inputs pequeños */
+    --radius-base: 0.5rem;      /* 8px · buttons, inputs, cards estándar */
+    --radius-lg: 0.75rem;       /* 12px · cards prominentes */
+    --radius-xl: 1rem;          /* 16px · modals */
+    --radius-full: 9999px;      /* FAB de WhatsApp, badges pill */
+
+    /* === 7. Shadows · dark-mode optimizadas === */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
+    --shadow-base: 0 4px 6px -1px rgba(0, 0, 0, 0.6), 0 2px 4px -1px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.7), 0 4px 6px -2px rgba(0, 0, 0, 0.5);
+    --shadow-glow-accent: 0 0 24px var(--color-accent-glow);   /* CTAs destacados */
+
+    /* === 8. Z-index scale === */
+    --z-base: 0;
+    --z-sticky: 10;             /* top nav */
+    --z-fab: 40;                /* WhatsApp FAB */
+    --z-modal-backdrop: 50;
+    --z-modal: 60;
+    --z-popover: 70;
+    --z-tooltip: 80;
+
+    /* === 9. Transitions === */
+    --duration-fast: 150ms;
+    --duration-base: 200ms;
+    --duration-slow: 300ms;
+    --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+    --ease-out: cubic-bezier(0.0, 0, 0.2, 1);
+
+    /* === 10. Breakpoints (referencia · Tailwind defaults) ===
+       sm: 640px · md: 768px · lg: 1024px · xl: 1280px · 2xl: 1536px
+       (declarados en tailwind.config.mjs · documentados acá para consistencia) */
+  }
+
+  /* Aplicar tokens base al body para que cualquier página herede el dark theme sin clases */
+  html, body {
+    background-color: var(--color-bg-base);
+    color: var(--color-text-primary);
+    font-family: var(--font-sans);
+  }
+  ```
+
+  **Notas de implementación:**
+  - Los `rgba()` de los `*-subtle` y `*-glow` reemplazan la notación de hex con alpha (`#1E6FFF15`) que algunos navegadores antiguos no soportan bien · perceptual equivalente a 8-15% / 25-40%.
+  - El bloque `html, body` al final garantiza dark theme por defecto sin necesidad de añadir clases en cada `<body>`.
+  - Tailwind puede consumir estos tokens vía `theme.extend.colors` en `tailwind.config.mjs` o como arbitrary values `bg-[var(--color-bg-base)]` (tarea separada en Fase 2 si hace falta uniformidad de utilidades).
 - [ ] **Step 2:** Crear `web/src/components/SeoHead.astro` con props `title`, `description`, `canonical?`, `ogImage?` que renderiza meta tags Open Graph + Twitter Card + canonical + JSON-LD Organization
 - [ ] **Step 3:** Crear `web/src/layouts/WebLayout.astro`:
 
@@ -371,7 +479,7 @@ const { title, description, canonical, ogImage } = Astro.props;
   <head>
     <SeoHead {title} {description} {canonical} {ogImage} />
   </head>
-  <body class="bg-white text-slate-900 antialiased">
+  <body class="antialiased">  <!-- bg + color heredados de tokens.css (dark theme por defecto) -->
     <NavBar />
     <main><slot /></main>
     <Footer />
@@ -1221,14 +1329,14 @@ git commit -m "docs: cerrar landing pública zenkai.systems v0.1 LIVE · Fase 5"
 | Fase | Tareas | Horas | Estado |
 |------|--------|-------|--------|
 | 0 · Setup monorepo `web/` (incluye 0.0 pre-flight) | 0.0 - 0.4 | 3.5-4.5h | pending |
-| 1 · Estructura Astro base | 1.1 - 1.4 | 5-7h | pending |
+| 1 · Estructura Astro base | 1.1 - 1.4 | 5.5-7.5h | pending |
 | 2 · Secciones públicas | 2.1 - 2.8 | 9-11h | pending |
 | 3 · Formulario + integración API (incluye 3.7-pre · CVE) | 3.1 - 3.8 (+3.7-pre) | 8.5-10.5h | pending |
 | 4 · WhatsApp FAB + Cal.com | 4.1 - 4.4 | 3-4h | pending |
 | 5 · QA + Deploy producción (incluye 5.3-pre · domain swap) | 5.1 - 5.5 (+5.3-pre) | 3.5-4.5h | pending |
-| **TOTAL** | **30 tareas** | **32.5-40.5h** | **pending** |
+| **TOTAL** | **30 tareas** | **33-41h** | **pending** |
 
-Reducción de horas vs v1.0 (34-44h → 32.5-40.5h) viene de: assets + env ya confirmados (menos discovery en Fase 1 y 2) · DNS Hostinger directo sin Cloudflare en Fase 5. Compensado por +30min de Tarea 3.7-pre (mitigación CVE `@astrojs/vercel`). Tarea 5.3-pre (domain swap orchestration) es neutra en tiempo: 30min nuevos + 5.3 simplificado de 1h a 30min.
+Reducción vs v1.0 (34-44h → 33-41h) viene de: assets + env ya confirmados (menos discovery en Fase 1 y 2) · DNS Hostinger directo sin Cloudflare en Fase 5. Compensado por +30min de Tarea 3.7-pre (mitigación CVE `@astrojs/vercel`) y +30min en Tarea 1.1 (design system propio · scope completo de tokens en vez de copy del panel). Tarea 5.3-pre (domain swap orchestration) es neutra: 30min nuevos + 5.3 simplificado de 1h a 30min.
 
 **Camino crítico:** Fase 0 → 1 → 2 (puede paralelizarse algo de 1.4 con 2.1) → 3 → 4 → 5. Fases 3 y 4 dependen de prerrequisitos del usuario (Resend, WA, Cal.com), pueden retrasarse si esos no están listos.
 
