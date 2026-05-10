@@ -13,7 +13,7 @@
 - **Fase actual:** Fase 0 cerrada · Fase 1 lista para arrancar
 - **Project Vercel:** `zenkai-web` (`prj_Ct9A96VniiBmECzUTeaNgTGFuSr7` · team `mrhaxel26-sketchs-projects`)
 - **URL temporal Vercel:** `https://zenkai-web-rho.vercel.app`
-- **Dominio production planeado:** `zenkai.systems` (apex · swap en Tarea 5.3-pre)
+- **Domain swap en Fase 5:** panel actual → `panel.zenkai.systems` · landing `zenkai-web` → apex `zenkai.systems` · panel sigue vivo, NO se elimina (orquestación en Tarea 5.3-pre)
 - **CVE pendiente:** `GHSA-mr6q-rp88-fx84` · mitigación en Tarea 3.7-pre · doc en `docs/security/2026-05-10-cve-astrojs-vercel-x-astro-path.md`
 - **Email comercial activo:** `hola@zenkai.systems` (Hostinger Starter Business · Resend dominio verified · Receiving OFF)
 
