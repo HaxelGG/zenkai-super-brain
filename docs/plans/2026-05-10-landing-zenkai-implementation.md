@@ -823,6 +823,82 @@ git add web/src/lib/ratelimit.ts web/tests/ratelimit.test.ts
 git commit -m "feat(web): rate limit 5/IP/h vía Airtable · Fase 3.6"
 ```
 
+### Tarea 3.7-pre · Mitigación CVE `x-astro-path` · middleware (30min)
+
+**Bloqueante de Tarea 3.7.** Debe estar mergeada **antes** de crear `/api/lead.ts` (primer endpoint serverless del adapter Vercel · abre la ventana de exposición de la CVE).
+
+**Files:**
+- Create: `web/src/middleware.ts`
+- Create: `web/tests/middleware.test.ts`
+
+**Contexto:** `@astrojs/vercel ^8.0.0` tiene CVE [GHSA-mr6q-rp88-fx84](https://github.com/advisories/GHSA-mr6q-rp88-fx84) (HIGH · CVSS 6.5) que permite override de path interno vía header `x-astro-path`. v10 parchea pero exige Astro 6 (no stable). Decisión documentada: aceptar v8 + middleware. Ver `docs/security/2026-05-10-cve-astrojs-vercel-x-astro-path.md`.
+
+- [ ] **Step 1:** Crear `web/src/middleware.ts` que strippea ambos headers en TODAS las requests:
+
+```ts
+// Mitigación CVE GHSA-mr6q-rp88-fx84 · @astrojs/vercel <10.0.2
+// Ver: docs/security/2026-05-10-cve-astrojs-vercel-x-astro-path.md
+import { defineMiddleware } from 'astro:middleware';
+
+export const onRequest = defineMiddleware(async (context, next) => {
+  const sanitized = new Headers(context.request.headers);
+  sanitized.delete('x-astro-path');
+  sanitized.delete('x_astro_path');
+  // Reemplazar el request con headers limpios para que el adapter no lea el header malicioso
+  context.request = new Request(context.request.url, {
+    method: context.request.method,
+    headers: sanitized,
+    body: context.request.body,
+    redirect: context.request.redirect,
+  });
+  return next();
+});
+```
+
+- [ ] **Step 2:** Crear `web/tests/middleware.test.ts` que verifica el strip:
+
+```ts
+import { describe, it, expect } from 'vitest';
+import { onRequest } from '../src/middleware';
+
+describe('middleware · CVE x-astro-path mitigation', () => {
+  it('elimina header x-astro-path antes de llamar next()', async () => {
+    const req = new Request('http://localhost/test', {
+      headers: { 'x-astro-path': '/api/admin', 'content-type': 'application/json' },
+    });
+    let observed: Headers | null = null;
+    const next = async () => { observed = req.headers; return new Response('ok'); };
+    await onRequest({ request: req } as any, next);
+    expect(observed?.get('x-astro-path')).toBeNull();
+    expect(observed?.get('content-type')).toBe('application/json');
+  });
+
+  it('elimina variante x_astro_path también', async () => {
+    const req = new Request('http://localhost/test', { headers: { 'x_astro_path': '/api/admin' } });
+    let observed: Headers | null = null;
+    const next = async () => { observed = req.headers; return new Response('ok'); };
+    await onRequest({ request: req } as any, next);
+    expect(observed?.get('x_astro_path')).toBeNull();
+  });
+});
+```
+
+- [ ] **Step 3:** `npm run test` debe pasar 2/2 tests del middleware
+- [ ] **Step 4:** Commit:
+
+```bash
+git add web/src/middleware.ts web/tests/middleware.test.ts
+git commit -m "security(web): middleware mitigación CVE x-astro-path · Tarea 3.7-pre"
+```
+
+**Criterios de done:**
+- ✅ `web/src/middleware.ts` existe y filtra `x-astro-path` + `x_astro_path` en todas las requests
+- ✅ Tests `middleware.test.ts` pasan 2/2 (ambas variantes del header)
+- ✅ Comentario en `middleware.ts` apunta al doc en `docs/security/2026-05-10-cve-astrojs-vercel-x-astro-path.md`
+- ✅ Commit creado · sin push (push se decide en checkpoint normal)
+
+---
+
 ### Tarea 3.7 · Endpoint /api/lead.ts (2h)
 
 **Files:**
@@ -1118,12 +1194,12 @@ git commit -m "docs: cerrar landing pública zenkai.systems v0.1 LIVE · Fase 5"
 | 0 · Setup monorepo `web/` (incluye 0.0 pre-flight) | 0.0 - 0.4 | 3.5-4.5h | pending |
 | 1 · Estructura Astro base | 1.1 - 1.4 | 5-7h | pending |
 | 2 · Secciones públicas | 2.1 - 2.8 | 9-11h | pending |
-| 3 · Formulario + integración API | 3.1 - 3.8 | 8-10h | pending |
+| 3 · Formulario + integración API (incluye 3.7-pre · CVE) | 3.1 - 3.8 (+3.7-pre) | 8.5-10.5h | pending |
 | 4 · WhatsApp FAB + Cal.com | 4.1 - 4.4 | 3-4h | pending |
 | 5 · QA + Deploy producción | 5.1 - 5.5 | 3.5-4.5h | pending |
-| **TOTAL** | **28 tareas** | **32-40h** | **pending** |
+| **TOTAL** | **29 tareas** | **32.5-40.5h** | **pending** |
 
-Reducción de horas vs v1.0 (34-44h → 32-40h) viene de: assets + env ya confirmados (menos discovery en Fase 1 y 2) · DNS Hostinger directo sin Cloudflare en Fase 5.
+Reducción de horas vs v1.0 (34-44h → 32.5-40.5h) viene de: assets + env ya confirmados (menos discovery en Fase 1 y 2) · DNS Hostinger directo sin Cloudflare en Fase 5. Compensado por +30min de Tarea 3.7-pre (mitigación CVE `@astrojs/vercel`).
 
 **Camino crítico:** Fase 0 → 1 → 2 (puede paralelizarse algo de 1.4 con 2.1) → 3 → 4 → 5. Fases 3 y 4 dependen de prerrequisitos del usuario (Resend, WA, Cal.com), pueden retrasarse si esos no están listos.
 
