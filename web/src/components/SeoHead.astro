@@ -5,6 +5,7 @@ interface Props {
   canonical?: string;
   ogImage?: string;
   lang?: string;
+  noindex?: boolean;
 }
 
 const {
@@ -13,6 +14,7 @@ const {
   ogImage = '/brand/og-image.png',
   canonical = Astro.url.href,
   lang = 'es',
+  noindex = false,
 } = Astro.props;
 
 const organizationJsonLd = {
@@ -34,6 +36,7 @@ const organizationJsonLd = {
 <title>{title}</title>
 <meta name="description" content={description} />
 <link rel="canonical" href={canonical} />
+{noindex && <meta name="robots" content="noindex, nofollow" />}
 
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 <link rel="icon" href="/favicon.ico" />

@@ -1,0 +1,42 @@
+---
+import WebLayout from '../layouts/WebLayout.astro';
+---
+<WebLayout
+  title="Página no encontrada · ZENKAI"
+  description="La página que buscás no existe. Volvé al inicio."
+  noindex={true}
+>
+  <main class="not-found">
+    <h1>Página no encontrada</h1>
+    <p>La URL que ingresaste no corresponde a ninguna página de zenkai.systems.</p>
+    <a href="/">← Volver al inicio</a>
+  </main>
+</WebLayout>
+
+<style>
+  .not-found {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: var(--space-24) var(--space-6);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+  .not-found h1 {
+    font-size: var(--text-3xl);
+    margin: 0;
+  }
+  .not-found p {
+    color: var(--color-text-secondary);
+    margin: 0;
+  }
+  .not-found a {
+    color: var(--color-accent-default);
+    text-decoration: none;
+    font-weight: var(--font-weight-medium);
+    transition: color var(--duration-base) var(--ease-default);
+  }
+  .not-found a:hover {
+    color: var(--color-accent-hover);
+  }
+</style>

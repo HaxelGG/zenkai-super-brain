@@ -39,3 +39,18 @@ Cualquier cambio en `web/` no debe afectar `panel/` ni `api/`.
 
 - Spec de diseno: `docs/specs/2026-05-05-landing-zenkai-design.md`
 - Plan de implementacion: `docs/plans/2026-05-10-landing-zenkai-implementation.md`
+
+## Troubleshooting
+
+### Build emite "Duplicate id" warning después de editar content collection
+
+Causa: cache pollution en `.astro/` por cambio de glob loader entre estado viejo y nuevo del archivo.
+
+Fix:
+
+~~~bash
+rm -rf web/.astro web/dist
+npm run build
+~~~
+
+Documentado tras quirk capturado en Fase 1.2 (commit `e8d4def`).

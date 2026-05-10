@@ -12,13 +12,14 @@ interface Props {
   description: string;
   canonical?: string;
   ogImage?: string;
+  noindex?: boolean;
 }
-const { title, description, canonical, ogImage } = Astro.props;
+const { title, description, canonical, ogImage, noindex } = Astro.props;
 ---
 <!DOCTYPE html>
 <html lang="es">
   <head>
-    <SeoHead {title} {description} {canonical} {ogImage} />
+    <SeoHead {title} {description} {canonical} {ogImage} {noindex} />
   </head>
   <body class="antialiased">  <!-- bg + color heredados de tokens.css (dark theme por defecto) -->
     <NavBar />

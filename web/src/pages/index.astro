@@ -1,10 +1,67 @@
 ---
 import WebLayout from '../layouts/WebLayout.astro';
+import TierCard from '../components/TierCard.astro';
+import SectorCard from '../components/SectorCard.astro';
+import { getCollection } from 'astro:content';
+
+const tiersRaw = await getCollection('tiers');
+const tiers = tiersRaw.sort((a, b) => a.data.precio_USD - b.data.precio_USD);
+
+const sectoresRaw = await getCollection('sectores');
+const sectores = sectoresRaw.sort((a, b) => a.data.prioridad - b.data.prioridad);
 ---
 <WebLayout
   title="ZENKAI · AI Growth Systems"
   description="Digitalizamos tu empresa con IA. Más ventas, menos costos, procesos automatizados."
 >
-  <h1>ZENKAI Growth Systems</h1>
-  <p>Landing pública en construcción · Fase 1.1.</p>
+  <section class="hero">
+    <h1>ZENKAI · AI Growth Systems</h1>
+    <p>Digitalizamos tu empresa con IA. Más ventas, menos costos, procesos automatizados.</p>
+  </section>
+
+  <section class="planes">
+    <h2>Planes</h2>
+    <div class="tiers-grid">
+      {tiers.map((tier) => <TierCard tier={tier} />)}
+    </div>
+  </section>
+
+  <section class="sectores">
+    <h2>Sectores</h2>
+    <div class="sectores-grid">
+      {sectores.map((sector) => <SectorCard sector={sector} />)}
+    </div>
+  </section>
 </WebLayout>
+
+<style>
+  section {
+    padding: var(--space-12) var(--space-6);
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .hero h1 {
+    font-size: var(--text-4xl);
+    margin: 0 0 var(--space-4);
+  }
+  .hero p {
+    font-size: var(--text-lg);
+    color: var(--color-text-secondary);
+    margin: 0;
+  }
+  .planes h2,
+  .sectores h2 {
+    font-size: var(--text-2xl);
+    margin: 0 0 var(--space-8);
+  }
+  .tiers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: var(--space-6);
+  }
+  .sectores-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: var(--space-4);
+  }
+</style>
