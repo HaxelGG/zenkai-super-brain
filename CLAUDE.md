@@ -244,7 +244,8 @@ Kenzai Super Brain/
 │   └── _template-cliente/   ← plantilla a copiar para cada cliente nuevo
 ├── finanzas/                ← calculadora + stacks + proyección
 ├── sops/                    ← procedimientos operativos estándar
-└── conexiones/              ← integraciones (Make · Airtable · WA · Framer)
+├── conexiones/              ← integraciones (Make · Airtable · WA · Framer)
+└── web/                     ← landing pública zenkai.systems · Astro 5 + Tailwind · proyecto Vercel separado zenkai-web
 ```
 
 ---
@@ -281,7 +282,7 @@ ZENKAI **no reemplaza** los skills del plugin `superpowers`. Los integra. Mapeo 
 | Ubicación | Pereira, Risaralda, Colombia |
 | Equipo | 2 personas (Growth + Sistema) |
 | Objetivo 2026 | $100,000 USD facturados antes de diciembre |
-| Stack activo | Claude Max · Airtable · Make · Framer · Shopify · VS Code · Gemini |
+| Stack activo | Claude Max · Airtable · Make · Shopify · VS Code · Gemini · Resend · Cal.com |
 | Mercados | Colombia/LATAM · España/Europa · USA/Canadá |
 | Nicho fase 1 | E-commerce |
 | Nicho fase 2 (mes 4+) | Clínicas & Salud |

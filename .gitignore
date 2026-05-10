@@ -30,3 +30,8 @@ build/
 
 # Superpowers · sesiones de brainstorming visual (mockups locales · no commitear)
 .superpowers/
+
+# Web pública (zenkai.systems)
+web/dist/
+web/.vercel/
+web/.astro/

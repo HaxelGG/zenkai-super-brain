@@ -1,8 +1,21 @@
 # ESTADO ACTUAL · ZENKAI Super Cerebro
 ## Punto de continuación entre sesiones de Claude Code
 
-**Última sesión cerrada:** 2026-05-05 (Fase 2.2 alcance A · LEGAL + FINANZAS + INMOBILIARIA conectadas)
+**Última sesión cerrada:** 2026-05-10 (Landing pública · Fase 0 cerrada — scaffolding web/ + Vercel project zenkai-web)
 **Modo recomendado para continuar:** `claude --dangerously-skip-permissions` desde `C:\Users\jordy\Desktop\Kenzai Super Brain\`
+
+---
+
+## 🚧 EN CURSO · LANDING PÚBLICA zenkai.systems
+
+- **Spec:** `docs/specs/2026-05-05-landing-zenkai-design.md` (commit `c87e538`)
+- **Plan:** `docs/plans/2026-05-10-landing-zenkai-implementation.md` (30 tareas · 32.5-40.5h · v1.1)
+- **Fase actual:** Fase 0 cerrada · Fase 1 lista para arrancar
+- **Project Vercel:** `zenkai-web` (`prj_Ct9A96VniiBmECzUTeaNgTGFuSr7` · team `mrhaxel26-sketchs-projects`)
+- **URL temporal Vercel:** `https://zenkai-web-rho.vercel.app`
+- **Dominio production planeado:** `zenkai.systems` (apex · swap en Tarea 5.3-pre)
+- **CVE pendiente:** `GHSA-mr6q-rp88-fx84` · mitigación en Tarea 3.7-pre · doc en `docs/security/2026-05-10-cve-astrojs-vercel-x-astro-path.md`
+- **Email comercial activo:** `hola@zenkai.systems` (Hostinger Starter Business · Resend dominio verified · Receiving OFF)
 
 ---
 
@@ -244,7 +257,7 @@ Esto refresca automáticamente `/conexiones` y los KPIs de `/rendimiento` y Home
 ## STACK ACTUAL
 
 - **Hosting:** GitHub (privado) → Vercel team `mrhaxel26-sketchs-projects` (Hobby)
-- **Stack actual:** Eco · $0/mes
+- **Stack actual:** Eco · ~$2.20 USD/mes ($0 Vercel + $2.20 Hostinger Email)
 - **Clientes activos:** 0
 - **Facturado 2026:** $0 / objetivo $100K USD
 - **Próximo hito:** primer cliente cerrado · activar Fase 1 (Claude API) y Fase 2 (Airtable) en paralelo
