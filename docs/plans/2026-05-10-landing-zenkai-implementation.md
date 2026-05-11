@@ -658,140 +658,156 @@ git commit -m "feat(web): env tipado con Zod · Fase 1.4"
 
 ---
 
-# FASE 2 · Secciones públicas (10-12h)
+# FASE 2 · Transformación visual a landing comercial (12-15h · v1.2)
 
-**Objetivo:** Las 12 páginas estáticas del sitio renderizan con copy real, responsive perfect en mobile/tablet/desktop, contenido de tiers y sectores se lee de las collections.
+**Spec extendido:** `docs/specs/2026-05-11-fase2-landing-visual-design.md` (criterios de éxito · referencias · decisiones · riesgos).
 
-**Criterios de done global:**
-- 12 páginas renderan: home + 8 sectores + planes + gracias + conversacion + 404
-- `npm run build` produce 12 HTMLs en `dist/`
-- En browse skill, screenshot de home en mobile (375px), tablet (768px), desktop (1440px) sin overflow
-- Lighthouse mobile ≥ 90 en Performance/Accessibility/SEO
+**Objetivo:** transformar la landing de **placeholder técnico** (Fase 1 deployed en `zenkai-web-rho.vercel.app`) a **landing comercial que convierte** visitantes en leads calificados. Identidad visual real · storytelling · jerarquía de tiers · proof de capacidad · copy validado por el usuario.
 
-### Tarea 2.1 · NavBar + Footer (1h)
+**Criterios de done global** (ver spec §1 para detalle):
+1. Visitante random entiende qué hace ZENKAI en <8s (test con 3 personas)
+2. Landing transmite "agencia más avanzada de IA en LATAM/España"
+3. Lite + Starter visualmente dominantes vs Growth/Pro/Enterprise
+4. Cada sección lleva al siguiente nivel de compromiso emocional (no listas planas)
+5. Proof de capacidad técnica visible (panel · 12 agentes · stack)
+6. Lighthouse mobile + desktop ≥ 90 en las 4 métricas · LCP < 2.0s
+7. WCAG AA · navegación por teclado · contraste ≥ 4.5:1
 
-**Files:**
-- Modify: `web/src/components/NavBar.astro`
-- Modify: `web/src/components/Footer.astro`
+**Bloqueantes pre-dispatch** (ver spec §6):
+- ⏸️ Copy validado de los 8 sectores (`dolor_principal`, `copy_corto`, `copy_largo`) → bloquea Tareas 2.3 y 2.7
+- ⏸️ Copy validado del hero (1 frase + sub-frase) → bloquea Tarea 2.1
+- ⏸️ Decisión paleta extendida (color secundario al accent `#1E6FFF`) → bloquea Tarea 2.1
+- ⏸️ Decisión librería de iconos (Lucide recomendado vs Heroicons vs Tabler) → bloquea Tarea 2.3
+- ⏸️ Decisión animaciones (Motion lib vs CSS puro) → bloquea Tarea 2.8
 
-- [ ] **Step 1:** NavBar sticky top con logo (placeholder SVG si item #1 no llegó) + links: Inicio · Planes · Sectores ▾ (dropdown con los 8) · Conversación · CTA "Empezar" (scroll-link al form en home). Mobile = hamburger menu
-- [ ] **Step 2:** Footer 3 columnas: marca + tagline · enlaces (Planes, Sectores, Política privacidad, Términos) · contacto (WA, email, ubicación Pereira). Cuarta columna pequeña con créditos "Construido con `/api/protocolo`" linkeando a panel
-- [ ] **Step 3:** Commit:
-
-```bash
-git add web/src/components/NavBar.astro web/src/components/Footer.astro
-git commit -m "feat(web): NavBar sticky + Footer 3 cols · Fase 2.1"
-```
-
-### Tarea 2.2 · Hero + ProofSection (1.5h)
+### Tarea 2.1 · Hero + NavBar reales (2h)
 
 **Files:**
+- Modify: `web/src/components/NavBar.astro` (reemplaza stub Fase 1.1)
 - Create: `web/src/components/Hero.astro`
-- Create: `web/src/components/ProofSection.astro`
+- Modify: `web/src/pages/index.astro` (integra Hero · saca el `<section class="hero">` actual)
 
-- [ ] **Step 1:** `Hero.astro` con headline §9 ("Tu negocio en internet en 7 días. IA, agenda, WhatsApp, ads. Empezás por $300."), subheadline 1 frase, dos CTAs (primario form scroll, secundario WhatsApp `wa.me/<num>`), badge "3 cupos abiertos · primeros 30 con descuento de fundador"
-- [ ] **Step 2:** `ProofSection.astro` con los 3 bullets §9 ("/api/protocolo genera tu propuesta automática · 12 agentes especializados · Panel operativo en zenkaibrain.vercel.app") · cada uno linkeable
-- [ ] **Step 3:** Commit:
+- [ ] **Step 1 — NavBar sticky real:** logo (`/brand/zenkai-logo-horizontal.png` ya en repo · usar `<img>` con `alt`) + links (Inicio · Planes · Sectores ▾ dropdown · Cómo trabajamos · Conversación) + CTA "Empezar" scroll-link al form. Mobile: hamburger menu funcional con `<details>`/`<summary>` o JS minimal.
+- [ ] **Step 2 — Hero real:** headline + sub-headline (copy validado · bloqueante) · 2 CTAs (primario form scroll · secundario WhatsApp `wa.me/<num>` desde env var) · elemento visual de impacto (decisión §4.5 del spec: animación sutil CSS · gradient animado · o demo de producto tipo typing).
+- [ ] **Step 3 — Decisión paleta extendida:** si el usuario aprobó color secundario, agregar tokens en `tokens.css` (ej `--color-accent-secondary: #...`) y documentar uso. Si no, dejar tal cual.
+- [ ] **Step 4 — Mobile QA:** hamburger menu funciona · hero responsive sin overflow.
+- [ ] **Step 5:** Commit `feat(web): NavBar sticky + Hero real · Fase 2.1`
 
-```bash
-git add web/src/components/Hero.astro web/src/components/ProofSection.astro
-git commit -m "feat(web): Hero + ProofSection · Fase 2.2"
-```
-
-### Tarea 2.3 · TierCard + TierDetail (2h)
+### Tarea 2.2 · Sección Tiers rediseñada (1.5h)
 
 **Files:**
-- Create: `web/src/components/TierCard.astro`
-- Create: `web/src/components/TierDetail.astro`
+- Modify: `web/src/components/TierCard.astro` (agregar variante `compact`)
+- Create: `web/src/components/TiersSection.astro`
+- Modify: `web/src/pages/index.astro` (reemplaza `<section class="planes">` actual)
 
-- [ ] **Step 1:** `TierCard.astro` recibe prop `tier` (de la collection) · render compacto: nombre, precio setup + mensual, public objetivo, CTA según `cta_tipo`. Variante visual `destacado=true` (Lite, Starter) usa borde/sombra; `cta_tipo=agendar` (Pro, Enterprise) usa CTA "agendar conversación"
-- [ ] **Step 2:** `TierDetail.astro` para sección expandida del Lite (la única que aparece al detalle en home según wireframe §8): renderiza todos los `incluye`, los 8 módulos por sector en grid, el SOP de 5 días, margen visible
-- [ ] **Step 3:** Commit:
+- [ ] **Step 1 — Decisión formato:** elegir (a) 2+3 split · (b) Toggle "Para empezar/Para escalar" · (c) Tabla comparativa con highlight. Justificar en commit message.
+- [ ] **Step 2 — TierCard variante:** agregar prop `variant: 'default' | 'compact'` · variante compact usado para Growth/Pro/Enterprise en formato (a) o (b).
+- [ ] **Step 3 — TiersSection:** implementa el layout elegido · Lite + Starter perceptiblemente dominantes (tamaño, peso visual, contraste, posición).
+- [ ] **Step 4 — Verificar criterio §1 punto 3:** screenshot del fold en desktop muestra jerarquía visual clara.
+- [ ] **Step 5:** Commit `feat(web): TiersSection con jerarquía visual · Fase 2.2`
 
-```bash
-git add web/src/components/TierCard.astro web/src/components/TierDetail.astro
-git commit -m "feat(web): TierCard + TierDetail · Fase 2.3"
-```
+### Tarea 2.3 · Sección Sectores con iconos SVG + copy real (1.5h)
 
-### Tarea 2.4 · SectorGrid + SectorCard (1h)
-
-**Files:**
-- Create: `web/src/components/SectorGrid.astro`
-- Create: `web/src/components/SectorCard.astro`
-
-- [ ] **Step 1:** `SectorGrid.astro` recibe `sectores` de la collection · grid 4×2 desktop, 2×4 tablet, 1×8 mobile
-- [ ] **Step 2:** `SectorCard.astro` muestra `icono`, `nombre`, `dolor_principal` truncado · link a `/sectores/<slug>`
-- [ ] **Step 3:** Commit:
-
-```bash
-git add web/src/components/SectorGrid.astro web/src/components/SectorCard.astro
-git commit -m "feat(web): SectorGrid + SectorCard · Fase 2.4"
-```
-
-### Tarea 2.5 · Página index completa (2h)
+**Bloqueante:** copy real de los 8 sectores aprobado por el usuario (`dolor_principal`, `copy_corto`).
 
 **Files:**
+- Modify: `web/src/components/SectorCard.astro` (icono SVG real + copy)
+- Modify (×8): `web/src/content/sectores/*.md` (reemplazar TODOs con copy real)
+- Possibly install: `astro-icon` + `@iconify-json/lucide` (o `lucide-static`)
+
+- [ ] **Step 1 — Decisión librería iconos:** elegir Lucide (recomendado · nombres ya en frontmatter) vs Heroicons vs Tabler. Instalar dependencia.
+- [ ] **Step 2 — SectorCard:** reemplazar `<span>` con string literal por componente SVG real. Mantener prop `aria-hidden="true"` cuando el icono es decorativo.
+- [ ] **Step 3 — Copy real:** actualizar los 8 archivos `web/src/content/sectores/*.md` reemplazando `dolor_principal` y `copy_corto` TODO con copy validado (`copy_largo` se mantiene TODO hasta Tarea 2.7).
+- [ ] **Step 4 — Verificar build:** Zod schemas aceptan los strings reales · `npm run build` verde.
+- [ ] **Step 5:** Commit `feat(web): sectores con iconos SVG + copy real (preview) · Fase 2.3`
+
+### Tarea 2.4 · Sección "Cómo trabajamos" (1.5h)
+
+**Files:**
+- Create: `web/src/components/ProcessSteps.astro`
+- Modify: `web/src/pages/index.astro` (agrega sección después de Sectores)
+
+- [ ] **Step 1 — ProcessSteps:** 3-4 pasos según spec §4.6 — (1) Diagnóstico, (2) Propuesta vía `/api/protocolo`, (3) Implementación, (4) Operación. Cada paso: icono SVG + título + 1-2 frases.
+- [ ] **Step 2 — Conexión visual:** línea, flecha, o gradient conectando los pasos en desktop. Stack vertical en mobile sin conexión visual (o conexión vertical sutil).
+- [ ] **Step 3 — Copy:** texto técnico-comercial · sin lorem ipsum · sin clichés ("transformamos tu negocio").
+- [ ] **Step 4:** Commit `feat(web): ProcessSteps "Cómo trabajamos" · Fase 2.4`
+
+### Tarea 2.5 · Sección "Proof de infraestructura" (1h)
+
+**Files:**
+- Create: `web/src/components/InfraProof.astro`
 - Modify: `web/src/pages/index.astro`
 
-- [ ] **Step 1:** Estructura por wireframe §8: `<Hero />` → `<TierDetail tier={lite} />` → sección "Upgrade path" (TierCards de Starter + Growth en grid 2 cols) → sección "Para empresas" (TierCards de Pro + Enterprise sobrios) → `<SectorGrid />` → `<ProofSection />` → sección CTA final con `<FormularioLead />` (componente stub por ahora · contenido real en Fase 3)
-- [ ] **Step 2:** `npm run dev` y verificar visualmente en browser cada sección
-- [ ] **Step 3:** Commit:
+- [ ] **Step 1 — Stats:** 3-4 stats numéricas (12 agentes IA · 11 sectores con módulos · 8 workflows operativos · opcional 4to si hay dato real). Mostrar con número grande + label corto.
+- [ ] **Step 2 — Stack logos:** logos pequeños de Anthropic Claude · Airtable · Vercel · Astro (sin afiliación falsa · solo "construido con"). SVGs en `web/public/brand/stack/` o vía CDN oficial.
+- [ ] **Step 3 — No testimonios placeholder:** si no hay caso real, no inventar. Esta sección es proof técnico, no social.
+- [ ] **Step 4:** Commit `feat(web): InfraProof section · Fase 2.5`
 
-```bash
-git add web/src/pages/index.astro
-git commit -m "feat(web): home con 7 secciones del wireframe · Fase 2.5"
-```
+### Tarea 2.6 · Footer profesional (1h)
 
-### Tarea 2.6 · Página dinámica `/sectores/[slug]` (2h)
+**Files:**
+- Modify: `web/src/components/Footer.astro` (reemplaza stub Fase 1.1)
+- Create: `web/src/pages/legal/privacidad.astro` (placeholder con `noindex`)
+- Create: `web/src/pages/legal/terminos.astro` (placeholder con `noindex`)
+
+- [ ] **Step 1 — Footer 3 columnas:** según spec §4.8. Stack en mobile.
+- [ ] **Step 2 — Páginas legales placeholder:** ambas usan WebLayout con `noindex={true}` · contenido mínimo "Documento en preparación · contacto: hola@zenkai.systems" hasta que se redacte legal real (post-primer-cliente o pre-launch público).
+- [ ] **Step 3 — Decisión:** incluir o no link al GitHub repo público en footer.
+- [ ] **Step 4:** Commit `feat(web): Footer profesional + páginas legales placeholder · Fase 2.6`
+
+### Tarea 2.7 · Páginas dedicadas `/sectores/<slug>` (2h)
+
+**Bloqueante:** `copy_largo` validado de los 8 sectores.
 
 **Files:**
 - Create: `web/src/pages/sectores/[slug].astro`
+- Modify (×8): `web/src/content/sectores/*.md` (reemplazar `copy_largo` TODO)
 
-- [ ] **Step 1:** `getStaticPaths()` itera collection sectores · página renderiza: `<Hero />` específico al sector (headline con nombre del sector + dolor) · 5 TierCards con `modulos_por_sector[<slug>]` visible en cada tier · `<FormularioLead />` con `sector` pre-seleccionado
-- [ ] **Step 2:** Cada página debe tener canonical único `https://zenkai.systems/sectores/<slug>` y OG image dedicada (usar fallback compartido en MVP, generación per-sector queda fuera de scope)
-- [ ] **Step 3:** Verificar build genera 8 HTMLs en `dist/sectores/`
-- [ ] **Step 4:** Commit:
+- [ ] **Step 1 — getStaticPaths:** itera collection sectores · genera 8 rutas.
+- [ ] **Step 2 — Página template:** hero específico al sector (headline con nombre del sector + dolor_principal) · `copy_largo` renderizado como markdown · 5 TierCards con `modulos_por_sector[<slug>]` visible · CTA contextual.
+- [ ] **Step 3 — Canonical único:** cada página tiene `canonical = "https://zenkai.systems/sectores/<slug>"` via prop al SeoHead.
+- [ ] **Step 4 — Verificar build:** `dist/sectores/<slug>/index.html` para los 8 sectores.
+- [ ] **Step 5:** Commit `feat(web): páginas dedicadas /sectores/[slug] (8) · Fase 2.7`
 
-```bash
-git add web/src/pages/sectores
-git commit -m "feat(web): páginas dinámicas /sectores/[slug] (8) · Fase 2.6"
-```
+### Tarea 2.8 · Pulido visual: animaciones, microinteracciones, gradientes (2h)
 
-### Tarea 2.7 · `/planes` comparativa + `/gracias` + `/conversacion` (1.5h)
-
-**Files:**
-- Create: `web/src/pages/planes/index.astro`
-- Create: `web/src/pages/gracias.astro`
-- Create: `web/src/pages/conversacion.astro`
-
-- [ ] **Step 1:** `/planes` = tabla comparativa de los 5 tiers · filas = features (sitio, WA, ads, IA, agente IA, app custom, etc.) · columnas = tiers · iconos ✓/✗
-- [ ] **Step 2:** `/gracias` = mensaje "Recibimos tu mensaje. En 24h te contactamos por WhatsApp." + link al WhatsApp + sugerencia "Mientras tanto, mirá los 8 sectores que servimos →"
-- [ ] **Step 3:** `/conversacion` = página minimal con embed Cal.com (`<iframe>` apuntando a `PUBLIC_CALCOM_LINK`) + texto "Reservá 30 min con Jordy para ver si Pro o Enterprise es para tu empresa". Cal.com link real va en Fase 4 — por ahora dejar placeholder
-- [ ] **Step 4:** Commit:
-
-```bash
-git add web/src/pages/planes web/src/pages/gracias.astro web/src/pages/conversacion.astro
-git commit -m "feat(web): /planes + /gracias + /conversacion · Fase 2.7"
-```
-
-### Tarea 2.8 · OG image + favicon + responsive QA (1h)
+**Bloqueante de decisión:** Motion library vs CSS puro.
 
 **Files:**
-- Create: `web/public/og-image.png` (1200×630)
-- Create: `web/public/favicon.svg`
-- Create: `web/public/robots.txt`
+- Modify: varios componentes (TierCard, SectorCard, CTAs, Hero) según necesidad
+- Possibly install: `motion` (~30 KB) o equivalent
 
-- [ ] **Step 1:** Generar OG image con headline "ZENKAI · Tu negocio en internet en 7 días" + logo + paleta índigo. Usar Figma/Canva o `frontend-design` skill si está activado
-- [ ] **Step 2:** Crear favicon SVG simple (monograma "Z" en color índigo)
-- [ ] **Step 3:** `robots.txt` permite todo (`User-agent: * \n Allow: /`) + apunta a sitemap auto-generado por Astro (`Sitemap: https://zenkai.systems/sitemap-index.xml`)
-- [ ] **Step 4:** Activar `@astrojs/sitemap` en `astro.config.mjs` (instalar `npm i @astrojs/sitemap` + añadir a integrations)
-- [ ] **Step 5:** Browse skill: tomar screenshot home en 375px, 768px, 1440px · documentar issues · arreglar
-- [ ] **Step 6:** Commit:
+- [ ] **Step 1 — Decisión Motion lib:** medir bundle size estimado · justificar trade-off. Si CSS puro alcanza para los efectos planeados, preferir esa ruta.
+- [ ] **Step 2 — Hover/focus states refinados:** TierCard (sutil lift + glow accent en hover) · SectorCard (border accent en hover) · CTAs (background shift fluido).
+- [ ] **Step 3 — Gradients de sección:** gradients sutiles en backgrounds de secciones sin saturar el dark theme. Usar `var(--color-accent-glow)` o similar para coherencia con tokens.
+- [ ] **Step 4 — Scroll-triggered fade-in:** si Motion lib aprobada · sino skip. Respetar `prefers-reduced-motion: reduce`.
+- [ ] **Step 5 — Visual check:** screenshot completo de home antes/después · diff visual.
+- [ ] **Step 6:** Commit `feat(web): pulido visual + microinteracciones · Fase 2.8`
 
-```bash
-git add web/public web/astro.config.mjs web/package.json
-git commit -m "feat(web): OG image + favicon + robots + sitemap · Fase 2.8"
-```
+### Tarea 2.9 · Performance + accesibilidad: Lighthouse audit + fixes (1.5h)
+
+**Files:** varios (según issues encontrados)
+
+- [ ] **Step 1 — Baseline:** correr Lighthouse mobile + desktop en URL de preview Vercel · capturar scores baseline.
+- [ ] **Step 2 — Performance fixes:** lazy-load imágenes below-the-fold · preconnect fonts · revisar bundle (`dist/_astro/*` <80 KB gzipped total).
+- [ ] **Step 3 — Accessibility fixes:** contraste con axe-core · skip-link al `<main>` · tab order coherente · focus rings visibles en todos los interactivos · `aria-label` en iconos no decorativos.
+- [ ] **Step 4 — SEO fixes:** verificar meta tags · `<h1>` único por página · canonical correcto · OG image presente (placeholder OK).
+- [ ] **Step 5 — Verificar `prefers-reduced-motion`:** simular preferencia y verificar que animaciones se reducen.
+- [ ] **Step 6 — Targets:** Lighthouse ≥ 90 en las 4 métricas en mobile y desktop. LCP < 2.0s. CLS < 0.05.
+- [ ] **Step 7:** Commit `perf(web): Lighthouse ≥ 90 + accesibilidad WCAG AA · Fase 2.9`
+
+### Tarea 2.10 · Visual regression check + QA cross-browser (1h)
+
+**Files:** ninguno (validación · fixes en commits separados si surgen)
+
+- [ ] **Step 1 — Browse skill screenshots:** capturar cada página (home + 8 sectores + 404) en mobile (375px), tablet (768px), desktop (1440px). Guardar en `/tmp/qa-fase2/` para review.
+- [ ] **Step 2 — Cross-browser:** Chrome (default), Firefox local · Safari vía BrowserStack/CrossBrowserTesting si no hay Mac. Documentar issues.
+- [ ] **Step 3 — Fold check:** screenshot del fold de home en desktop → comparar con criterio §1 punto 3 (Lite + Starter dominantes).
+- [ ] **Step 4 — Test cualitativo §1 punto 1:** opcional · pasarle a 3 personas que no conozcan ZENKAI y preguntar "¿qué hace esta empresa?". 3/3 deben acertar.
+- [ ] **Step 5 — Reporte final:** screenshot list + issues encontrados + fixes aplicados.
+- [ ] **Step 6:** Si hubo fixes, commit `fix(web): QA cross-browser + visual regression · Fase 2.10`
+
+**Total Fase 2:** **12-15h** (10 tareas · rango por decisión Motion lib + iconos custom + copy off-loop que no cuenta acá).
 
 ---
 
@@ -1328,13 +1344,13 @@ git commit -m "docs: cerrar landing pública zenkai.systems v0.1 LIVE · Fase 5"
 
 | Fase | Tareas | Horas | Estado |
 |------|--------|-------|--------|
-| 0 · Setup monorepo `web/` (incluye 0.0 pre-flight) | 0.0 - 0.4 | 3.5-4.5h | pending |
-| 1 · Estructura Astro base | 1.1 - 1.4 | 5.5-7.5h | pending |
-| 2 · Secciones públicas | 2.1 - 2.8 | 9-11h | pending |
+| 0 · Setup monorepo `web/` (incluye 0.0 pre-flight) | 0.0 - 0.4 | 3.5-4.5h | ✅ done |
+| 1 · Estructura Astro base | 1.1 - 1.4 | 5.5-7.5h | partial (1.1-1.3 ✅ · 1.4 pending) |
+| 2 · Transformación visual a landing comercial (v1.2) | 2.1 - 2.10 | 12-15h | pending |
 | 3 · Formulario + integración API (incluye 3.7-pre · CVE) | 3.1 - 3.8 (+3.7-pre) | 8.5-10.5h | pending |
 | 4 · WhatsApp FAB + Cal.com | 4.1 - 4.4 | 3-4h | pending |
 | 5 · QA + Deploy producción (incluye 5.3-pre · domain swap) | 5.1 - 5.5 (+5.3-pre) | 3.5-4.5h | pending |
-| **TOTAL** | **30 tareas** | **33-41h** | **pending** |
+| **TOTAL** | **32 tareas** | **36-45h** | **partial** |
 
 Reducción vs v1.0 (34-44h → 33-41h) viene de: assets + env ya confirmados (menos discovery en Fase 1 y 2) · DNS Hostinger directo sin Cloudflare en Fase 5. Compensado por +30min de Tarea 3.7-pre (mitigación CVE `@astrojs/vercel`) y +30min en Tarea 1.1 (design system propio · scope completo de tokens en vez de copy del panel). Tarea 5.3-pre (domain swap orchestration) es neutra: 30min nuevos + 5.3 simplificado de 1h a 30min.
 

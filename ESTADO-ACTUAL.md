@@ -1,22 +1,38 @@
 # ESTADO ACTUAL · ZENKAI Super Cerebro
 ## Punto de continuación entre sesiones de Claude Code
 
-**Última sesión cerrada:** 2026-05-10 (Landing pública · Fase 0 cerrada — scaffolding web/ + Vercel project zenkai-web)
+**Última sesión cerrada:** 2026-05-10 · Fase 1.3 DEPLOYED · landing live en zenkai-web-rho.vercel.app (versión placeholder · Fase 2 pendiente)
 **Modo recomendado para continuar:** `claude --dangerously-skip-permissions` desde `C:\Users\jordy\Desktop\Kenzai Super Brain\`
 
 ---
 
 ## 🚧 EN CURSO · LANDING PÚBLICA zenkai.systems
 
-- **Spec:** `docs/specs/2026-05-05-landing-zenkai-design.md` (commit `c87e538`)
-- **Plan:** `docs/plans/2026-05-10-landing-zenkai-implementation.md` (30 tareas · 32.5-40.5h · v1.1)
-- **Fase actual:** Fase 0 cerrada · Fase 1 lista para arrancar
+- **Spec original:** `docs/specs/2026-05-05-landing-zenkai-design.md` (commit `c87e538`)
+- **Spec Fase 2 (visual):** `docs/specs/2026-05-11-fase2-landing-visual-design.md` · transformación placeholder → landing comercial que convierte
+- **Plan:** `docs/plans/2026-05-10-landing-zenkai-implementation.md` (30 tareas · 32.5-40.5h · v1.2 con Fase 2 expandida a 10 tareas / 12-15h)
+- **LIVE:** `https://zenkai-web-rho.vercel.app` desde 2026-05-10 · build automático funcional vía webhook GitHub→Vercel
+- **Estado por fase:**
+  - ✅ Fase 0 · scaffolding `web/` + Vercel project `zenkai-web` (Tareas 0.1-0.2)
+  - ✅ Tarea 1.1 · design tokens + WebLayout + SeoHead (commit `4249ced`)
+  - ✅ Tarea 1.2 · content collections · 5 tiers + 8 sectores con Zod (commit `8a75321` + fix `e8d4def`)
+  - ✅ Tarea 1.3 · index con tiers/sectores + 404 + TierCard/SectorCard stubs (commit `c30a275`)
+  - ⏸️ Tarea 1.4 · helper de env tipado (45 min · pendiente · cierra Fase 1)
+  - ⏸️ Fase 2 · 10 tareas · 12-15h · transformación visual a landing comercial (próxima sesión)
 - **Project Vercel:** `zenkai-web` (`prj_Ct9A96VniiBmECzUTeaNgTGFuSr7` · team `mrhaxel26-sketchs-projects`)
-- **URL temporal Vercel:** `https://zenkai-web-rho.vercel.app`
 - **Domain swap en Fase 5:** panel actual → `panel.zenkai.systems` · landing `zenkai-web` → apex `zenkai.systems` · panel sigue vivo, NO se elimina (orquestación en Tarea 5.3-pre)
 - **CVE pendiente:** `GHSA-mr6q-rp88-fx84` · mitigación en Tarea 3.7-pre · doc en `docs/security/2026-05-10-cve-astrojs-vercel-x-astro-path.md`
 - **Email comercial activo:** `hola@zenkai.systems` (Hostinger Starter Business · Resend dominio verified · Receiving OFF)
-- **TODO técnico:** sector hogar tiene `agentes_prioritarios` inferidos en `web/src/content/sectores/hogar.md`. Cuando se cree `sectores/hogar.md` raíz (Fase 2 o primer cliente del sector), sincronizar agentes y campos modulares.
+- **Nota técnica · fix crítico Vercel:** commit `d006b2e` agregó `web/vercel.json` propio para no heredar el `vercel.json` raíz panel-specific (que define `functions: api/*.ts` + `buildCommand: cd panel && npm run build`). Sin este fix, builds de `zenkai-web` fallan con "The pattern 'api/*.ts' defined in 'functions' doesn't match any Serverless Functions inside the 'api' directory" porque Vercel hereda el config del repo padre aún con Root Directory = `web`. Override mínimo (`{"$schema": "..."}`) rompe la herencia y deja que Astro auto-detect maneje el build.
+- **TODO técnico (sectores):** sector hogar tiene `agentes_prioritarios` inferidos en `web/src/content/sectores/hogar.md`. Cuando se cree `sectores/hogar.md` raíz (Fase 2 o primer cliente del sector), sincronizar agentes y campos modulares.
+
+---
+
+## ⏸️ DEUDA TÉCNICA pendiente (próxima sesión)
+
+- **Vercel · Root Directory de proyecto `zenkaibrain`:** actualmente la raíz del repo está configurada como root del project del panel (legado de cuando los endpoints `/api/*` se servían desde la raíz). Resultado: cualquier push a `main` rebuilds tanto `zenkai-web` (correcto · Root Directory = `web`) como `zenkaibrain` (innecesario si solo tocamos `web/` o `docs/`). Acción: cambiar Root Directory de `zenkaibrain` a `panel` en Vercel UI → Settings → General. Cuidado: hay que verificar que los handlers `/api/clasificar` y `/api/protocolo` sigan funcionando — si viven en `api/` raíz, hay que moverlos o exponerlos desde `panel/`. Estimación: 30-60 min con smoke test.
+- **Tarea 1.4 · helper de env tipado (45 min):** crea `web/src/lib/env.ts` con Zod schemas para server/public env vars. Cierra Fase 1 formalmente. Bloqueante: ninguno · puede arrancar Fase 2 en paralelo si urge.
+- **Sectores + tiers · copy placeholder TODO:** los 8 sectores tienen `dolor_principal`, `copy_corto`, `copy_largo` como `"TODO: redactar en Fase 2 · ..."`. Reemplazo total con copy real es alcance de Fase 2 (bloqueante de Tarea 2.3 y 2.7 · requiere copy validado por el usuario antes de dispatch).
 
 ---
 
