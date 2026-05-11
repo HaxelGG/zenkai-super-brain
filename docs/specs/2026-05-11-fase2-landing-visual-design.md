@@ -1,8 +1,9 @@
 # Spec · Fase 2 landing zenkai.systems — Visual design + storytelling
 
 **Fecha:** 2026-05-11
-**Estado:** draft · pendiente de dispatch
+**Estado:** ready · copy validado · pendiente de dispatch
 **Spec relacionado:** `docs/specs/2026-05-05-landing-zenkai-design.md` (estructura + tiers + sectores)
+**Copy validado:** `docs/specs/2026-05-11-fase2-copy-validado.md` (source of truth · subagent consume verbatim)
 **Plan relacionado:** `docs/plans/2026-05-10-landing-zenkai-implementation.md` (Fase 2 expandida en este spec)
 **Live actual:** `https://zenkai-web-rho.vercel.app` (versión placeholder de Fase 1)
 
@@ -236,14 +237,16 @@ Antes del dispatch del subagent de Fase 2:
 
 | # | Dependencia | Quién entrega | Status |
 |---|---|---|---|
-| 1 | **Copy real de los 8 sectores** (dolor_principal · copy_corto · copy_largo) | Usuario + Claude.ai web · subagent NO inventa | ⏸️ pendiente |
-| 2 | **Decisión paleta extendida** — ¿agregamos color secundario al accent #1E6FFF? (violeta complementario · verde success · ámbar warning extendido) | Usuario | ⏸️ pendiente · decisión en Tarea 2.1 |
-| 3 | **Decisión librería de iconos** — Lucide (recomendado) vs Heroicons vs Tabler | Usuario o subagent con justificación | ⏸️ pendiente · decisión en Tarea 2.3 |
-| 4 | **Decisión animaciones** — Motion library (ej. `motion` o `@svelte-put/motion` adapter) vs solo CSS transitions · trade-off bundle size vs polish | Usuario o subagent con justificación | ⏸️ pendiente · decisión en Tarea 2.8 |
-| 5 | **Copy real del hero** (1 frase + sub-frase) | Usuario + Claude.ai web | ⏸️ pendiente · bloqueante de Tarea 2.1 |
+| 1 | **Copy real de los 8 sectores** (dolor_principal + copy card 3-4 frases + agentes) | Usuario | ✅ **resuelto** · ver `docs/specs/2026-05-11-fase2-copy-validado.md` §5 |
+| 2 | **Decisión paleta extendida** — ¿agregamos color secundario al accent #1E6FFF? | Usuario | ⏸️ pendiente · decisión en Tarea 2.1 (default si no se decide: mantener single-accent · paleta actual ya tiene success/warning/error semánticos definidos en tokens.css) |
+| 3 | **Decisión librería de iconos** — Lucide (recomendado) vs Heroicons vs Tabler | Usuario o subagent con justificación | ⏸️ pendiente · decisión en Tarea 2.3 (default: **Lucide** vía `astro-icon` + `@iconify-json/lucide`) |
+| 4 | **Decisión animaciones** — Motion library vs CSS transitions | Subagent con justificación | ⏸️ pendiente · decisión en Tarea 2.8 (default: **CSS puro** salvo que el polish requerido justifique el bundle extra) |
+| 5 | **Copy real del hero** (Variant A: "Digitalizamos tu empresa con IA. Desde una landing hasta tu operación completa.") | Usuario | ✅ **resuelto** · ver copy validado §1 |
 | 6 | **Logo cuadrado real** (placeholder actual usa el horizontal · TODO en SeoHead.astro) | Usuario (genera o aprueba) | ⏸️ pendiente · no crítico para Fase 2 pero deuda visible |
+| 7 | **WhatsApp number real** | Usuario | ✅ **resuelto** · `+57 322 627 2302` · ver copy validado §11 |
+| 8 | **Confirmación compromisos comerciales publicados** (Lite 30 días · SLA WA 30min · SLA form 4h · multi-idioma es/en/pt) | Usuario | ✅ **aprobados** · documentados en copy validado §12 · pasan a deuda operativa en ESTADO-ACTUAL |
 
-Tareas 2.1, 2.3, 2.7 son bloqueantes por copy. El resto puede arrancar sin copy (estructura primero, copy después en pase final).
+**Bloqueantes restantes para dispatch:** ninguno crítico. Tareas 2.1-2.10 pueden ejecutarse en orden. Decisiones #2/#3/#4 tienen defaults razonables si el usuario no quiere pre-decidir.
 
 ---
 

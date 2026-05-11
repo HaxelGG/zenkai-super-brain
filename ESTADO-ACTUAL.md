@@ -32,7 +32,21 @@
 
 - **Vercel · Root Directory de proyecto `zenkaibrain`:** actualmente la raíz del repo está configurada como root del project del panel (legado de cuando los endpoints `/api/*` se servían desde la raíz). Resultado: cualquier push a `main` rebuilds tanto `zenkai-web` (correcto · Root Directory = `web`) como `zenkaibrain` (innecesario si solo tocamos `web/` o `docs/`). Acción: cambiar Root Directory de `zenkaibrain` a `panel` en Vercel UI → Settings → General. Cuidado: hay que verificar que los handlers `/api/clasificar` y `/api/protocolo` sigan funcionando — si viven en `api/` raíz, hay que moverlos o exponerlos desde `panel/`. Estimación: 30-60 min con smoke test.
 - **Tarea 1.4 · helper de env tipado (45 min):** crea `web/src/lib/env.ts` con Zod schemas para server/public env vars. Cierra Fase 1 formalmente. Bloqueante: ninguno · puede arrancar Fase 2 en paralelo si urge.
-- **Sectores + tiers · copy placeholder TODO:** los 8 sectores tienen `dolor_principal`, `copy_corto`, `copy_largo` como `"TODO: redactar en Fase 2 · ..."`. Reemplazo total con copy real es alcance de Fase 2 (bloqueante de Tarea 2.3 y 2.7 · requiere copy validado por el usuario antes de dispatch).
+- **`copy_largo` de 8 sectores aún TODO:** la sesión 2026-05-11 validó preview de 3-4 frases (`copy_corto`) pero no el contenido largo de páginas dedicadas (3-5 párrafos por sector). Bloqueante de Tarea 2.7 (páginas `/sectores/<slug>`). Acción: el usuario genera con Claude.ai web antes del dispatch de 2.7.
+
+---
+
+## 📢 COMPROMISOS COMERCIALES PUBLICADOS (deuda operativa)
+
+Estos compromisos están **publicados en el copy de la landing** (`docs/specs/2026-05-11-fase2-copy-validado.md`) y deben cumplirse o documentarse formalmente antes del primer lead que los invoque:
+
+1. **Garantía Lite 30 días** — *"Sin tarjeta. Sin contrato anual. Si en 30 días no te funciona, no nos debés nada."* → política de reembolso a documentar en `LEGAL · templates_legales` ANTES del primer cliente Lite cerrado. Sin política escrita, riesgo de disputa.
+2. **SLA WhatsApp 30 min (horario laboral CO/ES)** — *"Habla con un fundador real. Respuesta en menos de 30 minutos en horario laboral."* → monitoreo manual (notificación WA Cloud API → app fundador) o alert Slack/Telegram sobre webhook de mensaje entrante. Tracking de SLA en Airtable.
+3. **SLA form 4h hábiles** — *"Te respondemos en menos de 4 horas hábiles."* → Resend manda auto-reply inmediato confirmando recepción · respuesta humana real a `hola@zenkai.systems` antes de 4h hábiles. Marcar lead como "respondido" en Airtable VENTAS dentro del SLA.
+4. **Multi-idioma (es/en/pt) en respuestas** — *"Respondemos en español, inglés y portugués."* → capacidad real vía fundador directo o herramientas de traducción asistida. Landing actualmente es solo español.
+5. **Diagnóstico gratis 30 min** — *"Diagnóstico gratis. 30 minutos. Sin compromiso."* → Cal.com slot configurado · agenda real disponible · no rebookeable después del No-show 2× (política a redactar). Bloqueante de pre-launch: Cal.com público activo en `/conversacion`.
+
+⚠️ **Acción mínima antes de pre-launch público:** items 1 (política reembolso) y 5 (Cal.com activo). Items 2-4 pueden documentarse vía SOPs internos sin cambio de copy.
 
 ---
 
