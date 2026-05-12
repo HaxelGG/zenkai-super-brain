@@ -1,0 +1,78 @@
+---
+interface Props {
+  variant?: 'default' | 'compact' | 'large';
+  showTagline?: boolean;
+}
+const { variant = 'default', showTagline = true } = Astro.props;
+---
+
+<span class={`brand brand-${variant}`}>
+  <span class="brand-wordmark">
+    <span class="brand-zenk">ZENK</span><span class="brand-ai">AI</span>
+  </span>
+  {showTagline && (
+    <span class="brand-tagline">AI · GROWTH SYSTEMS</span>
+  )}
+</span>
+
+<style>
+  .brand {
+    display: inline-flex;
+    flex-direction: column;
+    line-height: 1;
+    user-select: none;
+  }
+  .brand-wordmark {
+    font-family: 'Orbitron', system-ui, sans-serif;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    line-height: 1;
+  }
+  .brand-zenk { color: #F5F5FA; }
+  .brand-ai { color: #4A9EFF; }
+  .brand-tagline {
+    font-family: 'Geist Mono', 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, monospace;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    color: #7DA5FF;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  /* Variante default (navbar) */
+  .brand-default .brand-wordmark { font-size: 22px; }
+  .brand-default .brand-tagline { font-size: 9px; }
+
+  /* Variante compact (núcleo del diagrama) - todo blanco sin tagline */
+  .brand-compact {
+    display: inline-block;
+    padding: 0;
+    margin: 0;
+    text-align: center;
+  }
+  .brand-compact .brand-wordmark {
+    font-size: 18px;
+    letter-spacing: 0.08em;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+  }
+  .brand-compact .brand-zenk,
+  .brand-compact .brand-ai {
+    color: #FFFFFF;
+  }
+
+  /* Variante large (footer) */
+  .brand-large .brand-wordmark {
+    font-size: 28px;
+    letter-spacing: 0.05em;
+  }
+  .brand-large .brand-tagline {
+    font-size: 11px;
+    margin-top: 6px;
+  }
+
+  @media (max-width: 640px) {
+    .brand-compact .brand-wordmark { font-size: 14px; }
+    .brand-default .brand-wordmark { font-size: 20px; }
+    .brand-default .brand-tagline { font-size: 8px; }
+  }
+</style>

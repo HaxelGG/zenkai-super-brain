@@ -1,7 +1,5 @@
 ---
-import { Image } from 'astro:assets';
-import logoSquare from '../../assets/brand/zenkai-logo-square.png';
-import logoHorizontal from '../../assets/brand/zenkai-logo-horizontal.png';
+import Brand from './Brand.astro';
 ---
 <footer class="border-t border-zk-border bg-zk-bg2 relative overflow-hidden">
 
@@ -10,20 +8,9 @@ import logoHorizontal from '../../assets/brand/zenkai-logo-horizontal.png';
     <div class="grid lg:grid-cols-5 gap-10 mb-12">
 
       <div class="lg:col-span-2">
-        <div class="flex items-center gap-3 mb-5">
-          <Image
-            src={logoSquare}
-            alt="ZENKAI"
-            width={40}
-            height={40}
-            format="webp"
-            class="w-10 h-10 rounded-lg object-cover ring-1 ring-zk-border"
-          />
-          <div>
-            <div class="font-bold text-lg">ZENKAI</div>
-            <div class="text-[10px] font-mono text-zk-text2 mt-0.5">AI · GROWTH SYSTEMS</div>
-          </div>
-        </div>
+        <a href="/" class="brand-link inline-block mb-5">
+          <Brand variant="large" showTagline={true} />
+        </a>
         <p class="text-sm text-zk-text2 leading-relaxed mb-6 max-w-sm">
           Construimos sistemas de IA que generan ventas, reducen costos y automatizan operaciones. Tu propuesta gratis en 30 segundos.
         </p>
@@ -72,20 +59,17 @@ import logoHorizontal from '../../assets/brand/zenkai-logo-horizontal.png';
 
     </div>
 
-    <div class="border-t border-zk-border pt-10 pb-2">
-      <Image
-        src={logoHorizontal}
-        alt="ZENKAI · AI Growth Systems"
-        width={672}
-        height={448}
-        format="webp"
-        class="w-full max-w-2xl mx-auto opacity-40 hover:opacity-60 transition"
-      />
-    </div>
-
     <div class="border-t border-zk-border pt-6 flex flex-col sm:flex-row justify-between gap-4 text-xs text-zk-muted">
       <div>© 2026 ZENKAI Growth Systems · Construido remoto · Operando en LATAM y Europa</div>
       <div class="font-mono">Hecho con Claude · Astro · Vercel</div>
     </div>
   </div>
 </footer>
+
+<style>
+  .brand-link {
+    text-decoration: none;
+    transition: opacity 0.2s;
+  }
+  .brand-link:hover { opacity: 0.85; }
+</style>

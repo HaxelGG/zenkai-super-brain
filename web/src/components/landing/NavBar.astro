@@ -1,24 +1,11 @@
 ---
-import { Image } from 'astro:assets';
-import logoSquare from '../../assets/brand/zenkai-logo-square.png';
+import Brand from './Brand.astro';
 ---
 <header class="fixed top-0 left-0 right-0 z-50 nav-blur border-b border-zk-border/50">
   <div class="max-w-7xl mx-auto px-5 lg:px-8 h-16 flex items-center justify-between">
 
-    <a href="#" class="flex items-center gap-3 group">
-      <Image
-        src={logoSquare}
-        alt="ZENKAI"
-        width={36}
-        height={36}
-        format="webp"
-        loading="eager"
-        class="w-9 h-9 rounded-lg object-cover ring-1 ring-zk-border group-hover:ring-zk-accent transition"
-      />
-      <div class="hidden sm:block leading-none">
-        <div class="font-bold text-base tracking-tight">ZENKAI</div>
-        <div class="text-[10px] font-mono text-zk-text2 mt-0.5">AI · GROWTH SYSTEMS</div>
-      </div>
+    <a href="/" class="brand-link">
+      <Brand variant="default" showTagline={true} />
     </a>
 
     <nav class="hidden lg:flex items-center gap-7 text-sm text-zk-text2">
@@ -83,3 +70,11 @@ import logoSquare from '../../assets/brand/zenkai-logo-square.png';
     if (saved && ['USD', 'COP', 'EUR', 'MXN'].includes(saved)) applyCurrency(saved);
   } catch {}
 </script>
+
+<style>
+  .brand-link {
+    text-decoration: none;
+    transition: opacity 0.2s;
+  }
+  .brand-link:hover { opacity: 0.85; }
+</style>
