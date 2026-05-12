@@ -9,6 +9,7 @@ import SeoHead from '../components/SeoHead.astro';
 import NavBar from '../components/landing/NavBar.astro';
 import Footer from '../components/landing/Footer.astro';
 import WhatsAppFloat from '../components/WhatsAppFloat.astro';
+import Analytics from '@vercel/analytics/astro';
 
 interface Props {
   title: string;
@@ -23,6 +24,7 @@ const { title, description, canonical, ogImage, noindex } = Astro.props;
 <html lang="es">
   <head>
     <SeoHead {title} {description} {canonical} {ogImage} {noindex} />
+    <Analytics />
   </head>
   <body class="bg-zk-bg text-zk-text font-sans antialiased noise">
     <NavBar />
