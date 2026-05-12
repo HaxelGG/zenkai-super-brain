@@ -1,0 +1,196 @@
+---
+// ⭐ La estrella visual: red neural 3D con 12 agentes IA
+// Coordenadas verbatim del HTML standalone (pre-calculadas con math.sin/cos en cliente).
+// Mouse parallax 3D vía script inline.
+import { Image } from 'astro:assets';
+import logoSquare from '../../assets/brand/zenkai-logo-square.png';
+
+interface Node {
+  name: string;
+  left: number;
+  top: number;
+}
+const nodes: Node[] = [
+  { name: 'ZEUS',   left: 50.0,  top: 18.0  },
+  { name: 'APOLLO', left: 72.63, top: 27.37 },
+  { name: 'HERMES', left: 82.0,  top: 50.0  },
+  { name: 'ARES',   left: 72.63, top: 72.63 },
+  { name: 'ATLAS',  left: 50.0,  top: 82.0  },
+  { name: 'NEXUS',  left: 27.37, top: 72.63 },
+  { name: 'MUSE',   left: 18.0,  top: 50.0  },
+  { name: 'LEX',    left: 27.37, top: 27.37 },
+  { name: 'ORACLE', left: 67.23, top: 7.35  },
+  { name: 'ECHO',   left: 92.65, top: 67.23 },
+  { name: 'FORGE',  left: 32.77, top: 92.65 },
+  { name: 'HIVE',   left: 7.35,  top: 32.77 },
+];
+
+interface Line {
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+  delay: number;
+}
+const lines: Line[] = [
+  // 8 conexiones del núcleo (50,50) a los 8 nodos del octágono interno
+  { x1: 50, y1: 50, x2: 50.0,  y2: 18.0,  delay: 0.0 },
+  { x1: 50, y1: 50, x2: 72.63, y2: 27.37, delay: 0.3 },
+  { x1: 50, y1: 50, x2: 82.0,  y2: 50.0,  delay: 0.6 },
+  { x1: 50, y1: 50, x2: 72.63, y2: 72.63, delay: 0.9 },
+  { x1: 50, y1: 50, x2: 50.0,  y2: 82.0,  delay: 1.2 },
+  { x1: 50, y1: 50, x2: 27.37, y2: 72.63, delay: 1.5 },
+  { x1: 50, y1: 50, x2: 18.0,  y2: 50.0,  delay: 1.8 },
+  { x1: 50, y1: 50, x2: 27.37, y2: 27.37, delay: 2.1 },
+  // 8 conexiones del octágono entre sí (perímetro)
+  { x1: 50.0,  y1: 18.0,  x2: 72.63, y2: 27.37, delay: 1.0 },
+  { x1: 72.63, y1: 27.37, x2: 82.0,  y2: 50.0,  delay: 1.4 },
+  { x1: 82.0,  y1: 50.0,  x2: 72.63, y2: 72.63, delay: 1.8 },
+  { x1: 72.63, y1: 72.63, x2: 50.0,  y2: 82.0,  delay: 2.2 },
+  { x1: 50.0,  y1: 82.0,  x2: 27.37, y2: 72.63, delay: 2.6 },
+  { x1: 27.37, y1: 72.63, x2: 18.0,  y2: 50.0,  delay: 3.0 },
+  { x1: 18.0,  y1: 50.0,  x2: 27.37, y2: 27.37, delay: 3.4 },
+  { x1: 27.37, y1: 27.37, x2: 50.0,  y2: 18.0,  delay: 3.8 },
+  // 8 conexiones de los 4 nodos exteriores a los nodos del octágono
+  { x1: 67.23, y1: 7.35,  x2: 50.0,  y2: 18.0,  delay: 2.0 },
+  { x1: 67.23, y1: 7.35,  x2: 72.63, y2: 27.37, delay: 2.5 },
+  { x1: 92.65, y1: 67.23, x2: 82.0,  y2: 50.0,  delay: 3.0 },
+  { x1: 92.65, y1: 67.23, x2: 72.63, y2: 72.63, delay: 3.5 },
+  { x1: 32.77, y1: 92.65, x2: 50.0,  y2: 82.0,  delay: 0.0 },
+  { x1: 32.77, y1: 92.65, x2: 27.37, y2: 72.63, delay: 0.5 },
+  { x1: 7.35,  y1: 32.77, x2: 18.0,  y2: 50.0,  delay: 1.0 },
+  { x1: 7.35,  y1: 32.77, x2: 27.37, y2: 27.37, delay: 1.5 },
+];
+
+const stackChips = [
+  'Claude Opus 4.7',
+  'Sonnet 4.6',
+  'Haiku 4.5',
+  'Airtable',
+  'Make · n8n',
+  'WhatsApp Cloud API',
+  'Vercel · Astro',
+  'Resend',
+  'Cal.com',
+];
+---
+<section class="py-24 lg:py-32 border-t border-zk-border/50 relative overflow-hidden">
+
+  <div class="mesh-bg"></div>
+
+  <div class="relative max-w-6xl mx-auto px-5 lg:px-8 z-10">
+
+    <div class="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+
+      <div class="reveal">
+        <div class="inline-flex items-center gap-2 mb-5">
+          <div class="w-8 h-px bg-zk-accent"></div>
+          <span class="text-xs font-mono text-zk-accent uppercase tracking-[0.2em]">La infraestructura</span>
+        </div>
+        <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight mb-6 leading-[1.05]">
+          Una red neural<br>
+          <span class="gradient-text-neon">de 12 agentes IA</span><br>
+          trabajando por ti.
+        </h2>
+        <div class="space-y-4 text-zk-text2 leading-relaxed">
+          <p>
+            ZENKAI no es un chatbot. Es un <span class="text-zk-text font-medium">sistema multi-agente neuronal</span> donde cada agente especializado se conecta con los demás como una red de neuronas.
+          </p>
+          <p>
+            ZEUS coordina. APOLLO crea las landings. HERMES cierra ventas. NEXUS construye automatizaciones. ATLAS opera proyectos. Y 7 agentes más, cada uno experto en su área.
+          </p>
+          <p class="text-zk-text">
+            <span class="font-medium">Pasan información en tiempo real entre sí.</span> Cuando un lead califica con HERMES, ATLAS ya está preparando el onboarding. Cuando NEXUS detecta un cuello de botella, ECHO te avisa al WhatsApp. Esto es lo que separa una agencia de un sistema.
+          </p>
+        </div>
+
+        <div class="mt-8 p-5 bg-gradient-to-br from-zk-surface to-zk-surface2 border border-zk-border2 rounded-xl">
+          <div class="text-xs font-mono text-zk-muted uppercase tracking-wider mb-3 flex items-center gap-2">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+            Stack en producción
+          </div>
+          <div class="flex flex-wrap gap-2 text-xs font-mono">
+            {stackChips.map((chip) => (
+              <span class="px-3 py-1.5 bg-zk-bg2 border border-zk-border rounded-md hover:border-zk-accent/40 transition">{chip}</span>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div class="reveal flex justify-center items-center min-h-[520px]">
+        <div class="neural-container">
+          <div id="neural-stage" class="neural-stage">
+
+            <svg class="neural-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="neuralGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#1E6FFF" stop-opacity="0.8" />
+                  <stop offset="50%" stop-color="#7DA5FF" stop-opacity="0.6" />
+                  <stop offset="100%" stop-color="#A78BFA" stop-opacity="0.4" />
+                </linearGradient>
+              </defs>
+
+              {lines.map((l) => (
+                <line
+                  x1={l.x1}
+                  y1={l.y1}
+                  x2={l.x2}
+                  y2={l.y2}
+                  class="neural-line"
+                  style={`animation-delay: ${l.delay}s`}
+                />
+              ))}
+            </svg>
+
+            <div class="neural-core-rings"></div>
+            <div class="neural-core-rings r2"></div>
+            <div class="neural-core-rings r3"></div>
+
+            {nodes.map((n) => (
+              <div class="neural-node" style={`left: ${n.left}%; top: ${n.top}%;`}>
+                <div class="neural-node-dot"></div>
+                <div class="neural-node-label">{n.name}</div>
+              </div>
+            ))}
+
+            <div class="neural-core">
+              <div class="neural-core-inner">
+                <Image
+                  src={logoSquare}
+                  alt="ZENKAI"
+                  width={130}
+                  height={130}
+                  format="webp"
+                  class="w-full h-full object-cover"
+                />
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<script>
+  // Mouse parallax 3D · rota el neural-stage según posición del mouse en el container
+  const neuralStage = document.getElementById('neural-stage');
+  if (neuralStage) {
+    const neuralContainer = neuralStage.parentElement;
+    if (neuralContainer) {
+      neuralContainer.addEventListener('mousemove', (e) => {
+        const rect = neuralContainer.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / rect.width;
+        const y = (e.clientY - rect.top) / rect.height;
+        const rotateX = (y - 0.5) * -15;
+        const rotateY = (x - 0.5) * 15;
+        neuralStage.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+      });
+      neuralContainer.addEventListener('mouseleave', () => {
+        neuralStage.style.transform = 'rotateX(0) rotateY(0)';
+      });
+    }
+  }
+</script>

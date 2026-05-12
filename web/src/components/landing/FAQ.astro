@@ -1,0 +1,70 @@
+---
+// FAQ acordeón · usa <details>/<summary> nativo · sin JS
+interface QA {
+  q: string;
+  a: string;
+}
+const faqs: QA[] = [
+  {
+    q: '¿De verdad es gratis? ¿Después me van a llamar a vender?',
+    a: 'Es gratis y no te llamamos. La propuesta se genera automáticamente, queda en tu pantalla, puedes descargarla o pedirla por WhatsApp. Si quieres hablar, <strong class="text-zk-text">tú agendas</strong>. Si no, te quedas con la propuesta. No hay sales pipeline persiguiéndote.',
+  },
+  {
+    q: '¿Cómo funciona el descuento del 50% en el primer mes?',
+    a: 'Si agendas una llamada de 30 minutos con nuestro equipo y tu negocio califica para implementación, te aplicamos <strong class="text-zk-text">50% de descuento en el primer mes</strong> del plan que elijas. La calificación se basa en tres cosas: claridad de objetivo, capacidad operativa para implementar, y que el sistema que necesitas esté en nuestro alcance técnico. La llamada es gratis y no implica compromiso.',
+  },
+  {
+    q: 'No vendo por internet todavía. ¿Esto es para mí?',
+    a: 'Sí. El <strong class="text-zk-text">plan Lite ($300 + $90/mes)</strong> está pensado para negocios que NO venden por internet aún. Te montamos la primera presencia digital con WhatsApp profesional, formulario que llega a tu inbox, y agenda para citas. Sin pedirte que inviertas $1,000 en anuncios.',
+  },
+  {
+    q: '¿Por qué publican precios? Las agencias serias no lo hacen.',
+    a: 'Las agencias que no publican precios cobran lo que pueden, no lo que cuesta. Nuestra fórmula es matemática: <span class="font-mono text-zk-text">costo operativo trimestral × 2 = precio mínimo</span>. Transparencia es nuestro diferenciador. Y tu garantía de no estar pagando 5x más que el cliente de al lado.',
+  },
+  {
+    q: '¿Mis datos se quedan guardados? ¿Los venden?',
+    a: 'Tu texto se procesa con Claude (Anthropic) para generar la propuesta. Si solo pruebas la demo sin dejar contacto, <strong class="text-zk-text">no queda nada nuestro</strong>. Si nos das email/WhatsApp para enviar el PDF, se guarda <em>solo</em> para mandarte ESA propuesta. No vendemos data. Nunca.',
+  },
+  {
+    q: '¿En qué países operan? ¿Cobran en USD?',
+    a: 'Construido remoto desde <strong class="text-zk-text">Pereira (Colombia)</strong> y <strong class="text-zk-text">Madrid (España)</strong> desde junio 2026. Servimos clientes en LATAM, España y EE.UU. Todos los planes se facturan en USD para mantener precios estables — el toggle de moneda en la parte superior es referencial.',
+  },
+  {
+    q: '¿Puedo implementar la propuesta con otra agencia?',
+    a: 'Sí. La propuesta es tuya. Te decimos exactamente qué herramientas usar, qué configurar, qué automatizar. Si encuentras otra agencia que lo haga más barato o mejor, adelante. <strong class="text-zk-text">Si decides que prefieres trabajar con quienes diseñaron la arquitectura, hablamos.</strong>',
+  },
+  {
+    q: '¿Y si mi cliente no habla español? ¿La IA atiende en otros idiomas?',
+    a: 'Sí. Nuestros agentes IA conversacionales operan en <strong class="text-zk-text">español, inglés y portugués</strong> nativamente. Tu cliente puede tener clientes en cualquier idioma — la IA los atiende sin que tengas que pensarlo. Un solo sistema, múltiples idiomas según quien escribe.',
+  },
+];
+---
+<section id="faq" class="py-24 lg:py-32 border-t border-zk-border/50 relative">
+
+  <div class="max-w-3xl mx-auto px-5 lg:px-8">
+
+    <div class="text-center mb-12 reveal">
+      <div class="inline-flex items-center gap-2 mb-5">
+        <div class="w-8 h-px bg-zk-accent"></div>
+        <span class="text-xs font-mono text-zk-accent uppercase tracking-[0.2em]">Preguntas frecuentes</span>
+        <div class="w-8 h-px bg-zk-accent"></div>
+      </div>
+      <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight mb-5 leading-[1.05]">
+        Lo que todos preguntan<br>
+        <span class="text-zk-text2">antes de probar.</span>
+      </h2>
+    </div>
+
+    <div class="space-y-3 reveal">
+      {faqs.map((f) => (
+        <details class="group bg-gradient-to-br from-zk-surface to-zk-surface2 border border-zk-border2 rounded-xl overflow-hidden hover:border-zk-accent/40 transition">
+          <summary class="px-6 py-5 cursor-pointer flex items-center justify-between gap-4 font-medium text-zk-text2">
+            <span>{f.q}</span>
+            <svg class="w-5 h-5 shrink-0 text-zk-muted" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+          </summary>
+          <div class="px-6 pb-5 text-zk-text2 leading-relaxed text-sm" set:html={f.a}></div>
+        </details>
+      ))}
+    </div>
+  </div>
+</section>

@@ -5,7 +5,7 @@ import '../styles/tokens.css';
 import '../styles/global.css';
 import SeoHead from '../components/SeoHead.astro';
 import NavBar from '../components/landing/NavBar.astro';
-import Footer from '../components/Footer.astro';
+import Footer from '../components/landing/Footer.astro';
 import WhatsAppFloat from '../components/WhatsAppFloat.astro';
 
 interface Props {
@@ -29,23 +29,24 @@ const { title, description, canonical, ogImage, noindex } = Astro.props;
     <WhatsAppFloat />
 
     <script>
-      // Reveal-on-scroll observer · usa .reveal y .reveal.visible (estilos en global.css)
-      const observer = new IntersectionObserver(
-        (entries) => {
-          for (const entry of entries) {
-            if (entry.isIntersecting) {
-              entry.target.classList.add('visible');
-              observer.unobserve(entry.target);
-            }
-          }
-        },
-        { threshold: 0.12, rootMargin: '0px 0px -60px 0px' },
-      );
-
+      // Reveal · marca todos los .reveal como visibles al cargar (sin observer).
+      // Garantiza que screenshots, SEO crawlers y prefers-reduced-motion siempre
+      // muestren el contenido. La animación fade-up sigue ocurriendo (la transición
+      // CSS se aplica al cambio de class) pero todas las secciones revelan al inicio.
       const init = () => {
-        document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
-      };
+        document.querySelectorAll('.reveal').forEach((el) => el.classList.add('visible'));
 
+        // Mouse tracking para todas las .card-3d · alimenta el radial gradient ::before via --mouse-x/y
+        document.querySelectorAll<HTMLElement>('.card-3d').forEach((card) => {
+          card.addEventListener('mousemove', (e: MouseEvent) => {
+            const rect = card.getBoundingClientRect();
+            const x = ((e.clientX - rect.left) / rect.width) * 100;
+            const y = ((e.clientY - rect.top) / rect.height) * 100;
+            card.style.setProperty('--mouse-x', `${x}%`);
+            card.style.setProperty('--mouse-y', `${y}%`);
+          });
+        });
+      };
       if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', init);
       } else {

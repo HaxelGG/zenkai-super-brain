@@ -1,0 +1,248 @@
+---
+// Hero + Demo box · 3 estados (input/loading/proposal)
+// Sprint 2: simulación local (loading 8s → propuesta mock).
+// Sprint 3: reemplazará simulación por fetch real al /api/protocolo (lib/rate-limit, captcha, persistencia Airtable).
+---
+<section id="hero-demo" class="relative pt-28 pb-20 lg:pt-36 lg:pb-28 overflow-hidden">
+
+  <div class="mesh-bg"></div>
+  <div class="absolute inset-0 spotlight pointer-events-none"></div>
+  <div class="absolute inset-0 grid-bg pointer-events-none"></div>
+
+  <div class="relative max-w-6xl mx-auto px-5 lg:px-8 z-10">
+
+    <div class="flex justify-center mb-7">
+      <div class="relative inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-zk-surface/80 backdrop-blur-sm border border-zk-border text-xs font-mono">
+        <span class="relative flex h-2 w-2">
+          <span class="absolute inline-flex h-full w-full rounded-full bg-zk-success opacity-75" style="animation: pulseRing 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-zk-success"></span>
+        </span>
+        <span class="text-zk-text2">Sistema operando</span>
+        <span class="text-zk-muted">·</span>
+        <span class="text-zk-text">Claude · 12 agentes IA · Producción real</span>
+      </div>
+    </div>
+
+    <h1 class="hero-h1 text-center text-[2.75rem] sm:text-5xl lg:text-[4.5rem] font-extrabold tracking-[-0.04em] leading-[0.95] mb-6">
+      Más ventas. Menos costos.<br>
+      <span class="gradient-text">IA real construida para tu negocio.</span>
+    </h1>
+
+    <p class="text-center text-lg sm:text-xl text-zk-text2 max-w-3xl mx-auto mb-3 leading-relaxed">
+      Construimos sistemas de inteligencia artificial que <span class="text-zk-text font-medium">atraen clientes nuevos, recuperan ventas perdidas y automatizan tu operación.</span>
+    </p>
+    <p class="text-center text-base text-zk-muted max-w-2xl mx-auto mb-10">
+      Cuéntanos tu negocio en una caja de texto. En 30 segundos te entregamos una propuesta real con stack, precios y timeline. Sin agendar nada. Sin email para verla.
+    </p>
+
+    <div id="demo-container" class="relative max-w-3xl mx-auto">
+
+      <div id="demo-input" class="relative bg-gradient-to-br from-zk-surface to-zk-surface2 border border-zk-border2 rounded-2xl p-2 shadow-2xl shadow-black/60 transition-all duration-300">
+        <div class="flex items-center justify-between px-4 pt-3 pb-2 text-xs font-mono text-zk-muted">
+          <div class="flex items-center gap-2">
+            <div class="flex gap-1.5">
+              <div class="w-2.5 h-2.5 rounded-full bg-[#FF5F57]"></div>
+              <div class="w-2.5 h-2.5 rounded-full bg-[#FEBC2E]"></div>
+              <div class="w-2.5 h-2.5 rounded-full bg-[#28C840]"></div>
+            </div>
+            <span class="ml-2">propuesta.zenkai → describe tu negocio</span>
+          </div>
+          <span class="text-zk-success">● en vivo</span>
+        </div>
+
+        <textarea
+          id="demo-textarea"
+          rows="5"
+          maxlength="600"
+          placeholder="Tengo una clínica dental en Medellín, somos 3 doctores. Queremos agendar citas por WhatsApp y reducir el 25% de no-shows que tenemos…"
+          class="w-full bg-transparent text-zk-text placeholder:text-zk-muted text-base px-5 py-3 resize-none focus:outline-none font-sans leading-relaxed"
+        ></textarea>
+
+        <div class="flex items-center justify-between gap-3 px-4 pb-3 pt-1">
+          <div class="text-xs font-mono text-zk-muted flex items-center gap-2">
+            <span id="char-count" class="counter-num">0</span>
+            <span>/ 80 mínimos</span>
+            <span class="hidden sm:inline text-zk-muted">·</span>
+            <span class="hidden sm:inline text-zk-muted">ESP · EN · PT</span>
+          </div>
+          <button
+            id="generate-btn"
+            disabled
+            class="btn-primary text-white font-semibold text-sm px-6 py-3 rounded-xl disabled:opacity-30 disabled:cursor-not-allowed disabled:transform-none flex items-center gap-2 group"
+          >
+            <span>Generar propuesta</span>
+            <span class="hidden sm:inline text-white/70 text-xs font-mono">→ 30s</span>
+            <svg class="w-4 h-4 group-hover:translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div id="demo-loading" class="hidden bg-gradient-to-br from-zk-surface to-zk-surface2 border border-zk-border2 rounded-2xl p-8 shadow-2xl shadow-black/60">
+        <div class="flex items-center gap-3 mb-7">
+          <div class="relative flex h-3 w-3">
+            <span class="absolute inline-flex h-full w-full rounded-full bg-zk-accent opacity-75" style="animation: pulseRing 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;"></span>
+            <span class="relative inline-flex rounded-full h-3 w-3 bg-zk-accent"></span>
+          </div>
+          <div>
+            <div class="text-sm font-medium text-zk-text">Analizando con Claude Sonnet 4.6</div>
+            <div class="text-xs font-mono text-zk-muted">Tiempo estimado: 15-30 segundos</div>
+          </div>
+        </div>
+
+        <div class="space-y-5 font-mono text-sm">
+          <div class="step-line flex items-start gap-3">
+            <div class="mt-0.5 w-5 h-5 rounded-full bg-zk-accent/20 border border-zk-accent flex items-center justify-center flex-shrink-0">
+              <svg class="w-3 h-3 text-zk-accent" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            </div>
+            <div class="flex-1">
+              <div class="text-zk-text">Analizando tu negocio</div>
+              <div class="mt-0.5 text-xs text-zk-muted">Identificando sector, tamaño, tier y nivel de complejidad</div>
+            </div>
+          </div>
+          <div class="step-line delay-1 flex items-start gap-3">
+            <div class="mt-0.5 w-5 h-5 rounded-full bg-zk-accent/20 border border-zk-accent flex items-center justify-center flex-shrink-0">
+              <svg class="w-3 h-3 text-zk-accent" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            </div>
+            <div class="flex-1">
+              <div class="text-zk-text">Diseñando arquitectura técnica</div>
+              <div class="mt-0.5 text-xs text-zk-muted">Departamentos involucrados · agentes IA a activar · integraciones</div>
+            </div>
+          </div>
+          <div class="step-line delay-2 flex items-start gap-3">
+            <div class="mt-0.5 w-5 h-5 rounded-full bg-zk-accent/20 border border-zk-accent flex items-center justify-center flex-shrink-0">
+              <svg class="w-3 h-3 text-zk-accent" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            </div>
+            <div class="flex-1">
+              <div class="text-zk-text">Calculando dos rutas</div>
+              <div class="mt-0.5 text-xs text-zk-muted">Stack real · costos operativos reales · precio mínimo según fórmula matemática</div>
+            </div>
+          </div>
+          <div class="step-line delay-3 flex items-start gap-3">
+            <div class="mt-0.5 w-5 h-5 rounded-full bg-zk-accent/20 border border-zk-accent flex items-center justify-center flex-shrink-0">
+              <svg class="w-3 h-3 text-zk-accent" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            </div>
+            <div class="flex-1">
+              <div class="text-zk-text">Generando recomendación + próximos pasos</div>
+              <div class="mt-0.5 text-xs text-zk-muted">Acción para esta semana · acción para este mes · acción para el trimestre</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-8 h-1 bg-zk-surface3 rounded-full overflow-hidden">
+          <div id="progress-bar" class="h-full bg-gradient-to-r from-zk-accent via-zk-accent3 to-zk-accent transition-all duration-[8000ms] ease-linear" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <div id="demo-proposal" class="hidden space-y-6"></div>
+
+    </div>
+
+    <div class="mt-7 flex flex-wrap justify-center gap-x-7 gap-y-2.5 text-xs text-zk-muted">
+      <span class="flex items-center gap-1.5"><svg class="w-3.5 h-3.5 text-zk-success" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg> Sin email para ver la propuesta</span>
+      <span class="flex items-center gap-1.5"><svg class="w-3.5 h-3.5 text-zk-success" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg> Sin tarjeta · sin compromiso</span>
+      <span class="flex items-center gap-1.5"><svg class="w-3.5 h-3.5 text-zk-success" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg> Tu información no se vende</span>
+    </div>
+
+    <div class="mt-16 grid grid-cols-2 md:grid-cols-4 gap-px bg-zk-border rounded-2xl overflow-hidden">
+      <div class="stat-card bg-zk-bg p-6 text-center">
+        <div class="text-3xl lg:text-4xl font-bold text-zk-text counter-num">30s</div>
+        <div class="text-xs font-mono text-zk-muted mt-1 uppercase tracking-wider">Tiempo de propuesta</div>
+      </div>
+      <div class="stat-card bg-zk-bg p-6 text-center">
+        <div class="text-3xl lg:text-4xl font-bold text-zk-text counter-num">12</div>
+        <div class="text-xs font-mono text-zk-muted mt-1 uppercase tracking-wider">Agentes IA conectados</div>
+      </div>
+      <div class="stat-card bg-zk-bg p-6 text-center">
+        <div class="text-3xl lg:text-4xl font-bold text-zk-text counter-num">$90</div>
+        <div class="text-xs font-mono text-zk-muted mt-1 uppercase tracking-wider">Plan inicial / mes</div>
+      </div>
+      <div class="stat-card bg-zk-bg p-6 text-center">
+        <div class="text-3xl lg:text-4xl font-bold text-zk-text counter-num">5d</div>
+        <div class="text-xs font-mono text-zk-muted mt-1 uppercase tracking-wider">Primer entregable</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<script>
+  // Hero demo · char counter, placeholder rotativo, simulación de loading
+  // Sprint 3 reemplazará el setTimeout de 8s por fetch al /api/protocolo
+  const placeholders = [
+    'Tengo una clínica dental en Medellín, somos 3 doctores. Queremos agendar citas por WhatsApp y reducir el 25% de no-shows que tenemos…',
+    'Vendo ropa por Instagram, tengo Shopify, facturo $12K USD/mes. Quiero recuperar carritos abandonados y entender qué ads me generan ventas…',
+    'Tengo restaurante en Bogotá, 8K seguidores. 70% de pedidos llegan por Rappi que se queda con 30%. Quiero pedidos directos por WhatsApp…',
+    'Soy abogado independiente en Barcelona, 8 años de experiencia. Paso más tiempo redactando propuestas que cerrando casos…',
+  ];
+
+  const textarea = document.getElementById('demo-textarea') as HTMLTextAreaElement | null;
+  const charCount = document.getElementById('char-count');
+  const generateBtn = document.getElementById('generate-btn') as HTMLButtonElement | null;
+  const demoInput = document.getElementById('demo-input');
+  const demoLoading = document.getElementById('demo-loading');
+  const demoProposal = document.getElementById('demo-proposal');
+  const progressBar = document.getElementById('progress-bar');
+
+  if (textarea && charCount && generateBtn && demoInput && demoLoading && demoProposal && progressBar) {
+    let phIndex = 0;
+    setInterval(() => {
+      if (textarea.value === '') {
+        phIndex = (phIndex + 1) % placeholders.length;
+        textarea.placeholder = placeholders[phIndex];
+      }
+    }, 4500);
+
+    textarea.addEventListener('input', (e) => {
+      const target = e.target as HTMLTextAreaElement;
+      const len = target.value.length;
+      charCount.textContent = String(len);
+      if (len >= 80) {
+        generateBtn.disabled = false;
+        demoInput.classList.add('textarea-glow');
+      } else {
+        generateBtn.disabled = true;
+        demoInput.classList.remove('textarea-glow');
+      }
+    });
+
+    generateBtn.addEventListener('click', () => {
+      demoInput.classList.add('hidden');
+      demoLoading.classList.remove('hidden');
+      // Trigger progress bar animation (CSS transition de 8s definido en class duration-[8000ms])
+      requestAnimationFrame(() => {
+        progressBar.style.width = '100%';
+      });
+      // Sprint 2: render mock después de 8s. Sprint 3 reemplaza por fetch real.
+      setTimeout(() => {
+        demoLoading.classList.add('hidden');
+        demoProposal.classList.remove('hidden');
+        demoProposal.innerHTML = `
+          <div class="bg-gradient-to-br from-zk-surface to-zk-surface2 border border-zk-border2 rounded-2xl p-8 shadow-2xl shadow-black/60">
+            <div class="flex items-center gap-2 text-xs font-mono text-zk-success mb-4">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              Propuesta generada · Sprint 3 conectará al endpoint real
+            </div>
+            <h3 class="text-2xl font-bold mb-3">Esta es una propuesta mock</h3>
+            <p class="text-zk-text2 text-sm leading-relaxed mb-6">
+              En Sprint 3 este botón llamará a <code class="font-mono text-zk-text bg-zk-bg2 px-1.5 py-0.5 rounded">POST /api/protocolo</code> con el texto que escribiste y vas a recibir tu propuesta real generada por Claude Sonnet 4.6 (sector detectado · tier recomendado · stack · timeline · inversión mensual). Por ahora la UI completa, el endpoint backend ya existe y validado, falta cablear el fetch.
+            </p>
+            <button id="reset-demo" class="btn-ghost text-sm font-medium text-zk-text px-5 py-2.5 rounded-lg">Probar de nuevo</button>
+          </div>
+        `;
+        const resetBtn = document.getElementById('reset-demo');
+        if (resetBtn) {
+          resetBtn.addEventListener('click', () => {
+            demoProposal.classList.add('hidden');
+            demoProposal.innerHTML = '';
+            demoInput.classList.remove('hidden');
+            textarea.value = '';
+            charCount.textContent = '0';
+            generateBtn.disabled = true;
+            demoInput.classList.remove('textarea-glow');
+            progressBar.style.width = '0%';
+          });
+        }
+      }, 8000);
+    });
+  }
+</script>

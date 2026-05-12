@@ -1,0 +1,91 @@
+---
+import { Image } from 'astro:assets';
+import logoSquare from '../../assets/brand/zenkai-logo-square.png';
+import logoHorizontal from '../../assets/brand/zenkai-logo-horizontal.png';
+---
+<footer class="border-t border-zk-border bg-zk-bg2 relative overflow-hidden">
+
+  <div class="relative max-w-7xl mx-auto px-5 lg:px-8 py-16">
+
+    <div class="grid lg:grid-cols-5 gap-10 mb-12">
+
+      <div class="lg:col-span-2">
+        <div class="flex items-center gap-3 mb-5">
+          <Image
+            src={logoSquare}
+            alt="ZENKAI"
+            width={40}
+            height={40}
+            format="webp"
+            class="w-10 h-10 rounded-lg object-cover ring-1 ring-zk-border"
+          />
+          <div>
+            <div class="font-bold text-lg">ZENKAI</div>
+            <div class="text-[10px] font-mono text-zk-text2 mt-0.5">AI · GROWTH SYSTEMS</div>
+          </div>
+        </div>
+        <p class="text-sm text-zk-text2 leading-relaxed mb-6 max-w-sm">
+          Construimos sistemas de IA que generan ventas, reducen costos y automatizan operaciones. Tu propuesta gratis en 30 segundos.
+        </p>
+        <div class="space-y-2 text-sm">
+          <a href="mailto:hola@zenkai.systems" class="flex items-center gap-2 text-zk-text2 hover:text-zk-text transition group">
+            <svg class="w-4 h-4 group-hover:text-zk-accent transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+            <span class="font-mono">hola@zenkai.systems</span>
+          </a>
+          <a href="https://wa.me/573226272302" class="flex items-center gap-2 text-zk-text2 hover:text-zk-text transition group">
+            <svg class="w-4 h-4 group-hover:text-[#25D366] transition" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448L.057 24z"/></svg>
+            <span class="font-mono">+57 322 627 2302</span>
+          </a>
+        </div>
+      </div>
+
+      <div>
+        <div class="text-xs font-mono text-zk-muted uppercase tracking-wider mb-4">Producto</div>
+        <ul class="space-y-2 text-sm">
+          <li><a href="#hero-demo" class="text-zk-text2 hover:text-zk-text transition">Probar la demo</a></li>
+          <li><a href="#planes" class="text-zk-text2 hover:text-zk-text transition">Planes</a></li>
+          <li><a href="#sectores" class="text-zk-text2 hover:text-zk-text transition">Sectores</a></li>
+          <li><a href="#" class="text-zk-text2 hover:text-zk-text transition">Stack técnico</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="text-xs font-mono text-zk-muted uppercase tracking-wider mb-4">Sectores</div>
+        <ul class="space-y-2 text-sm">
+          <li><a href="#sectores" class="text-zk-text2 hover:text-zk-text transition">E-commerce</a></li>
+          <li><a href="#sectores" class="text-zk-text2 hover:text-zk-text transition">Servicios pro</a></li>
+          <li><a href="#sectores" class="text-zk-text2 hover:text-zk-text transition">Clínicas & Salud</a></li>
+          <li><a href="#sectores" class="text-zk-text2 hover:text-zk-text transition">Restaurantes</a></li>
+          <li><a href="#sectores" class="text-zk-text2 hover:text-zk-text transition">Ver todos</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="text-xs font-mono text-zk-muted uppercase tracking-wider mb-4">Empresa</div>
+        <ul class="space-y-2 text-sm">
+          <li><a href="#como-funciona" class="text-zk-text2 hover:text-zk-text transition">Cómo funciona</a></li>
+          <li><a href="#faq" class="text-zk-text2 hover:text-zk-text transition">FAQ</a></li>
+          <li><a href="https://wa.me/573226272302" class="text-zk-text2 hover:text-zk-text transition">WhatsApp directo</a></li>
+          <li><a href="#" class="text-zk-text2 hover:text-zk-text transition">Política de privacidad</a></li>
+        </ul>
+      </div>
+
+    </div>
+
+    <div class="border-t border-zk-border pt-10 pb-2">
+      <Image
+        src={logoHorizontal}
+        alt="ZENKAI · AI Growth Systems"
+        width={672}
+        height={448}
+        format="webp"
+        class="w-full max-w-2xl mx-auto opacity-40 hover:opacity-60 transition"
+      />
+    </div>
+
+    <div class="border-t border-zk-border pt-6 flex flex-col sm:flex-row justify-between gap-4 text-xs text-zk-muted">
+      <div>© 2026 ZENKAI Growth Systems · Construido remoto · Operando en LATAM y Europa</div>
+      <div class="font-mono">Hecho con Claude · Astro · Vercel</div>
+    </div>
+  </div>
+</footer>
