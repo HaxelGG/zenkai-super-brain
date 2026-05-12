@@ -35,8 +35,13 @@ export const createDemo = (record: DemoRecord): Promise<{ id: string }> =>
       reject(err);
       return;
     }
-    // El SDK v0.12 acepta callback estilo node · tipado del package es laxo, casteamos
-    const fields = { ...record } as Record<string, unknown>;
+    // El SDK v0.12 acepta callback estilo node · tipado del package es laxo, casteamos.
+    // created_at es dateTime manual en la tabla (no createdTime auto) · seteamos ISO UTC
+    // (Airtable lo muestra en la TZ configurada, ej. America/Bogota).
+    const fields = {
+      ...record,
+      created_at: new Date().toISOString(),
+    } as Record<string, unknown>;
     base(TABLE_NAME).create(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       [{ fields }] as any,

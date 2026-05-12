@@ -54,8 +54,9 @@ export const POST: APIRoute = async ({ request }) => {
   }
 
   // 4 · Persistir en Airtable demos (best-effort · no bloquea response si falla)
+  let airtableRecordId: string | undefined;
   try {
-    await createDemo({
+    const created = await createDemo({
       texto_usuario: texto,
       sector_detectado: result.data.sector_detectado,
       tier_recomendado: result.data.tier_recomendado,
@@ -64,6 +65,7 @@ export const POST: APIRoute = async ({ request }) => {
       email_capturado: email,
       whatsapp_capturado: whatsapp,
     });
+    airtableRecordId = created.id;
   } catch (err) {
     console.error('[lead-demo] airtable persistence failed:', err);
   }
@@ -82,10 +84,15 @@ export const POST: APIRoute = async ({ request }) => {
     }
   }
 
-  return json(200, {
-    ...result.data,
-    rateLimit: { remaining: rl.remaining, limit: rl.limit, bypassed: rl.bypassed === true },
-  });
+  const successHeaders: Record<string, string> = { 'content-type': 'application/json' };
+  if (airtableRecordId) successHeaders['x-airtable-record-id'] = airtableRecordId;
+  return new Response(
+    JSON.stringify({
+      ...result.data,
+      rateLimit: { remaining: rl.remaining, limit: rl.limit, bypassed: rl.bypassed === true },
+    }),
+    { status: 200, headers: successHeaders },
+  );
 };
 
 const json = (status: number, payload: unknown): Response =>

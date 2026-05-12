@@ -115,6 +115,22 @@ describe('POST /api/lead-demo', () => {
     expect(res.status).toBe(200);
   });
 
+  it('expone x-airtable-record-id en response headers cuando persistencia OK', async () => {
+    mockGenerate.mockResolvedValueOnce({ ok: true, data: validProposal });
+    mockCreateDemo.mockResolvedValueOnce({ id: 'recABC123' });
+    const res = await POST({ request: buildRequest({ texto: TEXTO }) } as any);
+    expect(res.status).toBe(200);
+    expect(res.headers.get('x-airtable-record-id')).toBe('recABC123');
+  });
+
+  it('NO expone x-airtable-record-id cuando persistencia falla (best-effort)', async () => {
+    mockGenerate.mockResolvedValueOnce({ ok: true, data: validProposal });
+    mockCreateDemo.mockRejectedValueOnce(new Error('airtable down'));
+    const res = await POST({ request: buildRequest({ texto: TEXTO }) } as any);
+    expect(res.status).toBe(200);
+    expect(res.headers.get('x-airtable-record-id')).toBeNull();
+  });
+
   it('extrae IP de x-forwarded-for y la hashea para rate limit', async () => {
     mockGenerate.mockResolvedValueOnce({ ok: true, data: validProposal });
     await POST({
