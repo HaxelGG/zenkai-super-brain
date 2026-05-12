@@ -1,0 +1,172 @@
+---
+export const prerender = true;
+import WebLayout from '../layouts/WebLayout.astro';
+
+const updated = '12 de mayo de 2026';
+---
+<WebLayout
+  title="Política de privacidad · ZENKAI"
+  description="Cómo tratamos tus datos en ZENKAI Growth Systems · qué guardamos, cuánto tiempo, con quién compartimos."
+  noindex={false}
+>
+  <article class="privacy-page">
+    <div class="privacy-wrap">
+      <header>
+        <p class="eyebrow">Última actualización: {updated}</p>
+        <h1>Política de privacidad</h1>
+        <p class="lead">
+          ZENKAI Growth Systems trata tus datos con el principio de <strong>recopilar lo mínimo necesario</strong> para entregarte valor. Esta página explica qué datos guardamos, por qué, cuánto tiempo y con quién los compartimos.
+        </p>
+      </header>
+
+      <h2>1 · Datos que guardamos</h2>
+
+      <h3>Si solo probás la demo (sin dejar contacto)</h3>
+      <ul>
+        <li><strong>Texto que escribís</strong> en el textarea de "Generar propuesta": se procesa con Claude (Anthropic) para generar la propuesta. Se guarda en nuestra base interna (Airtable) para mejorar el sistema. <em>No se asocia a tu identidad</em>.</li>
+        <li><strong>Hash SHA256 de tu IP</strong>: usado únicamente para el rate limit (5 generaciones por hora por IP). No guardamos la IP en claro.</li>
+        <li><strong>Timestamp</strong> del request.</li>
+      </ul>
+
+      <h3>Si nos das tu email o WhatsApp</h3>
+      <ul>
+        <li><strong>Email o número de WhatsApp</strong>: se asocia al record de tu propuesta para mandártela por correo o mensaje. Lo guardamos para responderte específicamente sobre <em>esa</em> propuesta.</li>
+        <li><strong>NO te suscribimos</strong> a newsletter ni listas de difusión sin tu consentimiento explícito.</li>
+      </ul>
+
+      <h2>2 · Con quién compartimos tus datos</h2>
+      <ul>
+        <li><strong>Anthropic</strong> (Claude API): procesa el texto de tu textarea para generar la propuesta. Anthropic <strong>no entrena</strong> sus modelos con datos de la API según su política comercial.</li>
+        <li><strong>Airtable</strong>: base de datos donde guardamos los records (texto + propuesta + email/whatsapp si los diste).</li>
+        <li><strong>Resend</strong>: servicio que envía el email con la propuesta cuando dejás tu correo.</li>
+        <li><strong>Upstash Redis</strong>: almacena solo el hash de IP para rate limit (no datos personales).</li>
+        <li><strong>Vercel</strong>: hosting de la landing y los endpoints. Tiene acceso operativo a logs de servidor (sin contenido de propuestas).</li>
+      </ul>
+      <p>
+        <strong>NO vendemos data a terceros. Nunca.</strong> No usamos tus datos para retargeting publicitario externo.
+      </p>
+
+      <h2>3 · Cuánto tiempo guardamos tus datos</h2>
+      <ul>
+        <li><strong>Records de demo sin contacto</strong>: indefinidamente para mejorar el sistema (datos no identificables).</li>
+        <li><strong>Records con email/WhatsApp</strong>: hasta que nos pidas eliminarlos (escribiendo a <a href="mailto:hola@zenkai.systems">hola@zenkai.systems</a>).</li>
+        <li><strong>Hash de IP en Upstash</strong>: 1 hora (ventana del rate limit). Después se borra automáticamente.</li>
+      </ul>
+
+      <h2>4 · Tus derechos</h2>
+      <ul>
+        <li><strong>Acceso</strong>: pedinos copia de los datos que tenemos sobre vos.</li>
+        <li><strong>Rectificación</strong>: pedinos corregir datos incorrectos.</li>
+        <li><strong>Eliminación</strong>: pedinos borrar todos tus datos.</li>
+        <li><strong>Portabilidad</strong>: pedinos los datos en formato JSON.</li>
+      </ul>
+      <p>Para cualquiera de estos derechos: <a href="mailto:hola@zenkai.systems">hola@zenkai.systems</a>. Respondemos en menos de 7 días hábiles.</p>
+
+      <h2>5 · Cookies</h2>
+      <p>
+        Esta landing usa <strong>localStorage</strong> y <strong>sessionStorage</strong> del navegador para:
+      </p>
+      <ul>
+        <li>Recordar tu preferencia de moneda (USD/COP/EUR/MXN).</li>
+        <li>Recordar si cerraste el banner de oferta 50% off (para no volver a mostrártelo en la misma sesión).</li>
+      </ul>
+      <p>
+        No usamos cookies de tracking de terceros (Google Analytics, Facebook Pixel, etc.). Solo Vercel Analytics propio para métricas agregadas anónimas.
+      </p>
+
+      <h2>6 · Cambios en esta política</h2>
+      <p>
+        Si cambiamos algo material, actualizamos la fecha al inicio de la página y avisamos por email a los clientes activos.
+      </p>
+
+      <h2>7 · Contacto</h2>
+      <p>
+        ZENKAI Growth Systems · Pereira, Colombia<br>
+        Email: <a href="mailto:hola@zenkai.systems">hola@zenkai.systems</a><br>
+        WhatsApp: <a href="https://wa.me/573226272302">+57 322 627 2302</a>
+      </p>
+
+      <p class="back">
+        <a href="/" class="back-link">← Volver al inicio</a>
+      </p>
+    </div>
+  </article>
+</WebLayout>
+
+<style>
+  .privacy-page {
+    padding: 7rem 1.25rem 5rem;
+    min-height: 100vh;
+  }
+  @media (min-width: 1024px) {
+    .privacy-page { padding: 9rem 2rem 6rem; }
+  }
+  .privacy-wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    color: #9999AE;
+    line-height: 1.7;
+    font-size: 15px;
+  }
+  .eyebrow {
+    font-family: 'Geist Mono', 'JetBrains Mono Variable', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: #5A5A70;
+    margin-bottom: 1rem;
+  }
+  .privacy-wrap h1 {
+    color: #F5F5FA;
+    font-size: 2.5rem;
+    font-weight: 700;
+    line-height: 1.1;
+    margin: 0 0 1.25rem;
+  }
+  .privacy-wrap .lead {
+    font-size: 17px;
+    color: #C5C5D6;
+    margin-bottom: 3rem;
+  }
+  .privacy-wrap h2 {
+    color: #F5F5FA;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 2.5rem 0 1rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #1F1F2C;
+  }
+  .privacy-wrap h3 {
+    color: #F5F5FA;
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin: 1.5rem 0 0.5rem;
+  }
+  .privacy-wrap p { margin: 0.75rem 0; }
+  .privacy-wrap ul {
+    margin: 0.75rem 0 1rem;
+    padding-left: 1.25rem;
+  }
+  .privacy-wrap li {
+    margin: 0.4rem 0;
+  }
+  .privacy-wrap strong { color: #F5F5FA; }
+  .privacy-wrap a {
+    color: #4A9EFF;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(74,158,255,0.3);
+    transition: border-color .2s;
+  }
+  .privacy-wrap a:hover { border-bottom-color: #4A9EFF; }
+  .back {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid #1F1F2C;
+  }
+  .back-link {
+    font-family: 'Geist Mono', 'JetBrains Mono Variable', monospace;
+    font-size: 13px;
+    border-bottom: none !important;
+  }
+  .back-link:hover { color: #7DB1FF; }
+</style>
