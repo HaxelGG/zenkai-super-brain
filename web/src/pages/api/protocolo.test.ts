@@ -72,6 +72,27 @@ describe('POST /api/protocolo', () => {
     expect(res.status).toBe(401);
   });
 
+  it('200 con Authorization: Bearer · auth header alternativo', async () => {
+    mockCreate.mockResolvedValueOnce(validModelResponse);
+    const res = await POST({
+      request: buildRequest({
+        json: { texto: TEXTO_VALIDO },
+        headers: { 'authorization': 'Bearer test-secret' },
+      }),
+    } as any);
+    expect(res.status).toBe(200);
+  });
+
+  it('401 con Authorization: Bearer wrong-token', async () => {
+    const res = await POST({
+      request: buildRequest({
+        json: { texto: TEXTO_VALIDO },
+        headers: { 'authorization': 'Bearer wrong-token' },
+      }),
+    } as any);
+    expect(res.status).toBe(401);
+  });
+
   it('400 con texto menor a 80 chars', async () => {
     const res = await POST({
       request: buildRequest({

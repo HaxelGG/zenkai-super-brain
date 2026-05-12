@@ -1,15 +1,13 @@
 ---
 // web/src/components/landing/DemoSection.astro
-// v3.3 Sprint 2.5 · Demo movido fuera del hero
-// El textarea ahora es la SECCIÓN 5, después de Hero → Problema → Diagrama → Stats
-// Ya no bloquea al visitante recién llegado.
+// v3.3 Sprint 2.5 + Sprint 3 · Demo cableado al endpoint real /api/lead-demo
+// Tres estados: input → loading (mín 8s) → propuesta real renderizada del JSON
 ---
 
 <section id="demo" class="relative py-24 lg:py-32 border-t border-zk-border/50 overflow-hidden">
 
   <div class="relative max-w-4xl mx-auto px-5 lg:px-8 z-10">
 
-    <!-- Heading -->
     <div class="text-center mb-12">
       <div class="section-badge">
         <span class="section-badge-line warm"></span>
@@ -25,10 +23,9 @@
       </p>
     </div>
 
-    <!-- DEMO BOX -->
     <div id="demo-container" class="relative">
 
-      <!-- ESTADO 1 · INPUT -->
+      {/* ESTADO 1 · INPUT */}
       <div id="demo-input" class="demo-box">
         <div class="flex items-center justify-between px-4 pt-3 pb-2 text-xs font-mono text-zk-muted">
           <div class="flex items-center gap-2">
@@ -71,11 +68,76 @@
         </div>
       </div>
 
-      <!-- AQUÍ van los estados loading + propuesta (mismo código que el HeroDemo actual) -->
-      <!-- Se reutilizan tal cual los div #demo-loading y #demo-proposal -->
+      {/* ESTADO 2 · LOADING (mín 8s · UX) */}
+      <div id="demo-loading" class="hidden demo-box p-8">
+        <div class="flex items-center gap-3 mb-7">
+          <div class="relative flex h-3 w-3">
+            <span class="absolute inline-flex h-full w-full rounded-full bg-zk-accent opacity-75 animate-ping"></span>
+            <span class="relative inline-flex rounded-full h-3 w-3 bg-zk-accent"></span>
+          </div>
+          <div>
+            <div class="text-sm font-medium text-zk-text">Analizando con Claude Sonnet 4.6</div>
+            <div class="text-xs font-mono text-zk-muted">Tiempo estimado: 15-30 segundos</div>
+          </div>
+        </div>
+
+        <div class="space-y-4 font-mono text-sm">
+          <div class="step-line flex items-start gap-3">
+            <div class="step-check"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></div>
+            <div class="flex-1">
+              <div class="text-zk-text">Analizando tu negocio</div>
+              <div class="mt-0.5 text-xs text-zk-muted">Sector, tamaño, complejidad, tier recomendado</div>
+            </div>
+          </div>
+          <div class="step-line delay-1 flex items-start gap-3">
+            <div class="step-check"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></div>
+            <div class="flex-1">
+              <div class="text-zk-text">Diseñando arquitectura técnica</div>
+              <div class="mt-0.5 text-xs text-zk-muted">Agentes IA · integraciones · stack</div>
+            </div>
+          </div>
+          <div class="step-line delay-2 flex items-start gap-3">
+            <div class="step-check"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></div>
+            <div class="flex-1">
+              <div class="text-zk-text">Calculando inversión y timeline</div>
+              <div class="mt-0.5 text-xs text-zk-muted">Precio mínimo según fórmula matemática</div>
+            </div>
+          </div>
+          <div class="step-line delay-3 flex items-start gap-3">
+            <div class="step-check"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></div>
+            <div class="flex-1">
+              <div class="text-zk-text">Generando recomendación + proyección 90 días</div>
+              <div class="mt-0.5 text-xs text-zk-muted">Resultado esperado para tu caso</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-8 h-1 bg-zk-surface3 rounded-full overflow-hidden">
+          <div id="progress-bar" class="h-full bg-gradient-to-r from-zk-accent via-zk-accent3 to-zk-accent transition-all duration-[8000ms] ease-linear" style="width: 0%"></div>
+        </div>
+      </div>
+
+      {/* ESTADO 3 · PROPUESTA (renderizada dinámicamente del JSON) */}
+      <div id="demo-proposal" class="hidden"></div>
+
+      {/* ESTADO 4 · ERROR */}
+      <div id="demo-error" class="hidden demo-box p-6 border-l-4 border-red-500">
+        <div class="flex items-start gap-3">
+          <svg class="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+          <div class="flex-1">
+            <div class="font-medium text-zk-text mb-1">Hubo un problema</div>
+            <div id="demo-error-msg" class="text-sm text-zk-text2 mb-4"></div>
+            <div class="flex gap-2">
+              <button id="demo-retry" class="text-xs font-mono text-zk-accent hover:underline">Probar de nuevo</button>
+              <span class="text-zk-muted">·</span>
+              <a href="https://wa.me/573226272302" class="text-xs font-mono text-zk-accent hover:underline">Escribinos por WhatsApp</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
 
-    <!-- Microcopy de confianza -->
     <div class="mt-7 flex flex-wrap justify-center gap-x-7 gap-y-2.5 text-xs text-zk-muted">
       <span class="flex items-center gap-1.5">
         <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20" style="color: #10D9A0;">
@@ -100,14 +162,11 @@
 </section>
 
 <style>
-  .section-badge {
-    display: inline-flex; align-items: center; gap: 12px;
-    margin-bottom: 20px;
-  }
+  .section-badge { display: inline-flex; align-items: center; gap: 12px; margin-bottom: 20px; }
   .section-badge-line { width: 32px; height: 1px; background: #4A9EFF; }
   .section-badge-line.warm { background: #FF9540; }
   .section-badge-text {
-    font-family: 'Geist Mono', ui-monospace, monospace;
+    font-family: 'Geist Mono', 'JetBrains Mono Variable', ui-monospace, monospace;
     font-size: 11px; color: #4A9EFF;
     letter-spacing: 0.2em; text-transform: uppercase;
   }
@@ -149,48 +208,261 @@
     50% { background-position: 100% 50%; }
   }
 
+  .step-check {
+    margin-top: 2px;
+    width: 20px; height: 20px;
+    border-radius: 9999px;
+    background: rgba(74, 158, 255, 0.2);
+    border: 1px solid #4A9EFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: #4A9EFF;
+  }
+  .step-line { opacity: 0; animation: stepFadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+  .step-line.delay-1 { animation-delay: 0.9s; }
+  .step-line.delay-2 { animation-delay: 2.4s; }
+  .step-line.delay-3 { animation-delay: 4.2s; }
+  @keyframes stepFadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
   .counter-num {
     font-variant-numeric: tabular-nums;
     font-feature-settings: 'tnum';
   }
+
+  .proposal-card {
+    background: linear-gradient(135deg, rgba(13,13,23,0.95), rgba(20,20,35,0.85));
+    border: 1px solid rgba(74, 158, 255, 0.3);
+    border-radius: 16px;
+    padding: 32px;
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6), 0 0 60px rgba(74,158,255,0.15);
+  }
+  .proposal-meta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 10px;
+    background: rgba(74,158,255,0.1);
+    border: 1px solid rgba(74,158,255,0.3);
+    border-radius: 9999px;
+    font-family: 'Geist Mono', 'JetBrains Mono Variable', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #4A9EFF;
+  }
+  .proposal-block {
+    background: rgba(13, 13, 23, 0.5);
+    border: 1px solid #1F1F2C;
+    border-radius: 12px;
+    padding: 16px;
+  }
+  .proposal-label {
+    font-family: 'Geist Mono', 'JetBrains Mono Variable', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: #5A5A70;
+    margin-bottom: 6px;
+  }
+  .proposal-pill {
+    display: inline-block;
+    padding: 4px 10px;
+    background: rgba(74, 158, 255, 0.1);
+    border: 1px solid rgba(74, 158, 255, 0.3);
+    border-radius: 6px;
+    font-family: 'Geist Mono', 'JetBrains Mono Variable', monospace;
+    font-size: 11px;
+    color: #7DA5FF;
+  }
 </style>
 
 <script>
-  // === Placeholder rotation ===
+  /* eslint-disable no-console */
+  const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T | null;
+
   const placeholders = [
-    "Tengo una clínica dental en Medellín, 3 doctores. Queremos agendar citas por WhatsApp y reducir el 25% de no-shows que tenemos…",
-    "Vendo ropa por Instagram, tengo Shopify, facturo $12K USD/mes. Quiero recuperar carritos abandonados y entender qué ads me generan ventas…",
-    "Tengo restaurante en Bogotá, 8K seguidores. 70% de pedidos llegan por Rappi que se queda con 30%. Quiero pedidos directos por WhatsApp…",
-    "Soy abogado independiente en Barcelona, 8 años de experiencia. Paso más tiempo redactando propuestas que cerrando casos…"
+    'Tengo una clínica dental en Medellín, 3 doctores. Queremos agendar citas por WhatsApp y reducir el 25% de no-shows que tenemos…',
+    'Vendo ropa por Instagram, tengo Shopify, facturo $12K USD/mes. Quiero recuperar carritos abandonados y entender qué ads me generan ventas…',
+    'Tengo restaurante en Bogotá, 8K seguidores. 70% de pedidos llegan por Rappi que se queda con 30%. Quiero pedidos directos por WhatsApp…',
+    'Soy abogado independiente en Barcelona, 8 años de experiencia. Paso más tiempo redactando propuestas que cerrando casos…',
   ];
-  const textarea = document.getElementById('demo-textarea') as HTMLTextAreaElement | null;
-  let phIndex = 0;
-  setInterval(() => {
-    if (textarea && textarea.value === '') {
-      phIndex = (phIndex + 1) % placeholders.length;
-      textarea.placeholder = placeholders[phIndex];
-    }
-  }, 4500);
 
-  // === Char counter + glow ===
-  const charCount = document.getElementById('char-count');
-  const generateBtn = document.getElementById('generate-btn');
-  const demoInput = document.getElementById('demo-input');
-  textarea?.addEventListener('input', (e: Event) => {
-    const target = e.target as HTMLTextAreaElement | null;
-    if (!target) return;
-    const len = target.value.length;
-    if (charCount) charCount.textContent = String(len);
-    if (len >= 80) {
-      generateBtn?.removeAttribute('disabled');
-      demoInput?.classList.add('glow');
-    } else {
-      generateBtn?.setAttribute('disabled', '');
-      demoInput?.classList.remove('glow');
-    }
-  });
+  const textarea = $<HTMLTextAreaElement>('demo-textarea');
+  const charCount = $('char-count');
+  const generateBtn = $<HTMLButtonElement>('generate-btn');
+  const demoInput = $('demo-input');
+  const demoLoading = $('demo-loading');
+  const demoProposal = $('demo-proposal');
+  const demoError = $('demo-error');
+  const demoErrorMsg = $('demo-error-msg');
+  const progressBar = $('progress-bar');
+  const retryBtn = $('demo-retry');
 
-  // === Conexión al endpoint /api/protocolo (Sprint 3) ===
-  // El botón "Generar propuesta" llamará a /api/lead-demo cuando esté listo (Sprint 3)
-  // Por ahora reutilizar la lógica del HeroDemo actual o dejar el handler como placeholder
+  if (textarea && charCount && generateBtn && demoInput && demoLoading && demoProposal && demoError && demoErrorMsg && progressBar && retryBtn) {
+
+    // Placeholder rotativo
+    let phIndex = 0;
+    setInterval(() => {
+      if (textarea.value === '') {
+        phIndex = (phIndex + 1) % placeholders.length;
+        textarea.placeholder = placeholders[phIndex];
+      }
+    }, 4500);
+
+    // Char counter + glow
+    textarea.addEventListener('input', (e: Event) => {
+      const target = e.target as HTMLTextAreaElement | null;
+      if (!target) return;
+      const len = target.value.length;
+      charCount.textContent = String(len);
+      if (len >= 80) {
+        generateBtn.disabled = false;
+        demoInput.classList.add('glow');
+      } else {
+        generateBtn.disabled = true;
+        demoInput.classList.remove('glow');
+      }
+    });
+
+    interface Propuesta {
+      headline: string;
+      dolor_identificado: string;
+      solucion: string;
+      agentes_activos: string[];
+      stack: string[];
+      timeline_dias: number;
+      inversion_mensual_usd: number;
+      proyeccion_90d: string;
+    }
+    interface ApiResponse {
+      sector_detectado: string;
+      tier_recomendado: string;
+      propuesta: Propuesta;
+      rateLimit?: { remaining: number; limit: number; bypassed: boolean };
+    }
+
+    const escape = (s: string): string =>
+      s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+    const renderPropuesta = (data: ApiResponse): string => {
+      const p = data.propuesta;
+      const agentes = p.agentes_activos.map((a) => `<span class="proposal-pill">${escape(a)}</span>`).join(' ');
+      const stack = p.stack.map((s) => `<span class="proposal-pill">${escape(s)}</span>`).join(' ');
+      return `
+        <div class="proposal-card space-y-5">
+          <div class="flex flex-wrap gap-2 items-center">
+            <span class="proposal-meta">Sector · ${escape(data.sector_detectado)}</span>
+            <span class="proposal-meta">Tier · ${escape(data.tier_recomendado)}</span>
+          </div>
+          <h3 class="text-2xl font-bold text-zk-text">${escape(p.headline)}</h3>
+          <div class="proposal-block">
+            <div class="proposal-label">Dolor identificado</div>
+            <p class="text-zk-text2 text-sm">${escape(p.dolor_identificado)}</p>
+          </div>
+          <div class="proposal-block">
+            <div class="proposal-label">Solución</div>
+            <p class="text-zk-text2 text-sm">${escape(p.solucion)}</p>
+          </div>
+          <div class="grid sm:grid-cols-2 gap-3">
+            <div class="proposal-block">
+              <div class="proposal-label">Agentes activos</div>
+              <div class="flex flex-wrap gap-1.5">${agentes}</div>
+            </div>
+            <div class="proposal-block">
+              <div class="proposal-label">Stack</div>
+              <div class="flex flex-wrap gap-1.5">${stack}</div>
+            </div>
+            <div class="proposal-block">
+              <div class="proposal-label">Timeline</div>
+              <div class="text-zk-text font-semibold">${p.timeline_dias} días</div>
+            </div>
+            <div class="proposal-block">
+              <div class="proposal-label">Inversión mensual</div>
+              <div class="text-zk-text font-semibold">$${p.inversion_mensual_usd.toLocaleString('en-US')} USD</div>
+            </div>
+          </div>
+          <div class="proposal-block" style="background: linear-gradient(135deg, rgba(30,111,255,0.15), rgba(74,158,255,0.05)); border-color: rgba(74,158,255,0.4);">
+            <div class="proposal-label" style="color: #4A9EFF;">Proyección a 90 días</div>
+            <p class="text-zk-text">${escape(p.proyeccion_90d)}</p>
+          </div>
+          <div class="flex flex-col sm:flex-row gap-3 pt-2">
+            <a href="https://cal.com/zenkai-growth-systems/strategy-call" target="_blank" rel="noopener" class="btn-primary text-white font-semibold px-6 py-3 rounded-xl text-center text-sm">
+              Conversar 30 min · 50% off primer mes
+            </a>
+            <button id="proposal-reset" class="text-sm font-mono text-zk-accent hover:underline">Probar otro negocio</button>
+          </div>
+        </div>
+      `;
+    };
+
+    const reset = () => {
+      demoProposal.innerHTML = '';
+      demoProposal.classList.add('hidden');
+      demoLoading.classList.add('hidden');
+      demoError.classList.add('hidden');
+      demoInput.classList.remove('hidden');
+      textarea.value = '';
+      charCount.textContent = '0';
+      generateBtn.disabled = true;
+      demoInput.classList.remove('glow');
+      progressBar.style.width = '0%';
+    };
+
+    const showError = (msg: string) => {
+      demoLoading.classList.add('hidden');
+      demoProposal.classList.add('hidden');
+      demoError.classList.remove('hidden');
+      demoErrorMsg.textContent = msg;
+    };
+
+    retryBtn.addEventListener('click', () => {
+      demoError.classList.add('hidden');
+      demoInput.classList.remove('hidden');
+    });
+
+    generateBtn.addEventListener('click', async () => {
+      const texto = textarea.value.trim();
+      if (texto.length < 80) return;
+
+      demoInput.classList.add('hidden');
+      demoLoading.classList.remove('hidden');
+      requestAnimationFrame(() => { progressBar.style.width = '100%'; });
+
+      // Mantener mín 8s de loading aunque el endpoint sea más rápido (UX)
+      const minLoading = new Promise((r) => setTimeout(r, 8000));
+      const fetchPromise = fetch('/api/lead-demo', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ texto }),
+      }).then(async (r) => ({ status: r.status, body: await r.json() }));
+
+      try {
+        const [{ status, body }] = await Promise.all([fetchPromise, minLoading]);
+        if (status === 200) {
+          demoProposal.innerHTML = renderPropuesta(body as ApiResponse);
+          demoLoading.classList.add('hidden');
+          demoProposal.classList.remove('hidden');
+          const resetBtn = $('proposal-reset');
+          if (resetBtn) resetBtn.addEventListener('click', reset);
+        } else if (status === 429) {
+          showError('Llegaste al límite de 5 propuestas por hora. Probá más tarde o escribinos por WhatsApp para hablar con un humano.');
+        } else if (status === 403) {
+          showError('Validación de seguridad falló. Recargá la página y probá de nuevo.');
+        } else if (status === 400) {
+          showError('El texto debe tener entre 80 y 600 caracteres.');
+        } else {
+          showError('Hubo un problema generando tu propuesta. Probá de nuevo o escribinos por WhatsApp.');
+          console.error('[demo] unexpected status', status, body);
+        }
+      } catch (err) {
+        showError('No se pudo conectar al servidor. Revisá tu conexión y probá de nuevo.');
+        console.error('[demo] fetch failed', err);
+      }
+    });
+  }
 </script>
