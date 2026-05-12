@@ -4,8 +4,8 @@ import vercel from '@astrojs/vercel';
 
 export default defineConfig({
   site: 'https://zenkai.systems',
-  output: 'static',
+  output: 'server',
   adapter: vercel({ webAnalytics: { enabled: true } }),
-  integrations: [tailwind({ applyBaseStyles: false })],
+  integrations: [tailwind({ applyBaseStyles: true })],
   server: { port: 4322 }
 });

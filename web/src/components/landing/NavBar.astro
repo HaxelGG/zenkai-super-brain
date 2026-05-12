@@ -1,0 +1,85 @@
+---
+import { Image } from 'astro:assets';
+import logoSquare from '../../assets/brand/zenkai-logo-square.png';
+---
+<header class="fixed top-0 left-0 right-0 z-50 nav-blur border-b border-zk-border/50">
+  <div class="max-w-7xl mx-auto px-5 lg:px-8 h-16 flex items-center justify-between">
+
+    <a href="#" class="flex items-center gap-3 group">
+      <Image
+        src={logoSquare}
+        alt="ZENKAI"
+        width={36}
+        height={36}
+        format="webp"
+        loading="eager"
+        class="w-9 h-9 rounded-lg object-cover ring-1 ring-zk-border group-hover:ring-zk-accent transition"
+      />
+      <div class="hidden sm:block leading-none">
+        <div class="font-bold text-base tracking-tight">ZENKAI</div>
+        <div class="text-[10px] font-mono text-zk-text2 mt-0.5">AI · GROWTH SYSTEMS</div>
+      </div>
+    </a>
+
+    <nav class="hidden lg:flex items-center gap-7 text-sm text-zk-text2">
+      <a href="#proyeccion" class="hover:text-zk-text transition">Resultados</a>
+      <a href="#como-funciona" class="hover:text-zk-text transition">Cómo funciona</a>
+      <a href="#diferente" class="hover:text-zk-text transition">Comparativa</a>
+      <a href="#planes" class="hover:text-zk-text transition">Planes</a>
+      <a href="#faq" class="hover:text-zk-text transition">FAQ</a>
+    </nav>
+
+    <div class="flex items-center gap-3">
+      <div class="hidden md:flex items-center text-xs font-mono bg-zk-surface border border-zk-border rounded-lg overflow-hidden">
+        <button class="currency-btn px-2.5 py-1.5 text-zk-text bg-zk-accent" data-currency="USD">USD</button>
+        <button class="currency-btn px-2.5 py-1.5 text-zk-text2 hover:text-zk-text" data-currency="COP">COP</button>
+        <button class="currency-btn px-2.5 py-1.5 text-zk-text2 hover:text-zk-text" data-currency="EUR">EUR</button>
+        <button class="currency-btn px-2.5 py-1.5 text-zk-text2 hover:text-zk-text" data-currency="MXN">MXN</button>
+      </div>
+      <a href="#hero-demo" class="text-sm font-semibold bg-white text-zk-bg px-4 py-2 rounded-lg hover:bg-zk-text2 transition">
+        Probar gratis
+      </a>
+    </div>
+  </div>
+</header>
+
+<script>
+  // Currency toggle · verbatim del HTML v3.2
+  // Actualiza estilos de botones + recalcula elementos .price y .price-monthly via data-usd
+  const rates: Record<string, number> = { USD: 1, COP: 4000, EUR: 0.92, MXN: 17 };
+  const symbols: Record<string, string> = { USD: '$', COP: '$', EUR: '€', MXN: '$' };
+  const suffixes: Record<string, string> = { USD: 'USD', COP: 'COP', EUR: 'EUR', MXN: 'MXN' };
+
+  const applyCurrency = (cur: string) => {
+    document.querySelectorAll<HTMLButtonElement>('.currency-btn').forEach((b) => {
+      const isActive = b.dataset.currency === cur;
+      b.classList.toggle('text-zk-text', isActive);
+      b.classList.toggle('bg-zk-accent', isActive);
+      b.classList.toggle('text-zk-text2', !isActive);
+    });
+    document.querySelectorAll<HTMLElement>('.price, .price-monthly').forEach((el) => {
+      const usd = parseFloat(el.dataset.usd ?? '0');
+      if (Number.isNaN(usd)) return;
+      const converted = Math.round(usd * rates[cur]);
+      const formatted = converted.toLocaleString('en-US');
+      const isMonthly = el.classList.contains('price-monthly');
+      el.innerHTML = isMonthly
+        ? `${symbols[cur]}${formatted}/mes`
+        : `${symbols[cur]}${formatted} <span class="text-sm font-normal text-zk-muted">${suffixes[cur]}</span>`;
+    });
+    try { localStorage.setItem('zk-currency', cur); } catch {}
+  };
+
+  document.querySelectorAll<HTMLButtonElement>('.currency-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const cur = btn.dataset.currency;
+      if (cur) applyCurrency(cur);
+    });
+  });
+
+  // Restore preferencia previa
+  try {
+    const saved = localStorage.getItem('zk-currency');
+    if (saved && ['USD', 'COP', 'EUR', 'MXN'].includes(saved)) applyCurrency(saved);
+  } catch {}
+</script>

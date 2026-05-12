@@ -35,3 +35,4 @@ build/
 web/dist/
 web/.vercel/
 web/.astro/
+.gstack/

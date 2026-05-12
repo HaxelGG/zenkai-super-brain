@@ -4,7 +4,6 @@ interface Props {
   description?: string;
   canonical?: string;
   ogImage?: string;
-  lang?: string;
   noindex?: boolean;
 }
 
@@ -13,7 +12,6 @@ const {
   description = 'Digitalizamos tu empresa con IA. Más ventas, menos costos, procesos automatizados.',
   ogImage = '/brand/og-image.png',
   canonical = Astro.url.href,
-  lang = 'es',
   noindex = false,
 } = Astro.props;
 
@@ -38,8 +36,8 @@ const organizationJsonLd = {
 <link rel="canonical" href={canonical} />
 {noindex && <meta name="robots" content="noindex, nofollow" />}
 
-<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-<link rel="icon" href="/favicon.ico" />
+<link rel="icon" type="image/png" href="/brand/zenkai-logo-square.png" />
+<link rel="apple-touch-icon" href="/brand/zenkai-logo-square.png" />
 
 <!-- Open Graph -->
 <meta property="og:title" content={title} />
@@ -57,4 +55,4 @@ const organizationJsonLd = {
 <meta name="twitter:image" content={ogImage} />
 
 {/* TODO: replace zenkai-logo-square.png with actual square version (currently using horizontal as fallback) */}
-<script type="application/ld+json" set:html={JSON.stringify(organizationJsonLd)} />
+<script is:inline type="application/ld+json" set:html={JSON.stringify(organizationJsonLd)} />
