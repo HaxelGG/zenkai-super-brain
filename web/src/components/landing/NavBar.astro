@@ -23,12 +23,51 @@ import Brand from './Brand.astro';
         <button class="currency-btn px-2.5 py-1.5 text-zk-text2 hover:text-zk-text" data-currency="EUR">EUR</button>
         <button class="currency-btn px-2.5 py-1.5 text-zk-text2 hover:text-zk-text" data-currency="MXN">MXN</button>
       </div>
-      <a href="#hero-demo" class="text-sm font-semibold bg-white text-zk-bg px-4 py-2 rounded-lg hover:bg-zk-text2 transition">
+      <a href="#hero-demo" class="hidden sm:inline-flex text-sm font-semibold bg-white text-zk-bg px-4 py-2 rounded-lg hover:bg-zk-text2 transition">
         Probar gratis
       </a>
+      <button
+        id="mobile-menu-toggle"
+        class="lg:hidden mobile-burger"
+        aria-label="Abrir menú"
+        aria-expanded="false"
+        aria-controls="mobile-menu"
+      >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
     </div>
   </div>
 </header>
+
+{/* Mobile overlay menu · solo visible <lg cuando #mobile-menu-toggle dispara */}
+<div id="mobile-menu" class="mobile-menu" aria-hidden="true">
+  <div class="mobile-menu-backdrop" data-mobile-close></div>
+  <nav class="mobile-menu-panel" role="dialog" aria-label="Navegación móvil">
+    <div class="mobile-menu-header">
+      <Brand variant="default" showTagline={true} />
+      <button class="mobile-close" aria-label="Cerrar menú" data-mobile-close>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+    <ul class="mobile-menu-links">
+      <li><a href="#proyeccion" data-mobile-close>Resultados</a></li>
+      <li><a href="#como-funciona" data-mobile-close>Cómo funciona</a></li>
+      <li><a href="#diferente" data-mobile-close>Comparativa</a></li>
+      <li><a href="#planes" data-mobile-close>Planes</a></li>
+      <li><a href="#sectores" data-mobile-close>Sectores</a></li>
+      <li><a href="#faq" data-mobile-close>FAQ</a></li>
+      <li><a href="/privacy" data-mobile-close>Privacidad</a></li>
+    </ul>
+    <a href="#hero-demo" class="mobile-cta" data-mobile-close>Probar gratis</a>
+  </nav>
+</div>
 
 <script>
   // Currency toggle · verbatim del HTML v3.2
@@ -64,11 +103,35 @@ import Brand from './Brand.astro';
     });
   });
 
-  // Restore preferencia previa
   try {
     const saved = localStorage.getItem('zk-currency');
     if (saved && ['USD', 'COP', 'EUR', 'MXN'].includes(saved)) applyCurrency(saved);
   } catch {}
+
+  // === Mobile hamburger menu ===
+  const burger = document.getElementById('mobile-menu-toggle');
+  const menu = document.getElementById('mobile-menu');
+  const open = () => {
+    if (!menu || !burger) return;
+    menu.classList.add('open');
+    menu.setAttribute('aria-hidden', 'false');
+    burger.setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden';
+  };
+  const close = () => {
+    if (!menu || !burger) return;
+    menu.classList.remove('open');
+    menu.setAttribute('aria-hidden', 'true');
+    burger.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+  };
+  burger?.addEventListener('click', open);
+  document.querySelectorAll('[data-mobile-close]').forEach((el) => {
+    el.addEventListener('click', close);
+  });
+  document.addEventListener('keydown', (e: KeyboardEvent) => {
+    if (e.key === 'Escape' && menu?.classList.contains('open')) close();
+  });
 </script>
 
 <style>
@@ -77,4 +140,109 @@ import Brand from './Brand.astro';
     transition: opacity 0.2s;
   }
   .brand-link:hover { opacity: 0.85; }
+
+  .mobile-burger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    color: #F5F5FA;
+    background: transparent;
+    border: 1px solid #2A2A3A;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .mobile-burger:hover {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(74, 158, 255, 0.4);
+  }
+
+  .mobile-menu {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    display: none;
+  }
+  .mobile-menu.open { display: block; }
+  .mobile-menu-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(3, 3, 5, 0.7);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    animation: fadeIn 0.2s ease;
+  }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .mobile-menu-panel {
+    position: absolute;
+    top: 0; right: 0; bottom: 0;
+    width: 100%;
+    max-width: 320px;
+    background: linear-gradient(180deg, #0D0D17, #080810);
+    border-left: 1px solid #1F1F2C;
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.6);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    animation: slideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @keyframes slideIn {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+  }
+  .mobile-menu-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #1F1F2C;
+    margin-bottom: 20px;
+  }
+  .mobile-close {
+    background: transparent;
+    border: none;
+    color: #9999AE;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 6px;
+    transition: color 0.2s;
+  }
+  .mobile-close:hover { color: #F5F5FA; }
+  .mobile-menu-links {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 24px 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .mobile-menu-links a {
+    display: block;
+    padding: 12px 14px;
+    color: #C5C5D6;
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 500;
+    border-radius: 8px;
+    transition: background 0.2s, color 0.2s;
+  }
+  .mobile-menu-links a:hover {
+    background: rgba(74, 158, 255, 0.08);
+    color: #F5F5FA;
+  }
+  .mobile-cta {
+    display: block;
+    text-align: center;
+    background: white;
+    color: #030305;
+    font-weight: 600;
+    padding: 14px 20px;
+    border-radius: 10px;
+    text-decoration: none;
+    transition: transform 0.2s;
+  }
+  .mobile-cta:hover { transform: translateY(-1px); }
 </style>
