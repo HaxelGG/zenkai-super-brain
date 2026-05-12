@@ -20,6 +20,8 @@ interface CompactTier {
   monthlyUsd: number;
   features: string[];
   ctaLabel: string;
+  /** Si es true, el CTA va a Cal.com en nueva pestaña (Pro/Enterprise). Default: scroll a #hero-demo. */
+  ctaToCalcom?: boolean;
 }
 
 const featured: FeaturedTier[] = [
@@ -75,7 +77,7 @@ const compact: CompactTier[] = [
       'Scoring 1-10 + enrutamiento',
       'Reportes semanales al WhatsApp',
     ],
-    ctaLabel: 'Ver detalle',
+    ctaLabel: 'Probar gratis',
   },
   {
     name: 'Pro',
@@ -90,6 +92,7 @@ const compact: CompactTier[] = [
       'Soporte prioritario · Slack',
     ],
     ctaLabel: 'Agendar consulta',
+    ctaToCalcom: true,
   },
   {
     name: 'Enterprise',
@@ -103,7 +106,8 @@ const compact: CompactTier[] = [
       'Integraciones legacy',
       'SLAs · roadmap trimestral',
     ],
-    ctaLabel: 'Conversar',
+    ctaLabel: 'Agendar consulta',
+    ctaToCalcom: true,
   },
 ];
 
@@ -183,7 +187,11 @@ const calcomLink = 'https://cal.com/zenkai-growth-systems/strategy-call';
               <li class="flex gap-1.5"><span class="text-zk-accent font-bold">+</span> {f}</li>
             ))}
           </ul>
-          <a href="#hero-demo" class="btn-ghost block text-center text-sm font-medium text-zk-text py-2.5 rounded-lg">{t.ctaLabel}</a>
+          {t.ctaToCalcom ? (
+            <a href={calcomLink} target="_blank" rel="noopener" class="btn-ghost block text-center text-sm font-medium text-zk-text py-2.5 rounded-lg">{t.ctaLabel}</a>
+          ) : (
+            <a href="#hero-demo" class="btn-ghost block text-center text-sm font-medium text-zk-text py-2.5 rounded-lg">{t.ctaLabel}</a>
+          )}
         </div>
       ))}
     </div>
