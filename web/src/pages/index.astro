@@ -1,32 +1,41 @@
 ---
 export const prerender = true;
 import WebLayout from '../layouts/WebLayout.astro';
-import HeroDemo from '../components/landing/HeroDemo.astro';
-import Proyeccion90Dias from '../components/landing/Proyeccion90Dias.astro';
-import StatsReales from '../components/landing/StatsReales.astro';
-import ComoFunciona from '../components/landing/ComoFunciona.astro';
+import HeroNuevo from '../components/landing/HeroNuevo.astro';
+import ElProblema from '../components/landing/ElProblema.astro';
 import DiagramaNeural from '../components/landing/DiagramaNeural.astro';
+import StatsReales from '../components/landing/StatsReales.astro';
+import DemoSection from '../components/landing/DemoSection.astro';
+import Proyeccion90Dias from '../components/landing/Proyeccion90Dias.astro';
+import ComoFunciona from '../components/landing/ComoFunciona.astro';
 import Comparativa from '../components/landing/Comparativa.astro';
 import Sectores from '../components/landing/Sectores.astro';
 import Planes from '../components/landing/Planes.astro';
 import VentajasTecnicas from '../components/landing/VentajasTecnicas.astro';
 import FAQ from '../components/landing/FAQ.astro';
 import CTAFinal from '../components/landing/CTAFinal.astro';
+import StickyBar from '../components/landing/StickyBar.astro';
 ---
 <WebLayout
-  title="ZENKAI · AI Growth Systems — Más ventas. Menos costos. IA real."
+  title="ZENKAI · Vendé más sin contratar a nadie. Sin trabajar más horas."
   description="Construimos sistemas de IA que aumentan tus ventas, reducen tus costos y automatizan tu operación. Tu propuesta personalizada en 30 segundos. Gratis."
 >
-  <HeroDemo />
-  <Proyeccion90Dias />
-  <StatsReales />
-  <ComoFunciona />
-  <DiagramaNeural />
-  <Comparativa />
-  <Sectores />
-  <Planes />
-  <VentajasTecnicas />
-  <FAQ />
-  <CTAFinal />
-  {/* Footer + WhatsAppFloat vienen del WebLayout */}
+  {/* Sprint 2.5 v3.3 · nuevo orden visual del fold superior */}
+  {/* NavBar y Footer vienen del WebLayout */}
+
+  <HeroNuevo />              {/* 1 · Hero rediseñado (reemplaza HeroDemo) */}
+  <ElProblema />             {/* 2 · NUEVO · contraste positivo */}
+  <DiagramaNeural />         {/* 3 · SUBIDO · era sección 5 (v4 cinematic bloom + Bezier) */}
+  <StatsReales />            {/* 4 */}
+  <DemoSection />            {/* 5 · MOVIDO · era sección 1 (demo box extraído del hero) */}
+  <Proyeccion90Dias />       {/* 6 */}
+  <ComoFunciona />           {/* 7 */}
+  <Comparativa />            {/* 8 */}
+  <Sectores />               {/* 9 */}
+  <Planes />                 {/* 10 */}
+  <VentajasTecnicas />       {/* 11 */}
+  <FAQ />                    {/* 12 */}
+  <CTAFinal />               {/* 13 */}
+
+  <StickyBar />              {/* fixed bottom · NO es sección */}
 </WebLayout>

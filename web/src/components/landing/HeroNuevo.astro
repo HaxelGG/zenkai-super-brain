@@ -1,0 +1,220 @@
+---
+// web/src/components/landing/HeroNuevo.astro
+// v3.3 Sprint 2.5 · Headline ventas + trust bar + stats comerciales
+// REEMPLAZA al HeroDemo.astro actual (el demo box se extrae a DemoSection.astro)
+---
+
+<section class="relative pt-28 pb-20 lg:pt-36 lg:pb-24 overflow-hidden">
+
+  <!-- Background atmosférico -->
+  <div class="absolute inset-0 pointer-events-none z-0" aria-hidden="true">
+    <div class="absolute inset-0" style="background: radial-gradient(ellipse 80% 60% at 50% 30%, rgba(15, 30, 60, 0.5) 0%, transparent 60%), radial-gradient(ellipse 50% 40% at 80% 20%, rgba(255, 140, 50, 0.03) 0%, transparent 50%), radial-gradient(ellipse 50% 40% at 20% 80%, rgba(30, 111, 255, 0.05) 0%, transparent 50%);"></div>
+  </div>
+
+  <div class="relative max-w-6xl mx-auto px-5 lg:px-8 z-10 text-center">
+
+    <!-- Live badge -->
+    <div class="flex justify-center mb-7">
+      <div class="live-badge">
+        <span class="dot"></span>
+        <span class="text-zk-text">Sistema operando</span>
+        <span class="text-zk-muted">·</span>
+        <span class="text-zk-text2">12 agentes IA · Producción real</span>
+      </div>
+    </div>
+
+    <!-- HEADLINE ORIENTADO A VENTAS -->
+    <h1 class="text-[2.5rem] sm:text-5xl lg:text-[5rem] font-extrabold tracking-[-0.045em] leading-[0.95] mb-6">
+      <span class="gradient-cool">Vendé más.</span><br>
+      <span class="text-zk-text">Sin contratar a nadie.</span><br>
+      <span class="gradient-warm">Sin trabajar más horas.</span>
+    </h1>
+
+    <!-- Sub-headline + segmentador -->
+    <p class="text-lg sm:text-xl text-zk-text2 max-w-2xl mx-auto mb-3 leading-relaxed">
+      Sistemas de IA reales construidos para tu negocio en <strong class="text-zk-text">5 días</strong>.
+    </p>
+    <p class="text-base text-zk-muted max-w-xl mx-auto mb-10">
+      Para empresarios que ya facturan y quieren crecer sin colapsar su operación.
+    </p>
+
+    <!-- TRUST MINI-BAR (4 microcred) -->
+    <div class="flex justify-center mb-10">
+      <div class="trust-bar">
+        <span class="trust-item">
+          <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+          <span>Sin tarjeta · sin email</span>
+        </span>
+        <span class="trust-item">
+          <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+          <span>Primer entregable en <strong>5 días</strong></span>
+        </span>
+        <span class="trust-item">
+          <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+          <span>Desde <strong>$90 USD/mes</strong></span>
+        </span>
+        <span class="trust-item">
+          <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+          <span>Garantía <strong>30 días</strong></span>
+        </span>
+      </div>
+    </div>
+
+    <!-- CTAs DUALES (azul/principal + amber/oferta) -->
+    <div class="flex flex-col sm:flex-row gap-3 justify-center mb-16">
+      <a href="#demo" class="btn-primary text-white font-semibold text-base px-7 py-4 rounded-xl inline-flex items-center justify-center gap-2">
+        <span>Ver propuesta personalizada gratis</span>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+      </a>
+      <a href="https://cal.com/zenkai-growth-systems/strategy-call" target="_blank" rel="noopener" class="btn-warm text-white font-semibold text-base px-7 py-4 rounded-xl inline-flex items-center justify-center gap-2">
+        <span>Agendar 30 min · 50% off primer mes</span>
+      </a>
+    </div>
+
+    <!-- STATS COMERCIALES (reemplaza las técnicas 30s/12/$90/5d) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
+      <div class="stat-card-commercial">
+        <div class="stat-number-big gradient-cool">+40%</div>
+        <div class="stat-label">aumento en ventas</div>
+        <div class="stat-desc">en empresas que conectaron WhatsApp Business AI</div>
+      </div>
+      <div class="stat-card-commercial warm">
+        <div class="stat-number-big gradient-warm">-35%</div>
+        <div class="stat-label">costos de servicio</div>
+        <div class="stat-desc">IA $0.15-2/consulta vs $8-15 humano</div>
+      </div>
+      <div class="stat-card-commercial">
+        <div class="stat-number-big gradient-cool">+30%</div>
+        <div class="stat-label">productividad operativa</div>
+        <div class="stat-desc">sin contratar personal adicional</div>
+      </div>
+      <div class="stat-card-commercial warm">
+        <div class="stat-number-big gradient-warm">5d</div>
+        <div class="stat-label">primer entregable</div>
+        <div class="stat-desc">desde el día que firmás</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<style>
+  .live-badge {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 8px 14px;
+    background: rgba(8, 12, 24, 0.7);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(125, 165, 255, 0.18);
+    border-radius: 100px;
+    font-family: 'Geist Mono', ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+  }
+  .live-badge .dot {
+    position: relative;
+    width: 6px; height: 6px;
+    background: #10D9A0; border-radius: 50%;
+    animation: heroDotPulse 2s ease-in-out infinite;
+  }
+  @keyframes heroDotPulse {
+    0%, 100% { box-shadow: 0 0 8px #10D9A0; }
+    50% { box-shadow: 0 0 18px #10D9A0, 0 0 28px rgba(16, 217, 160, 0.5); }
+  }
+
+  .gradient-cool {
+    background: linear-gradient(135deg, #FFFFFF 0%, #B8D4FF 45%, #4A9EFF 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .gradient-warm {
+    background: linear-gradient(135deg, #FFD89A 0%, #FF8830 50%, #FFB060 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .trust-bar {
+    display: inline-flex; flex-wrap: wrap; align-items: center;
+    justify-content: center; gap: 24px;
+    padding: 14px 24px;
+    background: rgba(8, 12, 24, 0.4);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(125, 165, 255, 0.12);
+    border-radius: 100px;
+  }
+  .trust-item {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 12px; color: #8B95B0; font-weight: 500;
+    white-space: nowrap;
+  }
+  .trust-item svg { color: #10D9A0; flex-shrink: 0; }
+  .trust-item strong { color: #E0E5F0; font-weight: 600; }
+
+  .btn-primary {
+    position: relative; overflow: hidden;
+    background: linear-gradient(135deg, #1E6FFF 0%, #4A9EFF 50%, #1E6FFF 100%);
+    background-size: 200% 200%;
+    animation: heroGradientShift 8s ease infinite;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.25), 0 4px 16px rgba(30,111,255,0.4), 0 0 0 1px rgba(30,111,255,0.6);
+    transition: all .3s cubic-bezier(.16,1,.3,1);
+  }
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.35), 0 16px 40px rgba(30,111,255,0.5), 0 0 60px rgba(30,111,255,0.4);
+  }
+  .btn-primary::before {
+    content: ''; position: absolute; top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+    transition: left .7s ease;
+  }
+  .btn-primary:hover::before { left: 100%; }
+
+  .btn-warm {
+    position: relative; overflow: hidden;
+    background: linear-gradient(135deg, #FF8830 0%, #FFB060 50%, #FF8830 100%);
+    background-size: 200% 200%;
+    animation: heroGradientShift 8s ease infinite;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.25), 0 4px 16px rgba(255,140,50,0.4), 0 0 0 1px rgba(255,140,50,0.6);
+    transition: all .3s cubic-bezier(.16,1,.3,1);
+  }
+  .btn-warm:hover {
+    transform: translateY(-2px);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.35), 0 16px 40px rgba(255,140,50,0.5), 0 0 60px rgba(255,140,50,0.4);
+  }
+  @keyframes heroGradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  .stat-card-commercial {
+    background: rgba(8, 12, 24, 0.5);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(125, 165, 255, 0.15);
+    border-radius: 16px;
+    padding: 24px;
+    text-align: left;
+    transition: all .4s cubic-bezier(.16,1,.3,1);
+    transform-style: preserve-3d;
+  }
+  .stat-card-commercial:hover {
+    transform: translateY(-4px) rotateX(2deg);
+    border-color: rgba(74, 158, 255, 0.4);
+  }
+  .stat-card-commercial.warm:hover {
+    border-color: rgba(255, 165, 70, 0.4);
+  }
+  .stat-number-big {
+    font-size: 3rem; font-weight: 700;
+    letter-spacing: -0.04em; line-height: 1;
+    margin-bottom: 8px;
+  }
+  .stat-label {
+    color: #E0E5F0; font-size: 14px; font-weight: 500;
+    margin-bottom: 4px;
+  }
+  .stat-desc {
+    color: #8B95B0; font-size: 12px; line-height: 1.5;
+  }
+</style>

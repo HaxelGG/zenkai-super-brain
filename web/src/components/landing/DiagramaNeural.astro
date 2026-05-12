@@ -1,196 +1,730 @@
 ---
-// ⭐ La estrella visual: red neural 3D con 12 agentes IA
-// Coordenadas verbatim del HTML standalone (pre-calculadas con math.sin/cos en cliente).
-// Mouse parallax 3D vía script inline.
+// web/src/components/landing/DiagramaNeural.astro
+// v4 · Cinematic neural network · SVG bloom filters + Bezier curves + camera shake
+// Self-contained: estilos y JS están en este archivo, no requiere imports adicionales
+
 import { Image } from 'astro:assets';
 import logoSquare from '../../assets/brand/zenkai-logo-square.png';
-
-interface Node {
-  name: string;
-  left: number;
-  top: number;
-}
-const nodes: Node[] = [
-  { name: 'ZEUS',   left: 50.0,  top: 18.0  },
-  { name: 'APOLLO', left: 72.63, top: 27.37 },
-  { name: 'HERMES', left: 82.0,  top: 50.0  },
-  { name: 'ARES',   left: 72.63, top: 72.63 },
-  { name: 'ATLAS',  left: 50.0,  top: 82.0  },
-  { name: 'NEXUS',  left: 27.37, top: 72.63 },
-  { name: 'MUSE',   left: 18.0,  top: 50.0  },
-  { name: 'LEX',    left: 27.37, top: 27.37 },
-  { name: 'ORACLE', left: 67.23, top: 7.35  },
-  { name: 'ECHO',   left: 92.65, top: 67.23 },
-  { name: 'FORGE',  left: 32.77, top: 92.65 },
-  { name: 'HIVE',   left: 7.35,  top: 32.77 },
-];
-
-interface Line {
-  x1: number;
-  y1: number;
-  x2: number;
-  y2: number;
-  delay: number;
-}
-const lines: Line[] = [
-  // 8 conexiones del núcleo (50,50) a los 8 nodos del octágono interno
-  { x1: 50, y1: 50, x2: 50.0,  y2: 18.0,  delay: 0.0 },
-  { x1: 50, y1: 50, x2: 72.63, y2: 27.37, delay: 0.3 },
-  { x1: 50, y1: 50, x2: 82.0,  y2: 50.0,  delay: 0.6 },
-  { x1: 50, y1: 50, x2: 72.63, y2: 72.63, delay: 0.9 },
-  { x1: 50, y1: 50, x2: 50.0,  y2: 82.0,  delay: 1.2 },
-  { x1: 50, y1: 50, x2: 27.37, y2: 72.63, delay: 1.5 },
-  { x1: 50, y1: 50, x2: 18.0,  y2: 50.0,  delay: 1.8 },
-  { x1: 50, y1: 50, x2: 27.37, y2: 27.37, delay: 2.1 },
-  // 8 conexiones del octágono entre sí (perímetro)
-  { x1: 50.0,  y1: 18.0,  x2: 72.63, y2: 27.37, delay: 1.0 },
-  { x1: 72.63, y1: 27.37, x2: 82.0,  y2: 50.0,  delay: 1.4 },
-  { x1: 82.0,  y1: 50.0,  x2: 72.63, y2: 72.63, delay: 1.8 },
-  { x1: 72.63, y1: 72.63, x2: 50.0,  y2: 82.0,  delay: 2.2 },
-  { x1: 50.0,  y1: 82.0,  x2: 27.37, y2: 72.63, delay: 2.6 },
-  { x1: 27.37, y1: 72.63, x2: 18.0,  y2: 50.0,  delay: 3.0 },
-  { x1: 18.0,  y1: 50.0,  x2: 27.37, y2: 27.37, delay: 3.4 },
-  { x1: 27.37, y1: 27.37, x2: 50.0,  y2: 18.0,  delay: 3.8 },
-  // 8 conexiones de los 4 nodos exteriores a los nodos del octágono
-  { x1: 67.23, y1: 7.35,  x2: 50.0,  y2: 18.0,  delay: 2.0 },
-  { x1: 67.23, y1: 7.35,  x2: 72.63, y2: 27.37, delay: 2.5 },
-  { x1: 92.65, y1: 67.23, x2: 82.0,  y2: 50.0,  delay: 3.0 },
-  { x1: 92.65, y1: 67.23, x2: 72.63, y2: 72.63, delay: 3.5 },
-  { x1: 32.77, y1: 92.65, x2: 50.0,  y2: 82.0,  delay: 0.0 },
-  { x1: 32.77, y1: 92.65, x2: 27.37, y2: 72.63, delay: 0.5 },
-  { x1: 7.35,  y1: 32.77, x2: 18.0,  y2: 50.0,  delay: 1.0 },
-  { x1: 7.35,  y1: 32.77, x2: 27.37, y2: 27.37, delay: 1.5 },
-];
-
-const stackChips = [
-  'Claude Opus 4.7',
-  'Sonnet 4.6',
-  'Haiku 4.5',
-  'Airtable',
-  'Make · n8n',
-  'WhatsApp Cloud API',
-  'Vercel · Astro',
-  'Resend',
-  'Cal.com',
-];
 ---
-<section class="py-24 lg:py-32 border-t border-zk-border/50 relative overflow-hidden">
 
-  <div class="mesh-bg"></div>
+<section id="diagrama-neural" class="neural-section">
+  <div class="space-bg"></div>
 
-  <div class="relative max-w-6xl mx-auto px-5 lg:px-8 z-10">
+  <div class="neural-wrapper">
 
-    <div class="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-
-      <div class="reveal">
-        <div class="inline-flex items-center gap-2 mb-5">
-          <div class="w-8 h-px bg-zk-accent"></div>
-          <span class="text-xs font-mono text-zk-accent uppercase tracking-[0.2em]">La infraestructura</span>
-        </div>
-        <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight mb-6 leading-[1.05]">
-          Una red neural<br>
-          <span class="gradient-text-neon">de 12 agentes IA</span><br>
-          trabajando por ti.
-        </h2>
-        <div class="space-y-4 text-zk-text2 leading-relaxed">
-          <p>
-            ZENKAI no es un chatbot. Es un <span class="text-zk-text font-medium">sistema multi-agente neuronal</span> donde cada agente especializado se conecta con los demás como una red de neuronas.
-          </p>
-          <p>
-            ZEUS coordina. APOLLO crea las landings. HERMES cierra ventas. NEXUS construye automatizaciones. ATLAS opera proyectos. Y 7 agentes más, cada uno experto en su área.
-          </p>
-          <p class="text-zk-text">
-            <span class="font-medium">Pasan información en tiempo real entre sí.</span> Cuando un lead califica con HERMES, ATLAS ya está preparando el onboarding. Cuando NEXUS detecta un cuello de botella, ECHO te avisa al WhatsApp. Esto es lo que separa una agencia de un sistema.
-          </p>
-        </div>
-
-        <div class="mt-8 p-5 bg-gradient-to-br from-zk-surface to-zk-surface2 border border-zk-border2 rounded-xl">
-          <div class="text-xs font-mono text-zk-muted uppercase tracking-wider mb-3 flex items-center gap-2">
-            <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
-            Stack en producción
-          </div>
-          <div class="flex flex-wrap gap-2 text-xs font-mono">
-            {stackChips.map((chip) => (
-              <span class="px-3 py-1.5 bg-zk-bg2 border border-zk-border rounded-md hover:border-zk-accent/40 transition">{chip}</span>
-            ))}
-          </div>
-        </div>
+    <!-- Lado texto -->
+    <div class="neural-text reveal">
+      <div class="section-badge">
+        <span class="dot"></span>
+        <span class="dim">La infraestructura</span>
+      </div>
+      <h2>
+        <span class="gradient-cool">Una red neural</span><br>
+        <span class="gradient-warm">de 12 agentes IA</span><br>
+        <span class="gradient-cool">trabajando por ti.</span>
+      </h2>
+      <div class="prose">
+        <p>
+          ZENKAI no es un chatbot. Es un <strong>sistema multi-agente neuronal</strong> donde cada agente especializado se conecta con los demás como una red de neuronas.
+        </p>
+        <p>
+          ZEUS coordina. APOLLO crea las landings. HERMES cierra ventas. NEXUS construye automatizaciones. ATLAS opera proyectos. Y 7 agentes más, cada uno experto en su área.
+        </p>
+        <p class="highlight">
+          <strong>Pasan información en tiempo real entre sí.</strong> Cuando un lead califica con HERMES, ATLAS ya está preparando el onboarding. Cuando NEXUS detecta un cuello de botella, ECHO te avisa al WhatsApp. Esto es lo que separa una agencia de un sistema.
+        </p>
       </div>
 
-      <div class="reveal flex justify-center items-center min-h-[520px]">
-        <div class="neural-container">
-          <div id="neural-stage" class="neural-stage">
+      <div class="stack-card">
+        <div class="stack-title">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+          </svg>
+          Stack en producción
+        </div>
+        <div class="stack-pills">
+          <span class="pill">Claude Opus 4.7</span>
+          <span class="pill">Sonnet 4.6</span>
+          <span class="pill">Haiku 4.5</span>
+          <span class="pill">Airtable</span>
+          <span class="pill">Make · n8n</span>
+          <span class="pill">WhatsApp Cloud API</span>
+          <span class="pill">Vercel · Astro</span>
+          <span class="pill">Resend</span>
+          <span class="pill">Cal.com</span>
+        </div>
+      </div>
+    </div>
 
-            <svg class="neural-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+    <!-- Lado diagrama -->
+    <div class="neural-side reveal">
+      <div class="neural-container">
+        <div class="neural-cinema">
+          <div class="atmosphere"></div>
+          <div class="neural-stage" id="neuralStage">
+
+            <svg class="neural-svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
               <defs>
-                <linearGradient id="neuralGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#1E6FFF" stop-opacity="0.8" />
-                  <stop offset="50%" stop-color="#7DA5FF" stop-opacity="0.6" />
-                  <stop offset="100%" stop-color="#A78BFA" stop-opacity="0.4" />
+                <filter id="bloom-soft" x="-50%" y="-50%" width="200%" height="200%">
+                  <feGaussianBlur stdDeviation="0.6" result="b1"/>
+                  <feGaussianBlur stdDeviation="1.5" in="SourceGraphic" result="b2"/>
+                  <feMerge>
+                    <feMergeNode in="b2"/>
+                    <feMergeNode in="b1"/>
+                    <feMergeNode in="SourceGraphic"/>
+                  </feMerge>
+                </filter>
+                <filter id="bloom-strong" x="-100%" y="-100%" width="300%" height="300%">
+                  <feGaussianBlur stdDeviation="0.8" result="b1"/>
+                  <feGaussianBlur stdDeviation="2.5" in="SourceGraphic" result="b2"/>
+                  <feGaussianBlur stdDeviation="5" in="SourceGraphic" result="b3"/>
+                  <feMerge>
+                    <feMergeNode in="b3"/>
+                    <feMergeNode in="b2"/>
+                    <feMergeNode in="b1"/>
+                    <feMergeNode in="SourceGraphic"/>
+                  </feMerge>
+                </filter>
+                <linearGradient id="lineCool" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#4A9EFF" stop-opacity="0.9"/>
+                  <stop offset="50%" stop-color="#1E6FFF" stop-opacity="0.7"/>
+                  <stop offset="100%" stop-color="#7DAFFF" stop-opacity="0.5"/>
                 </linearGradient>
+                <linearGradient id="lineWarm" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#FFD080" stop-opacity="0.9"/>
+                  <stop offset="50%" stop-color="#FF9540" stop-opacity="0.7"/>
+                  <stop offset="100%" stop-color="#FFB060" stop-opacity="0.5"/>
+                </linearGradient>
+                <radialGradient id="pulseCool">
+                  <stop offset="0%" stop-color="#FFFFFF" stop-opacity="1"/>
+                  <stop offset="40%" stop-color="#4A9EFF" stop-opacity="0.9"/>
+                  <stop offset="100%" stop-color="#1E6FFF" stop-opacity="0"/>
+                </radialGradient>
+                <radialGradient id="pulseWarm">
+                  <stop offset="0%" stop-color="#FFFFFF" stop-opacity="1"/>
+                  <stop offset="40%" stop-color="#FFB060" stop-opacity="0.9"/>
+                  <stop offset="100%" stop-color="#FF8830" stop-opacity="0"/>
+                </radialGradient>
               </defs>
 
-              {lines.map((l) => (
-                <line
-                  x1={l.x1}
-                  y1={l.y1}
-                  x2={l.x2}
-                  y2={l.y2}
-                  class="neural-line"
-                  style={`animation-delay: ${l.delay}s`}
-                />
-              ))}
+              <g id="starfield"></g>
+              <g id="meshLayer" filter="url(#bloom-soft)"></g>
+              <g id="mainConnections" filter="url(#bloom-soft)"></g>
+              <g id="pulseLayer" filter="url(#bloom-strong)"></g>
+              <g id="burstLayer" filter="url(#bloom-strong)"></g>
             </svg>
 
-            <div class="neural-core-rings"></div>
-            <div class="neural-core-rings r2"></div>
-            <div class="neural-core-rings r3"></div>
-
-            {nodes.map((n) => (
-              <div class="neural-node" style={`left: ${n.left}%; top: ${n.top}%;`}>
-                <div class="neural-node-dot"></div>
-                <div class="neural-node-label">{n.name}</div>
-              </div>
-            ))}
-
+            <!-- Núcleo central con logo -->
             <div class="neural-core">
-              <div class="neural-core-inner">
-                <Image
-                  src={logoSquare}
-                  alt="ZENKAI"
-                  width={130}
-                  height={130}
-                  format="webp"
-                  class="w-full h-full object-cover"
-                />
+              <div class="core-aura-2"></div>
+              <div class="core-aura-1"></div>
+              <div class="core-inner">
+                <Image src={logoSquare} alt="ZENKAI" width={130} height={130} class="core-logo" />
               </div>
+              <div class="core-ring"></div>
             </div>
+
+            <div id="agentsContainer"></div>
 
           </div>
         </div>
       </div>
-
     </div>
+
   </div>
 </section>
 
-<script>
-  // Mouse parallax 3D · rota el neural-stage según posición del mouse en el container
-  const neuralStage = document.getElementById('neural-stage');
-  if (neuralStage) {
-    const neuralContainer = neuralStage.parentElement;
-    if (neuralContainer) {
-      neuralContainer.addEventListener('mousemove', (e) => {
-        const rect = neuralContainer.getBoundingClientRect();
-        const x = (e.clientX - rect.left) / rect.width;
-        const y = (e.clientY - rect.top) / rect.height;
-        const rotateX = (y - 0.5) * -15;
-        const rotateY = (x - 0.5) * 15;
-        neuralStage.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-      });
-      neuralContainer.addEventListener('mouseleave', () => {
-        neuralStage.style.transform = 'rotateX(0) rotateY(0)';
-      });
+<style>
+  .neural-section {
+    position: relative;
+    padding: 6rem 1.25rem;
+    border-top: 1px solid rgba(31, 31, 44, 0.5);
+    overflow: hidden;
+  }
+  @media (min-width: 1024px) {
+    .neural-section { padding: 8rem 2rem; }
+  }
+
+  .space-bg {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 40%, rgba(15, 30, 60, 0.5) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 40% at 80% 20%, rgba(255, 140, 50, 0.03) 0%, transparent 50%),
+      radial-gradient(ellipse 50% 40% at 20% 80%, rgba(30, 111, 255, 0.05) 0%, transparent 50%);
+  }
+
+  .neural-wrapper {
+    position: relative;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 3rem;
+    align-items: center;
+    z-index: 1;
+  }
+  @media (min-width: 1024px) {
+    .neural-wrapper {
+      grid-template-columns: 1fr 1fr;
+      gap: 5rem;
     }
   }
+
+  /* === LADO TEXTO === */
+  .section-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 1.25rem;
+  }
+  .section-badge .dot {
+    width: 32px;
+    height: 1px;
+    background: #1E6FFF;
+  }
+  .section-badge .dim {
+    font-family: 'Geist Mono', ui-monospace, monospace;
+    font-size: 11px;
+    color: #1E6FFF;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  .neural-text h2 {
+    font-family: 'Geist', system-ui, sans-serif;
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: 1.05;
+    margin-bottom: 1.5rem;
+  }
+  .gradient-cool {
+    background: linear-gradient(135deg, #FFFFFF 0%, #B8D4FF 50%, #4A9EFF 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .gradient-warm {
+    background: linear-gradient(135deg, #FFB855 0%, #FF8830 50%, #FFAF55 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .prose {
+    color: #9999AE;
+    font-size: 1rem;
+    line-height: 1.65;
+  }
+  .prose p {
+    margin-bottom: 1rem;
+  }
+  .prose strong {
+    color: #F5F5FA;
+    font-weight: 500;
+  }
+  .prose .highlight {
+    color: #E0E5F0;
+  }
+
+  /* Stack card */
+  .stack-card {
+    margin-top: 2rem;
+    padding: 1.25rem;
+    background: linear-gradient(135deg, rgba(13, 13, 23, 0.8), rgba(20, 20, 35, 0.5));
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(31, 31, 44, 1);
+    border-radius: 0.75rem;
+  }
+  .stack-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Geist Mono', ui-monospace, monospace;
+    font-size: 11px;
+    color: #5A5A70;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+  .stack-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .pill {
+    padding: 0.375rem 0.75rem;
+    background: rgba(8, 8, 16, 1);
+    border: 1px solid rgba(31, 31, 44, 1);
+    border-radius: 0.375rem;
+    font-family: 'Geist Mono', ui-monospace, monospace;
+    font-size: 12px;
+    color: #9999AE;
+    transition: all 0.25s;
+  }
+  .pill:hover {
+    border-color: rgba(74, 158, 255, 0.4);
+    color: #F5F5FA;
+  }
+
+  /* === DIAGRAMA NEURAL === */
+  .neural-side {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 500px;
+  }
+  .neural-container {
+    position: relative;
+    perspective: 1800px;
+    width: 100%;
+    aspect-ratio: 1;
+    max-width: 520px;
+  }
+  .neural-cinema {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    animation: cinemaShake 8s ease-in-out infinite;
+  }
+  @keyframes cinemaShake {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    20%      { transform: translate(0.4px, -0.3px) rotate(0.04deg); }
+    40%      { transform: translate(-0.3px, 0.3px) rotate(-0.03deg); }
+    60%      { transform: translate(0.3px, 0.2px) rotate(0.02deg); }
+    80%      { transform: translate(-0.2px, -0.4px) rotate(-0.04deg); }
+  }
+  .neural-stage {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .neural-svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: visible;
+  }
+  .atmosphere {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(circle at 50% 50%, rgba(30, 111, 255, 0.08) 0%, transparent 50%),
+      radial-gradient(circle at 30% 70%, rgba(255, 165, 70, 0.04) 0%, transparent 40%);
+    filter: blur(40px);
+  }
+
+  /* Núcleo */
+  .neural-core {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 130px;
+    height: 130px;
+    z-index: 30;
+  }
+  .core-aura-1 {
+    position: absolute;
+    inset: -60px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(74, 158, 255, 0.4) 0%, rgba(74, 158, 255, 0.1) 30%, transparent 60%);
+    animation: auraPulse 4s ease-in-out infinite;
+    pointer-events: none;
+  }
+  .core-aura-2 {
+    position: absolute;
+    inset: -100px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 165, 70, 0.15) 0%, transparent 50%);
+    animation: auraPulse 4s ease-in-out infinite 1s;
+    pointer-events: none;
+  }
+  @keyframes auraPulse {
+    0%, 100% { transform: scale(0.95); opacity: 0.8; }
+    50%      { transform: scale(1.1); opacity: 1; }
+  }
+  .core-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: 28px;
+    overflow: hidden;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.4),
+      inset 0 -2px 8px rgba(0, 0, 0, 0.3),
+      0 0 0 1.5px rgba(74, 158, 255, 0.6),
+      0 0 30px rgba(74, 158, 255, 0.6),
+      0 0 80px rgba(30, 111, 255, 0.5),
+      0 0 160px rgba(74, 158, 255, 0.3);
+    animation: coreLife 3.5s ease-in-out infinite;
+  }
+  @keyframes coreLife {
+    0%, 100% {
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.4),
+        inset 0 -2px 8px rgba(0, 0, 0, 0.3),
+        0 0 0 1.5px rgba(74, 158, 255, 0.6),
+        0 0 30px rgba(74, 158, 255, 0.6),
+        0 0 80px rgba(30, 111, 255, 0.5),
+        0 0 160px rgba(74, 158, 255, 0.3);
+    }
+    50% {
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.5),
+        inset 0 -2px 8px rgba(0, 0, 0, 0.3),
+        0 0 0 2px rgba(74, 158, 255, 0.8),
+        0 0 50px rgba(74, 158, 255, 0.9),
+        0 0 120px rgba(30, 111, 255, 0.7),
+        0 0 240px rgba(255, 165, 70, 0.2);
+    }
+  }
+  .core-logo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .core-ring {
+    position: absolute;
+    inset: -12px;
+    border-radius: 40px;
+    pointer-events: none;
+  }
+  .core-ring::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    border: 1px dashed rgba(74, 158, 255, 0.5);
+    animation: rotateClockwise 30s linear infinite;
+  }
+  @keyframes rotateClockwise {
+    to { transform: rotate(360deg); }
+  }
+
+  /* Agents */
+  :global(.agent-node) {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    z-index: 20;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  :global(.agent-node:hover) {
+    transform: translate(-50%, -50%) scale(1.15) translateZ(40px);
+    z-index: 25;
+  }
+  :global(.agent-glow) {
+    position: relative;
+    width: 36px;
+    height: 36px;
+    margin: 0 auto;
+  }
+  :global(.agent-glow::before) {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(74, 158, 255, 0.5) 0%, rgba(30, 111, 255, 0.2) 40%, transparent 70%);
+    animation: agentOuterPulse 3.5s ease-in-out infinite;
+  }
+  :global(.agent-glow.warm::before) {
+    background: radial-gradient(circle, rgba(255, 165, 70, 0.45) 0%, rgba(255, 140, 50, 0.18) 40%, transparent 70%);
+  }
+  @keyframes agentOuterPulse {
+    0%, 100% { transform: scale(0.9); opacity: 0.6; }
+    50%      { transform: scale(1.3); opacity: 1; }
+  }
+  :global(.agent-dot) {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #FFFFFF;
+    box-shadow: 0 0 8px rgba(255, 255, 255, 1), 0 0 20px rgba(74, 158, 255, 1), 0 0 40px rgba(30, 111, 255, 0.8);
+    animation: agentInner 2.5s ease-in-out infinite;
+  }
+  :global(.agent-dot.warm) {
+    background: #FFE0A0;
+    box-shadow: 0 0 8px rgba(255, 224, 160, 1), 0 0 20px rgba(255, 165, 70, 1), 0 0 40px rgba(255, 140, 50, 0.8);
+  }
+  @keyframes agentInner {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); }
+    50%      { transform: translate(-50%, -50%) scale(1.4); }
+  }
+  :global(.agent-label) {
+    margin-top: 10px;
+    padding: 5px 10px;
+    background: rgba(8, 12, 24, 0.9);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(125, 165, 255, 0.25);
+    border-radius: 6px;
+    font-family: 'Geist Mono', ui-monospace, monospace;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    color: #E0E5F0;
+    white-space: nowrap;
+    transition: all 0.3s;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  }
+  :global(.agent-node:hover .agent-label) {
+    border-color: rgba(74, 158, 255, 0.6);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 30px rgba(74, 158, 255, 0.5);
+  }
+
+  @media (max-width: 640px) {
+    .neural-container { max-width: 380px; }
+    .neural-core { width: 100px; height: 100px; }
+    .core-aura-1 { inset: -45px; }
+    .core-aura-2 { inset: -75px; }
+    .core-inner { border-radius: 22px; }
+    :global(.agent-glow) { width: 30px; height: 30px; }
+    :global(.agent-dot) { width: 7px; height: 7px; }
+    :global(.agent-label) { font-size: 9px; padding: 4px 8px; }
+  }
+</style>
+
+<script is:inline>
+  (function() {
+    const INNER = [
+      { name: 'ZEUS',   angle: 0,   warm: false },
+      { name: 'APOLLO', angle: 45,  warm: true  },
+      { name: 'HERMES', angle: 90,  warm: false },
+      { name: 'ARES',   angle: 135, warm: true  },
+      { name: 'ATLAS',  angle: 180, warm: false },
+      { name: 'NEXUS',  angle: 225, warm: true  },
+      { name: 'MUSE',   angle: 270, warm: false },
+      { name: 'LEX',    angle: 315, warm: true  },
+    ];
+    const OUTER = [
+      { name: 'ORACLE', angle: 22,  warm: true  },
+      { name: 'ECHO',   angle: 112, warm: false },
+      { name: 'FORGE',  angle: 202, warm: true  },
+      { name: 'HIVE',   angle: 292, warm: false },
+    ];
+    const R_INNER = 30;
+    const R_OUTER = 44;
+    const C = { x: 50, y: 50 };
+
+    const pos = (angle, r) => {
+      const rad = (angle - 90) * Math.PI / 180;
+      return { x: C.x + r * Math.cos(rad), y: C.y + r * Math.sin(rad) };
+    };
+
+    function bezierPath(p1, p2, curvature) {
+      curvature = curvature || 0.15;
+      const mx = (p1.x + p2.x) / 2;
+      const my = (p1.y + p2.y) / 2;
+      const dx = p2.x - p1.x;
+      const dy = p2.y - p1.y;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      const cx_dir = mx - C.x;
+      const cy_dir = my - C.y;
+      const cd = Math.sqrt(cx_dir*cx_dir + cy_dir*cy_dir) || 1;
+      const ox = (cx_dir / cd) * dist * curvature;
+      const oy = (cy_dir / cd) * dist * curvature;
+      return `M ${p1.x.toFixed(2)} ${p1.y.toFixed(2)} Q ${(mx+ox).toFixed(2)} ${(my+oy).toFixed(2)} ${p2.x.toFixed(2)} ${p2.y.toFixed(2)}`;
+    }
+
+    const seed = (s) => {
+      let state = s;
+      return () => { state = (state * 9301 + 49297) % 233280; return state / 233280; };
+    };
+    const rng = seed(137);
+
+    // Starfield
+    const starfield = document.getElementById('starfield');
+    if (!starfield) return; // El componente no está montado
+    let stars = '';
+    for (let i = 0; i < 90; i++) {
+      const x = rng() * 100;
+      const y = rng() * 100;
+      if (Math.sqrt((x-50)**2 + (y-50)**2) < 14) continue;
+      const r = 0.08 + rng() * 0.18;
+      const op = 0.15 + rng() * 0.4;
+      stars += `<circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="${r.toFixed(2)}" fill="#FFFFFF" opacity="${op.toFixed(2)}"><animate attributeName="opacity" values="${op.toFixed(2)};${(op*0.3).toFixed(2)};${op.toFixed(2)}" dur="${(2 + rng()*4).toFixed(1)}s" repeatCount="indefinite"/></circle>`;
+    }
+    starfield.innerHTML = stars;
+
+    // Mesh
+    const meshPoints = [];
+    for (let i = 0; i < 110; i++) {
+      let x, y, dist, tries = 0;
+      do {
+        const ang = rng() * Math.PI * 2;
+        const r = 10 + rng() * 38;
+        x = 50 + Math.cos(ang) * r;
+        y = 50 + Math.sin(ang) * r;
+        dist = Math.sqrt((x-50)**2 + (y-50)**2);
+        tries++;
+      } while (dist < 16 && tries < 8);
+      meshPoints.push({ x, y, size: 0.15 + rng() * 0.3, warm: rng() > 0.75 });
+    }
+
+    const meshLines = [];
+    meshPoints.forEach((p, i) => {
+      const close = meshPoints
+        .map((q, j) => ({ idx: j, d: Math.sqrt((p.x-q.x)**2 + (p.y-q.y)**2) }))
+        .filter(d => d.idx !== i && d.d < 7.5)
+        .sort((a,b) => a.d - b.d)
+        .slice(0, 2);
+      close.forEach(c => {
+        const key = [i, c.idx].sort().join('-');
+        if (!meshLines.find(l => l.key === key)) {
+          meshLines.push({ key, from: i, to: c.idx });
+        }
+      });
+    });
+
+    const meshLayer = document.getElementById('meshLayer');
+    let meshSVG = '';
+    meshLines.forEach((line) => {
+      const p1 = meshPoints[line.from];
+      const p2 = meshPoints[line.to];
+      const useWarm = p1.warm || p2.warm;
+      const stroke = useWarm ? 'url(#lineWarm)' : 'url(#lineCool)';
+      const opacity = 0.25 + rng() * 0.25;
+      meshSVG += `<path d="${bezierPath(p1, p2, 0.05)}" stroke="${stroke}" stroke-width="0.1" fill="none" opacity="${opacity.toFixed(2)}"><animate attributeName="opacity" values="${opacity.toFixed(2)};${(opacity*0.4).toFixed(2)};${opacity.toFixed(2)}" dur="${(4 + rng()*4).toFixed(1)}s" repeatCount="indefinite"/></path>`;
+    });
+    meshPoints.forEach((p) => {
+      const fill = p.warm ? '#FFB060' : '#7DAFFF';
+      const op = 0.5 + rng() * 0.4;
+      meshSVG += `<circle cx="${p.x.toFixed(2)}" cy="${p.y.toFixed(2)}" r="${p.size.toFixed(2)}" fill="${fill}" opacity="${op.toFixed(2)}"><animate attributeName="opacity" values="${op.toFixed(2)};${(op*0.4).toFixed(2)};${op.toFixed(2)}" dur="${(2.5 + rng()*3).toFixed(1)}s" repeatCount="indefinite"/></circle>`;
+    });
+    meshLayer.innerHTML = meshSVG;
+
+    // Main connections
+    const mainConn = document.getElementById('mainConnections');
+    let mainSVG = '';
+    INNER.forEach((a, i) => {
+      const p = pos(a.angle, R_INNER);
+      const stroke = a.warm ? 'url(#lineWarm)' : 'url(#lineCool)';
+      const delay = (i * 0.35) % 4;
+      mainSVG += `<path d="${bezierPath(C, p, 0.08)}" stroke="${stroke}" stroke-width="0.22" fill="none" stroke-linecap="round" opacity="0.7"><animate attributeName="opacity" values="0.7;0.95;0.7" dur="4s" begin="${delay}s" repeatCount="indefinite"/></path>`;
+    });
+    for (let i = 0; i < INNER.length; i++) {
+      const a = INNER[i];
+      const b = INNER[(i + 1) % INNER.length];
+      const p1 = pos(a.angle, R_INNER);
+      const p2 = pos(b.angle, R_INNER);
+      const useWarm = a.warm && b.warm;
+      const stroke = useWarm ? 'url(#lineWarm)' : 'url(#lineCool)';
+      const delay = (i * 0.5 + 1) % 5;
+      mainSVG += `<path d="${bezierPath(p1, p2, 0.18)}" stroke="${stroke}" stroke-width="0.18" fill="none" stroke-linecap="round" opacity="0.5"><animate attributeName="opacity" values="0.5;0.85;0.5" dur="5s" begin="${delay}s" repeatCount="indefinite"/></path>`;
+    }
+    const outerPairs = [[0,0],[0,1],[1,2],[1,3],[2,4],[2,5],[3,6],[3,7]];
+    outerPairs.forEach(([oi, ii], idx) => {
+      const o = OUTER[oi];
+      const inn = INNER[ii];
+      const p1 = pos(o.angle, R_OUTER);
+      const p2 = pos(inn.angle, R_INNER);
+      const useWarm = o.warm || inn.warm;
+      const stroke = useWarm ? 'url(#lineWarm)' : 'url(#lineCool)';
+      const delay = (idx * 0.4 + 1.5) % 4;
+      mainSVG += `<path d="${bezierPath(p1, p2, 0.12)}" stroke="${stroke}" stroke-width="0.2" fill="none" stroke-linecap="round" opacity="0.6"><animate attributeName="opacity" values="0.6;0.9;0.6" dur="4.5s" begin="${delay}s" repeatCount="indefinite"/></path>`;
+    });
+    mainConn.innerHTML = mainSVG;
+
+    // Pulses con trail
+    const pulseLayer = document.getElementById('pulseLayer');
+    let pulseSVG = '';
+    INNER.forEach((a, i) => {
+      const p = pos(a.angle, R_INNER);
+      const path = bezierPath(C, p, 0.08);
+      const dur = 2.8;
+      const delay = (i * 0.4) % 4;
+      const grad = a.warm ? 'url(#pulseWarm)' : 'url(#pulseCool)';
+      for (let t = 0; t < 3; t++) {
+        const r = 0.7 - t * 0.18;
+        const op = 1 - t * 0.3;
+        const sd = delay + t * 0.06;
+        pulseSVG += `<circle r="${r.toFixed(2)}" fill="${grad}" opacity="0"><animateMotion dur="${dur}s" repeatCount="indefinite" begin="${sd.toFixed(2)}s" path="${path}"/><animate attributeName="opacity" values="0;${op.toFixed(2)};${op.toFixed(2)};0" keyTimes="0;0.1;0.9;1" dur="${dur}s" begin="${sd.toFixed(2)}s" repeatCount="indefinite"/></circle>`;
+      }
+    });
+    outerPairs.slice(0, 4).forEach(([oi, ii], idx) => {
+      const o = OUTER[oi];
+      const inn = INNER[ii];
+      const p1 = pos(o.angle, R_OUTER);
+      const p2 = pos(inn.angle, R_INNER);
+      const path = bezierPath(p1, p2, 0.12);
+      const dur = 3.2;
+      const delay = (idx * 0.8 + 1) % 4;
+      const grad = o.warm ? 'url(#pulseWarm)' : 'url(#pulseCool)';
+      for (let t = 0; t < 3; t++) {
+        const r = 0.5 - t * 0.13;
+        const op = 0.9 - t * 0.3;
+        const sd = delay + t * 0.06;
+        pulseSVG += `<circle r="${r.toFixed(2)}" fill="${grad}" opacity="0"><animateMotion dur="${dur}s" repeatCount="indefinite" begin="${sd.toFixed(2)}s" path="${path}"/><animate attributeName="opacity" values="0;${op.toFixed(2)};${op.toFixed(2)};0" keyTimes="0;0.1;0.9;1" dur="${dur}s" begin="${sd.toFixed(2)}s" repeatCount="indefinite"/></circle>`;
+      }
+    });
+    pulseLayer.innerHTML = pulseSVG;
+
+    // Burst
+    const burstLayer = document.getElementById('burstLayer');
+    let burstSVG = '';
+    INNER.forEach((a, i) => {
+      const p = pos(a.angle, R_INNER);
+      const dur = 2.8;
+      const delay = (i * 0.4) % 4;
+      const burstColor = a.warm ? '#FFB060' : '#7DAFFF';
+      const beginTimes = [];
+      for (let cycle = 0; cycle < 4; cycle++) {
+        beginTimes.push((delay + dur * 0.9 + cycle * dur).toFixed(2) + 's');
+      }
+      burstSVG += `<g transform="translate(${p.x.toFixed(2)} ${p.y.toFixed(2)})"><circle r="0" fill="none" stroke="${burstColor}" stroke-width="0.15" opacity="0"><animate attributeName="r" values="0;3" dur="0.6s" begin="${beginTimes.join(';')}" fill="freeze"/><animate attributeName="opacity" values="0.8;0" dur="0.6s" begin="${beginTimes.join(';')}" fill="freeze"/></circle></g>`;
+    });
+    burstLayer.innerHTML = burstSVG;
+
+    // Agentes
+    const agentsContainer = document.getElementById('agentsContainer');
+    const allAgents = [
+      ...INNER.map(a => ({ ...a, r: R_INNER })),
+      ...OUTER.map(a => ({ ...a, r: R_OUTER }))
+    ];
+    allAgents.forEach(a => {
+      const p = pos(a.angle, a.r);
+      const div = document.createElement('div');
+      div.className = 'agent-node';
+      div.style.left = p.x + '%';
+      div.style.top = p.y + '%';
+      div.innerHTML = `<div class="agent-glow ${a.warm ? 'warm' : ''}"><div class="agent-dot ${a.warm ? 'warm' : ''}"></div></div><div class="agent-label">${a.name}</div>`;
+      agentsContainer.appendChild(div);
+    });
+
+    // Mouse parallax 3D
+    const stage = document.getElementById('neuralStage');
+    const container = document.querySelector('.neural-container');
+    const isTouch = window.matchMedia('(hover: none)').matches;
+
+    if (!isTouch) {
+      container.addEventListener('mousemove', (e) => {
+        const rect = container.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / rect.width;
+        const y = (e.clientY - rect.top) / rect.height;
+        const rotateX = (y - 0.5) * -18;
+        const rotateY = (x - 0.5) * 18;
+        stage.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(30px)`;
+      });
+      container.addEventListener('mouseleave', () => {
+        stage.style.transform = '';
+      });
+    } else {
+      let t = 0;
+      setInterval(() => {
+        t += 0.3;
+        stage.style.transform = `rotateY(${Math.sin(t * 0.01) * 6}deg) rotateX(${Math.cos(t * 0.012) * 3}deg)`;
+      }, 50);
+    }
+  })();
 </script>

@@ -1,0 +1,196 @@
+---
+// web/src/components/landing/DemoSection.astro
+// v3.3 Sprint 2.5 · Demo movido fuera del hero
+// El textarea ahora es la SECCIÓN 5, después de Hero → Problema → Diagrama → Stats
+// Ya no bloquea al visitante recién llegado.
+---
+
+<section id="demo" class="relative py-24 lg:py-32 border-t border-zk-border/50 overflow-hidden">
+
+  <div class="relative max-w-4xl mx-auto px-5 lg:px-8 z-10">
+
+    <!-- Heading -->
+    <div class="text-center mb-12">
+      <div class="section-badge">
+        <span class="section-badge-line warm"></span>
+        <span class="section-badge-text warm">Probalo ahora</span>
+        <span class="section-badge-line warm"></span>
+      </div>
+      <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight mb-5 leading-[1.05]">
+        Tu propuesta personalizada<br>
+        <span class="gradient-warm">en 30 segundos.</span>
+      </h2>
+      <p class="text-lg text-zk-text2 max-w-2xl mx-auto">
+        Sin agendar nada. Sin email para verla. Sin compromiso.
+      </p>
+    </div>
+
+    <!-- DEMO BOX -->
+    <div id="demo-container" class="relative">
+
+      <!-- ESTADO 1 · INPUT -->
+      <div id="demo-input" class="demo-box">
+        <div class="flex items-center justify-between px-4 pt-3 pb-2 text-xs font-mono text-zk-muted">
+          <div class="flex items-center gap-2">
+            <div class="flex gap-1.5">
+              <div class="w-2.5 h-2.5 rounded-full bg-[#FF5F57]"></div>
+              <div class="w-2.5 h-2.5 rounded-full bg-[#FEBC2E]"></div>
+              <div class="w-2.5 h-2.5 rounded-full bg-[#28C840]"></div>
+            </div>
+            <span class="ml-2">propuesta.zenkai → describe tu negocio</span>
+          </div>
+          <span style="color: #10D9A0;">● en vivo</span>
+        </div>
+
+        <textarea
+          id="demo-textarea"
+          rows="5"
+          maxlength="600"
+          placeholder="Tengo una clínica dental en Medellín, 3 doctores. Queremos agendar citas por WhatsApp y reducir el 25% de no-shows que tenemos…"
+          class="w-full bg-transparent text-zk-text placeholder:text-zk-muted text-base px-5 py-3 resize-none focus:outline-none font-sans leading-relaxed"
+        ></textarea>
+
+        <div class="flex items-center justify-between gap-3 px-4 pb-3 pt-1">
+          <div class="text-xs font-mono text-zk-muted flex items-center gap-2">
+            <span id="char-count" class="counter-num">0</span>
+            <span>/ 80 mínimos</span>
+            <span class="hidden sm:inline text-zk-muted">·</span>
+            <span class="hidden sm:inline text-zk-muted">ESP · EN · PT</span>
+          </div>
+          <button
+            id="generate-btn"
+            disabled
+            class="btn-primary text-white font-semibold text-sm px-6 py-3 rounded-xl disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-2 group"
+          >
+            <span>Generar propuesta</span>
+            <span class="hidden sm:inline text-white/70 text-xs font-mono">→ 30s</span>
+            <svg class="w-4 h-4 group-hover:translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- AQUÍ van los estados loading + propuesta (mismo código que el HeroDemo actual) -->
+      <!-- Se reutilizan tal cual los div #demo-loading y #demo-proposal -->
+    </div>
+
+    <!-- Microcopy de confianza -->
+    <div class="mt-7 flex flex-wrap justify-center gap-x-7 gap-y-2.5 text-xs text-zk-muted">
+      <span class="flex items-center gap-1.5">
+        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20" style="color: #10D9A0;">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+        </svg>
+        Sin email para ver la propuesta
+      </span>
+      <span class="flex items-center gap-1.5">
+        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20" style="color: #10D9A0;">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+        </svg>
+        Sin tarjeta · sin compromiso
+      </span>
+      <span class="flex items-center gap-1.5">
+        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20" style="color: #10D9A0;">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+        </svg>
+        Tu información no se vende
+      </span>
+    </div>
+  </div>
+</section>
+
+<style>
+  .section-badge {
+    display: inline-flex; align-items: center; gap: 12px;
+    margin-bottom: 20px;
+  }
+  .section-badge-line { width: 32px; height: 1px; background: #4A9EFF; }
+  .section-badge-line.warm { background: #FF9540; }
+  .section-badge-text {
+    font-family: 'Geist Mono', ui-monospace, monospace;
+    font-size: 11px; color: #4A9EFF;
+    letter-spacing: 0.2em; text-transform: uppercase;
+  }
+  .section-badge-text.warm { color: #FF9540; }
+
+  .gradient-warm {
+    background: linear-gradient(135deg, #FFD89A 0%, #FF8830 50%, #FFB060 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .demo-box {
+    background: linear-gradient(135deg, rgba(13,13,23,0.95), rgba(20,20,35,0.85));
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border: 1px solid #2A2A3A;
+    border-radius: 16px;
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6);
+    transition: all .3s;
+  }
+  .demo-box.glow {
+    border-color: rgba(74,158,255,0.6);
+    box-shadow: 0 0 0 2px rgba(74,158,255,0.4), 0 0 60px rgba(74,158,255,0.3), 0 25px 50px -12px rgba(0,0,0,0.7);
+  }
+
+  .btn-primary {
+    position: relative; overflow: hidden;
+    background: linear-gradient(135deg, #1E6FFF 0%, #4A9EFF 50%, #1E6FFF 100%);
+    background-size: 200% 200%;
+    animation: demoGradShift 8s ease infinite;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.25), 0 4px 16px rgba(30,111,255,0.4), 0 0 0 1px rgba(30,111,255,0.6);
+    transition: all .3s cubic-bezier(.16,1,.3,1);
+  }
+  .btn-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.35), 0 16px 40px rgba(30,111,255,0.5), 0 0 60px rgba(30,111,255,0.4);
+  }
+  @keyframes demoGradShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  .counter-num {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum';
+  }
+</style>
+
+<script>
+  // === Placeholder rotation ===
+  const placeholders = [
+    "Tengo una clínica dental en Medellín, 3 doctores. Queremos agendar citas por WhatsApp y reducir el 25% de no-shows que tenemos…",
+    "Vendo ropa por Instagram, tengo Shopify, facturo $12K USD/mes. Quiero recuperar carritos abandonados y entender qué ads me generan ventas…",
+    "Tengo restaurante en Bogotá, 8K seguidores. 70% de pedidos llegan por Rappi que se queda con 30%. Quiero pedidos directos por WhatsApp…",
+    "Soy abogado independiente en Barcelona, 8 años de experiencia. Paso más tiempo redactando propuestas que cerrando casos…"
+  ];
+  const textarea = document.getElementById('demo-textarea') as HTMLTextAreaElement | null;
+  let phIndex = 0;
+  setInterval(() => {
+    if (textarea && textarea.value === '') {
+      phIndex = (phIndex + 1) % placeholders.length;
+      textarea.placeholder = placeholders[phIndex];
+    }
+  }, 4500);
+
+  // === Char counter + glow ===
+  const charCount = document.getElementById('char-count');
+  const generateBtn = document.getElementById('generate-btn');
+  const demoInput = document.getElementById('demo-input');
+  textarea?.addEventListener('input', (e: Event) => {
+    const target = e.target as HTMLTextAreaElement | null;
+    if (!target) return;
+    const len = target.value.length;
+    if (charCount) charCount.textContent = String(len);
+    if (len >= 80) {
+      generateBtn?.removeAttribute('disabled');
+      demoInput?.classList.add('glow');
+    } else {
+      generateBtn?.setAttribute('disabled', '');
+      demoInput?.classList.remove('glow');
+    }
+  });
+
+  // === Conexión al endpoint /api/protocolo (Sprint 3) ===
+  // El botón "Generar propuesta" llamará a /api/lead-demo cuando esté listo (Sprint 3)
+  // Por ahora reutilizar la lógica del HeroDemo actual o dejar el handler como placeholder
+</script>
