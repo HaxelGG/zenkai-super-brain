@@ -2,6 +2,8 @@
 // web/src/components/landing/DemoSection.astro
 // v3.3 Sprint 2.5 + Sprint 3 · Demo cableado al endpoint real /api/lead-demo
 // Tres estados: input → loading (mín 8s) → propuesta real renderizada del JSON
+// Turnstile widget render condicional · solo si PUBLIC_TURNSTILE_SITE_KEY está definida
+const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? '';
 ---
 
 <section id="demo" class="relative py-24 lg:py-32 border-t border-zk-border/50 overflow-hidden">
@@ -46,6 +48,18 @@
           placeholder="Tengo una clínica dental en Medellín, 3 doctores. Queremos agendar citas por WhatsApp y reducir el 25% de no-shows que tenemos…"
           class="w-full bg-transparent text-zk-text placeholder:text-zk-muted text-base px-5 py-3 resize-none focus:outline-none font-sans leading-relaxed"
         ></textarea>
+
+        {turnstileSiteKey && (
+          <div class="px-4 pb-2 flex justify-start">
+            <div
+              id="turnstile-widget"
+              class="cf-turnstile"
+              data-sitekey={turnstileSiteKey}
+              data-theme="dark"
+              data-size="flexible"
+            ></div>
+          </div>
+        )}
 
         <div class="flex items-center justify-between gap-3 px-4 pb-3 pt-1">
           <div class="text-xs font-mono text-zk-muted flex items-center gap-2">
@@ -137,6 +151,15 @@
       </div>
 
     </div>
+
+    {turnstileSiteKey && (
+      <script
+        src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+        async
+        defer
+        is:inline
+      ></script>
+    )}
 
     <div class="mt-7 flex flex-wrap justify-center gap-x-7 gap-y-2.5 text-xs text-zk-muted">
       <span class="flex items-center gap-1.5">
@@ -425,9 +448,44 @@
       demoInput.classList.remove('hidden');
     });
 
+    // Detecta si el widget Turnstile está renderizado en el DOM.
+    // Si lo está, exigimos token; si no, el backend hace fallback graceful (no-op).
+    const turnstileWidget = $('turnstile-widget');
+    const turnstileEnabled = !!turnstileWidget;
+
+    interface TurnstileAPI {
+      reset: (el?: HTMLElement | string) => void;
+      getResponse: (el?: HTMLElement | string) => string | undefined;
+    }
+    const getTurnstile = (): TurnstileAPI | undefined =>
+      (window as unknown as { turnstile?: TurnstileAPI }).turnstile;
+
+    const readTurnstileToken = (): string | undefined => {
+      if (!turnstileEnabled) return undefined;
+      const api = getTurnstile();
+      if (api && turnstileWidget) return api.getResponse(turnstileWidget);
+      const tokenInput = document.querySelector<HTMLInputElement>(
+        'input[name="cf-turnstile-response"]',
+      );
+      return tokenInput?.value || undefined;
+    };
+
+    const resetTurnstile = () => {
+      if (!turnstileEnabled) return;
+      const api = getTurnstile();
+      if (api && turnstileWidget) api.reset(turnstileWidget);
+    };
+
     generateBtn.addEventListener('click', async () => {
       const texto = textarea.value.trim();
       if (texto.length < 80) return;
+
+      const turnstileToken = readTurnstileToken();
+      if (turnstileEnabled && !turnstileToken) {
+        showError('Por favor resolvé el captcha antes de continuar. Si no aparece, recargá la página.');
+        demoInput.classList.remove('hidden');
+        return;
+      }
 
       demoInput.classList.add('hidden');
       demoLoading.classList.remove('hidden');
@@ -438,7 +496,10 @@
       const fetchPromise = fetch('/api/lead-demo', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ texto }),
+        body: JSON.stringify({
+          texto,
+          ...(turnstileToken ? { turnstileToken } : {}),
+        }),
       }).then(async (r) => ({ status: r.status, body: await r.json() }));
 
       try {
@@ -462,6 +523,9 @@
       } catch (err) {
         showError('No se pudo conectar al servidor. Revisá tu conexión y probá de nuevo.');
         console.error('[demo] fetch failed', err);
+      } finally {
+        // Token Turnstile es single-use · resetear para próximo submit
+        resetTurnstile();
       }
     });
   }
