@@ -3,7 +3,7 @@ name: "Resend"
 slug: resend
 servicios_dependientes: [Vercel zenkai-web, Hostinger DNS]
 criticidad: media
-estado_conexion: pendiente
+estado_conexion: activo
 fase_conexion: 3
 ---
 
@@ -13,6 +13,7 @@ fase_conexion: 3
 **Owner:** ATLAS · ECHO · HERMES
 **Plan recomendado:** Free (3,000 emails/mes · 100 emails/día · dominio verified) → upgrade a Pro ($20/mes · 50k emails/mes) cuando pasen los 50 leads/día.
 **Dominio verificado:** `zenkai.systems` (verified · Receiving OFF · ver `conexiones/credenciales.md`)
+**Estado:** ✅ **activo desde 2026-05-13** · `RESEND_API_KEY` configurada en Vercel `zenkai-web` · smoke test `/api/lead-demo` con email opcional retorna 200 sin errores en Vercel logs · FROM = `ZENKAI <hola@zenkai.systems>` · ReplyTo = `hola@zenkai.systems`
 
 ---
 
@@ -44,7 +45,7 @@ Cuando llega un lead "calificado" (criterios de scoring por definir en HERMES-CR
 ✅ Status: **Verified**
 ✅ Receiving: OFF (solo enviamos · recepción va a Hostinger Email)
 
-⏸️ Pendiente: `RESEND_API_KEY` en Vercel `zenkai-web` para activar envío desde código.
+✅ `RESEND_API_KEY` configurada en Vercel `zenkai-web` desde 2026-05-13 · envío activo en producción.
 
 ---
 

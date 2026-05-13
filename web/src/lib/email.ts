@@ -64,10 +64,12 @@ const renderHtml = (p: PropuestaEmailPayload): string => `
 
 export const sendProposalByEmail = async (payload: PropuestaEmailPayload): Promise<{ id: string }> => {
   const client = getClient();
-  const from = import.meta.env.ZENKAI_FROM_EMAIL ?? 'hola@zenkai.systems';
+  // Override via ZENKAI_FROM_EMAIL acepta formato "Nombre <email>" o solo "email"
+  const from = import.meta.env.ZENKAI_FROM_EMAIL ?? 'ZENKAI <hola@zenkai.systems>';
   const result = await client.emails.send({
     from,
     to: payload.to,
+    replyTo: 'hola@zenkai.systems',
     subject: `Tu propuesta personalizada · ZENKAI · ${payload.tier}`,
     html: renderHtml(payload),
   });

@@ -60,8 +60,8 @@ Verificación end-to-end del pipeline público en `zenkai-web-rho.vercel.app`:
 - **Tarea 1.4 · helper de env tipado (45 min):** crea `web/src/lib/env.ts` con Zod schemas para server/public env vars. Originalmente cerraba Fase 1 · ahora es nice-to-have (Sprint 3 ya valida inline en cada lib · `proposal.ts` `airtable.ts` `rate-limit.ts` `turnstile.ts` `email.ts`). Bloqueante: ninguno.
 - **ENV vars opcionales en Vercel para activar defensas 100%** (estado verificado 2026-05-13 · guías paso-a-paso 2026-05-13):
   - ~~`UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN`~~ ✅ **YA configuradas** · sliding window 5/IP/h activo en producción
-  - ⚠️ `TURNSTILE_SITE_KEY` (público) + `TURNSTILE_SECRET_KEY` (server) → guía completa en `conexiones/conexiones-turnstile.md` v1.0. **🚨 BLOQUEANTE DE CÓDIGO:** el frontend `DemoSection.astro` NO tiene el widget Turnstile integrado (verificado 2026-05-13). Si se setea `TURNSTILE_SECRET_KEY` antes de integrar el widget, todos los demos rompen con HTTP 403. Orden correcto documentado en la guía: sprint frontend (20-30 min) → keys Cloudflare → ENV vars Vercel → redeploy → smoke test
-  - ⚠️ `RESEND_API_KEY` → guía completa en `conexiones/conexiones-resend.md` v1.0. Dominio `zenkai.systems` ya está verified en Resend (SPF + DKIM + DMARC OK). Solo falta generar API key y copiarla a Vercel (5 min · sin bloqueante de código)
+  - ~~`RESEND_API_KEY`~~ ✅ **YA configurada** 2026-05-13 · smoke test `/api/lead-demo` con email opcional retorna 200 + record `recEKyeNdrzv0bYea` · 0 errores en Vercel logs · FROM mejorado a `ZENKAI <hola@zenkai.systems>` + ReplyTo en commit subsiguiente
+  - ⚠️ `TURNSTILE_SITE_KEY` (público) + `TURNSTILE_SECRET_KEY` (server) → guía completa en `conexiones/conexiones-turnstile.md` v1.0. Frontend `DemoSection.astro` YA tiene el widget integrado con render condicional (commit `018465f`) — setear las 2 ENV vars en Vercel activa el captcha automáticamente sin más código. Vercel logs confirman warning `TURNSTILE_SECRET_KEY missing` en producción (no-op activo · esperado)
   - Crítico antes de abrir demo público con tráfico orgánico en zenkai.systems
 - **`copy_largo` de 8 sectores aún TODO:** la sesión 2026-05-11 validó preview de 3-4 frases (`copy_corto`) pero no el contenido largo de páginas dedicadas (3-5 párrafos por sector). Bloqueante de páginas `/sectores/<slug>` si se decide construirlas. Acción: el usuario genera con Claude.ai web antes del dispatch.
 
@@ -225,10 +225,10 @@ Si en uso real cae mucho en path inferido, escalar a Sonnet 4.6 para el classifi
 
 **Configuradas en Vercel `zenkai-web` (verificado smoke test 2026-05-13):**
 - `UPSTASH_REDIS_REST_URL` ✓ / `UPSTASH_REDIS_REST_TOKEN` ✓ → rate limit sliding window 5/IP/h activo en `/api/lead-demo`
+- `RESEND_API_KEY` ✓ → email transaccional activo · FROM `ZENKAI <hola@zenkai.systems>` · ReplyTo `hola@zenkai.systems` · plan Free 3k emails/mes
 
 **Pendientes en Vercel `zenkai-web` (no-op si missing · feature gating graceful):**
-- `TURNSTILE_SITE_KEY` (público) / `TURNSTILE_SECRET_KEY` (server) → captcha Cloudflare en demo (free tier Cloudflare · widget para sitio único)
-- `RESEND_API_KEY` → email opcional con HTML inline cuando visitor deja email en demo (Resend ya tiene dominio verified `zenkai.systems`)
+- `PUBLIC_TURNSTILE_SITE_KEY` (frontend) / `TURNSTILE_SECRET_KEY` (server) → captcha Cloudflare en demo. Frontend widget YA integrado (commit `018465f` · render condicional). Solo falta crear widget en Cloudflare + sumar ambas keys a Vercel
 
 **Disponibles en `.env` local pero NO sincronizadas a Vercel** (sólo `getBase("VENTAS")` se usa en producción hoy · agregar en Vercel cuando algún endpoint las consuma):
 - `AIRTABLE_BASE_LEGAL=appy9s8qJ9TP98HYS`
@@ -244,8 +244,7 @@ Si en uso real cae mucho en path inferido, escalar a Sonnet 4.6 para el classifi
 
 Sprints 1+2+2.5+3 cerrados · landing comercial v3.3 deployed · demo end-to-end cableado. Opciones para continuar:
 
-1. **Activar defensas restantes del demo público** (paso a paso documentado): seguir `conexiones/conexiones-resend.md` (5 min · sin código) + `conexiones/conexiones-turnstile.md` (requiere sprint frontend 20-30 min ANTES de activar la SECRET key). Upstash ya OK. Crítico antes de abrir tráfico orgánico.
-   - **Sub-task de código:** integrar widget `<div class="cf-turnstile">` en `web/src/components/landing/DemoSection.astro` y leer `cf-turnstile-response` para enviar como `turnstileToken` en el body de `/api/lead-demo`. Dispatch a FORGE-FRONTEND en próxima sesión.
+1. **Activar Turnstile en Vercel** (única defensa restante · 15 min): seguir `conexiones/conexiones-turnstile.md` desde paso 1 (crear widget Cloudflare) hasta paso 4 (redeploy). El paso 5 (sprint frontend) ya está hecho · commit `018465f`. Una vez sumadas las 2 keys (`PUBLIC_TURNSTILE_SITE_KEY` + `TURNSTILE_SECRET_KEY`) y redeploy, defensas 100% on.
 2. ~~**Política de reembolso 30 días escrita**~~ ✅ cerrado 2026-05-13 · template v1.0 en `templates/template-garantia-lite-30-dias.md` · pendiente registro Airtable + referencia cruzada en contrato master.
 3. **Smoke test end-to-end con caso real** (15 min): disparar `/api/lead-demo` con un input real, validar que llega a tabla `demos` Airtable VENTAS · verificar header `x-airtable-record-id` · seguir el flujo desde browser real en zenkai-web-rho.vercel.app.
 4. **Fase 5 · domain swap** (Tarea 5.3-pre): apex `zenkai.systems` → landing `zenkai-web` · panel actual → `panel.zenkai.systems`. Tareas DNS + Vercel domain config. Pre-launch comercial.
