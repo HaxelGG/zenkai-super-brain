@@ -149,6 +149,8 @@ Se anexa al presente contrato como Anexo B.
 ### 9.1 · Garantía de entrega
 Si ZENKAI no entrega el alcance pactado en [N_SEMANAS] semanas (salvo causa atribuible al CLIENTE), reembolsará el [%_REEMBOLSO_NO_ENTREGA]% del setup.
 
+> **Excepción para Tier Lite:** si el contrato corresponde al Tier Lite ($300 setup + $90/mes), el presente artículo 9.1 es sustituido por el **Anexo C · Garantía de Satisfacción 30 días** (`template-garantia-lite-30-dias.md`), que otorga al CLIENTE una garantía de satisfacción más amplia conforme al copy publicado en zenkai.systems. Para todos los demás tiers (Starter, Growth, Pro, Enterprise) rige este artículo 9.1.
+
 ### 9.2 · Limitación de responsabilidad
 La responsabilidad total de ZENKAI bajo este contrato no excederá el valor total pagado por EL CLIENTE en los [N_MESES_LIMITE] meses anteriores al evento que origina la responsabilidad.
 
