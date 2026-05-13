@@ -1,8 +1,32 @@
 # ESTADO ACTUAL · ZENKAI Super Cerebro
 ## Punto de continuación entre sesiones de Claude Code
 
-**Última sesión cerrada:** 2026-05-10 · Fase 1.3 DEPLOYED · landing live en zenkai-web-rho.vercel.app (versión placeholder · Fase 2 pendiente)
+**Última sesión cerrada:** 2026-05-13 · Sprints 1+2+2.5+3 DEPLOYED · landing comercial v3.3 live · demo end-to-end cableado a `/api/lead-demo` con persistencia Airtable · **smoke test producción verde 2026-05-13 06:58 UTC**
 **Modo recomendado para continuar:** `claude --dangerously-skip-permissions` desde `C:\Users\jordy\Desktop\Kenzai Super Brain\`
+
+---
+
+## ✅ SMOKE TEST PRODUCCIÓN 2026-05-13
+
+Verificación end-to-end del pipeline público en `zenkai-web-rho.vercel.app`:
+
+| Check | Resultado |
+|-------|-----------|
+| HTTP status `/api/lead-demo` | 200 OK (sin auth · es endpoint público) |
+| Latencia primera call | ~13s (cache miss) |
+| Latencia segunda call | ~8s (cache parcial · prompt cache de system prompt común) |
+| Header `x-airtable-record-id` | `recqgahRfwCSZZMhn` (presente) |
+| Record visible en Airtable VENTAS / demos | ✅ todos los campos OK |
+| `sector_detectado` (clínica dental Medellín) | `salud` ✓ |
+| `sector_detectado` (restaurante Bogotá Rappi) | `restaurante` ✓ |
+| `tier_recomendado` ($500-1500 USD budget) | `Starter` ✓ |
+| `created_at` manual ISO | `2026-05-13T06:58:48.741Z` (no createdTime auto) ✓ |
+| `ip_hash` | SHA256 64-char hex · IP NO en claro ✓ |
+| Rate limit Upstash | ✅ **ACTIVO** · sliding window decrementa 5→4→3 entre calls (`bypassed:false`) |
+| Captcha Turnstile | ⚠️ no-op · acepta requests sin token (TURNSTILE_SECRET_KEY pendiente) |
+| Email Resend | sin probar (requiere campo opcional `email` en input) |
+
+**Hallazgo importante:** Upstash Redis YA está configurado en Vercel `zenkai-web` (contrariamente a lo que decía ESTADO-ACTUAL pre-update). Solo faltan **Turnstile** (captcha) y **Resend** (email opcional) para defensas 100%.
 
 ---
 
@@ -10,18 +34,20 @@
 
 - **Spec original:** `docs/specs/2026-05-05-landing-zenkai-design.md` (commit `c87e538`)
 - **Spec Fase 2 (visual):** `docs/specs/2026-05-11-fase2-landing-visual-design.md` · transformación placeholder → landing comercial que convierte
-- **Plan:** `docs/plans/2026-05-10-landing-zenkai-implementation.md` (30 tareas · 32.5-40.5h · v1.2 con Fase 2 expandida a 10 tareas / 12-15h)
-- **LIVE:** `https://zenkai-web-rho.vercel.app` desde 2026-05-10 · build automático funcional vía webhook GitHub→Vercel
+- **Plan:** `docs/plans/2026-05-10-landing-zenkai-implementation.md` v1.3 · copy validado + 8 sectores + problema/CTA final · commit `fbc7ccf`
+- **LIVE:** `https://zenkai-web-rho.vercel.app` desde 2026-05-10 · landing comercial v3.3 funcional con demo cableado end-to-end
 - **Estado por fase:**
   - ✅ Fase 0 · scaffolding `web/` + Vercel project `zenkai-web` (Tareas 0.1-0.2)
-  - ✅ Tarea 1.1 · design tokens + WebLayout + SeoHead (commit `4249ced`)
-  - ✅ Tarea 1.2 · content collections · 5 tiers + 8 sectores con Zod (commit `8a75321` + fix `e8d4def`)
-  - ✅ Tarea 1.3 · index con tiers/sectores + 404 + TierCard/SectorCard stubs (commit `c30a275`)
-  - ⏸️ Tarea 1.4 · helper de env tipado (45 min · pendiente · cierra Fase 1)
-  - ⏸️ Fase 2 · 10 tareas · 12-15h · transformación visual a landing comercial (próxima sesión)
+  - ✅ Fase 1 (Tareas 1.1-1.3) · design tokens + content collections + index inicial (commits `4249ced` `8a75321` `c30a275`)
+  - ⏸️ Tarea 1.4 · helper de env tipado · **superseded** por validación inline en `lib/proposal.ts` + middleware · sigue siendo nice-to-have (45 min) pero no bloquea
+  - ✅ **Sprint 1 foundation** (commit `edf8c11`) · backend `POST /api/protocolo` server-side Sonnet 4.6 + Zod input/output · tokens zk-* completos · `global.css` con 15 keyframes + mesh-bg + glass · logos astro:assets WebP · NavBar v3.2 con currency toggle USD/COP/EUR/MXN · 7/7 tests vitest
+  - ✅ **Sprint 2** (commit `2e2ff47`) · 11 componentes landing en orden visual final · HeroDemo · Proyeccion90Dias · StatsReales · ComoFunciona · DiagramaNeural (12 nodos + 24 líneas SVG + parallax 3D) · Comparativa · Sectores · Planes (5 tiers) · VentajasTecnicas · FAQ · CTAFinal · Footer
+  - ✅ **Sprint 2.5 (v3.3 hero ventas)** (commit `129f7db`) · headline orientado a ventas + trust mini-bar + stats comerciales en hero · sección 'El problema' como contraste positivo · DiagramaNeural v4 cinematográfico (bloom + Bezier) · sticky CTA bar 50% off · demo movido a sección 5 (no bloquea visitantes nuevos)
+  - ✅ **Sprint 3 demo end-to-end** (commit `a09d8c8`) · `POST /api/lead-demo` operativo · validación Zod + captcha Turnstile (no-op si missing) + rate limit Upstash 5/IP/h (no-op si missing) + persistencia Airtable best-effort + email Resend opcional · DemoSection cableado con 3 estados (input→loading 8s→propuesta) · 23/23 tests vitest verdes · dual auth header (x-zenkai-key O Bearer) · CVE mitigada vía middleware
+  - ✅ **Post-Sprint 3 hardening** · tabla `demos` creada en Airtable VENTAS (commit `40bbbc9`) · cleanup branches mergeados (commit `d160a87`) · wordmark Orbitron en lugar de logo image (commit `435bb6e`) · /privacy creada con política mínima legal (commit `2d11213`) · fixes QA Sprint 4 (5 commits `267072c` `099628a` `56f365d` `3556837` `5f06204`): footer hrefs reales · Pro/Enterprise CTAs a Cal.com · FAQ moneda copy alineado con behavior real · hamburger menu mobile <lg con overlay · pre-fill textarea demo con template por sector
 - **Project Vercel:** `zenkai-web` (`prj_Ct9A96VniiBmECzUTeaNgTGFuSr7` · team `mrhaxel26-sketchs-projects`)
 - **Domain swap en Fase 5:** panel actual → `panel.zenkai.systems` · landing `zenkai-web` → apex `zenkai.systems` · panel sigue vivo, NO se elimina (orquestación en Tarea 5.3-pre)
-- **CVE pendiente:** `GHSA-mr6q-rp88-fx84` · mitigación en Tarea 3.7-pre · doc en `docs/security/2026-05-10-cve-astrojs-vercel-x-astro-path.md`
+- **CVE `GHSA-mr6q-rp88-fx84`:** ✅ **mitigada** en `web/src/middleware.ts` (filtra headers `x-astro-path` / `x_astro_path` en /api/* · 5 tests cubriéndolo) · doc original en `docs/security/2026-05-10-cve-astrojs-vercel-x-astro-path.md`
 - **Email comercial activo:** `hola@zenkai.systems` (Hostinger Starter Business · Resend dominio verified · Receiving OFF)
 - **Nota técnica · fix crítico Vercel:** commit `d006b2e` agregó `web/vercel.json` propio para no heredar el `vercel.json` raíz panel-specific (que define `functions: api/*.ts` + `buildCommand: cd panel && npm run build`). Sin este fix, builds de `zenkai-web` fallan con "The pattern 'api/*.ts' defined in 'functions' doesn't match any Serverless Functions inside the 'api' directory" porque Vercel hereda el config del repo padre aún con Root Directory = `web`. Override mínimo (`{"$schema": "..."}`) rompe la herencia y deja que Astro auto-detect maneje el build.
 - **TODO técnico (sectores):** sector hogar tiene `agentes_prioritarios` inferidos en `web/src/content/sectores/hogar.md`. Cuando se cree `sectores/hogar.md` raíz (Fase 2 o primer cliente del sector), sincronizar agentes y campos modulares.
@@ -30,9 +56,14 @@
 
 ## ⏸️ DEUDA TÉCNICA pendiente (próxima sesión)
 
-- **Vercel · Root Directory de proyecto `zenkaibrain`:** actualmente la raíz del repo está configurada como root del project del panel (legado de cuando los endpoints `/api/*` se servían desde la raíz). Resultado: cualquier push a `main` rebuilds tanto `zenkai-web` (correcto · Root Directory = `web`) como `zenkaibrain` (innecesario si solo tocamos `web/` o `docs/`). Acción: cambiar Root Directory de `zenkaibrain` a `panel` en Vercel UI → Settings → General. Cuidado: hay que verificar que los handlers `/api/clasificar` y `/api/protocolo` sigan funcionando — si viven en `api/` raíz, hay que moverlos o exponerlos desde `panel/`. Estimación: 30-60 min con smoke test.
-- **Tarea 1.4 · helper de env tipado (45 min):** crea `web/src/lib/env.ts` con Zod schemas para server/public env vars. Cierra Fase 1 formalmente. Bloqueante: ninguno · puede arrancar Fase 2 en paralelo si urge.
-- **`copy_largo` de 8 sectores aún TODO:** la sesión 2026-05-11 validó preview de 3-4 frases (`copy_corto`) pero no el contenido largo de páginas dedicadas (3-5 párrafos por sector). Bloqueante de Tarea 2.7 (páginas `/sectores/<slug>`). Acción: el usuario genera con Claude.ai web antes del dispatch de 2.7.
+- **Vercel · Root Directory de proyecto `zenkaibrain`:** actualmente la raíz del repo está configurada como root del project del panel (legado de cuando los endpoints `/api/*` se servían desde la raíz). Resultado: cualquier push a `main` rebuilds tanto `zenkai-web` (correcto · Root Directory = `web`) como `zenkaibrain` (innecesario si solo tocamos `web/` o `docs/`). Acción: cambiar Root Directory de `zenkaibrain` a `panel` en Vercel UI → Settings → General. Cuidado: hay que verificar que los handlers `/api/clasificar` y `/api/protocolo` (los del panel, no los nuevos de `web/`) sigan funcionando — si viven en `api/` raíz, hay que moverlos o exponerlos desde `panel/`. Estimación: 30-60 min con smoke test.
+- **Tarea 1.4 · helper de env tipado (45 min):** crea `web/src/lib/env.ts` con Zod schemas para server/public env vars. Originalmente cerraba Fase 1 · ahora es nice-to-have (Sprint 3 ya valida inline en cada lib · `proposal.ts` `airtable.ts` `rate-limit.ts` `turnstile.ts` `email.ts`). Bloqueante: ninguno.
+- **ENV vars opcionales en Vercel para activar defensas 100%** (estado verificado 2026-05-13 · guías paso-a-paso 2026-05-13):
+  - ~~`UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN`~~ ✅ **YA configuradas** · sliding window 5/IP/h activo en producción
+  - ⚠️ `TURNSTILE_SITE_KEY` (público) + `TURNSTILE_SECRET_KEY` (server) → guía completa en `conexiones/conexiones-turnstile.md` v1.0. **🚨 BLOQUEANTE DE CÓDIGO:** el frontend `DemoSection.astro` NO tiene el widget Turnstile integrado (verificado 2026-05-13). Si se setea `TURNSTILE_SECRET_KEY` antes de integrar el widget, todos los demos rompen con HTTP 403. Orden correcto documentado en la guía: sprint frontend (20-30 min) → keys Cloudflare → ENV vars Vercel → redeploy → smoke test
+  - ⚠️ `RESEND_API_KEY` → guía completa en `conexiones/conexiones-resend.md` v1.0. Dominio `zenkai.systems` ya está verified en Resend (SPF + DKIM + DMARC OK). Solo falta generar API key y copiarla a Vercel (5 min · sin bloqueante de código)
+  - Crítico antes de abrir demo público con tráfico orgánico en zenkai.systems
+- **`copy_largo` de 8 sectores aún TODO:** la sesión 2026-05-11 validó preview de 3-4 frases (`copy_corto`) pero no el contenido largo de páginas dedicadas (3-5 párrafos por sector). Bloqueante de páginas `/sectores/<slug>` si se decide construirlas. Acción: el usuario genera con Claude.ai web antes del dispatch.
 
 ---
 
@@ -40,13 +71,13 @@
 
 Estos compromisos están **publicados en el copy de la landing** (`docs/specs/2026-05-11-fase2-copy-validado.md`) y deben cumplirse o documentarse formalmente antes del primer lead que los invoque:
 
-1. **Garantía Lite 30 días** — *"Sin tarjeta. Sin contrato anual. Si en 30 días no te funciona, no nos debés nada."* → política de reembolso a documentar en `LEGAL · templates_legales` ANTES del primer cliente Lite cerrado. Sin política escrita, riesgo de disputa.
-2. **SLA WhatsApp 30 min (horario laboral CO/ES)** — *"Habla con un fundador real. Respuesta en menos de 30 minutos en horario laboral."* → monitoreo manual (notificación WA Cloud API → app fundador) o alert Slack/Telegram sobre webhook de mensaje entrante. Tracking de SLA en Airtable.
-3. **SLA form 4h hábiles** — *"Te respondemos en menos de 4 horas hábiles."* → Resend manda auto-reply inmediato confirmando recepción · respuesta humana real a `hola@zenkai.systems` antes de 4h hábiles. Marcar lead como "respondido" en Airtable VENTAS dentro del SLA.
-4. **Multi-idioma (es/en/pt) en respuestas** — *"Respondemos en español, inglés y portugués."* → capacidad real vía fundador directo o herramientas de traducción asistida. Landing actualmente es solo español.
-5. **Diagnóstico gratis 30 min** — *"Diagnóstico gratis. 30 minutos. Sin compromiso."* → Cal.com slot configurado · agenda real disponible · no rebookeable después del No-show 2× (política a redactar). Bloqueante de pre-launch: Cal.com público activo en `/conversacion`.
+1. **Garantía Lite 30 días** — *"Sin tarjeta. Sin contrato anual. Si en 30 días no te funciona, no nos debés nada."* → política de reembolso a documentar en `LEGAL · templates_legales` ANTES del primer cliente Lite cerrado. **STATUS: ✅ template v1.0 redactado 2026-05-13** en `templates/template-garantia-lite-30-dias.md` (Anexo C del contrato). Define causales objetivas (sitio inaccesible, WA no operativo, form no entrega, Cal.com no agenda, entregable retrasado >5d hábiles), exclusiones (cambio de prioridad, falta de tráfico, demora del cliente >14d en aportar contenido), tabla de reembolso por situación (100%/50%/25%/0% del setup · 100% del fee mensual), procedimiento de solicitud (email `hola@zenkai.systems` con asunto `GARANTÍA 30D — [empresa]`), plazos (acuse 4h hábiles · resolución 5d hábiles · transferencia 10d hábiles), garantía única por cliente (lockout 12 meses), cláusula buena fe contra abuso. ✅ Registrado en Airtable `LEGAL · templates_legales` (record `recx1Owy4MDbDtEsF` · v1.0 · 2026-05-13 · tipo "Otro" · idioma es) · referencia cruzada agregada en `templates/template-contrato-servicios.md` Cláusula 9.1 (excepción para Tier Lite). ⏸️ Solo falta adjuntar PDF del Anexo C al campo `archivo` (opcional · generar con `/make-pdf` cuando se prepare primer cliente Lite).
+2. **SLA WhatsApp 30 min (horario laboral CO/ES)** — *"Habla con un fundador real. Respuesta en menos de 30 minutos en horario laboral."* → monitoreo manual (notificación WA Cloud API → app fundador) o alert Slack/Telegram sobre webhook de mensaje entrante. Tracking de SLA en Airtable. **STATUS: pendiente (WA flotante en landing ya enlaza a número real).**
+3. **SLA form 4h hábiles** — *"Te respondemos en menos de 4 horas hábiles."* → Resend manda auto-reply inmediato confirmando recepción · respuesta humana real a `hola@zenkai.systems` antes de 4h hábiles. Marcar lead como "respondido" en Airtable VENTAS dentro del SLA. **STATUS: pendiente (form `/api/lead-demo` ya persiste a Airtable VENTAS · falta auto-reply Resend + SOP humano).**
+4. **Multi-idioma (es/en/pt) en respuestas** — *"Respondemos en español, inglés y portugués."* → capacidad real vía fundador directo o herramientas de traducción asistida. Landing actualmente es solo español. **STATUS: pendiente.**
+5. **Diagnóstico gratis 30 min** — *"Diagnóstico gratis. 30 minutos. Sin compromiso."* → Cal.com slot configurado · agenda real disponible · no rebookeable después del No-show 2× (política a redactar). Bloqueante de pre-launch: Cal.com público activo. **STATUS: Cal.com event `strategy-call` activo (commit `1074a66`) · CTAs Pro/Enterprise/Hero ya apuntan a Cal.com (commit `099628a`) · falta política No-show 2× escrita.**
 
-⚠️ **Acción mínima antes de pre-launch público:** items 1 (política reembolso) y 5 (Cal.com activo). Items 2-4 pueden documentarse vía SOPs internos sin cambio de copy.
+⚠️ **Acción mínima antes de pre-launch público:** ~~item 1 (política reembolso escrita)~~ ✅ cubierto 2026-05-13. Items 2-4 pueden documentarse vía SOPs internos sin cambio de copy. Item 5 técnicamente OK · falta solo política No-show formal.
 
 ---
 
@@ -180,10 +211,24 @@ Si en uso real cae mucho en path inferido, escalar a Sonnet 4.6 para el classifi
 
 ## ENV VARS YA CONFIGURADAS EN VERCEL
 
-- `ANTHROPIC_API_KEY` ✓ (en uso por `/api/clasificar` y `/api/protocolo`)
-- `ZENKAI_API_KEY` ✓ (Bearer token para auth de los endpoints · ver `.env.example`)
-- `AIRTABLE_TOKEN` ✓ (en uso por persistirPropuesta · Personal Access Token)
-- `AIRTABLE_BASE_VENTAS=appmiicsbFsvRfxQ9` ✓ (Fase 2 v0.1 · base de propuestas)
+**Panel `zenkaibrain` (legacy):**
+- `ANTHROPIC_API_KEY` ✓ (en uso por `/api/clasificar` y `/api/protocolo` del panel)
+- `ZENKAI_API_KEY` ✓ (Bearer token para auth · timing-safe compare · ver `.env.example`)
+- `AIRTABLE_TOKEN` ✓ (Personal Access Token · en uso por persistirPropuesta)
+- `AIRTABLE_BASE_VENTAS=appmiicsbFsvRfxQ9` ✓
+
+**Project `zenkai-web` (landing pública · Sprint 1-3):**
+- `ANTHROPIC_API_KEY` ✓ (en uso por `web/src/lib/proposal.ts` → `/api/lead-demo` y `/api/protocolo`)
+- `ZENKAI_API_KEY` ✓ (acepta dual: header `x-zenkai-key` O `Authorization: Bearer`)
+- `AIRTABLE_TOKEN` ✓ (en uso por `web/src/lib/airtable.ts` → `createDemo`)
+- `AIRTABLE_BASE_VENTAS=appmiicsbFsvRfxQ9` ✓ (tabla `demos` `tblR1tgCOznCKCeBb` creada 2026-05-12)
+
+**Configuradas en Vercel `zenkai-web` (verificado smoke test 2026-05-13):**
+- `UPSTASH_REDIS_REST_URL` ✓ / `UPSTASH_REDIS_REST_TOKEN` ✓ → rate limit sliding window 5/IP/h activo en `/api/lead-demo`
+
+**Pendientes en Vercel `zenkai-web` (no-op si missing · feature gating graceful):**
+- `TURNSTILE_SITE_KEY` (público) / `TURNSTILE_SECRET_KEY` (server) → captcha Cloudflare en demo (free tier Cloudflare · widget para sitio único)
+- `RESEND_API_KEY` → email opcional con HTML inline cuando visitor deja email en demo (Resend ya tiene dominio verified `zenkai.systems`)
 
 **Disponibles en `.env` local pero NO sincronizadas a Vercel** (sólo `getBase("VENTAS")` se usa en producción hoy · agregar en Vercel cuando algún endpoint las consuma):
 - `AIRTABLE_BASE_LEGAL=appy9s8qJ9TP98HYS`
@@ -197,21 +242,33 @@ Si en uso real cae mucho en path inferido, escalar a Sonnet 4.6 para el classifi
 
 ## QUÉ HACER EN LA NUEVA SESIÓN
 
-Fases 2 + 2.1 + 2.2 (alcance A) cerradas. Opciones para continuar:
-1. **Fase 3 — Make:** workflow que recibe webhook de Tally/Typeform/landing → crea Lead en Airtable → llama a `/api/protocolo?persist=true&lead_id=recXXX` → propuesta queda guardada y linkeada al lead. Cero intervención humana hasta el HERMES-CLOSE. Es el primer flujo end-to-end realmente automatizado.
-2. **Sembrar FINANZAS con gastos actuales:** registrar Anthropic API · Vercel · Airtable · GitHub (todos $0 hoy excepto Anthropic, que ya está cobrando por las llamadas a `/api/protocolo`). Da baseline para calcular costo operativo trimestral según fórmula §4 CLAUDE.md.
-3. **Validación con cliente real:** usar el sandbox para preparar tu primera propuesta comercial · linkeala a un Lead real en Airtable · seguimiento manual por ahora · camino al "primer cliente cerrado" del objetivo 2026.
+Sprints 1+2+2.5+3 cerrados · landing comercial v3.3 deployed · demo end-to-end cableado. Opciones para continuar:
 
-**Smoke test del pipeline completo (verificar que sigue vivo):**
+1. **Activar defensas restantes del demo público** (paso a paso documentado): seguir `conexiones/conexiones-resend.md` (5 min · sin código) + `conexiones/conexiones-turnstile.md` (requiere sprint frontend 20-30 min ANTES de activar la SECRET key). Upstash ya OK. Crítico antes de abrir tráfico orgánico.
+   - **Sub-task de código:** integrar widget `<div class="cf-turnstile">` en `web/src/components/landing/DemoSection.astro` y leer `cf-turnstile-response` para enviar como `turnstileToken` en el body de `/api/lead-demo`. Dispatch a FORGE-FRONTEND en próxima sesión.
+2. ~~**Política de reembolso 30 días escrita**~~ ✅ cerrado 2026-05-13 · template v1.0 en `templates/template-garantia-lite-30-dias.md` · pendiente registro Airtable + referencia cruzada en contrato master.
+3. **Smoke test end-to-end con caso real** (15 min): disparar `/api/lead-demo` con un input real, validar que llega a tabla `demos` Airtable VENTAS · verificar header `x-airtable-record-id` · seguir el flujo desde browser real en zenkai-web-rho.vercel.app.
+4. **Fase 5 · domain swap** (Tarea 5.3-pre): apex `zenkai.systems` → landing `zenkai-web` · panel actual → `panel.zenkai.systems`. Tareas DNS + Vercel domain config. Pre-launch comercial.
+5. **Fase 2 sectores `/sectores/<slug>` con copy_largo:** generar 8 copys de 3-5 párrafos en Claude.ai web → poblar `web/src/content/sectores/*.md` → construir páginas dedicadas. Útil para SEO long-tail pero no bloquea pre-launch.
+
+**Smoke test del demo público (verificar que sigue vivo):**
 ```bash
-curl -X POST "https://zenkaibrain-git-main-mrhaxel26-sketchs-projects.vercel.app/api/protocolo?persist=true&lead_id=recXXX" \
+curl -X POST "https://zenkai-web-rho.vercel.app/api/lead-demo" \
+  -H "Content-Type: application/json" \
+  -d '{"input":"[CLIENTE] Tengo una clínica dental en Medellín con 3 doctores · perdemos turnos por WhatsApp..."}'
+# Headers esperados: x-airtable-record-id (si persistencia OK)
+```
+
+**Smoke test del endpoint interno (auth requerida):**
+```bash
+curl -X POST "https://zenkai-web-rho.vercel.app/api/protocolo" \
   -H "Authorization: Bearer $ZENKAI_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"input":"[CLIENTE] Tu input acá..."}'
-# Headers esperados: X-Airtable-Record-Id + X-Airtable-Linked-Lead
 ```
 
-**Sandbox UI:** `https://zenkaibrain-git-main-mrhaxel26-sketchs-projects.vercel.app/sandbox`
+**Landing pública:** `https://zenkai-web-rho.vercel.app`
+**Sandbox UI panel (legacy):** `https://zenkaibrain-git-main-mrhaxel26-sketchs-projects.vercel.app/sandbox`
 
 **Smoke test de los endpoints (verificar que siguen vivos):**
 ```bash
@@ -287,8 +344,9 @@ Esto refresca automáticamente `/conexiones` y los KPIs de `/rendimiento` y Home
 
 ## STACK ACTUAL
 
-- **Hosting:** GitHub (privado) → Vercel team `mrhaxel26-sketchs-projects` (Hobby)
-- **Stack actual:** Eco · ~$2.20 USD/mes ($0 Vercel + $2.20 Hostinger Email)
+- **Hosting:** GitHub (privado) → Vercel team `mrhaxel26-sketchs-projects` (Hobby · 2 projects: `zenkaibrain` panel · `zenkai-web` landing)
+- **Stack actual:** Eco · ~$118.33 USD/mes (Claude Max $100 + Framer Basic $15 + dominio prorrateado $3.33 · resto en free tier)
+- **Trimestral confirmado:** ~$355 USD · piso §4 (×2) = ~$710 USD
 - **Clientes activos:** 0
 - **Facturado 2026:** $0 / objetivo $100K USD
-- **Próximo hito:** primer cliente cerrado · activar Fase 1 (Claude API) y Fase 2 (Airtable) en paralelo
+- **Próximo hito:** abrir demo público en zenkai.systems · activar defensas (Upstash + Turnstile + Resend) · capturar primer lead orgánico
