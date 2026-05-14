@@ -5,6 +5,7 @@ import PageHeader from "../components/PageHeader.astro";
 import KPIStat from "../components/KPIStat.astro";
 import KPIStrip from "../components/KPIStrip.astro";
 import EmptyState from "../components/EmptyState.astro";
+import { getPanelStats } from "../lib/airtable";
 
 const [agentes, sectores, workflows, sops, conexiones] = await Promise.all([
   getCollection("agentes"),
@@ -14,11 +15,14 @@ const [agentes, sectores, workflows, sops, conexiones] = await Promise.all([
   getCollection("conexiones"),
 ]);
 
+// Datos en vivo de Airtable (CRM Ventas) — null si no hay token configurado.
+const stats = await getPanelStats();
+
 const conexionesActivas = conexiones.filter((c) => c.data.estado_conexion === "activo").length;
 
 const fases = [
   { num: 1, nombre: "Anthropic Claude API", estado: "pendiente" },
-  { num: 2, nombre: "Airtable + 6 bases", estado: "pendiente" },
+  { num: 2, nombre: "Airtable + 6 bases", estado: stats ? "activo" : "pendiente" },
   { num: 3, nombre: "Make + connections", estado: "pendiente" },
   { num: 4, nombre: "WhatsApp Cloud API + BSP", estado: "pendiente" },
   { num: 5, nombre: "Cal.com + Stripe/Wompi", estado: "pendiente" },
@@ -46,10 +50,49 @@ const fases = [
       <KPIStrip>
         <KPIStat label="Conexiones activas" value={`${conexionesActivas} / ${conexiones.length}`} caption="planeadas" variant={conexionesActivas === 0 ? "muted" : "default"} />
         <KPIStat label="Stack actual" value="Eco" caption="hasta primer cliente Pro" />
-        <KPIStat label="Clientes activos" value="—" caption="🔌 conecta Airtable" variant="muted" />
+        <KPIStat
+          label="Clientes activos"
+          value={stats ? stats.clientesActivos : "—"}
+          caption={stats ? "en CRM Ventas · Airtable" : "🔌 conecta Airtable"}
+          variant={stats && stats.clientesActivos > 0 ? "default" : "muted"}
+        />
         <KPIStat label="Facturado 2026" value="$0" caption="objetivo $100,000 USD" variant="muted" />
       </KPIStrip>
     </div>
+  </section>
+
+  <section class="mb-12">
+    <h2 class="text-h2 mb-4">Clientes y pipeline</h2>
+    {stats ? (
+      <>
+        <p class="text-small text-text-muted mb-4">
+          {stats.leadsTotal} leads · {stats.dealsTotal} deals en pipeline · {stats.clientesActivos} clientes activos
+          <span class="text-text-faint"> · Airtable CRM Ventas, actualizado en este deploy</span>
+        </p>
+        {stats.clientes.length > 0 ? (
+          <ul class="card-base divide-y divide-border">
+            {stats.clientes.map((c) => (
+              <li class="flex items-center justify-between p-4">
+                <div>
+                  <div class="text-body text-text">{c.empresa}</div>
+                  <div class="text-small text-text-faint">{c.servicio}</div>
+                </div>
+                <span class="text-micro uppercase tracking-wide text-success bg-success/10 px-2 py-0.5 rounded-chip">
+                  {c.estado}
+                </span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <EmptyState title="Sin clientes activos" message="Aún no hay clientes con estado Activo en el CRM." />
+        )}
+      </>
+    ) : (
+      <EmptyState
+        title="Clientes y pipeline"
+        message="Conecta Airtable (variable AIRTABLE_TOKEN en el proyecto Vercel zenkaibrain) para ver clientes activos, leads y deals desde la base CRM Ventas."
+      />
+    )}
   </section>
 
   <section class="mb-12">
@@ -71,7 +114,10 @@ const fases = [
             <div class="text-small text-text-faint font-mono">Fase {f.num}</div>
             <div class="text-body text-text">{f.nombre}</div>
           </div>
-          <span class="text-micro uppercase tracking-wide text-warning bg-warning/10 px-2 py-0.5 rounded-chip">
+          <span class:list={[
+            "text-micro uppercase tracking-wide px-2 py-0.5 rounded-chip",
+            f.estado === "activo" ? "text-success bg-success/10" : "text-warning bg-warning/10",
+          ]}>
             {f.estado}
           </span>
         </li>

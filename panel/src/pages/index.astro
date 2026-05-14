@@ -4,6 +4,7 @@ import PanelLayout from "../layouts/PanelLayout.astro";
 import KPIStat from "../components/KPIStat.astro";
 import KPIStrip from "../components/KPIStrip.astro";
 import { validateCrossRefs } from "../lib/cross-refs";
+import { getPanelStats } from "../lib/airtable";
 
 // Build-time gate: si las referencias cruzadas están rotas, el build falla aquí
 // con mensaje claro. Solo se ejecuta una vez al renderizar Home (la página raíz).
@@ -15,6 +16,9 @@ const [agentes, sectores, workflows, conexiones] = await Promise.all([
   getCollection("workflows"),
   getCollection("conexiones"),
 ]);
+
+// Datos en vivo de Airtable (CRM Ventas) — null si no hay token configurado.
+const stats = await getPanelStats();
 
 const sectoresAlta = sectores.filter((s) => s.data.prioridad === "alta").length;
 const conexionesActivas = conexiones.filter((c) => c.data.estado_conexion === "activo").length;
@@ -32,7 +36,7 @@ const checklistPlatform = [
   { label: "6 / 6 Workflows end-to-end mapeados", done: workflows.length === 6 },
   { label: "5 / 5 SOPs con SLA definido",         done: true },
   { label: "Conexiones APIs activas",             done: conexionesActivas > 0, partial: `${conexionesActivas} / ${conexiones.length}` },
-  { label: "Primer cliente activo",               done: false },
+  { label: "Primer cliente activo",               done: stats ? stats.clientesActivos > 0 : false },
 ];
 ---
 
@@ -47,7 +51,12 @@ const checklistPlatform = [
 
   <section class="mb-10">
     <KPIStrip>
-      <KPIStat label="Clientes activos" value="—" caption="🔌 conecta Airtable" variant="muted" />
+      <KPIStat
+        label="Clientes activos"
+        value={stats ? stats.clientesActivos : "—"}
+        caption={stats ? "en CRM Ventas · Airtable" : "🔌 conecta Airtable"}
+        variant={stats && stats.clientesActivos > 0 ? "default" : "muted"}
+      />
       <KPIStat label="Facturado 2026"   value="$0" caption="objetivo $100K USD" variant="muted" />
       <KPIStat label="Agentes listos"   value={`${agentes.length} / 12`} caption="documentados" />
       <KPIStat label="Stack actual"     value="Eco" caption="$0 / mes" />
