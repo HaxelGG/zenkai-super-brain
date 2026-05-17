@@ -36,3 +36,14 @@ web/dist/
 web/.vercel/
 web/.astro/
 .gstack/
+
+# Obsidian
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+.obsidian/cache
+.obsidian/plugins/*/data.json
+# Plugin builds (Obsidian re-descarga al abrir vault si community-plugins.json los lista)
+.obsidian/plugins/*/main.js
+.obsidian/plugins/*/styles.css
+.obsidian/plugins/*/*.map
+.obsidian/plugins/*/.gitignore

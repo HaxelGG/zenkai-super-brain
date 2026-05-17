@@ -1,0 +1,14 @@
+{
+  "userIgnoreFilters": [
+    "panel/",
+    "node_modules/",
+    "api/",
+    "web/",
+    "scripts/",
+    "dist/",
+    "build/",
+    ".next/",
+    ".vercel/",
+    ".cache/"
+  ]
+}
