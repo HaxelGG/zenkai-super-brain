@@ -47,3 +47,9 @@ web/.astro/
 .obsidian/plugins/*/styles.css
 .obsidian/plugins/*/*.map
 .obsidian/plugins/*/.gitignore
+
+
+
+
+# Ignore Smart Environment folder
+.smart-env
