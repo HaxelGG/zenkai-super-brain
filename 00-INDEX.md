@@ -22,7 +22,8 @@ tags: [home, navegacion]
 ## 📆 Operación diaria
 
 - [[00-DASHBOARD]] — queries Dataview · agentes · sectores · workflows · skills · cambios recientes
-- Daily notes — `daily/YYYY-MM-DD.md` (a crear cuando se active el plugin de daily notes)
+- [[daily/2026-05-16|Daily hoy]] — sesión actual · `Ctrl+P` → "Open today's daily note" para abrir/crear automático
+- [[daily/_template|Template daily]] — plantilla aplicada por el plugin (config en `.obsidian/daily-notes.json`)
 
 ---
 
