@@ -8,5 +8,7 @@
   "remotely-save",
   "obsidian-style-settings",
   "obsidian-tasks-plugin",
-  "templater-obsidian"
+  "templater-obsidian",
+  "smart-connections",
+  "copilot"
 ]
