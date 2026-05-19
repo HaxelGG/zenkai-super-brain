@@ -54,3 +54,4 @@
 "event_logs:lookup:get_results": {"key":"lookup:get_results","ct":3,"first_at":1779007231731,"last_at":1779007239816,"class_name":"EventLog"},
 "event_logs:sources:opened": {"key":"sources:opened","ct":1,"first_at":1779073819997,"last_at":1779073819997,"class_name":"EventLog","event_sources":{"active-leaf-change":1}},
 "event_logs:sources:opened": {"key":"sources:opened","ct":2,"first_at":1779073819997,"last_at":1779114425393,"class_name":"EventLog","event_sources":{"active-leaf-change":2}},
+"event_logs:sources:opened": {"key":"sources:opened","ct":3,"first_at":1779073819997,"last_at":1779137457629,"class_name":"EventLog","event_sources":{"active-leaf-change":3}},
