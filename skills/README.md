@@ -75,6 +75,7 @@ Skills que llenan gaps específicos del flujo ZENKAI:
 | [`skill-cualificar-lead.md`](skill-cualificar-lead.md) | Score 1-10 con rúbrica y handoff a humano | HERMES |
 | [`skill-generar-propuesta.md`](skill-generar-propuesta.md) | Estructura de propuesta comercial profesional | LEX · HERMES |
 | [`skill-onboarding-cliente.md`](skill-onboarding-cliente.md) | Protocolo de 48h post-firma | ATLAS |
+| [`skill-hormozi-roadmap.md`](skill-hormozi-roadmap.md) | Diagnóstico de etapa + roadmap a $100K (basado en Hormozi) | ZEUS · ORACLE · HERMES |
 
 ---
 

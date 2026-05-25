@@ -19,7 +19,7 @@ color_acento: "#4f46e5"
 ## IDENTIDAD
 
 **Modelo default:** **Claude Opus 4.7** (único agente que usa Opus por defecto)
-**Skills activados por defecto:** `brainstorming`, `writing-plans`, `verification-before-completion`
+**Skills activados por defecto:** `brainstorming`, `writing-plans`, `verification-before-completion`, `skill-hormozi-roadmap` (dueño del ritual semanal de roadmap a $100K)
 **Subagentes:** ZEUS-OKR · ZEUS-MARKET · ZEUS-DECIDE · ZEUS-TREND
 
 ---
