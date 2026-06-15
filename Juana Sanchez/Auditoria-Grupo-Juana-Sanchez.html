@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Auditoría — Landing Grupo Juana Sánchez</title>
+<style>
+  @page { size: A4; margin: 22mm 20mm; }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body {
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    color: #1d1a16;
+    font-size: 10.5pt;
+    line-height: 1.55;
+    margin: 0;
+  }
+  h1, h2, h3 { font-weight: 600; letter-spacing: -0.01em; color: #14110d; }
+  h1 { font-size: 22pt; line-height: 1.15; margin: 0 0 4pt; }
+  h2 { font-size: 14pt; margin: 22pt 0 8pt; padding-top: 6pt; border-top: 1.5px solid #c8a35a; }
+  h3 { font-size: 11.5pt; margin: 14pt 0 4pt; color: #6b5a2e; }
+  p { margin: 0 0 8pt; }
+  a { color: #8a6d2f; text-decoration: none; }
+  .eyebrow { font-family: "Courier New", monospace; font-size: 8pt; letter-spacing: 0.22em;
+             text-transform: uppercase; color: #b58e47; margin-bottom: 10pt; }
+  .meta { color: #6a655c; font-size: 9pt; margin-bottom: 2pt; }
+  .lead { font-size: 11pt; color: #3a352c; }
+  .score-band {
+    background: linear-gradient(135deg, #2a2419, #4a3826);
+    color: #f4efe6; padding: 16pt 18pt; border-radius: 6pt; margin: 14pt 0 4pt;
+    display: flex; align-items: baseline; justify-content: space-between;
+  }
+  .score-band .big { font-size: 30pt; font-weight: 700; color: #e8c98a; }
+  .score-band .lbl { font-family: "Courier New", monospace; font-size: 8.5pt;
+                     letter-spacing: 0.18em; text-transform: uppercase; color: #d8bb8a; }
+  table { width: 100%; border-collapse: collapse; margin: 8pt 0 12pt; font-size: 9.5pt; }
+  th, td { text-align: left; padding: 5pt 8pt; border-bottom: 0.6px solid #ddd6c8; vertical-align: top; }
+  th { font-family: "Courier New", monospace; font-size: 7.5pt; letter-spacing: 0.12em;
+       text-transform: uppercase; color: #8a8478; border-bottom: 1.2px solid #c8a35a; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .ok { color: #2e7d4f; font-weight: 600; }
+  .warn { color: #b07b1e; font-weight: 600; }
+  .bad { color: #b3402e; font-weight: 600; }
+  .done { background: #eef6ef; }
+  ul { margin: 0 0 8pt; padding-left: 16pt; }
+  li { margin-bottom: 3pt; }
+  .footer-note { margin-top: 18pt; padding-top: 8pt; border-top: 0.6px solid #ddd6c8;
+                 font-size: 8.5pt; color: #8a8478; }
+  .avoid-break { break-inside: avoid; }
+</style>
+</head>
+<body>
+
+  <div class="eyebrow">● Auditoría técnica · Landing page</div>
+  <h1>Grupo Juana Sánchez</h1>
+  <p class="meta">Sitio: grupo-juana-sanchez.vercel.app · Stack: Next.js 15 sobre Vercel</p>
+  <p class="meta">Fecha: 21 de mayo de 2026 · Mediciones reales en producción + revisión de código</p>
+
+  <div class="score-band avoid-break">
+    <div>
+      <div class="lbl">Puntuación global</div>
+      <div style="font-size:10pt;color:#d8bb8a;margin-top:3pt;">Sólida y profesional</div>
+    </div>
+    <div class="big">8.6<span style="font-size:14pt;color:#bfa05f;"> / 10</span></div>
+  </div>
+
+  <h2>Resumen ejecutivo</h2>
+  <p class="lead">La landing de Grupo Juana Sánchez es un sitio sólido y profesional, con una
+  estética editorial de nivel agencia, un SEO técnico muy completo y una respuesta de servidor
+  rápida. El margen de mejora se concentra en la eficiencia de assets (fuentes y JavaScript de
+  animación) y en el endurecimiento de seguridad mediante cabeceras HTTP.</p>
+
+  <table class="avoid-break">
+    <thead><tr><th>Área</th><th>Nota</th></tr></thead>
+    <tbody>
+      <tr><td>Diseño visual / estética</td><td class="num">9.0</td></tr>
+      <tr><td>Tipografía</td><td class="num">9.0</td></tr>
+      <tr><td>Coherencia de marca</td><td class="num">8.5</td></tr>
+      <tr><td>SEO técnico</td><td class="num">9.0</td></tr>
+      <tr><td>Velocidad de respuesta (TTFB / edge)</td><td class="num">9.0</td></tr>
+      <tr><td>Animación / interacción</td><td class="num">8.5</td></tr>
+      <tr><td>Peso de assets (JS + fuentes)</td><td class="num">7.0</td></tr>
+      <tr><td>Seguridad (cabeceras)</td><td class="num">8.5 <span style="color:#8a8478;font-size:8pt;">(tras P1)</span></td></tr>
+      <tr><td>Accesibilidad</td><td class="num">7.5</td></tr>
+      <tr><td>Conversión / CTAs</td><td class="num">8.0</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Métricas medidas</h2>
+  <table>
+    <thead><tr><th>Métrica</th><th>Valor</th><th>Veredicto</th></tr></thead>
+    <tbody>
+      <tr><td>TTFB (time to first byte)</td><td>0.33 – 0.47 s (cache HIT)</td><td class="ok">Muy bueno</td></tr>
+      <tr><td>HTML</td><td>104 KB → 17.6 KB (Brotli)</td><td class="ok">Excelente</td></tr>
+      <tr><td>JS + CSS transferido</td><td>~370 KB (349 JS + 21 CSS)</td><td class="warn">Pesado</td></tr>
+      <tr><td>Chunk de JS mayor</td><td>~130 KB (Motion / React / Lenis)</td><td class="warn">Pesado</td></tr>
+      <tr><td>Fuentes</td><td>~275 KB · 6 woff2 (mayor: 120 KB)</td><td class="warn">Pesado</td></tr>
+      <tr><td>Imagen hero (LCP)</td><td>Precargada · AVIF 40.9 KB</td><td class="ok">Muy bueno</td></tr>
+      <tr><td>Formatos de imagen</td><td>AVIF + WebP (tras P1)</td><td class="ok">Óptimo</td></tr>
+      <tr><td>Compresión (Brotli / gzip)</td><td>Activa</td><td class="ok">Óptimo</td></tr>
+      <tr><td>HSTS</td><td>Activo</td><td class="ok">Óptimo</td></tr>
+      <tr><td>Cabeceras de seguridad</td><td>Aplicadas (tras P1)</td><td class="ok">Bueno</td></tr>
+      <tr><td>SEO técnico</td><td>Schema.org, OG, sitemap, robots, manifest</td><td class="ok">Excelente</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Fortalezas</h2>
+  <ul>
+    <li><b>Estética y tipografía de nivel agencia.</b> Sistema tipográfico coherente (Italiana, Cormorant, Fraunces, Jost, JetBrains Mono) y paleta cuidada (crema, malva, menta, dorado, marrón tabaco): cada firma tiene su mundo sin perder unidad.</li>
+    <li><b>Base técnica moderna y limpia.</b> Next.js 15, componentes bien organizados, render estático con caché de edge.</li>
+    <li><b>SEO técnico muy completo.</b> Datos estructurados Schema.org, imagen OpenGraph dinámica, sitemap, robots y manifest PWA.</li>
+    <li><b>Respuesta de servidor rápida.</b> TTFB por debajo de medio segundo gracias al edge cache de Vercel.</li>
+    <li><b>Detalles de marca cuidados.</b> Microcopys, espaciados, numeración y color con criterio editorial.</li>
+  </ul>
+
+  <h2>Recomendaciones priorizadas</h2>
+
+  <h3>P1 — Alto impacto, bajo esfuerzo · IMPLEMENTADO ✓</h3>
+  <div class="done" style="padding:8pt 10pt;border-radius:5pt;">
+  <p><b>1. AVIF en imágenes.</b> Antes solo WebP. Con AVIF, el hero pasó de 70.5 KB (JPEG) /
+  51.5 KB (WebP) a <b>40.9 KB (AVIF)</b> — ahorro del 42 % frente a JPEG y 21 % frente a WebP,
+  aplicable a todas las fotos.</p>
+  <p style="margin-bottom:0;"><b>2. Cabeceras de seguridad.</b> Añadidas X-Content-Type-Options,
+  X-Frame-Options, Referrer-Policy y Permissions-Policy (antes: ninguna). El Content-Security-Policy
+  se deja para un paso dedicado (requiere pruebas para no bloquear scripts inline de Next, Motion o
+  Vercel Analytics).</p>
+  </div>
+
+  <h3>P2 — Alto impacto, esfuerzo medio · pendiente</h3>
+  <ul>
+    <li><b>3. Aligerar las fuentes (~275 KB).</b> Limitar a los pesos usados de cada familia,
+    subsetear a <code>latin</code> y evaluar si las cinco familias son imprescindibles (Cormorant y
+    Fraunces son ambas serif). Objetivo: 120–150 KB.</li>
+    <li><b>4. Reducir el JavaScript de animación (Motion / Lenis, ~130 KB).</b> Cargar Motion solo
+    en las secciones que lo usan y trasladar animaciones simples a CSS / IntersectionObserver.
+    Objetivo: First Load JS por debajo de 200 KB (mejora TBT e INP).</li>
+  </ul>
+
+  <h3>P3 — Pulido</h3>
+  <ul>
+    <li><b>5. Caché de imágenes.</b> Afinar la retención de las imágenes optimizadas (la gestiona el edge de Vercel).</li>
+    <li><b>6. Accesibilidad.</b> Auditar el contraste de los textos tenues (rótulos a baja opacidad) y el foco visible en todos los interactivos.</li>
+    <li><b>7. Navegación del timeline.</b> Hacer las flechas más evidentes como método de navegación.</li>
+    <li><b>8. Mantenimiento del countdown.</b> La fecha (3 de junio de 2026) está fija; tras esa fecha el banner cambia solo a "Ya disponible".</li>
+  </ul>
+
+  <h2>Conclusión</h2>
+  <p>Con una base de <b>8.6 / 10</b>, la landing ya transmite calidad y profesionalismo.
+  Completadas las recomendaciones P1 (hechas) y P2 (fuentes y JavaScript), el sitio se situaría con
+  holgura en el rango <b>9 – 9.5</b>, con tiempos de carga más ligeros y una postura de seguridad
+  reforzada, sin sacrificar nada del diseño actual.</p>
+
+  <div class="footer-note">Auditoría generada el 21 de mayo de 2026 · Mediciones tomadas sobre la
+  versión en producción en grupo-juana-sanchez.vercel.app.</div>
+
+</body>
+</html>

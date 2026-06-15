@@ -1,0 +1,29 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "juana-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--prefix", "juana-sanchez-landing"],
+      "port": 3000
+    },
+    {
+      "name": "panel-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--prefix", "juana-sanchez-panel", "--", "--port", "3001"],
+      "port": 3001
+    },
+    {
+      "name": "panel-ui-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--prefix", "juana-panel-ui", "--", "--port", "3002"],
+      "port": 3002
+    },
+    {
+      "name": "tienda-static",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "8099", "--directory", "Online store/tienda online"],
+      "port": 8099
+    }
+  ]
+}
