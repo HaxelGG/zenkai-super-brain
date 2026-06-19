@@ -1,0 +1,24 @@
+# AGENTS.md
+
+## Cursor Cloud specific instructions
+
+This repo is an Obsidian vault (the ZENKAI "Super Cerebro" markdown knowledge base) **plus** three runnable code units that live alongside the markdown:
+
+| Unit | Path | What it is | Dev command | Port |
+|------|------|------------|-------------|------|
+| Panel | `panel/` | Astro 5 **static** internal dashboard. Renders the `agentes/`, `sectores/`, `workflows/`, etc. markdown via content collections (glob loaders point at `../<folder>`). | `npm run dev` (in `panel/`) | 4321 |
+| Web | `web/` | Astro 5 **SSR** public landing (`output: 'server'`, Vercel adapter). Has Vitest unit tests. | `npm run dev` (in `web/`) | 4322 |
+| Scripts + API | root (`scripts/`, `api/`) | TypeScript run with `tsx`; `api/*.ts` are Vercel serverless functions that call the Anthropic + Airtable SDKs. | `npm run clasificar` / `npm run protocolo` (root) | — |
+
+Standard commands live in each `package.json` and the per-folder `README.md` (`panel/README.md`, `web/README.md`). Don't duplicate them; read those.
+
+### Non-obvious caveats
+
+- **Each unit has its own `node_modules`.** The root, `panel/`, and `web/` are installed independently (`vercel.json` does `npm install && cd panel && npm install`). The update script installs all three.
+- **Secrets are optional for local dev/build/test.** Nothing here is set by default in the cloud VM.
+  - `panel` and `web` **build and run without any secrets** — they degrade gracefully (panel shows a "🔌 conecta Airtable" placeholder; web lead capture is best-effort).
+  - `web` Vitest tests mock Anthropic/Airtable/Resend, so `npm test` passes with **no secrets**.
+- **Live AI features need `ANTHROPIC_API_KEY`.** The root `npm run test:clasificar` / `test:protocolo`, the panel `/sandbox` page, and the web `/api/lead-demo` + `/api/protocolo` endpoints make **real, paid** Anthropic calls. They return 5xx without the key. Optional companions: `ZENKAI_API_KEY` (Bearer auth for the API endpoints) and `AIRTABLE_TOKEN` (persistence).
+- **The panel's `/sandbox` calls `/api/clasificar` and `/api/protocolo`, which are root-level Vercel functions — NOT served by `astro dev`.** Those endpoints only exist under `vercel dev` / a Vercel deploy, so the sandbox button 404s under a plain `panel` dev server. This is expected, not a bug.
+- **Root `tsconfig.json` excludes `panel/`.** Typecheck the root with `npx tsc --noEmit`; build the panel with its own `npm run build` (`astro check && astro build`).
+- **`web` build/cache quirk:** if a content-collection edit triggers a "Duplicate id" warning, run `rm -rf web/.astro web/dist` then rebuild (documented in `web/README.md`).
