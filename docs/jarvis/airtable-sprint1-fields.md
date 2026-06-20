@@ -13,16 +13,12 @@ Base: **VENTAS** (`AIRTABLE_BASE_VENTAS`)
 | `respondido_at` | Date/time | S-01 · respuesta humana |
 | `sla_alert_sent` | Checkbox | S-01 dedup |
 
-## Tabla `leads`
+## Tabla `Leads` (nombre exacto en Airtable)
+
+Campos existentes usados por M-03: `Notas`, `Nombre`, `Email`, `Fuente`, `Servicio Interes`, `Presupuesto USD`, `Estado`, `Fecha Entrada`.
 
 | Campo | Tipo | Uso |
 |-------|------|-----|
-| `mensaje_original` | Long text | Input M-03 |
-| `empresa` | Text | Contexto scoring |
-| `sector` | Text / select | Contexto scoring |
-| `source` | Single select | Contexto scoring |
-| `email` | Email | Contacto |
-| `created_at` | Date/time | S-01 filtro |
 | `score` | Number | M-03 output |
 | `etapa` | Single select | `hot` · `nurturing` · `descalificado` |
 | `cualificacion_razon` | Long text | M-03 |
@@ -30,13 +26,13 @@ Base: **VENTAS** (`AIRTABLE_BASE_VENTAS`)
 | `respondido_at` | Date/time | S-01 |
 | `sla_alert_sent` | Checkbox | S-01 dedup |
 
-## Fórmula S-01 (referencia)
+## Fórmula S-01 · Leads (referencia)
 
 ```
 AND(
   {respondido_at}=BLANK(),
   OR({sla_alert_sent}=FALSE(), {sla_alert_sent}=BLANK()),
-  IS_BEFORE({created_at}, DATEADD(NOW(), -3, 'hours'))
+  IS_BEFORE({Fecha Entrada}, DATEADD(NOW(), -3, 'hours'))
 )
 ```
 

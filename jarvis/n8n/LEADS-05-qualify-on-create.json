@@ -26,7 +26,7 @@
         "table": {
           "__rl": true,
           "mode": "name",
-          "value": "leads"
+          "value": "Leads"
         },
         "id": "={{ $json.body?.record_id || $json.record_id }}"
       },
@@ -44,7 +44,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const f = $input.first().json.fields || $input.first().json;\nconst recordId = $input.first().json.id || $('Webhook Lead Creado').first().json.body?.record_id;\nconst text = [\n  f.mensaje_original || f.Mensaje || f.notes || f.Notas || '',\n  f.empresa ? `Empresa: ${f.empresa}` : '',\n  f.sector ? `Sector: ${f.sector}` : '',\n  f.source ? `Source: ${f.source}` : '',\n  f.email ? `Email: ${f.email}` : '',\n].filter(Boolean).join('\\n');\n\nconst system = `Sos HERMES de ZENKAI. Cualificá el lead con la rúbrica oficial (skill-cualificar-lead).\nDevolvé SOLO JSON válido:\n{\"score\": number, \"etapa\": \"hot\"|\"nurturing\"|\"descalificado\", \"razon\": string, \"brief\": string}\n\nRúbrica: presupuesto +2, decision-maker +2, urgencia +2, sector conocido +2, +6 meses +1, mercado prio +1, pide gratis -3, copy-paste -2.\n≥6 hot · 4-5 nurturing · ≤3 descalificado.`;\n\nreturn [{ json: { recordId, text, anthropicBody: {\n  model: 'claude-sonnet-4-6',\n  max_tokens: 1024,\n  system,\n  messages: [{ role: 'user', content: text || 'Sin mensaje — score conservador 3.' }]\n} } }];"
+        "jsCode": "const f = $input.first().json.fields || $input.first().json;\nconst recordId = $input.first().json.id || $('Webhook Lead Creado').first().json.body?.record_id;\nconst text = [\n  f.Notas || f.mensaje_original || '',\n  f.Nombre ? `Nombre: ${f.Nombre}` : '',\n  f['Servicio Interes'] ? `Servicio: ${f['Servicio Interes']}` : '',\n  f.Fuente ? `Fuente: ${f.Fuente}` : '',\n  f.Email ? `Email: ${f.Email}` : '',\n  f['Presupuesto USD'] ? `Presupuesto USD: ${f['Presupuesto USD']}` : '',\n  f.Estado ? `Estado: ${f.Estado}` : '',\n].filter(Boolean).join('\\n');\n\nconst system = `Sos HERMES de ZENKAI. Cualificá el lead con la rúbrica oficial (skill-cualificar-lead).\nDevolvé SOLO JSON válido:\n{\"score\": number, \"etapa\": \"hot\"|\"nurturing\"|\"descalificado\", \"razon\": string, \"brief\": string}\n\nRúbrica: presupuesto +2, decision-maker +2, urgencia +2, sector conocido +2, +6 meses +1, mercado prio +1, pide gratis -3, copy-paste -2.\n≥6 hot · 4-5 nurturing · ≤3 descalificado.`;\n\nreturn [{ json: { recordId, text, anthropicBody: {\n  model: 'claude-sonnet-4-6',\n  max_tokens: 1024,\n  system,\n  messages: [{ role: 'user', content: text || 'Sin mensaje — score conservador 3.' }]\n} } }];"
       },
       "id": "b1b2c3d4-e5f6-7890-abcd-ef1234560103",
       "name": "Build Qualify Prompt",
@@ -104,7 +104,7 @@
         "table": {
           "__rl": true,
           "mode": "name",
-          "value": "leads"
+          "value": "Leads"
         },
         "columns": {
           "mappingMode": "defineBelow",

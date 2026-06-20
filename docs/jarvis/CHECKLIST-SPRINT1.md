@@ -5,7 +5,7 @@ Marcar en orden. Tiempo estimado: **45–60 min**.
 ## Repo (local)
 
 - [ ] `npm run n8n:checklist` — 4 JSON válidos
-- [ ] `npm run jarvis:setup-sprint1` — campos Airtable documentados
+- [ ] `npm run jarvis:setup-sprint1 -- --apply` — crear campos faltantes
 
 ## n8n Cloud
 
@@ -26,7 +26,7 @@ Marcar en orden. Tiempo estimado: **45–60 min**.
 ## Airtable VENTAS
 
 - [ ] Campos en `demos`: `autoreply_sent`, `respondido_at`, `sla_alert_sent`
-- [ ] Campos en `leads`: `score`, `etapa`, `respondido_at`, `sla_alert_sent`, `cualificacion_razon`, `cualificacion_brief`, `created_at`
+- [ ] Campos en `Leads`: `score`, `etapa`, `cualificacion_*`, `respondido_at`, `sla_alert_sent`
 - [ ] Automation demo → webhook M-02
 - [ ] Automation lead → webhook M-03
 

@@ -74,7 +74,7 @@ Copiar URLs de producción de cada webhook (Test → Production).
 
 ### M-03 · Lead creado
 
-- **Trigger:** Record created in `leads`
+- **Trigger:** Record created in `Leads` (nombre exacto)
 - **Action:** Webhook POST → URL producción `leads-qualify`
 
 ```json

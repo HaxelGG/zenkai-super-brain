@@ -44,6 +44,7 @@ const canonical = new URL(toJarvisCanonicalPath(Astro.url.pathname), JARVIS_URL)
     <link rel="manifest" href="/jarvis-manifest.webmanifest" />
     <script src="/jarvis-live.js" defer></script>
     <script src="/jarvis-voice.js" defer></script>
+    <script src="/jarvis-telegram.js" defer></script>
     <title>{title} · JARVIS · ZENKAI</title>
   </head>
   <body>
@@ -76,6 +77,7 @@ const canonical = new URL(toJarvisCanonicalPath(Astro.url.pathname), JARVIS_URL)
             </div>
           </div>
           <div class="flex items-center gap-2 shrink-0">
+            <span id="jv-telegram-badge" class="jv-telegram-badge" data-state="offline" title="Telegram · ejecutá npm run jarvis:telegram">TG</span>
             <button type="button" id="jv-install-btn" class="jv-install-btn hidden" title="Instalar JARVIS en el escritorio">
               <span class="jv-install-btn-label">Instalar</span>
             </button>
