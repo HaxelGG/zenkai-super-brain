@@ -12,6 +12,9 @@ import { allowDashboardRequest, setDashboardCacheHeaders } from "../jarvis-guard
 import { allowOrchestratorRequest } from "../jarvis-orchestrator.js";
 
 export function jarvisSubpath(req: VercelRequest): string {
+  const q = req.query.route;
+  if (typeof q === "string" && q.trim()) return q.replace(/\/$/, "");
+  if (Array.isArray(q) && q[0]) return String(q[0]).replace(/\/$/, "");
   const raw = req.url || "";
   const m = raw.match(/\/api\/jarvis\/?([^?]*)/);
   return (m?.[1] || "").replace(/\/$/, "") || "status";
