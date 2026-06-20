@@ -3,10 +3,12 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 const mockGenerate = vi.fn();
 const mockSynth = vi.fn();
 const mockDispatch = vi.fn();
+const mockSendEmail = vi.fn();
 
 vi.mock('../../lib/proposal', () => ({ generateProposal: mockGenerate }));
 vi.mock('../../lib/voice', () => ({ synthesizeSpeech: mockSynth }));
 vi.mock('../../lib/n8n', () => ({ dispatchToN8n: mockDispatch }));
+vi.mock('../../lib/email', () => ({ sendProposalByEmail: mockSendEmail }));
 
 const validProposal = {
   sector_detectado: 'salud',
@@ -27,10 +29,12 @@ beforeEach(() => {
   mockGenerate.mockReset();
   mockSynth.mockReset();
   mockDispatch.mockReset();
+  mockSendEmail.mockReset();
   vi.stubEnv('ZENKAI_API_KEY', 'test-secret');
   mockGenerate.mockResolvedValue({ ok: true, data: validProposal });
   mockSynth.mockResolvedValue({ ok: true, audio: new Uint8Array([1, 2, 3]).buffer, contentType: 'audio/mpeg' });
   mockDispatch.mockResolvedValue({ ok: true, status: 200, response: null });
+  mockSendEmail.mockResolvedValue({ id: 'email_abc123' });
 });
 
 const { POST } = await import('./orquestar');
@@ -117,6 +121,43 @@ describe('POST /api/orquestar', () => {
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.n8n).toEqual({ ok: false, status: 500, error: 'N8N_WEBHOOK_URL missing' });
+  });
+
+  it('200 con email · envía la propuesta y resume el resultado', async () => {
+    const res = await POST({
+      request: buildRequest({
+        json: { texto: TEXTO, email: 'cliente@empresa.com' },
+        headers: { 'x-zenkai-key': 'test-secret' },
+      }),
+    } as any);
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.email).toEqual({ ok: true, id: 'email_abc123' });
+    expect(mockSendEmail).toHaveBeenCalledOnce();
+    expect(mockSendEmail.mock.calls[0][0]).toMatchObject({ to: 'cliente@empresa.com', sector: 'salud' });
+  });
+
+  it('no envía email cuando no se provee dirección', async () => {
+    const res = await POST({
+      request: buildRequest({ json: { texto: TEXTO }, headers: { 'x-zenkai-key': 'test-secret' } }),
+    } as any);
+    expect(res.status).toBe(200);
+    expect((await res.json()).email).toBeUndefined();
+    expect(mockSendEmail).not.toHaveBeenCalled();
+  });
+
+  it('email best-effort · si falla, email.ok=false pero 200', async () => {
+    mockSendEmail.mockRejectedValueOnce(new Error('resend send failed'));
+    const res = await POST({
+      request: buildRequest({
+        json: { texto: TEXTO, email: 'cliente@empresa.com' },
+        headers: { 'x-zenkai-key': 'test-secret' },
+      }),
+    } as any);
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.email.ok).toBe(false);
+    expect(body.proposal).toBeDefined();
   });
 
   it('502 cuando generateProposal falla', async () => {

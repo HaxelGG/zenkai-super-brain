@@ -9,16 +9,24 @@
 import { generateProposal, type ProposalOutput } from './proposal';
 import { synthesizeSpeech } from './voice';
 import { dispatchToN8n } from './n8n';
+import { sendProposalByEmail } from './email';
 
 export interface OrchestrateOptions {
   voice?: boolean;
   notify?: boolean;
   voiceId?: string;
+  email?: string;
 }
 
 export interface N8nSummary {
   ok: boolean;
   status: number;
+  error?: string;
+}
+
+export interface EmailSummary {
+  ok: boolean;
+  id?: string;
   error?: string;
 }
 
@@ -29,6 +37,7 @@ export type OrchestrateResult =
       audioBase64?: string;
       voiceError?: string;
       n8n?: N8nSummary;
+      email?: EmailSummary;
     }
   | { ok: false; status: number; error: string; detail?: unknown };
 
@@ -72,6 +81,20 @@ export const orchestrate = async (
     result.n8n = d.ok
       ? { ok: true, status: d.status }
       : { ok: false, status: d.status, error: d.error };
+  }
+
+  if (opts.email) {
+    try {
+      const sent = await sendProposalByEmail({
+        to: opts.email,
+        sector: proposal.sector_detectado,
+        tier: proposal.tier_recomendado,
+        propuesta: proposal.propuesta,
+      });
+      result.email = { ok: true, id: sent.id };
+    } catch (err) {
+      result.email = { ok: false, error: err instanceof Error ? err.message : String(err) };
+    }
   }
 
   return result;

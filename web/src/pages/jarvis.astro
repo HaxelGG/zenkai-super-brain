@@ -43,6 +43,16 @@ export const prerender = false;
         placeholder="Tengo una clínica dental en Medellín, 4 odontólogos. Perdemos turnos por no contestar WhatsApp a tiempo. Queremos automatizar agenda y respuestas."
         class="w-full font-mono text-sm px-3 py-2 rounded-xl border border-zk-border2 bg-zk-bg2 text-zk-text focus:outline-none focus:border-zk-accent transition-colors resize-y"
       ></textarea>
+      <div class="mt-4">
+        <label for="opt-email" class="block text-sm text-zk-text2 mb-1">Enviar propuesta por email (opcional)</label>
+        <input
+          id="opt-email"
+          type="email"
+          autocomplete="off"
+          placeholder="cliente@empresa.com"
+          class="w-full sm:max-w-xs font-mono text-sm px-3 py-2 rounded-xl border border-zk-border2 bg-zk-bg2 text-zk-text focus:outline-none focus:border-zk-accent transition-colors"
+        />
+      </div>
       <div class="mt-4 flex flex-wrap items-center gap-5">
         <label class="flex items-center gap-2 cursor-pointer text-sm text-zk-text2">
           <input type="checkbox" id="opt-voice" class="accent-zk-accent" checked />
@@ -96,6 +106,7 @@ export const prerender = false;
   const brief = $<HTMLTextAreaElement>('brief');
   const optVoice = $<HTMLInputElement>('opt-voice');
   const optNotify = $<HTMLInputElement>('opt-notify');
+  const optEmail = $<HTMLInputElement>('opt-email');
   const run = $<HTMLButtonElement>('run');
   const status = $<HTMLParagraphElement>('status');
   const result = $<HTMLDivElement>('result');
@@ -125,12 +136,19 @@ export const prerender = false;
     };
   }
 
-  const renderProposal = (p: Proposal, n8n?: { ok: boolean; status: number; error?: string }): string => {
+  const renderProposal = (
+    p: Proposal,
+    n8n?: { ok: boolean; status: number; error?: string },
+    email?: { ok: boolean; id?: string; error?: string },
+  ): string => {
     const pr = p.propuesta;
     const chips = (xs: string[]) =>
       xs.map((x) => `<span class="inline-block rounded-full border border-zk-border2 px-2 py-0.5 text-xs text-zk-text2 mr-1 mb-1">${esc(x)}</span>`).join('');
     const n8nLine = n8n
       ? `<div class="mt-3 text-xs font-mono ${n8n.ok ? 'text-zk-success' : 'text-zk-warning'}">n8n: ${n8n.ok ? 'evento enviado ✓' : 'no enviado — ' + esc(n8n.error || '')}</div>`
+      : '';
+    const emailLine = email
+      ? `<div class="mt-1 text-xs font-mono ${email.ok ? 'text-zk-success' : 'text-zk-warning'}">email: ${email.ok ? 'enviado ✓ (' + esc(email.id || '') + ')' : 'no enviado — ' + esc(email.error || '')}</div>`
       : '';
     return `
       <div class="space-y-3 not-italic text-zk-text">
@@ -149,6 +167,7 @@ export const prerender = false;
         </div>
         <p class="text-sm text-zk-text2"><strong class="text-zk-text">Proyección 90d:</strong> ${esc(pr.proyeccion_90d)}</p>
         ${n8nLine}
+        ${emailLine}
       </div>`;
   };
 
@@ -174,7 +193,12 @@ export const prerender = false;
       const res = await fetch('/api/orquestar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
-        body: JSON.stringify({ texto, voice: optVoice.checked, notify: optNotify.checked }),
+        body: JSON.stringify({
+          texto,
+          voice: optVoice.checked,
+          notify: optNotify.checked,
+          email: optEmail.value.trim() || undefined,
+        }),
       });
       const secs = ((performance.now() - t0) / 1000).toFixed(1);
       const data = await res.json();
@@ -186,7 +210,7 @@ export const prerender = false;
       }
       status.textContent = `Listo · ${secs}s`;
       result.className = 'text-sm';
-      result.innerHTML = renderProposal(data.proposal, data.n8n);
+      result.innerHTML = renderProposal(data.proposal, data.n8n, data.email);
       if (data.audioBase64) {
         player.src = `data:audio/mpeg;base64,${data.audioBase64}`;
         player.classList.remove('hidden');

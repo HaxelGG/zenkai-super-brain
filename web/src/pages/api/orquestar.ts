@@ -39,11 +39,12 @@ export const POST: APIRoute = async ({ request }) => {
     });
   }
 
-  const { texto, voice, notify, voiceId } = (body ?? {}) as {
+  const { texto, voice, notify, voiceId, email } = (body ?? {}) as {
     texto?: unknown;
     voice?: unknown;
     notify?: unknown;
     voiceId?: unknown;
+    email?: unknown;
   };
   if (typeof texto !== 'string') {
     return new Response(
@@ -56,6 +57,7 @@ export const POST: APIRoute = async ({ request }) => {
     voice: voice === true,
     notify: notify === true,
     voiceId: typeof voiceId === 'string' ? voiceId : undefined,
+    email: typeof email === 'string' && email.includes('@') ? email.trim() : undefined,
   });
 
   if (!result.ok) {
@@ -71,6 +73,7 @@ export const POST: APIRoute = async ({ request }) => {
       audioBase64: result.audioBase64,
       voiceError: result.voiceError,
       n8n: result.n8n,
+      email: result.email,
     }),
     { status: 200, headers: { 'content-type': 'application/json' } },
   );
