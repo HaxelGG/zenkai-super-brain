@@ -20,6 +20,7 @@ export type LiveLeadRow = {
   company: string;
   stage: string;
   score: number;
+  valueUsd: number;
 };
 
 export type PipelineStage =
@@ -105,6 +106,7 @@ function mapLead(r: AirtableRecord): LiveLeadRow {
     company: fieldStr(f, "Empresa", "empresa", "Company"),
     stage: fieldStr(f, "Etapa", "etapa", "Stage", "Estado", "estado"),
     score: fieldNum(f, "Score", "score", "Rating"),
+    valueUsd: fieldNum(f, "valor_estimado_USD", "Valor USD", "Valor", "valor", "Value"),
   };
 }
 
@@ -114,7 +116,7 @@ function buildPipelineFunnel(leads: LiveLeadRow[]) {
     return {
       stage: STAGE_LABELS[stage],
       count: matching.length,
-      valueUsd: 0,
+      valueUsd: matching.reduce((sum, l) => sum + (l.valueUsd || 0), 0),
     };
   });
 }

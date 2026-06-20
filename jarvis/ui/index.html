@@ -2,10 +2,19 @@
 <html lang="es">
   <head>
     <meta charset="utf-8" />
-    <meta http-equiv="refresh" content="0;url=https://panel.zenkai.systems/jarvis" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>JARVIS · ZENKAI</title>
+    <script>
+      (function () {
+        var path = window.location.pathname.replace(/^\/+/, "");
+        var target = "https://panel.zenkai.systems/jarvis/" + path;
+        if (window.location.search) target += window.location.search;
+        window.location.replace(target);
+      })();
+    </script>
   </head>
   <body>
-    <p>Redirigiendo a <a href="https://panel.zenkai.systems/jarvis">JARVIS Command Center</a>…</p>
+    <p>Redirigiendo al Command Center…</p>
+    <p><a id="link" href="https://panel.zenkai.systems/jarvis/">Abrir JARVIS</a></p>
   </body>
 </html>

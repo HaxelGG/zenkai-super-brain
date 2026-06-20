@@ -29,9 +29,9 @@ const kpis = [
 <JarvisLayout title="Pipeline CRM" dataSource={data.meta?.dataSource ?? "mock"} liveRecords={data.meta?.liveRecords}>
   <JarvisMobileNav />
 
-  <header class="mb-8" data-jv-animate="1">
+  <header class="mb-6" data-jv-animate="1">
     <div class="jv-label mb-2">HERMES · Ventas & CRM</div>
-    <h1 class="jv-display text-2xl sm:text-3xl font-bold">Pipeline</h1>
+    <h1 class="jv-heading-page">Pipeline</h1>
     <p class="mt-2 jv-mono text-[12px] text-[var(--jv-text-muted)]">Leads · propuestas · negociaciones · cierres</p>
   </header>
 
@@ -40,12 +40,12 @@ const kpis = [
   </section>
 
   <HudPanel class="mb-5" animate={2}>
-    <h2 class="jv-display text-sm font-semibold text-[var(--jv-cyan)] mb-5">Embudo de ventas</h2>
+    <h2 class="jv-heading-section mb-5">Embudo de ventas</h2>
     <div class="flex flex-col sm:flex-row gap-2 sm:gap-0 sm:items-stretch">
       {data.pipelineFunnel.map((stage, i) => (
         <div class="jv-funnel-stage flex-1 p-4 text-center" data-jv-animate={String(i + 3)}>
           <div class="jv-label text-[9px] opacity-70 mb-1">{stage.stage}</div>
-          <div class="jv-display text-xl font-bold text-[var(--jv-cyan)]" data-jv-funnel-count={String(i)} data-count-up={String(stage.count)}>{stage.count}</div>
+          <div class="jv-metric-value text-[var(--jv-cyan)]" data-jv-funnel-count={String(i)} data-count-up={String(stage.count)}>{stage.count}</div>
           <div class="jv-mono text-[10px] text-[var(--jv-text-dim)] mt-1" data-jv-funnel-value={String(i)}>${(stage.valueUsd / 1000).toFixed(0)}K</div>
         </div>
       ))}
@@ -53,7 +53,7 @@ const kpis = [
   </HudPanel>
 
   <HudPanel animate={4}>
-    <h2 class="jv-display text-sm font-semibold text-[var(--jv-cyan)] mb-4">Leads activos</h2>
+    <h2 class="jv-heading-section mb-4">Leads activos</h2>
     <div class="overflow-x-auto">
       <table class="jv-table w-full text-[13px]">
         <thead>

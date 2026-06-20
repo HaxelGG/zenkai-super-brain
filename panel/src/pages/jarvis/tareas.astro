@@ -35,16 +35,16 @@ const listTasks = [...data.tasks]
 <JarvisLayout title="Tareas" dataSource={data.meta?.dataSource ?? "mock"} liveRecords={data.meta?.liveRecords}>
   <JarvisMobileNav />
 
-  <header class="mb-8" data-jv-animate="1">
+  <header class="mb-6" data-jv-animate="1">
     <div class="jv-label mb-2">ATLAS · Operaciones</div>
-    <h1 class="jv-display text-2xl sm:text-3xl font-bold">Task Board</h1>
+    <h1 class="jv-heading-page">Task Board</h1>
     <p class="mt-2 jv-mono text-[12px] text-[var(--jv-text-muted)] max-w-2xl">
       {data.tasks.filter((t) => t.status !== "done").length} tareas activas · {data.tasks.filter((t) => t.status === "working").length} en working · {data.tasks.filter((t) => t.status === "done").length} completadas
     </p>
   </header>
 
   <HudPanel class="mb-6" animate={2}>
-    <h2 class="jv-display text-sm font-semibold text-[var(--jv-cyan)] mb-3">Carga por agente</h2>
+    <h2 class="jv-heading-section mb-3">Carga por agente</h2>
     <div class="flex flex-wrap gap-3">
       {agentCounts.map((a) => (
         <div class="flex items-center gap-2 px-3 py-2 rounded-sm border border-[var(--jv-border)] text-[13px] hover:border-[var(--jv-cyan)] transition-colors">
@@ -67,7 +67,7 @@ const listTasks = [...data.tasks]
   </section>
 
   <HudPanel animate={3}>
-    <h2 class="jv-display text-sm font-semibold text-[var(--jv-cyan)] mb-4">Vista lista · prioridad</h2>
+    <h2 class="jv-heading-section mb-4">Vista lista · prioridad</h2>
     <div class="space-y-2">
       {listTasks.map((task) => (
         <TaskCard task={task} />

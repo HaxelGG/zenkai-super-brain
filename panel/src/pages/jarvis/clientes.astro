@@ -23,9 +23,9 @@ const kpis = [
 <JarvisLayout title="Clientes" dataSource={data.meta?.dataSource ?? "mock"} liveRecords={data.meta?.liveRecords}>
   <JarvisMobileNav />
 
-  <header class="mb-8" data-jv-animate="1">
+  <header class="mb-6" data-jv-animate="1">
     <div class="jv-label mb-2">ATLAS · Delivery & Clientes</div>
-    <h1 class="jv-display text-2xl sm:text-3xl font-bold">Clientes</h1>
+    <h1 class="jv-heading-page">Clientes</h1>
     <p class="mt-2 jv-mono text-[12px] text-[var(--jv-text-muted)]">Portfolio activo · health score · agente lead</p>
   </header>
 
@@ -65,7 +65,7 @@ const kpis = [
   </div>
 
   <HudPanel class="mt-5" animate={5}>
-    <h2 class="jv-display text-sm font-semibold text-[var(--jv-cyan)] mb-4">Proyectos vinculados</h2>
+    <h2 class="jv-heading-section mb-4">Proyectos vinculados</h2>
     <div class="space-y-3">
       {data.projects.map((p) => (
         <div class="flex items-center gap-4 p-3 border border-[var(--jv-border)] rounded-sm">

@@ -28,13 +28,13 @@ const onlineSystems = data.systemConnections.filter((s) => s.status === "online"
 <JarvisLayout title="Command Center" dataSource={data.meta?.dataSource ?? "mock"} liveRecords={data.meta?.liveRecords}>
   <JarvisMobileNav />
 
-  <header class="mb-8" data-jv-animate="1">
-    <div class="flex flex-col xl:flex-row xl:items-end xl:justify-between gap-6">
+  <header class="mb-6" data-jv-animate="1">
+    <div class="flex flex-col xl:flex-row xl:items-end xl:justify-between gap-5">
       <div>
-        <div class="jv-label mb-3">ZENKAI · Intelligence Systems Online</div>
-        <h1 class="jv-display text-2xl sm:text-3xl font-bold text-[var(--jv-text)] jv-typing-cursor">{data.greeting}</h1>
-        <p class="mt-2 jv-mono text-[12px] text-[var(--jv-text-muted)]">{data.dateLabel}</p>
-        <div class="mt-4 flex flex-wrap gap-3">
+        <div class="jv-label mb-2">ZENKAI · Intelligence Systems Online</div>
+        <h1 class="jv-greeting jv-typing-cursor">{data.greeting}</h1>
+        <p class="mt-1.5 jv-mono text-[var(--jv-text-muted)]">{data.dateLabel}</p>
+        <div class="mt-3 flex flex-wrap gap-2">
           <SemaphoreBadge status={data.agencySemaphore} label="Estado agencia" />
           <span class="jv-mono text-[10px] text-[var(--jv-text-dim)] px-2 py-1 border border-[var(--jv-border)] rounded-sm">
             {onlineSystems}/{data.systemConnections.length} sistemas online
@@ -49,15 +49,23 @@ const onlineSystems = data.systemConnections.filter((s) => s.status === "online"
     <IntelligenceBrief brief={data.intelligence} compact />
   </HudPanel>
 
-  <section class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-    {data.kpis.map((kpi, i) => <MetricCard metric={kpi} index={i} />)}
+  <section class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-2.5 mb-6" data-jv-social-root>
+    {data.kpis.map((kpi, i) => (
+      <MetricCard
+        metric={kpi}
+        index={i}
+        socialData={
+          kpi.id === "roas" ? "roas" : kpi.id === "engagement-ig" ? "ig-engagement" : undefined
+        }
+      />
+    ))}
   </section>
 
   <div class="grid grid-cols-1 xl:grid-cols-12 gap-4 sm:gap-5">
     <section class="xl:col-span-3 space-y-4">
       <HudPanel animate={2}>
         <div class="flex items-center justify-between mb-4">
-          <h2 class="jv-display text-sm font-semibold text-[var(--jv-cyan)]">Tareas</h2>
+          <h2 class="jv-heading-section">Tareas</h2>
           <a href={routes.tareas} class="jv-mono text-[10px] text-[var(--jv-cyan)] no-underline hover:underline">ver todo →</a>
         </div>
         <div class="mb-4">
@@ -75,7 +83,7 @@ const onlineSystems = data.systemConnections.filter((s) => s.status === "online"
 
       <HudPanel animate={3}>
         <div class="flex items-center justify-between mb-3">
-          <h2 class="jv-display text-sm font-semibold text-[var(--jv-cyan)]">Live Feed</h2>
+          <h2 class="jv-heading-section">Live Feed</h2>
           <span class="jarvis-status-dot" aria-hidden="true"></span>
         </div>
         <ActivityFeed events={data.activityFeed} limit={5} />
@@ -84,7 +92,7 @@ const onlineSystems = data.systemConnections.filter((s) => s.status === "online"
 
     <section class="xl:col-span-5 space-y-4">
       <HudPanel animate={4}>
-        <h2 class="jv-display text-sm font-semibold text-[var(--jv-cyan)] mb-4">Rendimiento</h2>
+        <h2 class="jv-heading-section mb-3">Rendimiento</h2>
         <LineChart
           title="Revenue mensual 2026"
           series={data.finance.monthlyRevenue.map((m) => ({ label: m.month, actual: m.actual, projected: m.projected }))}
@@ -135,7 +143,7 @@ const onlineSystems = data.systemConnections.filter((s) => s.status === "online"
     <section class="xl:col-span-4 space-y-4">
       <HudPanel animate={7}>
         <div class="flex items-center justify-between mb-4">
-          <h2 class="jv-display text-sm font-semibold text-[var(--jv-cyan)]">Agentes IA</h2>
+          <h2 class="jv-heading-section">Agentes IA</h2>
           <a href={routes.agentes} class="jv-mono text-[10px] text-[var(--jv-cyan)] no-underline">detalle →</a>
         </div>
         <AgentStatusGrid statuses={data.agentStatuses} compact />
@@ -143,7 +151,7 @@ const onlineSystems = data.systemConnections.filter((s) => s.status === "online"
 
       <HudPanel animate={8}>
         <div class="flex items-center justify-between mb-4">
-          <h2 class="jv-display text-sm font-semibold text-[var(--jv-cyan)]">Social</h2>
+          <h2 class="jv-heading-section">Social</h2>
           <a href={routes.social} class="jv-mono text-[10px] text-[var(--jv-cyan)] no-underline">detalle →</a>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-2">
@@ -163,15 +171,15 @@ const onlineSystems = data.systemConnections.filter((s) => s.status === "online"
 
   <section class="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-4">
     <HudPanel>
-      <h2 class="jv-display text-sm font-semibold text-[var(--jv-cyan)] mb-4">Alertas</h2>
+      <h2 class="jv-heading-section mb-3">Alertas</h2>
       <div class="space-y-2">{data.alerts.map((a) => <AlertItem alert={a} />)}</div>
     </HudPanel>
     <HudPanel>
-      <h2 class="jv-display text-sm font-semibold text-[var(--jv-cyan)] mb-4">Prioridades semana</h2>
+      <h2 class="jv-heading-section mb-3">Prioridades semana</h2>
       <ol class="space-y-3">
         {data.priorities.map((p, i) => (
-          <li class="flex gap-3 text-sm">
-            <span class="jv-display text-[10px] w-6 h-6 shrink-0 flex items-center justify-center border border-[var(--jv-cyan)] text-[var(--jv-cyan)]">{i + 1}</span>
+          <li class="flex gap-2.5 text-[var(--jv-text-sm)]">
+            <span class="jv-display text-[var(--jv-text-2xs)] w-5 h-5 shrink-0 flex items-center justify-center border border-[var(--jv-border-bright)] text-[var(--jv-cyan)]">{i + 1}</span>
             <span class="text-[var(--jv-text-muted)] leading-snug pt-0.5">{p}</span>
           </li>
         ))}
@@ -181,11 +189,11 @@ const onlineSystems = data.systemConnections.filter((s) => s.status === "online"
       <h3 class="jv-label mb-3">AI Usage hoy</h3>
       <div class="grid grid-cols-2 gap-3 mb-3">
         <div>
-          <div class="jv-metric-value text-lg" data-count-up={String(data.aiUsage.callsToday)}>{data.aiUsage.callsToday}</div>
+          <div class="jv-metric-value" data-count-up={String(data.aiUsage.callsToday)}>{data.aiUsage.callsToday}</div>
           <div class="jv-mono text-[10px] text-[var(--jv-text-dim)]">llamadas API</div>
         </div>
         <div>
-          <div class="jv-metric-value text-lg" data-count-up={`$${data.aiUsage.costTodayUsd}`}>${data.aiUsage.costTodayUsd}</div>
+          <div class="jv-metric-value" data-count-up={`$${data.aiUsage.costTodayUsd}`}>${data.aiUsage.costTodayUsd}</div>
           <div class="jv-mono text-[10px] text-[var(--jv-text-dim)]">costo hoy</div>
         </div>
       </div>

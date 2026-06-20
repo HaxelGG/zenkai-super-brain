@@ -214,6 +214,8 @@ export type JarvisMeta = {
     leads: number;
     clients: number;
   };
+  financeConnected?: boolean;
+  socialConnected?: boolean;
 };
 
 export type JarvisData = {

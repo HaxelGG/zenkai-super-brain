@@ -11,34 +11,35 @@ import { getJarvisData } from "../../lib/jarvis";
 
 const data = await getJarvisData();
 const f = data.finance;
+const isLive = data.meta?.financeConnected || data.meta?.dataSource === "live";
 
 const runRateStatus = f.runRateMonthly >= f.runRateNeeded ? "green" : f.runRateMonthly >= f.runRateNeeded * 0.8 ? "yellow" : "red";
 
 const financeKpis = [
-  { id: "rev-week", label: "Revenue semana", value: `$${f.revenueWeek.toLocaleString("en-US")}`, caption: "USD" },
-  { id: "rev-month", label: "Revenue mes", value: `$${f.revenueMonth.toLocaleString("en-US")}`, caption: "Junio 2026 · parcial" },
-  { id: "rev-ytd", label: "Revenue YTD", value: `$${f.revenueYtd.toLocaleString("en-US")}`, caption: "14.2% de meta $100K" },
-  { id: "pipeline", label: "Pipeline ponderado", value: `$${(f.pipelineWeighted / 1000).toFixed(0)}K`, caption: "USD cualificado" },
-  { id: "run-rate", label: "Run rate mensual", value: `$${(f.runRateMonthly / 1000).toFixed(1)}K`, caption: `necesario $${(f.runRateNeeded / 1000).toFixed(1)}K/mes` },
-  { id: "expenses", label: "Gastos operativos", value: `$${f.expensesMonth}`, caption: `de $${f.expensesBudget} presupuesto` },
+  { id: "rev-month", label: "Revenue mes", value: isLive && f.revenueMonth ? `$${f.revenueMonth.toLocaleString("en-US")}` : "—", caption: isLive ? "Deals cerrados · Airtable" : "AIRTABLE_TOKEN" },
+  { id: "rev-ytd", label: "Revenue YTD", value: isLive && f.revenueYtd ? `$${f.revenueYtd.toLocaleString("en-US")}` : "—", caption: f.revenueYtd ? `${Math.round((f.revenueYtd / f.goal2026) * 100)}% meta $100K` : "Sin datos reales" },
+  { id: "pipeline", label: "Pipeline ponderado", value: isLive && f.pipelineWeighted ? `$${(f.pipelineWeighted / 1000).toFixed(0)}K` : "—", caption: "valor_estimado_USD · leads" },
+  { id: "run-rate", label: "Run rate mensual", value: isLive && f.runRateMonthly ? `$${(f.runRateMonthly / 1000).toFixed(1)}K` : "—", caption: `Meta $${(f.runRateNeeded / 1000).toFixed(1)}K/mes` },
+  { id: "deals-total", label: "Deals CRM", value: "—", caption: "Runtime · /api/jarvis/finance" },
+  { id: "expenses", label: "Gastos operativos", value: "—", caption: "Base FINANZAS · pendiente" },
 ];
 ---
 
 <JarvisLayout title="Finanzas" dataSource={data.meta?.dataSource ?? "mock"} liveRecords={data.meta?.liveRecords}>
   <JarvisMobileNav />
 
-  <header class="mb-8" data-jv-animate="1">
+  <header class="mb-6" data-jv-animate="1">
     <div class="jv-label mb-2">ORACLE · Finanzas</div>
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-      <h1 class="jv-display text-2xl sm:text-3xl font-bold">Finanzas</h1>
+      <h1 class="jv-heading-page">Finanzas</h1>
       <SemaphoreBadge status={runRateStatus} label={`Run rate ${runRateStatus === "green" ? "en meta" : "bajo meta"}`} />
     </div>
-    <p class="mt-2 jv-mono text-[12px] text-[var(--jv-text-muted)] max-w-2xl">
-      Revenue, run rate hacia $100K USD 2026, cuentas por cobrar y margen por proyecto.
+    <p class="mt-1.5 text-[var(--jv-text-sm)] text-[var(--jv-text-muted)] max-w-2xl">
+      Revenue desde deals Airtable · run rate hacia $100K USD 2026. Gastos requieren base FINANZAS.
     </p>
   </header>
 
-  <section class="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-8">
+  <section class="grid grid-cols-2 lg:grid-cols-3 gap-2.5 mb-6">
     {financeKpis.map((kpi, i) => (
       <MetricCard metric={kpi} index={i} />
     ))}
@@ -79,7 +80,7 @@ const financeKpis = [
 
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
     <HudPanel animate={4}>
-      <h2 class="jv-display text-sm font-semibold text-[var(--jv-cyan)] mb-4">Cuentas por cobrar</h2>
+      <h2 class="jv-heading-section mb-4">Cuentas por cobrar</h2>
       <table class="jv-table w-full text-[13px]">
         <thead>
           <tr class="border-b border-[var(--jv-border)]">
@@ -103,7 +104,7 @@ const financeKpis = [
     </HudPanel>
 
     <HudPanel animate={5}>
-      <h2 class="jv-display text-sm font-semibold text-[var(--jv-cyan)] mb-4">Margen por proyecto</h2>
+      <h2 class="jv-heading-section mb-4">Margen por proyecto</h2>
       <table class="jv-table w-full text-[13px]">
         <thead>
           <tr class="border-b border-[var(--jv-border)]">
@@ -131,7 +132,7 @@ const financeKpis = [
 
   {data.alerts.filter((a) => a.message.includes("cobrar")).length > 0 && (
     <HudPanel class="mt-6">
-      <h2 class="jv-display text-sm font-semibold text-[var(--jv-cyan)] mb-3">Alertas financieras</h2>
+      <h2 class="jv-heading-section mb-3">Alertas financieras</h2>
       <div class="space-y-2">
         {data.alerts.filter((a) => a.message.includes("cobrar")).map((a) => <AlertItem alert={a} />)}
       </div>

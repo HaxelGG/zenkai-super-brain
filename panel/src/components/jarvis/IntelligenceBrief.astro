@@ -35,11 +35,11 @@ const generated = new Date(brief.generatedAt).toLocaleString("es-CO", {
     )}
   </div>
 
-  <h2 class="text-[15px] sm:text-base font-semibold text-[var(--jv-text)] leading-snug mb-3 jv-intel-headline">
+  <h2 class="text-[var(--jv-text-md)] font-medium text-[var(--jv-text)] leading-snug mb-2">
     {brief.headline}
   </h2>
 
-  <p class="text-[13px] text-[var(--jv-text-muted)] leading-relaxed mb-4">{brief.summary}</p>
+  <p class="text-[var(--jv-text-sm)] text-[var(--jv-text-muted)] leading-relaxed mb-3">{brief.summary}</p>
 
   {!compact && (
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -76,9 +76,3 @@ const generated = new Date(brief.generatedAt).toLocaleString("es-CO", {
     </div>
   )}
 </div>
-
-<style>
-  .jv-intel-headline {
-    text-shadow: 0 0 30px rgba(0, 212, 255, 0.15);
-  }
-</style>

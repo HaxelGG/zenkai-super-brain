@@ -1,21 +1,9 @@
 ---
-import { JARVIS_NAV, PANEL_URL, isJarvisNavActive, resolveJarvisRoutes } from "../../lib/jarvis/config";
+import { resolveJarvisRoutes } from "../../lib/jarvis/config";
+import JarvisNavList from "./JarvisNavList.astro";
 
 const routes = resolveJarvisRoutes(Astro.url.hostname);
 const path = Astro.url.pathname;
-
-const icons: Record<string, string> = {
-  home: "M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1V9.5z",
-  agents: "M12 2a4 4 0 014 4v1h2a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V9a2 2 0 012-2h2V6a4 4 0 014-4z",
-  pipeline: "M3 3v18h18M7 16l4-8 4 5 5-9",
-  clients: "M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75",
-  finance: "M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6",
-  social: "M7 8h10M7 12h4m-4 4h7M5 4h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z",
-  tasks: "M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11",
-  systems: "M12 2l3 7h7l-5.5 4.5 2 7L12 17l-6.5 3.5 2-7L2 9h7l3-7z",
-  goals: "M12 2l2.4 7.4H22l-6 4.6 2.3 7L12 17.8 5.7 21l2.3-7-6-4.6h7.6L12 2z",
-  intel: "M12 2a10 10 0 100 20 10 10 0 000-20zm0 4v8l5 3",
-};
 ---
 
 <button
@@ -32,37 +20,17 @@ const icons: Record<string, string> = {
 <div id="jv-drawer-backdrop" class="jv-drawer-backdrop" aria-hidden="true"></div>
 
 <aside id="jv-mobile-drawer" class="jv-mobile-drawer" aria-hidden="true">
-  <div class="p-5 border-b border-[var(--jv-border)] flex items-center justify-between">
-    <a href={routes.home} class="flex items-center gap-3 no-underline">
+  <div class="px-4 py-3 border-b border-[var(--jv-border)] flex items-center justify-between shrink-0">
+    <a href={routes.home} class="flex items-center gap-2.5 no-underline">
       <div class="arc-reactor shrink-0" aria-hidden="true"></div>
-      <span class="jv-display text-sm font-bold text-[var(--jv-cyan)]">JARVIS</span>
+      <span class="jv-display text-[11px] font-semibold text-[var(--jv-cyan)] tracking-wider">JARVIS</span>
     </a>
     <button type="button" id="jv-menu-close" class="jv-drawer-close" aria-label="Cerrar menú">✕</button>
   </div>
-  <nav class="p-3 space-y-0.5 overflow-y-auto flex-1">
-    {JARVIS_NAV.map((item) => {
-      const href = routes[item.key];
-      return (
-        <a
-          href={href}
-          class:list={[
-            "jv-nav-item flex items-center gap-2.5 px-3 py-2.5 rounded-sm text-[14px] no-underline",
-            isJarvisNavActive(path, href) ? "jv-nav-active font-medium" : "text-[var(--jv-text-muted)]",
-          ]}
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
-            <path d={icons[item.icon]} />
-          </svg>
-          {item.label}
-        </a>
-      );
-    })}
+
+  <nav class="flex-1 min-h-0 overflow-y-auto px-2 py-2">
+    <JarvisNavList path={path} itemPadding="px-2.5 py-2" />
   </nav>
-  <div class="p-3 border-t border-[var(--jv-border)]">
-    <a href={PANEL_URL} class="jv-nav-item flex items-center gap-2 px-3 py-2 rounded-sm text-[13px] text-[var(--jv-text-muted)] no-underline">
-      ← Super Cerebro
-    </a>
-  </div>
 </aside>
 
 <script>

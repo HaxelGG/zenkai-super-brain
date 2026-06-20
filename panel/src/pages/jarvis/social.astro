@@ -16,10 +16,10 @@ const platformLabels = {
 };
 
 const socialKpis = [
-  { id: "reach-total", label: "Alcance total 7d", value: "22.4K", caption: "3 canales orgánicos", delta: { value: 11, label: "vs sem. ant.", direction: "up" as const }, liveAttr: "ig-reach" },
-  { id: "eng-avg", label: "Engagement promedio", value: "4.4%", caption: "orgánico ponderado", delta: { value: 0.4, label: "pp", direction: "up" as const }, liveAttr: "ig-engagement" },
-  { id: "roas", label: "ROAS Meta Ads", value: "3.2x", caption: "últimos 30 días", delta: { value: 0.4, label: "vs mes ant.", direction: "up" as const }, liveAttr: "roas" },
-  { id: "cac", label: "Spend Meta 7d", value: "$98", caption: "Meta Ads", delta: { value: 8, label: "vs mes ant.", direction: "down" as const }, liveAttr: "spend" },
+  { id: "reach-total", label: "Alcance total 7d", value: "—", caption: "Runtime · Instagram insights", liveAttr: "ig-reach" },
+  { id: "eng-avg", label: "Engagement IG", value: "—", caption: "Runtime · Meta Graph API", liveAttr: "ig-engagement" },
+  { id: "roas", label: "ROAS Meta Ads", value: "—", caption: "Runtime · META_AD_ACCOUNT_ID", liveAttr: "roas" },
+  { id: "cac", label: "Spend Meta 7d", value: "—", caption: "Runtime · Meta Ads", liveAttr: "spend" },
 ];
 
 const calendarStatusStyle = {
@@ -33,11 +33,11 @@ const calendarStatusStyle = {
   <div data-jv-social-root hidden aria-hidden="true"></div>
   <JarvisMobileNav />
 
-  <header class="mb-8" data-jv-animate="1">
+  <header class="mb-6" data-jv-animate="1">
     <div class="jv-label mb-2">ARES · MUSE · Marketing</div>
-    <h1 class="jv-display text-2xl sm:text-3xl font-bold">Social & Engagement</h1>
+    <h1 class="jv-heading-page">Social & Engagement</h1>
     <p class="mt-2 jv-mono text-[12px] text-[var(--jv-text-muted)] max-w-2xl">
-      Métricas orgánicas, paid media y calendario de contenido · cadencia semanal ARES + MUSE.
+      Métricas en vivo vía Meta Graph API. Configura <span class="text-[var(--jv-cyan)]">META_ACCESS_TOKEN</span>, <span class="text-[var(--jv-cyan)]">INSTAGRAM_BUSINESS_ACCOUNT_ID</span> y <span class="text-[var(--jv-cyan)]">META_AD_ACCOUNT_ID</span> en Vercel.
     </p>
   </header>
 
@@ -51,45 +51,50 @@ const calendarStatusStyle = {
     ))}
   </section>
 
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
-    <HudPanel animate={3}>
-      <h2 class="jv-display text-sm font-semibold text-[var(--jv-cyan)] mb-4">Top performers</h2>
-      <ul class="space-y-3">
-        {data.topPosts.map((post, i) => (
-          <li class="flex gap-3 p-3 border border-[var(--jv-border)] rounded-sm hover:border-[var(--jv-cyan)] transition-colors">
-            <div class="w-8 h-8 rounded-sm bg-gradient-to-br from-[#1E6FFF] to-[#00D4FF] flex items-center justify-center text-[#030810] jv-display text-[10px] font-bold shrink-0">
-              {i + 1}
-            </div>
-            <div class="min-w-0 flex-1">
-              <p class="font-medium text-[13px] leading-snug text-[var(--jv-text)]">{post.hook}</p>
-              <div class="mt-1.5 flex flex-wrap gap-2 jv-mono text-[10px] text-[var(--jv-text-dim)]">
-                <span>{post.platform.toUpperCase()}</span>
-                <span>{post.reach.toLocaleString("es-CO")} alcance</span>
-                <span>{post.engagement}% eng.</span>
-                {post.saves && <span>{post.saves} saves</span>}
+  <HudPanel class="mb-6" animate={2}>
+    <p class="jv-mono text-[var(--jv-text-2xs)] text-[var(--jv-text-dim)] mb-4">
+      Calendario y top posts son plantillas operativas · conecta Meta API arriba para KPIs reales.
+    </p>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+      <div>
+        <h2 class="jv-heading-section mb-4">Top performers</h2>
+        <ul class="space-y-3">
+          {data.topPosts.map((post, i) => (
+            <li class="flex gap-3 p-3 border border-[var(--jv-border)] rounded-sm hover:border-[var(--jv-cyan)] transition-colors">
+              <div class="w-8 h-8 rounded-sm bg-gradient-to-br from-[#1E6FFF] to-[#00D4FF] flex items-center justify-center text-[#030810] jv-display text-[10px] font-bold shrink-0">
+                {i + 1}
               </div>
-            </div>
-          </li>
-        ))}
-      </ul>
-    </HudPanel>
+              <div class="min-w-0 flex-1">
+                <p class="font-medium text-[13px] leading-snug text-[var(--jv-text)]">{post.hook}</p>
+                <div class="mt-1.5 flex flex-wrap gap-2 jv-mono text-[10px] text-[var(--jv-text-dim)]">
+                  <span>{post.platform.toUpperCase()}</span>
+                  <span>{post.reach.toLocaleString("es-CO")} alcance</span>
+                  <span>{post.engagement}% eng.</span>
+                  {post.saves && <span>{post.saves} saves</span>}
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
 
-    <HudPanel animate={4}>
-      <h2 class="jv-display text-sm font-semibold text-[var(--jv-cyan)] mb-4">Calendario · 7 días</h2>
-      <ul class="space-y-2.5">
-        {data.contentCalendar.map((item) => (
-          <li class="flex items-center gap-3 text-[13px] py-1.5 border-b border-[var(--jv-border)] last:border-0">
-            <time class="jv-mono text-[10px] text-[var(--jv-cyan)] w-14 shrink-0">
-              {new Date(item.date + "T12:00:00").toLocaleDateString("es-CO", { day: "numeric", month: "short" })}
-            </time>
-            <span class="jv-display text-[9px] w-6 text-[var(--jv-text-dim)]">{platformLabels[item.platform]}</span>
-            <span class="flex-1 truncate text-[var(--jv-text-muted)]">{item.title}</span>
-            <span class:list={["jv-mono text-[9px] px-1.5 py-0.5 rounded-sm shrink-0", calendarStatusStyle[item.status]]}>{item.status}</span>
-          </li>
-        ))}
-      </ul>
-    </HudPanel>
-  </div>
+      <div>
+        <h2 class="jv-heading-section mb-4">Calendario · 7 días</h2>
+        <ul class="space-y-2.5">
+          {data.contentCalendar.map((item) => (
+            <li class="flex items-center gap-3 text-[13px] py-1.5 border-b border-[var(--jv-border)] last:border-0">
+              <time class="jv-mono text-[10px] text-[var(--jv-cyan)] w-14 shrink-0">
+                {new Date(item.date + "T12:00:00").toLocaleDateString("es-CO", { day: "numeric", month: "short" })}
+              </time>
+              <span class="jv-display text-[9px] w-6 text-[var(--jv-text-dim)]">{platformLabels[item.platform]}</span>
+              <span class="flex-1 truncate text-[var(--jv-text-muted)]">{item.title}</span>
+              <span class:list={["jv-mono text-[9px] px-1.5 py-0.5 rounded-sm shrink-0", calendarStatusStyle[item.status]]}>{item.status}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </HudPanel>
 
   <HudPanel animate={5}>
     <BarChart

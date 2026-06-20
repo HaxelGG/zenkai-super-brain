@@ -20,18 +20,18 @@ const statusIcon = {
 
 const kpis = [
   { id: "s1", label: "Sistemas online", value: `${online}/${data.systemConnections.length}`, caption: "conexiones activas" },
-  { id: "s2", label: "Fases completadas", value: "2/7", caption: "roadmap Capa 1" },
-  { id: "s3", label: "Latencia promedio", value: "456ms", caption: "APIs activas", delta: { value: 12, label: "vs ayer", direction: "down" as const } },
-  { id: "s4", label: "Uptime global", value: "99.2%", caption: "30 días" },
+  { id: "s2", label: "Airtable CRM", value: data.meta?.dataSource === "live" ? "LIVE" : "MOCK", caption: data.meta?.liveRecords ? `${data.meta.liveRecords.leads}L · ${data.meta.liveRecords.clients}C` : "AIRTABLE_TOKEN" },
+  { id: "s3", label: "Meta Social", value: data.meta?.socialConnected ? "CONFIG" : "—", caption: "META_ACCESS_TOKEN + IG ID" },
+  { id: "s4", label: "n8n Cloud", value: "PENDING", caption: "zenkai-growth-systems.app.n8n.cloud" },
 ];
 ---
 
 <JarvisLayout title="Sistemas" dataSource={data.meta?.dataSource ?? "mock"} liveRecords={data.meta?.liveRecords}>
   <JarvisMobileNav />
 
-  <header class="mb-8" data-jv-animate="1">
+  <header class="mb-6" data-jv-animate="1">
     <div class="jv-label mb-2">FORGE · NEXUS · Infraestructura</div>
-    <h1 class="jv-display text-2xl sm:text-3xl font-bold">Sistemas & Conexiones</h1>
+    <h1 class="jv-heading-page">Sistemas & Conexiones</h1>
     <p class="mt-2 jv-mono text-[12px] text-[var(--jv-text-muted)]">
       {online} online · {degraded} degraded · {pending} pending · roadmap 7 fases
     </p>
@@ -43,7 +43,7 @@ const kpis = [
 
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
     <HudPanel animate={2}>
-      <h2 class="jv-display text-sm font-semibold text-[var(--jv-cyan)] mb-5">Estado de conexiones</h2>
+      <h2 class="jv-heading-section mb-5">Estado de conexiones</h2>
       <div class="space-y-4">
         {data.systemConnections.map((sys, i) => {
           const st = statusIcon[sys.status];
@@ -83,11 +83,11 @@ const kpis = [
       />
       <div class="mt-6 grid grid-cols-2 gap-4 pt-4 border-t border-[var(--jv-border)]">
         <div>
-          <div class="jv-metric-value text-lg" data-count-up={String((data.aiUsage.tokensMonth / 1000000).toFixed(1))}>{(data.aiUsage.tokensMonth / 1000000).toFixed(1)}M</div>
+          <div class="jv-metric-value" data-count-up={String((data.aiUsage.tokensMonth / 1000000).toFixed(1))}>{(data.aiUsage.tokensMonth / 1000000).toFixed(1)}M</div>
           <div class="jv-mono text-[10px] text-[var(--jv-text-dim)]">tokens mes</div>
         </div>
         <div>
-          <div class="jv-metric-value text-lg" data-count-up={`$${data.aiUsage.costMonthUsd}`}>${data.aiUsage.costMonthUsd}</div>
+          <div class="jv-metric-value" data-count-up={`$${data.aiUsage.costMonthUsd}`}>${data.aiUsage.costMonthUsd}</div>
           <div class="jv-mono text-[10px] text-[var(--jv-text-dim)]">costo mes</div>
         </div>
       </div>
@@ -95,7 +95,7 @@ const kpis = [
   </div>
 
   <HudPanel animate={4}>
-    <h2 class="jv-display text-sm font-semibold text-[var(--jv-cyan)] mb-4">Roadmap conexiones · 7 fases</h2>
+    <h2 class="jv-heading-section mb-4">Roadmap conexiones · 7 fases</h2>
     <div class="grid grid-cols-7 gap-2">
       {[1, 2, 3, 4, 5, 6, 7].map((phase) => {
         const conn = data.systemConnections.find((c) => c.phase === phase);

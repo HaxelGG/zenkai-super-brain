@@ -1,12 +1,13 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "",
   "buildCommand": "",
   "outputDirectory": ".",
-  "framework": null,
   "redirects": [
     {
       "source": "/",
-      "destination": "https://panel.zenkai.systems/jarvis",
+      "destination": "https://panel.zenkai.systems/jarvis/",
       "permanent": false
     },
     {

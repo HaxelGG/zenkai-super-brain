@@ -6,6 +6,7 @@ import JarvisMobileDrawer from "../components/jarvis/JarvisMobileDrawer.astro";
 import JarvisCommandPalette from "../components/jarvis/JarvisCommandPalette.astro";
 import JarvisBoot from "../components/jarvis/JarvisBoot.astro";
 import DataSourceBadge from "../components/jarvis/DataSourceBadge.astro";
+import JarvisVoiceOrb from "../components/jarvis/JarvisVoiceOrb.astro";
 import { JARVIS_URL, toJarvisCanonicalPath } from "../lib/jarvis/config";
 import type { DataSource } from "../lib/jarvis/types";
 
@@ -36,6 +37,7 @@ const canonical = new URL(toJarvisCanonicalPath(Astro.url.pathname), JARVIS_URL)
     <link rel="canonical" href={canonical} />
     <link rel="icon" type="image/svg+xml" href="/jarvis-favicon.svg" />
     <script src="/jarvis-live.js" defer></script>
+    <script src="/jarvis-voice.js" defer></script>
     <title>{title} · JARVIS · ZENKAI</title>
   </head>
   <body>
@@ -46,33 +48,34 @@ const canonical = new URL(toJarvisCanonicalPath(Astro.url.pathname), JARVIS_URL)
     <div class="jarvis-shell flex min-h-screen">
       <JarvisSidebar />
       <div class="flex-1 flex flex-col min-w-0">
-        <header class="jarvis-header sticky top-0 z-40 px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between border-b">
-          <div class="flex items-center gap-3 min-w-0">
+        <header class="jarvis-header sticky top-0 z-40 px-4 sm:px-6 lg:px-8 h-12 flex items-center justify-between border-b">
+          <div class="flex items-center gap-2.5 min-w-0">
             <JarvisMobileDrawer />
             <div class="lg:hidden flex items-center gap-2 min-w-0">
-              <span class="jv-display text-sm font-semibold text-[var(--jv-cyan)] truncate">{title}</span>
+              <span class="jv-heading-section truncate">{title}</span>
             </div>
-            <div class="hidden lg:flex items-center gap-3 min-w-0">
+            <div class="hidden lg:flex items-center gap-2 min-w-0">
               <span class="jarvis-status-dot shrink-0" aria-hidden="true"></span>
-              <span class="jv-label shrink-0">JARVIS</span>
-              <span class="jv-mono text-[10px] text-[var(--jv-text-dim)]">/</span>
-              <span class="jv-mono text-[10px] text-[var(--jv-text-muted)] truncate">{title}</span>
-              <span class="jv-mono text-[10px] text-[var(--jv-text-dim)]">·</span>
-              <span class="jv-mono text-[10px] text-[var(--jv-text-muted)]" id="jv-live-clock">--:--:--</span>
+              <span class="jv-label shrink-0 opacity-60">JARVIS</span>
+              <span class="jv-mono text-[var(--jv-text-dim)]">/</span>
+              <span class="jv-mono text-[var(--jv-text-muted)] truncate">{title}</span>
+              <span class="jv-mono text-[var(--jv-text-dim)]">·</span>
+              <span class="jv-mono text-[var(--jv-text-dim)]" id="jv-live-clock">--:--:--</span>
             </div>
           </div>
-          <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+          <div class="flex items-center gap-2 shrink-0">
+            <JarvisVoiceOrb />
             <button type="button" id="jv-cmd-trigger" class="jv-cmd-trigger hidden sm:flex" title="Navegación rápida (⌘K)">
-              <span class="jv-mono text-[10px] text-[var(--jv-text-dim)]">⌘K</span>
+              <span class="jv-mono text-[var(--jv-text-dim)]">⌘K</span>
             </button>
             <DataSourceBadge source={dataSource} liveRecords={liveRecords} />
-            <span class="hidden sm:inline jv-mono text-[10px] text-[var(--jv-text-muted)]">
+            <span class="hidden sm:inline jv-mono text-[var(--jv-text-dim)]">
               {new Date().toLocaleDateString("es-CO", { weekday: "short", day: "numeric", month: "short", year: "numeric" })}
             </span>
-            <div class="w-8 h-8 rounded-full border border-[var(--jv-border-bright)] bg-[rgba(0,212,255,0.1)] text-[var(--jv-cyan)] flex items-center justify-center text-[10px] font-bold jv-display">JG</div>
+            <div class="w-7 h-7 rounded-full border border-[var(--jv-border)] bg-[rgba(0,212,255,0.06)] text-[var(--jv-cyan)] flex items-center justify-center text-[var(--jv-text-2xs)] font-semibold jv-display">JG</div>
           </div>
         </header>
-        <main class="flex-1 px-4 sm:px-6 lg:px-8 py-6 sm:py-8 overflow-x-hidden">
+        <main class="flex-1 px-4 sm:px-6 lg:px-8 py-5 sm:py-6 overflow-x-hidden">
           <slot />
         </main>
         <footer class="border-t border-[var(--jv-border)] px-4 sm:px-6 lg:px-8 py-3 flex flex-col sm:flex-row justify-between gap-1 text-[10px] text-[var(--jv-text-dim)] jv-mono">

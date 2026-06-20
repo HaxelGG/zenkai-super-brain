@@ -7,6 +7,7 @@ Endpoints serverless en Vercel para refrescar datos sin redeploy del panel está
 | Ruta | Qué devuelve | Cache |
 |------|--------------|-------|
 | `GET /api/jarvis/crm` | Leads + clientes activos desde Airtable | 45s |
+| `GET /api/jarvis/finance` | Revenue YTD, pipeline ponderado, run rate | 120s |
 | `GET /api/jarvis/social` | Instagram insights + Meta Ads (7d) | 5min |
 
 ## Variables requeridas (Vercel · zenkaibrain)
@@ -30,7 +31,7 @@ META_AD_ACCOUNT_ID=act_...
 - Actualiza badge LIVE/MOCK al cargar
 - Refresca KPIs con `data-jv-live` y `data-jv-social`
 - Reemplaza tabla pipeline (`#jv-pipeline-leads`) con leads live
-- Poll: CRM cada 5 min · Social cada 10 min
+- Poll: CRM cada 5 min · Finance cada 8 min · Social cada 10 min
 
 ## Seguridad
 
@@ -41,5 +42,6 @@ META_AD_ACCOUNT_ID=act_...
 
 ```bash
 curl -sH "Origin: https://jarvis.zenkai.systems" https://jarvis.zenkai.systems/api/jarvis/crm | jq .source
+curl -sH "Origin: https://jarvis.zenkai.systems" https://jarvis.zenkai.systems/api/jarvis/finance | jq .source
 curl -sH "Origin: https://jarvis.zenkai.systems" https://jarvis.zenkai.systems/api/jarvis/social | jq .source
 ```

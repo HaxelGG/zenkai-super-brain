@@ -19,13 +19,13 @@ function formatValue(n: number): string {
 }
 ---
 
-<div class="flex items-center gap-5" data-jv-animate="2">
-  <div class="relative w-[110px] h-[110px] shrink-0">
+<div class="flex items-center gap-4" data-jv-animate="2">
+  <div class="relative w-[88px] h-[88px] shrink-0">
     <svg viewBox="0 0 100 100" class="w-full h-full -rotate-90">
-      <circle cx="50" cy="50" r="42" fill="none" class="jv-ring-track" stroke-width="6" />
+      <circle cx="50" cy="50" r="42" fill="none" class="jv-ring-track" stroke-width="5" />
       <circle
         cx="50" cy="50" r="42" fill="none" class="jv-ring-fill"
-        stroke-width="6" stroke-linecap="round"
+        stroke-width="5" stroke-linecap="round"
         stroke-dasharray={circumference} stroke-dashoffset={offset}
         style="transition: stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1)"
       />
@@ -37,12 +37,12 @@ function formatValue(n: number): string {
       </defs>
     </svg>
     <div class="absolute inset-0 flex flex-col items-center justify-center">
-      <span class="jv-display text-xl font-bold text-[var(--jv-cyan)]" data-count-up={String(pct)}>{pct}%</span>
+      <span class="jv-mono text-[var(--jv-text-md)] font-semibold text-[var(--jv-cyan)]" data-count-up={String(pct)}>{pct}%</span>
     </div>
   </div>
   <div>
     <div class="jv-label">{label}</div>
-    <div class="jv-display text-2xl font-bold mt-1 text-[var(--jv-text)]" data-count-up={formatValue(current)}>{formatValue(current)}</div>
-    <div class="jv-mono text-[11px] text-[var(--jv-text-muted)] mt-1">de {format === "usd" ? "$100K USD" : formatValue(target)}</div>
+    <div class="jv-metric-value jv-metric-value-lg mt-0.5" data-count-up={formatValue(current)}>{formatValue(current)}</div>
+    <div class="jv-mono text-[var(--jv-text-dim)] mt-0.5">de {format === "usd" ? "$100K USD" : formatValue(target)}</div>
   </div>
 </div>

@@ -28,9 +28,9 @@ const platformMilestones = [
 <JarvisLayout title="Goals & OKRs" dataSource={data.meta?.dataSource ?? "mock"} liveRecords={data.meta?.liveRecords}>
   <JarvisMobileNav />
 
-  <header class="mb-8" data-jv-animate="1">
+  <header class="mb-6" data-jv-animate="1">
     <div class="jv-label mb-2">ZEUS · Estrategia 2026</div>
-    <h1 class="jv-display text-2xl sm:text-3xl font-bold">Goals & OKRs</h1>
+    <h1 class="jv-heading-page">Goals & OKRs</h1>
     <p class="mt-2 jv-mono text-[12px] text-[var(--jv-text-muted)] max-w-2xl">
       Meta $100K USD · OKRs por departamento · hitos Capa 1
     </p>
@@ -40,7 +40,7 @@ const platformMilestones = [
     <div class="flex flex-col lg:flex-row items-center gap-8">
       <ProgressRing current={data.finance.revenueYtd} target={data.finance.goal2026} label="Meta principal 2026" format="usd" />
       <div class="flex-1 text-center lg:text-left">
-        <h2 class="jv-display text-xl font-bold">$100,000 USD facturados</h2>
+        <h2 class="jv-heading-page normal-case tracking-normal">$100,000 USD facturados</h2>
         <p class="mt-2 text-[13px] text-[var(--jv-text-muted)]">
           Antes de diciembre 2026 · Run rate $12,500/mes · Actual ${(data.finance.runRateMonthly / 1000).toFixed(1)}K/mes
         </p>
@@ -55,7 +55,7 @@ const platformMilestones = [
   </HudPanel>
 
   <section class="mb-8">
-    <h2 class="jv-display text-sm font-semibold text-[var(--jv-cyan)] mb-4">Metas trimestrales</h2>
+    <h2 class="jv-heading-section mb-4">Metas trimestrales</h2>
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {data.goals.map((goal, i) => {
         const pct = Math.min(100, Math.round((goal.current / goal.target) * 100));
@@ -77,7 +77,7 @@ const platformMilestones = [
   </section>
 
   <section class="mb-8">
-    <h2 class="jv-display text-sm font-semibold text-[var(--jv-cyan)] mb-4">OKRs por departamento</h2>
+    <h2 class="jv-heading-section mb-4">OKRs por departamento</h2>
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
       {data.okrs.map((okr, i) => (
         <HudPanel animate={i + 4}>
@@ -105,7 +105,7 @@ const platformMilestones = [
   </section>
 
   <HudPanel animate={8}>
-    <h2 class="jv-display text-sm font-semibold text-[var(--jv-cyan)] mb-4">Hitos Capa 1</h2>
+    <h2 class="jv-heading-section mb-4">Hitos Capa 1</h2>
     <ul class="space-y-3">
       {platformMilestones.map((m) => (
         <li class="flex items-center gap-3 text-[13px]">

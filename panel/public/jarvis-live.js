@@ -1,6 +1,5 @@
 /**
- * JARVIS runtime refresh · CRM + Social sin redeploy.
- * Carga en JarvisLayout · endpoints /api/jarvis/*
+ * JARVIS runtime refresh · CRM + Finance + Social sin redeploy.
  */
 (function () {
   const badge = document.getElementById("jv-data-badge");
@@ -31,21 +30,28 @@
     setTimeout(() => toast.classList.remove("jv-sync-visible"), 3200);
   }
 
-  function setBadgeLive(leads, clients) {
+  function setBadgeLive(leads, clients, extra) {
     badge.dataset.source = "live";
     badge.className =
       "inline-flex items-center gap-2 px-2.5 py-1 rounded border text-[10px] font-mono uppercase tracking-wider border-emerald-500/40 bg-emerald-500/10 text-emerald-400";
-    badge.title = "Datos CRM desde Airtable · refrescado en vivo";
+    badge.title = "Datos en vivo · Airtable + APIs";
     badge.innerHTML =
       '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>' +
       "LIVE" +
-      `<span class="text-white/40 normal-case tracking-normal"> · ${leads}L · ${clients}C</span>`;
+      `<span class="text-white/40 normal-case tracking-normal"> · ${leads}L · ${clients}C${extra ? ` · ${extra}` : ""}</span>`;
   }
 
   function patchText(selector, value) {
     document.querySelectorAll(selector).forEach((el) => {
       el.textContent = value;
+      el.classList.remove("jv-metric-empty", "opacity-60");
     });
+  }
+
+  function fmtUsd(n) {
+    if (!n || n <= 0) return "—";
+    if (n >= 1000) return `$${(n / 1000).toFixed(n >= 10000 ? 0 : 1)}K`;
+    return `$${Math.round(n).toLocaleString("en-US")}`;
   }
 
   function patchPipelineTable(leads) {
@@ -64,13 +70,14 @@
             : score >= 5
               ? "text-[var(--jv-warning)]"
               : "text-[var(--jv-text-dim)]";
+        const val = lead.valueUsd ? `$${Number(lead.valueUsd).toLocaleString("en-US")}` : "—";
         return `<tr>
-          <td class="py-3"><div class="font-medium">${lead.name}</div><div class="jv-mono text-[10px] text-[var(--jv-text-dim)]">${lead.company}</div></td>
-          <td class="py-3 text-[var(--jv-text-muted)]">—</td>
-          <td class="py-3"><span class="jv-mono text-[10px] px-2 py-0.5 rounded-sm border" style="border-color:${color};color:${color}">${stage}</span></td>
-          <td class="py-3"><span class="jv-mono font-bold ${scoreClass}">${score}/10</span></td>
-          <td class="py-3 jv-mono">$0</td>
-          <td class="py-3"><span class="jv-mono text-[10px] text-[var(--jv-cyan)]">HERMES</span></td>
+          <td class="py-2.5"><div class="font-medium text-[var(--jv-text-sm)]">${lead.name}</div><div class="jv-mono text-[var(--jv-text-2xs)] text-[var(--jv-text-dim)]">${lead.company}</div></td>
+          <td class="py-2.5 text-[var(--jv-text-muted)] text-[var(--jv-text-sm)]">—</td>
+          <td class="py-2.5"><span class="jv-mono text-[var(--jv-text-2xs)] px-1.5 py-0.5 rounded-sm border" style="border-color:${color};color:${color}">${stage}</span></td>
+          <td class="py-2.5"><span class="jv-mono font-semibold text-[var(--jv-text-sm)] ${scoreClass}">${score}/10</span></td>
+          <td class="py-2.5 jv-mono text-[var(--jv-text-sm)]">${val}</td>
+          <td class="py-2.5"><span class="jv-mono text-[var(--jv-text-2xs)] text-[var(--jv-cyan)]">HERMES</span></td>
         </tr>`;
       })
       .join("");
@@ -82,7 +89,10 @@
       const countEl = document.querySelector(`[data-jv-funnel-count="${i}"]`);
       const valueEl = document.querySelector(`[data-jv-funnel-value="${i}"]`);
       if (countEl) countEl.textContent = String(stage.count);
-      if (valueEl) valueEl.textContent = `$${Math.round(stage.valueUsd / 1000)}K`;
+      if (valueEl) {
+        const v = stage.valueUsd || 0;
+        valueEl.textContent = v >= 1000 ? `$${Math.round(v / 1000)}K` : v > 0 ? `$${v}` : "—";
+      }
     });
   }
 
@@ -110,20 +120,50 @@
       patchText('[data-jv-live="clients-count"]', String(clients));
       patchText('[data-jv-live="pipeline-leads"]', String(data.leads?.length ?? leads));
 
+      const conversion = leads > 0 && clients > 0 ? `${Math.round((clients / leads) * 100)}%` : "—";
+      patchText('[data-jv-live="conversion-rate"]', conversion);
+      patchText('[data-jv-live="deals-total"]', String(data.liveRecords?.deals ?? data.dealsTotal ?? "—"));
+      patchText('[data-jv-live="capacity-pct"]', clients > 0 ? `${Math.round((clients / 5) * 100)}%` : "—");
+
       patchPipelineTable(data.leads);
       patchFunnel(data.pipelineFunnel);
 
       window.dispatchEvent(new CustomEvent("jarvis:crm", { detail: data }));
-      showToast(`CRM sincronizado · ${leads} leads · ${clients} clientes`);
     } catch {
-      /* silent · static mock remains */
+      /* silent */
     } finally {
       badge?.classList.remove("jv-badge-loading");
     }
   }
 
+  async function refreshFinance() {
+    try {
+      const res = await fetch("/api/jarvis/finance", {
+        headers: { Accept: "application/json" },
+        credentials: "same-origin",
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data.source !== "live") return;
+
+      patchText('[data-jv-live="revenue-ytd"]', fmtUsd(data.revenueYtd));
+      patchText('[data-jv-live="pipeline-weighted"]', fmtUsd(data.pipelineWeighted));
+      patchText('[data-jv-live="run-rate"]', fmtUsd(data.runRateMonthly));
+      patchText('[data-jv-live="deals-total"]', String(data.dealsCount || "—"));
+
+      const leads = document.querySelector('[data-jv-live="leads-count"]')?.textContent;
+      const clients = document.querySelector('[data-jv-live="clients-count"]')?.textContent;
+      if (leads && clients) setBadgeLive(leads, clients, "fin");
+
+      window.dispatchEvent(new CustomEvent("jarvis:finance", { detail: data }));
+      showToast(`Finanzas · YTD ${fmtUsd(data.revenueYtd)} · Pipeline ${fmtUsd(data.pipelineWeighted)}`);
+    } catch {
+      /* silent */
+    }
+  }
+
   async function refreshSocial() {
-    if (!document.querySelector("[data-jv-social-root]")) return;
+    if (!document.querySelector("[data-jv-social-root], [data-jv-social], [data-jv-live='roas'], [data-jv-live='ig-engagement']")) return;
     try {
       const res = await fetch("/api/jarvis/social", {
         headers: { Accept: "application/json" },
@@ -137,20 +177,27 @@
         patchText('[data-jv-social="ig-followers"]', formatCompact(data.instagram.followers));
         patchText('[data-jv-social="ig-reach"]', formatCompact(data.instagram.reach7d));
         patchText('[data-jv-social="ig-engagement"]', `${data.instagram.engagementRate}%`);
+        patchText('[data-jv-live="ig-engagement"]', `${data.instagram.engagementRate}%`);
       }
       if (data.metaAds) {
         patchText('[data-jv-social="roas"]', `${data.metaAds.roas.toFixed(1)}x`);
         patchText('[data-jv-social="spend"]', `$${Math.round(data.metaAds.spend7d)}`);
+        patchText('[data-jv-live="roas"]', `${data.metaAds.roas.toFixed(1)}x`);
       }
 
       window.dispatchEvent(new CustomEvent("jarvis:social", { detail: data }));
+      showToast("Social sincronizado · Instagram + Meta Ads");
     } catch {
       /* silent */
     }
   }
 
-  refreshCrm();
-  refreshSocial();
+  async function refreshAll() {
+    await Promise.all([refreshCrm(), refreshFinance(), refreshSocial()]);
+  }
+
+  refreshAll();
   setInterval(refreshCrm, 5 * 60 * 1000);
+  setInterval(refreshFinance, 8 * 60 * 1000);
   setInterval(refreshSocial, 10 * 60 * 1000);
 })();

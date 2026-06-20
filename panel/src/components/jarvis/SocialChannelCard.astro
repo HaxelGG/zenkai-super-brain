@@ -34,29 +34,41 @@ function formatReach(n: number): string {
 }
 ---
 
-<div class="p-3 border border-[var(--jv-border)] rounded-sm hover:border-[var(--jv-border-bright)] transition-all duration-300 hover:shadow-[0_0_16px_rgba(0,212,255,0.1)]">
-  <div class="flex items-center justify-between mb-2">
+<div class="p-2.5 border border-[var(--jv-border)] rounded-sm hover:border-[var(--jv-border-bright)] transition-all duration-200">
+  <div class="flex items-center justify-between mb-1.5">
     <div class="flex items-center gap-2">
-      <div class:list={["w-7 h-7 rounded-sm bg-gradient-to-br flex items-center justify-center text-white jv-display text-[9px] font-bold", icon.bg]}>
+      <div class:list={["w-6 h-6 rounded-sm bg-gradient-to-br flex items-center justify-center text-white jv-display text-[8px] font-bold", icon.bg]}>
         {icon.label}
       </div>
-      <span class="text-[13px] font-medium">{channel.label}</span>
+      <span class="text-[var(--jv-text-sm)] font-medium">{channel.label}</span>
     </div>
-    <span class="jv-mono text-[10px] text-[var(--jv-success)]">▲ {channel.delta.value}{channel.platform === "meta_ads" ? "x" : "%"}</span>
+    {channel.delta && (
+      <span class="jv-mono text-[var(--jv-text-2xs)] text-[var(--jv-success)]">
+        ▲ {channel.delta.value}{channel.platform === "meta_ads" ? "x" : "%"}
+      </span>
+    )}
   </div>
-  <div class="grid grid-cols-2 gap-2 mb-2">
+  <div class="grid grid-cols-2 gap-2 mb-1.5">
     <div>
-      <div class="jv-label text-[8px] opacity-60">{channel.metricLabel}</div>
-      <div class="jv-mono text-sm font-semibold text-[var(--jv-cyan)]">
+      <div class="jv-label opacity-60">{channel.metricLabel}</div>
+      <div
+        class="jv-mono text-[var(--jv-text-sm)] font-semibold text-[var(--jv-cyan)]"
+        data-jv-social={channel.platform === "instagram" ? "ig-reach" : channel.platform === "meta_ads" ? "roas" : undefined}
+      >
         {channel.platform === "meta_ads" ? `${channel.engagement}x` : formatReach(channel.reach)}
       </div>
     </div>
     <div>
-      <div class="jv-label text-[8px] opacity-60">{channel.secondaryLabel}</div>
-      <div class="jv-mono text-sm font-semibold">{channel.secondaryValue}</div>
+      <div class="jv-label opacity-60">{channel.secondaryLabel}</div>
+      <div
+        class="jv-mono text-[var(--jv-text-sm)] font-semibold"
+        data-jv-social={channel.platform === "instagram" ? "ig-engagement" : channel.platform === "meta_ads" ? "spend" : undefined}
+      >
+        {channel.secondaryValue}
+      </div>
     </div>
   </div>
-  <svg width="100%" height="28" viewBox="0 0 120 28" preserveAspectRatio="none" aria-hidden="true">
-    <path d={sparklinePath(channel.trend, 120, 28)} fill="none" stroke="#00D4FF" stroke-width="1.5" stroke-linecap="round" opacity="0.8" />
+  <svg width="100%" height="22" viewBox="0 0 120 22" preserveAspectRatio="none" aria-hidden="true">
+    <path d={sparklinePath(channel.trend, 120, 22)} fill="none" stroke="#00D4FF" stroke-width="1.25" stroke-linecap="round" opacity="0.6" />
   </svg>
 </div>
