@@ -1,9 +1,9 @@
 /**
- * JARVIS Orquestador · enruta instrucciones de voz/texto del Command Center.
- * Fast path local → CRM snapshot → clasificador Haiku → respuesta corta Sonnet-lite.
+ * JARVIS Orquestador · DeepSeek brain + fast fallbacks.
  */
 import { clasificar } from "../anthropic/clasificar.js";
 import { getJarvisCrmSnapshot } from "../airtable/jarvis-crm.js";
+import { askJarvisBrain, isJarvisBrainEnabled } from "./deepseek-brain.js";
 
 export type JarvisAction = { type: "navigate"; path: string };
 
@@ -14,7 +14,7 @@ export type JarvisRunResult = {
   speech: string;
   action?: JarvisAction;
   agent?: string;
-  source: "local" | "crm" | "clasificar";
+  source: "deepseek" | "local" | "crm" | "clasificar";
   timestamp: string;
 };
 
@@ -31,14 +31,6 @@ const NAV_ROUTES: { re: RegExp; path: string; speech: string }[] = [
   { re: /command center|inicio|home|centro/, path: "/jarvis/", speech: "Command Center." },
 ];
 
-function norm(text: string): string {
-  return text
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .trim();
-}
-
 function makeId(): string {
   return `run_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 }
@@ -48,23 +40,43 @@ function trimSpeech(text: string, max = 220): string {
   return t.length <= max ? t : `${t.slice(0, max - 1)}…`;
 }
 
-export async function executeJarvisInstruction(instruction: string): Promise<JarvisRunResult> {
-  const trimmed = instruction.trim();
-  const id = makeId();
-  const timestamp = new Date().toISOString();
-  const lower = norm(trimmed);
+function brainResult(
+  id: string,
+  instruction: string,
+  timestamp: string,
+  data: {
+    reply: string;
+    speech: string;
+    action?: JarvisAction;
+    agent?: string;
+  },
+): JarvisRunResult {
+  return {
+    id,
+    instruction,
+    reply: data.reply,
+    speech: data.speech,
+    action: data.action,
+    agent: data.agent,
+    source: "deepseek",
+    timestamp,
+  };
+}
 
-  if (!trimmed) {
-    return {
-      id,
-      instruction: trimmed,
-      reply: "No recibí instrucción.",
-      speech: "No recibí instrucción.",
-      source: "local",
-      timestamp,
-    };
+async function fetchCrmSafe() {
+  try {
+    return await getJarvisCrmSnapshot(process.env.AIRTABLE_TOKEN);
+  } catch {
+    return null;
   }
+}
 
+async function legacyFallback(
+  id: string,
+  trimmed: string,
+  timestamp: string,
+  lower: string,
+): Promise<JarvisRunResult> {
   for (const route of NAV_ROUTES) {
     if (route.re.test(lower)) {
       return {
@@ -137,4 +149,37 @@ export async function executeJarvisInstruction(instruction: string): Promise<Jar
       timestamp,
     };
   }
+}
+
+export async function executeJarvisInstruction(instruction: string): Promise<JarvisRunResult> {
+  const trimmed = instruction.trim();
+  const id = makeId();
+  const timestamp = new Date().toISOString();
+  const lower = trimmed
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+
+  if (!trimmed) {
+    return {
+      id,
+      instruction: trimmed,
+      reply: "No recibí instrucción.",
+      speech: "No recibí instrucción.",
+      source: "local",
+      timestamp,
+    };
+  }
+
+  if (isJarvisBrainEnabled()) {
+    const crm = await fetchCrmSafe();
+    const brain = await askJarvisBrain(trimmed, crm);
+    if (brain.ok) {
+      return brainResult(id, trimmed, timestamp, brain.data);
+    }
+    console.warn("[jarvis] deepseek fallback:", brain.error, brain.detail ?? "");
+  }
+
+  return legacyFallback(id, trimmed, timestamp, lower);
 }
