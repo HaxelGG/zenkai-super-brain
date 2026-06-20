@@ -1,21 +1,23 @@
 ---
-import { JARVIS_BASE, JARVIS_NAV } from "../../lib/jarvis/config";
+import { JARVIS_NAV, isJarvisNavActive, resolveJarvisRoutes } from "../../lib/jarvis/config";
 
+const routes = resolveJarvisRoutes(Astro.url.hostname);
 const path = Astro.url.pathname;
-const isActive = (href: string) =>
-  href === JARVIS_BASE ? path === JARVIS_BASE || path === `${JARVIS_BASE}/` : path.startsWith(href);
 ---
 
 <nav class="lg:hidden flex gap-1.5 overflow-x-auto pb-4 mb-2 -mx-1 px-1 scrollbar-hide">
-  {JARVIS_NAV.map((item) => (
-    <a
-      href={item.href}
-      class:list={[
-        "shrink-0 px-3 py-1.5 rounded-sm text-small no-underline transition-all duration-300",
-        isActive(item.href) ? "jv-pill-active" : "jv-pill",
-      ]}
-    >
-      {item.label}
-    </a>
-  ))}
+  {JARVIS_NAV.map((item) => {
+    const href = routes[item.key];
+    return (
+      <a
+        href={href}
+        class:list={[
+          "shrink-0 px-3 py-1.5 rounded-sm text-small no-underline transition-all duration-300",
+          isJarvisNavActive(path, href) ? "jv-pill-active" : "jv-pill",
+        ]}
+      >
+        {item.label}
+      </a>
+    );
+  })}
 </nav>

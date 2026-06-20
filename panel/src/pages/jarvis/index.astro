@@ -15,9 +15,10 @@ import IntelligenceBrief from "../../components/jarvis/IntelligenceBrief.astro";
 import SectorChart from "../../components/jarvis/SectorChart.astro";
 import DualBarChart from "../../components/jarvis/DualBarChart.astro";
 import { getJarvisData } from "../../lib/jarvis";
-import { JARVIS_ROUTES } from "../../lib/jarvis/config";
+import { resolveJarvisRoutes } from "../../lib/jarvis/config";
 
 const data = await getJarvisData();
+const routes = resolveJarvisRoutes(Astro.url.hostname);
 const pendingTasks = data.tasks.filter((t) => t.status === "pending");
 const workingTasks = data.tasks.filter((t) => t.status === "working");
 const doneThisWeek = data.tasks.filter((t) => t.status === "done");
@@ -57,7 +58,7 @@ const onlineSystems = data.systemConnections.filter((s) => s.status === "online"
       <HudPanel animate={2}>
         <div class="flex items-center justify-between mb-4">
           <h2 class="jv-display text-sm font-semibold text-[var(--jv-cyan)]">Tareas</h2>
-          <a href={JARVIS_ROUTES.tareas} class="jv-mono text-[10px] text-[var(--jv-cyan)] no-underline hover:underline">ver todo →</a>
+          <a href={routes.tareas} class="jv-mono text-[10px] text-[var(--jv-cyan)] no-underline hover:underline">ver todo →</a>
         </div>
         <div class="mb-4">
           <div class="jv-label mb-2 opacity-70">Pendientes · {pendingTasks.length}</div>
@@ -97,7 +98,7 @@ const onlineSystems = data.systemConnections.filter((s) => s.status === "online"
       <HudPanel animate={6} padding="sm">
         <div class="flex items-center justify-between mb-3">
           <h3 class="jv-label">Proyectos activos</h3>
-          <a href={JARVIS_ROUTES.clientes} class="jv-mono text-[10px] text-[var(--jv-cyan)] no-underline">clientes →</a>
+          <a href={routes.clientes} class="jv-mono text-[10px] text-[var(--jv-cyan)] no-underline">clientes →</a>
         </div>
         <div class="overflow-x-auto">
           <table class="jv-table w-full text-[13px]">
@@ -135,7 +136,7 @@ const onlineSystems = data.systemConnections.filter((s) => s.status === "online"
       <HudPanel animate={7}>
         <div class="flex items-center justify-between mb-4">
           <h2 class="jv-display text-sm font-semibold text-[var(--jv-cyan)]">Agentes IA</h2>
-          <a href={JARVIS_ROUTES.agentes} class="jv-mono text-[10px] text-[var(--jv-cyan)] no-underline">detalle →</a>
+          <a href={routes.agentes} class="jv-mono text-[10px] text-[var(--jv-cyan)] no-underline">detalle →</a>
         </div>
         <AgentStatusGrid statuses={data.agentStatuses} compact />
       </HudPanel>
@@ -143,7 +144,7 @@ const onlineSystems = data.systemConnections.filter((s) => s.status === "online"
       <HudPanel animate={8}>
         <div class="flex items-center justify-between mb-4">
           <h2 class="jv-display text-sm font-semibold text-[var(--jv-cyan)]">Social</h2>
-          <a href={JARVIS_ROUTES.social} class="jv-mono text-[10px] text-[var(--jv-cyan)] no-underline">detalle →</a>
+          <a href={routes.social} class="jv-mono text-[10px] text-[var(--jv-cyan)] no-underline">detalle →</a>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-2">
           {data.socialChannels.slice(0, 2).map((ch) => <SocialChannelCard channel={ch} />)}
@@ -153,7 +154,7 @@ const onlineSystems = data.systemConnections.filter((s) => s.status === "online"
       <HudPanel>
         <div class="flex items-center justify-between mb-3">
           <h3 class="jv-label">Sectores</h3>
-          <a href={JARVIS_ROUTES.intel} class="jv-mono text-[10px] text-[var(--jv-cyan)] no-underline">intel →</a>
+          <a href={routes.intel} class="jv-mono text-[10px] text-[var(--jv-cyan)] no-underline">intel →</a>
         </div>
         <SectorChart sectors={data.sectorPerformance.slice(0, 4)} />
       </HudPanel>
@@ -193,7 +194,7 @@ const onlineSystems = data.systemConnections.filter((s) => s.status === "online"
           <div style={`width:${m.pct}%;background:${m.color}`} title={`${m.model} ${m.pct}%`} />
         ))}
       </div>
-      <a href={JARVIS_ROUTES.sistemas} class="jv-mono text-[10px] text-[var(--jv-cyan)] no-underline">ver sistemas →</a>
+      <a href={routes.sistemas} class="jv-mono text-[10px] text-[var(--jv-cyan)] no-underline">ver sistemas →</a>
     </HudPanel>
   </section>
 </JarvisLayout>

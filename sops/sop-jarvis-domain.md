@@ -12,7 +12,8 @@ criticidad: media
 **Owner:** FORGE · ATLAS  
 **Proyecto Vercel:** `zenkaibrain` (mismo deploy que el panel)  
 **URL canónica:** https://jarvis.zenkai.systems  
-**Rutas internas:** `/jarvis`, `/jarvis/finanzas`, `/jarvis/social`, `/jarvis/tareas`, `/jarvis/goals`
+**Rutas públicas (subdominio):** `/`, `/finanzas`, `/social`, `/tareas`, `/goals`, `/agentes`, `/pipeline`, `/clientes`, `/sistemas`, `/intel`  
+**Rutas internas (panel):** `/jarvis`, `/jarvis/finanzas`, …
 
 ---
 
@@ -22,7 +23,7 @@ JARVIS comparte el build estático del panel (`panel/dist`). No requiere un proy
 
 1. Añadir el subdominio en Vercel project `zenkaibrain`
 2. Crear el registro DNS en Hostinger
-3. Verificar SSL y redirect `/` → `/jarvis`
+3. Verificar SSL y rewrites `/` → contenido JARVIS (URL limpia, sin `/jarvis` en barra)
 
 ---
 
@@ -57,12 +58,17 @@ dig jarvis.zenkai.systems +short
 # debe resolver a cname.vercel-dns.com o IP Vercel
 
 curl -sI https://jarvis.zenkai.systems/ | head -5
-# HTTP/2 307 o 308 → Location: /jarvis (redirect configurado en vercel.json raíz)
+# HTTP/2 200 — sirve Command Center sin redirect visible a /jarvis
+
+curl -sI https://jarvis.zenkai.systems/finanzas | head -5
+# HTTP/2 200 — rewrite interno a /jarvis/finanzas
 ```
 
 ### 4 · Smoke test funcional
 
-- [ ] `https://jarvis.zenkai.systems/` redirige a `/jarvis`
+- [ ] `https://jarvis.zenkai.systems/` carga Command Center (URL limpia)
+- [ ] `https://jarvis.zenkai.systems/finanzas` carga Finanzas
+- [ ] `/jarvis/*` en subdominio JARVIS redirige a URL limpia (301)
 - [ ] Command Center carga con KPIs y bento grid
 - [ ] Navegación sidebar: Finanzas · Social · Tareas · Goals
 - [ ] Link "Volver al Panel" apunta a `https://panel.zenkai.systems`
@@ -75,7 +81,7 @@ curl -sI https://jarvis.zenkai.systems/ | head -5
 
 | Archivo | Qué hace |
 |---------|----------|
-| `vercel.json` (raíz) | Redirect `jarvis.zenkai.systems/` → `/jarvis` |
+| `vercel.json` (raíz) | Rewrites host `jarvis.zenkai.systems` → `/jarvis/*` · redirects legacy `/jarvis` → URL limpia |
 | `panel/src/lib/jarvis/config.ts` | URLs canónicas `JARVIS_URL` · `PANEL_URL` |
 | `panel/src/layouts/JarvisLayout.astro` | `<link rel="canonical">` apunta a jarvis.zenkai.systems |
 

@@ -1,9 +1,13 @@
 ---
-import { JARVIS_BASE, JARVIS_NAV, JARVIS_ROUTES, PANEL_URL } from "../../lib/jarvis/config";
+import {
+  JARVIS_NAV,
+  PANEL_URL,
+  isJarvisNavActive,
+  resolveJarvisRoutes,
+} from "../../lib/jarvis/config";
 
+const routes = resolveJarvisRoutes(Astro.url.hostname);
 const path = Astro.url.pathname;
-const isActive = (href: string) =>
-  href === JARVIS_BASE ? path === JARVIS_BASE || path === `${JARVIS_BASE}/` : path.startsWith(href);
 
 const icons: Record<string, string> = {
   home: "M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1V9.5z",
@@ -21,7 +25,7 @@ const icons: Record<string, string> = {
 
 <aside class="jarvis-sidebar hidden lg:flex flex-col w-60 shrink-0 border-r">
   <div class="p-5 border-b border-[var(--jv-border)]">
-    <a href={JARVIS_ROUTES.home} class="flex items-center gap-3 no-underline group">
+    <a href={routes.home} class="flex items-center gap-3 no-underline group">
       <div class="arc-reactor arc-reactor-lg shrink-0" aria-hidden="true"></div>
       <div>
         <div class="jv-display text-sm font-bold text-[var(--jv-cyan)] group-hover:text-white transition-colors">JARVIS</div>
@@ -31,20 +35,23 @@ const icons: Record<string, string> = {
   </div>
 
   <nav class="flex-1 p-3 space-y-0.5 overflow-y-auto">
-    {JARVIS_NAV.map((item) => (
-      <a
-        href={item.href}
-        class:list={[
-          "jv-nav-item flex items-center gap-2.5 px-3 py-2 rounded-sm text-[13px] no-underline transition-all duration-300",
-          isActive(item.href) ? "jv-nav-active font-medium" : "text-[var(--jv-text-muted)]",
-        ]}
-      >
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d={icons[item.icon]} />
-        </svg>
-        {item.label}
-      </a>
-    ))}
+    {JARVIS_NAV.map((item) => {
+      const href = routes[item.key];
+      return (
+        <a
+          href={href}
+          class:list={[
+            "jv-nav-item flex items-center gap-2.5 px-3 py-2 rounded-sm text-[13px] no-underline transition-all duration-300",
+            isJarvisNavActive(path, href) ? "jv-nav-active font-medium" : "text-[var(--jv-text-muted)]",
+          ]}
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d={icons[item.icon]} />
+          </svg>
+          {item.label}
+        </a>
+      );
+    })}
   </nav>
 
   <div class="p-3 border-t border-[var(--jv-border)]">

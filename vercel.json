@@ -10,10 +10,28 @@
   },
   "redirects": [
     {
+      "source": "/jarvis",
+      "has": [{ "type": "host", "value": "jarvis.zenkai.systems" }],
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/jarvis/:path*",
+      "has": [{ "type": "host", "value": "jarvis.zenkai.systems" }],
+      "destination": "/:path*",
+      "permanent": true
+    }
+  ],
+  "rewrites": [
+    {
       "source": "/",
       "has": [{ "type": "host", "value": "jarvis.zenkai.systems" }],
-      "destination": "/jarvis",
-      "permanent": false
+      "destination": "/jarvis"
+    },
+    {
+      "source": "/:path((?!api|_astro|jarvis-favicon\\.svg).*)",
+      "has": [{ "type": "host", "value": "jarvis.zenkai.systems" }],
+      "destination": "/jarvis/:path"
     }
   ]
 }
