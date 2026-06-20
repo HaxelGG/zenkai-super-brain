@@ -28,11 +28,13 @@
     return h === "jarvis.zenkai.systems" || h.endsWith(".jarvis.zenkai.systems");
   }
 
-  /** Mismo deploy Vercel sirve /api en panel y jarvis; localhost astro dev → panel prod */
+  /**
+   * Vercel sirve /api/jarvis/* en panel.zenkai.systems (404 en jarvis subdomain).
+   * jarvis + localhost → proxy panel; panel host → same-origin.
+   */
   function getApiBase() {
     const h = window.location.hostname.toLowerCase();
-    if (isJarvisHost() || h === "panel.zenkai.systems") return "";
-    if (h === "localhost" || h === "127.0.0.1") return PANEL_API;
+    if (isJarvisHost() || h === "localhost" || h === "127.0.0.1") return PANEL_API;
     return "";
   }
 
