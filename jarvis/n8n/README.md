@@ -9,7 +9,7 @@ Motor de automatización comercial ZENKAI. Importar en **n8n Cloud** (`zenkai-gr
 | M-04 | `ZENKAI-M-04-hot-lead-alert.json` | `POST /webhook/jarvis-callback` | Alerta Slack/email lead caliente |
 | M-03 | `LEADS-05-qualify-on-create.json` | `POST /webhook/leads-qualify` | Cualificación HERMES → Airtable |
 | M-02 | `ZENKAI-M-02-demo-autoreply.json` | `POST /webhook/demo-autoreply` | Auto-reply recepción demo (SLA 4h) |
-| S-01 | `ZENKAI-S-01-sla-form-3h.json` | Cron cada hora | Alerta si sin respuesta >3h |
+| M-05 | `ZENKAI-M-05-content-pipeline.json` | `POST /webhook/agency-content` | Pipeline contenido MUSE · HeyGen/ElevenLabs |
 
 **Orden de importación:** M-04 → M-03 → M-02 → S-01 (M-03 llama al webhook de M-04).
 

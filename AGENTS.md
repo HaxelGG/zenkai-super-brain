@@ -37,6 +37,14 @@ This is an N3–N4 program (per `CLAUDE.md` §3); built incrementally as self-co
 - **Local live testing:** create a gitignored `web/.env` with `ZENKAI_API_KEY` (+ `N8N_WEBHOOK_URL`, and either `ANTHROPIC_API_KEY` or `LLM_PROVIDER=deepseek`+`DEEPSEEK_API_KEY`, plus `ELEVENLABS_API_KEY` for voice); `astro dev` loads it. **Astro requires a dev-server restart to pick up `.env` changes.** The full JARVIS pipeline (DeepSeek proposal + ElevenLabs voice + n8n dispatch via `/api/orquestar`) has been verified end-to-end this way.
 - **Pending (need design + provider keys):** any Cursor-style agentic features. Add each as its own `web/src/lib/*` module + `/api/*` route + mocked test, gated behind its own env var.
 
+**Agency Platform (increment 6) — `scripts/agency/*` + `/api/agency/*`:**
+- **JARVIS Director** routes voice/API instructions to departments when keywords or `[AGENTE]` / `[DEPARTAMENTO]` tags match (`scripts/agency/director.ts`).
+- **12 agents** registered with LLM tier (DeepSeek/Sonnet/Haiku/Opus), n8n events, MCP servers (`scripts/agency/registry.ts`).
+- **Marketing pipeline** MUSE: copy → ElevenLabs voice → HeyGen/Higgsfield video → n8n `agency.marketing.content` (`scripts/agency/departments/marketing.ts`).
+- **Sales** HERMES + **Ops** ATLAS tasks/goals (`scripts/agency/departments/`).
+- CLI: `npm run agency:status` · `agency:director` · `agency:content` · `agency:agent`.
+- n8n export: `jarvis/n8n/ZENKAI-M-05-content-pipeline.json`.
+
 **Provider keys/accounts cannot be created by the agent**, and the agent **cannot create new GitHub repos or Vercel/Airtable/n8n connections** — those need each provider's dashboard and are user-only external actions. The git remote token is scoped to this repo only; `gh` is read-only. The only credential generated in-repo is the app's own `ZENKAI_API_KEY` (random bearer token; set it as a secret, never commit it).
 
 @AGENTS.wmill.md

@@ -2,6 +2,7 @@
  * JARVIS Orquestador · cerebro LLM + contexto ops + n8n dispatch.
  */
 import { clasificar } from "../anthropic/clasificar.js";
+import { directorRoute, shouldDelegateToAgency } from "../agency/director.js";
 import { askJarvisBrain, isJarvisBrainEnabled } from "./brain.js";
 import { dispatchJarvisEvent } from "./n8n-dispatch.js";
 import { fetchJarvisOps, formatJarvisOpsContext } from "./ops-context.js";
@@ -18,7 +19,7 @@ export type JarvisRunResult = {
   source: "deepseek" | "anthropic" | "local" | "clasificar";
   timestamp: string;
   dispatch?: { event: string; ok: boolean; error?: string };
-  meta?: { fallbackReason?: string; contextLive?: boolean };
+  meta?: { fallbackReason?: string; contextLive?: boolean; agency?: boolean; department?: string };
 };
 
 function makeId(): string {
@@ -86,6 +87,28 @@ export async function executeJarvisInstruction(instruction: string): Promise<Jar
       source: "local",
       timestamp,
     };
+  }
+
+  if (shouldDelegateToAgency(trimmed)) {
+    try {
+      const routed = await directorRoute(trimmed);
+      const primary = routed.results[0];
+      if (primary) {
+        return {
+          id,
+          instruction: trimmed,
+          reply: primary.reply,
+          speech: primary.speech || primary.reply.slice(0, 220),
+          agent: primary.agent,
+          source: primary.provider,
+          timestamp,
+          dispatch: primary.dispatch,
+          meta: { agency: true, department: routed.department, contextLive: !!primary.meta?.contextLive },
+        };
+      }
+    } catch (e) {
+      console.warn("[jarvis] agency director failed:", e instanceof Error ? e.message : e);
+    }
   }
 
   if (isJarvisBrainEnabled()) {
