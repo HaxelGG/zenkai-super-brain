@@ -29,7 +29,9 @@ Motor de automatización comercial ZENKAI. Importar en **n8n Cloud** (`zenkai-gr
 | `SLACK_WEBHOOK_URL` | `https://hooks.slack.com/...` (opcional) |
 | `N8N_JARVIS_CALLBACK_URL` | `https://zenkai-growth-systems.app.n8n.cloud/webhook/jarvis-callback` |
 
-Los workflows Sprint 1 usan **`$vars.*`** en headers HTTP — no requieren credenciales vault en n8n (solo Variables de instancia).
+Los exports usan **`$vars.*`**. Al importar con MCP, `import-via-mcp.ts` **inyecta literales desde `.env`** (n8n Cloud no expone REST `/api/v1/variables` en este plan).
+
+Alternativa manual: Settings → Variables + `npm run n8n:vars -- --apply` (requiere `N8N_API_KEY`).
 
 ## Credenciales (legacy · ya no requeridas en Sprint 1 env-based)
 

@@ -4,14 +4,16 @@ import JarvisMobileNav from "../../../components/jarvis/JarvisMobileNav.astro";
 import JarvisDepartmentHub from "../../../components/jarvis/JarvisDepartmentHub.astro";
 import { getJarvisData } from "../../../lib/jarvis";
 import { JARVIS_DEPARTMENTS, getDepartmentBySlug } from "../../../lib/jarvis/departments";
+import { resolveJarvisRoutes } from "../../../lib/jarvis/config";
 
 export function getStaticPaths() {
   return JARVIS_DEPARTMENTS.map((d) => ({ params: { slug: d.slug } }));
 }
 
+const routes = resolveJarvisRoutes(Astro.url.hostname);
 const { slug } = Astro.params;
 const department = getDepartmentBySlug(slug ?? "");
-if (!department) return Astro.redirect("/jarvis/");
+if (!department) return Astro.redirect(routes.home);
 
 const data = await getJarvisData();
 ---

@@ -1,5 +1,5 @@
 ---
-import { JARVIS_DEPARTMENTS } from "../../lib/jarvis/departments";
+import { JARVIS_DEPARTMENTS, navLabel } from "../../lib/jarvis/departments";
 import { resolveJarvisRoutes, type JarvisRouteKey } from "../../lib/jarvis/config";
 
 const routes = resolveJarvisRoutes(Astro.url.hostname);
@@ -27,7 +27,7 @@ const routes = resolveJarvisRoutes(Astro.url.hostname);
           <p class="jv-dept-card-tagline">{dept.tagline}</p>
           <div class="jv-dept-card-modules">
             {dept.items.slice(0, 3).map((item) => (
-              <span class="jv-dept-card-chip">{item.label ?? item.key}</span>
+              <span class="jv-dept-card-chip">{navLabel(item.key, item.label)}</span>
             ))}
           </div>
         </a>

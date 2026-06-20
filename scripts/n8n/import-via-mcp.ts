@@ -21,6 +21,10 @@ const ORDER = [
   "LEADS-05-qualify-on-create.json",
   "ZENKAI-M-02-demo-autoreply.json",
   "ZENKAI-S-01-sla-form-3h.json",
+  "ZENKAI-M-05-content-pipeline.json",
+  "ZENKAI-M-06-meta-publish.json",
+  "ZENKAI-OPS-01-daily-recap.json",
+  "ZENKAI-IA-01-devtask.json",
 ] as const;
 
 type N8nNode = {
@@ -57,7 +61,69 @@ function loadExport(filename: string): WorkflowExport {
   const path = join(process.cwd(), "jarvis", "n8n", filename);
   const raw = JSON.parse(readFileSync(path, "utf8")) as WorkflowExport;
   if (!raw.name || !raw.nodes?.length) throw new Error(`${filename}: invalid export`);
-  return raw;
+  return injectVarsFromEnv(raw);
+}
+
+/** Valores que el export referencia como `$vars.*` — se resuelven desde `.env` al importar. */
+const VAR_SPECS: { key: string; env: string; required?: boolean; fallback?: string }[] = [
+  { key: "AIRTABLE_BASE_VENTAS", env: "AIRTABLE_BASE_VENTAS", required: true },
+  { key: "AIRTABLE_TOKEN", env: "AIRTABLE_TOKEN", required: true },
+  { key: "RESEND_API_KEY", env: "RESEND_API_KEY", required: true },
+  { key: "ANTHROPIC_API_KEY", env: "ANTHROPIC_API_KEY", required: true },
+  { key: "ZENKAI_FROM_EMAIL", env: "ZENKAI_FROM_EMAIL", fallback: "ZENKAI <hola@zenkai.systems>" },
+  { key: "ZENKAI_ALERT_EMAIL", env: "ZENKAI_ALERT_EMAIL", fallback: "hola@zenkai.systems" },
+  {
+    key: "N8N_JARVIS_CALLBACK_URL",
+    env: "N8N_JARVIS_CALLBACK_URL",
+    fallback: `${baseUrl()}/webhook/jarvis-callback`,
+  },
+  { key: "SLACK_WEBHOOK_URL", env: "SLACK_WEBHOOK_URL" },
+];
+
+function resolveVar(spec: (typeof VAR_SPECS)[number]): string | null {
+  const raw = process.env[spec.env]?.trim();
+  if (raw) return raw;
+  if (spec.fallback) return spec.fallback;
+  if (spec.required) return null;
+  return "";
+}
+
+function buildVarMap(): Record<string, string> {
+  const map: Record<string, string> = {};
+  const missing: string[] = [];
+  for (const spec of VAR_SPECS) {
+    const value = resolveVar(spec);
+    if (value === null) {
+      missing.push(spec.env);
+      continue;
+    }
+    map[spec.key] = value;
+  }
+  if (missing.length) {
+    throw new Error(`Faltan en .env: ${missing.join(", ")}`);
+  }
+  return map;
+}
+
+/** Sustituye `$vars.*` por literales del `.env` (n8n Cloud no expone REST / Variables vacías). */
+function injectVarsFromEnv(exp: WorkflowExport): WorkflowExport {
+  const vars = buildVarMap();
+  let json = JSON.stringify(exp);
+
+  for (const [key, val] of Object.entries(vars)) {
+    const esc = (s: string) => s.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+    const jsQuoted = `'${esc(val)}'`;
+    const jsonEsc = JSON.stringify(val).slice(1, -1);
+
+    json = json.replace(
+      new RegExp(`\\{\\{\\s*\\$vars\\.${key}\\s*\\|\\|\\s*'([^']*)'\\s*\\}\\}`, "g"),
+      (_, fb: string) => (val ? jsonEsc : fb),
+    );
+    json = json.replace(new RegExp(`\\{\\{\\s*\\$vars\\.${key}\\s*\\}\\}`, "g"), () => jsonEsc);
+    json = json.replace(new RegExp(`\\$vars\\.${key}`, "g"), () => jsQuoted);
+  }
+
+  return JSON.parse(json) as WorkflowExport;
 }
 
 function stubSdkCode(workflowId: string, workflowName: string): string {
@@ -351,9 +417,10 @@ async function main(): Promise<void> {
     await importOne(token, file, existing, force);
   }
 
-  console.log("\nPost-import manual:");
-  console.log("  1. n8n Variables → docs/jarvis/n8n-variables-sprint1.md");
+  console.log("\nPost-import:");
+  console.log("  1. Smoke test webhooks → docs/jarvis/CHECKLIST-SPRINT1.md");
   console.log("  2. Airtable automations → docs/jarvis/airtable-automations-sprint1.md");
+  console.log("  (Secrets inyectados desde .env al importar; repo JSON sigue usando $vars.*)");
 }
 
 main().catch((e) => {

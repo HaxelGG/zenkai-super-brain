@@ -16,7 +16,7 @@
     {
       "parameters": {
         "method": "GET",
-        "url": "={{ 'https://api.airtable.com/v0/' + $vars.AIRTABLE_BASE_VENTAS + '/demos?filterByFormula=' + encodeURIComponent('AND({respondido_at}=BLANK(), OR({sla_alert_sent}=FALSE(), {sla_alert_sent}=BLANK()), IS_BEFORE({created_at}, DATEADD(NOW(), -3, \\'hours\\')))') }}",
+        "url": "={{ 'https://api.airtable.com/v0/' + $vars.AIRTABLE_BASE_VENTAS + '/demos?filterByFormula=' + encodeURIComponent('AND({respondido_at}=BLANK(), OR({sla_alert_sent}=FALSE(), {sla_alert_sent}=BLANK()), IS_BEFORE(CREATED_TIME(), DATEADD(NOW(), -3, \\'hours\\')))') }}",
         "authentication": "none",
         "sendHeaders": true,
         "headerParameters": {
@@ -170,15 +170,10 @@
   ],
   "connections": {
     "Cron Cada Hora": {
-      "main": [
-        [
-          { "node": "Demos SLA vencido", "type": "main", "index": 0 },
-          { "node": "Leads SLA vencido", "type": "main", "index": 0 }
-        ]
-      ]
+      "main": [[{ "node": "Demos SLA vencido", "type": "main", "index": 0 }]]
     },
     "Demos SLA vencido": {
-      "main": [[{ "node": "Merge Records", "type": "main", "index": 0 }]]
+      "main": [[{ "node": "Leads SLA vencido", "type": "main", "index": 0 }]]
     },
     "Leads SLA vencido": {
       "main": [[{ "node": "Merge Records", "type": "main", "index": 0 }]]
@@ -188,18 +183,18 @@
     },
     "Hay pendientes": {
       "main": [
-        [{ "node": "Slack configurado", "type": "main", "index": 0 }],
+        [
+          { "node": "Marcar sla_alert_sent", "type": "main", "index": 0 },
+          { "node": "Slack configurado", "type": "main", "index": 0 }
+        ],
         [{ "node": "No-op OK", "type": "main", "index": 0 }]
       ]
     },
     "Slack configurado": {
-      "main": [
-        [{ "node": "Slack SLA Alert", "type": "main", "index": 0 }],
-        [{ "node": "Marcar sla_alert_sent", "type": "main", "index": 0 }]
-      ]
+      "main": [[{ "node": "Slack SLA Alert", "type": "main", "index": 0 }], []]
     },
     "Slack SLA Alert": {
-      "main": [[{ "node": "Marcar sla_alert_sent", "type": "main", "index": 0 }]]
+      "main": [[]]
     }
   },
   "pinData": {},

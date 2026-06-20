@@ -143,9 +143,9 @@ if (MCP_TOKEN) {
       console.log(`  #${e.id} wf=${e.workflowId} → ${msg}`);
     }
     console.log(
-      "\nDiagnóstico habitual: falta AIRTABLE_BASE_VENTAS en Variables, RESEND_API_KEY inválida, o vars sin cargar.",
+      "\nDiagnóstico habitual: secrets vacíos en n8n, RESEND/Airtable inválidos, o S-01 merge sin ambas ramas.",
     );
-    console.log("Fix: npm run n8n:vars -- --print → pegar en n8n Variables, o npm run n8n:vars -- --apply");
+    console.log("Fix: npm run n8n:import:mcp -- --apply --force  (inyecta .env al desplegar)");
   } else {
     console.log("\n✓ Sin errores nuevos en ejecuciones recientes");
   }

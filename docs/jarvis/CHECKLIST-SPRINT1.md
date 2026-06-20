@@ -1,23 +1,23 @@
 # Checklist Sprint 1 · n8n comercial ZENKAI
 
-Marcar en orden. Tiempo estimado restante: **15–20 min** (variables + Airtable automations).
+Marcar en orden. Tiempo estimado restante: **~10 min** (solo Airtable automations).
 
 ## Repo (local)
 
 - [x] `npm run n8n:checklist` — 4 JSON válidos
 - [x] `npm run jarvis:setup-sprint1` — campos Airtable OK
-- [x] Workflows refactorizados a `$vars.*` (sin credenciales vault · Slack opcional)
-- [x] `npm run n8n:import:mcp -- --apply --force` — 4 workflows recreados + publicados
+- [x] Workflows usan `$vars.*` en repo · secrets inyectados desde `.env` al importar MCP
+- [x] `npm run n8n:import:mcp -- --apply --force` — 4 workflows activos
 
 ## n8n Cloud
 
 - [x] MCP token válido · HTTP 200
-- [x] M-04 `jarvis-callback` — **active** · webhook 200
-- [x] M-03 `leads-qualify` — **active** · webhook 200
-- [x] M-02 `demo-autoreply` — **active** · webhook 200
+- [x] M-04 `jarvis-callback` — **success** · alerta fundador
+- [x] M-03 `leads-qualify` — **success** · score/etapa en Airtable
+- [x] M-02 `demo-autoreply` — **success** · `autoreply_sent=true`
 - [x] S-01 cron horario — **active**
-- [ ] **Variables** `$vars.*` → `npm run n8n:vars -- --apply` (requiere `N8N_API_KEY`) o `--print` + pegar en UI
-- [ ] `npm run n8n:smoke` — sin errores en ejecuciones
+- [x] Secrets vía import MCP (`.env` → literales en nodos; no requiere Variables UI)
+- [x] `npm run n8n:smoke` — webhooks OK
 
 ## Airtable VENTAS
 
@@ -27,13 +27,14 @@ Marcar en orden. Tiempo estimado restante: **15–20 min** (variables + Airtable
 
 ## Smoke test end-to-end
 
-- [ ] Variables n8n cargadas (sin error en Executions)
-- [ ] POST M-02 con `record_id` real + email
-- [ ] POST M-03 con `record_id` lead real
-- [ ] POST M-04 con `score: 8` → email/Slack fundador
+- [x] Executions **success** (sin `access to env vars denied` ni `v0//Leads`)
+- [x] POST M-02 con `record_id` real + email
+- [x] POST M-03 con `record_id` lead real
+- [x] POST M-04 con `score: 8` → email fundador
 - [ ] Demo en landing con email → Airtable automation → M-02
 
 ## Done
 
-- [ ] Fundador recibe alerta lead caliente (score ≥ 6)
-- [ ] SLA S-01 alerta una sola vez (`sla_alert_sent`)
+- [x] M-03 cualifica y escribe Airtable (M-04 si score ≥ 6)
+- [ ] Fundador recibe alerta lead caliente en producción real (score ≥ 6)
+- [ ] SLA S-01 alerta una sola vez (`sla_alert_sent`) — cron OK (fix merge secuencial + CREATED_TIME)

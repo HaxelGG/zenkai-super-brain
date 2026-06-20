@@ -2,7 +2,7 @@
  * Proveedores de media · ElevenLabs · HeyGen · Higgsfield
  */
 import { synthesizeJarvisSpeech } from "../../jarvis/elevenlabs-speak.js";
-import type { MediaJob, MediaProvider } from "./types.js";
+import type { MediaJob, MediaProvider } from "../types.js";
 
 export async function runVoicePipeline(text: string): Promise<MediaJob> {
   if (!process.env.ELEVENLABS_API_KEY?.trim()) {
