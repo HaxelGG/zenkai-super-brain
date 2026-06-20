@@ -18,18 +18,23 @@ Motor de automatización comercial ZENKAI. Importar en **n8n Cloud** (`zenkai-gr
 | Variable | Ejemplo |
 |----------|---------|
 | `AIRTABLE_BASE_VENTAS` | `appXXXXXXXX` |
+| `AIRTABLE_TOKEN` | `pat...` (PAT Airtable) |
+| `RESEND_API_KEY` | `re_...` |
+| `ANTHROPIC_API_KEY` | `sk-ant-...` |
 | `ZENKAI_FROM_EMAIL` | `ZENKAI <hola@zenkai.systems>` |
 | `ZENKAI_ALERT_EMAIL` | `hola@zenkai.systems` |
 | `SLACK_WEBHOOK_URL` | `https://hooks.slack.com/...` (opcional) |
 | `N8N_JARVIS_CALLBACK_URL` | `https://zenkai-growth-systems.app.n8n.cloud/webhook/jarvis-callback` |
 
-## Credenciales (mapear al importar)
+Los workflows Sprint 1 usan **`$env.*`** en headers HTTP — no requieren credenciales vault en n8n (solo estas variables).
+
+## Credenciales (legacy · ya no requeridas en Sprint 1 env-based)
 
 | Nombre sugerido | Tipo | Uso |
 |-----------------|------|-----|
-| Airtable PAT ZENKAI | Airtable Personal Access Token | M-02, M-03, S-01 |
-| Resend API Bearer | HTTP Header Auth · `Authorization: Bearer re_...` | M-02, M-04 |
-| Anthropic API Key | HTTP Header Auth · `x-api-key: sk-ant-...` | M-03 |
+| ~~Airtable PAT~~ | — | Reemplazado por `$env.AIRTABLE_TOKEN` |
+| ~~Resend API Bearer~~ | — | Reemplazado por `$env.RESEND_API_KEY` |
+| ~~Anthropic API Key~~ | — | Reemplazado por `$env.ANTHROPIC_API_KEY` |
 
 ## Checklist operativo
 
