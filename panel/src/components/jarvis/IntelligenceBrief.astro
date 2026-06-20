@@ -1,0 +1,83 @@
+---
+import type { IntelligenceBrief } from "../../lib/jarvis/types";
+import AgentAvatar from "./AgentAvatar.astro";
+import { JARVIS_ROUTES } from "../../lib/jarvis/config";
+
+interface Props {
+  brief: IntelligenceBrief;
+  compact?: boolean;
+}
+
+const { brief, compact = false } = Astro.props;
+
+const generated = new Date(brief.generatedAt).toLocaleString("es-CO", {
+  day: "numeric",
+  month: "short",
+  hour: "2-digit",
+  minute: "2-digit",
+});
+---
+
+<div class="jv-intel-brief">
+  <div class="flex items-center justify-between mb-4">
+    <div class="flex items-center gap-3">
+      <AgentAvatar agent={brief.agent} size="md" glow />
+      <div>
+        <div class="jv-label">Intelligence Brief · Semana {brief.weekNumber}</div>
+        <div class="jv-mono text-[10px] text-[var(--jv-text-dim)]">Generado {generated} · {brief.agent}</div>
+      </div>
+    </div>
+    {!compact && (
+      <a href={JARVIS_ROUTES.intel} class="jv-mono text-[10px] text-[var(--jv-cyan)] no-underline hover:underline shrink-0">
+        reporte completo →
+      </a>
+    )}
+  </div>
+
+  <h2 class="text-[15px] sm:text-base font-semibold text-[var(--jv-text)] leading-snug mb-3 jv-intel-headline">
+    {brief.headline}
+  </h2>
+
+  <p class="text-[13px] text-[var(--jv-text-muted)] leading-relaxed mb-4">{brief.summary}</p>
+
+  {!compact && (
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div>
+        <div class="jv-label text-[9px] mb-2 opacity-80">Insights</div>
+        <ul class="space-y-2">
+          {brief.insights.map((item) => (
+            <li class="text-[12px] text-[var(--jv-text-muted)] leading-snug flex gap-2">
+              <span class="text-[var(--jv-cyan)] shrink-0">▸</span>{item}
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div>
+        <div class="jv-label text-[9px] mb-2 text-[var(--jv-warning)] opacity-80">Riesgos</div>
+        <ul class="space-y-2">
+          {brief.risks.map((item) => (
+            <li class="text-[12px] text-[var(--jv-text-muted)] leading-snug flex gap-2">
+              <span class="text-[var(--jv-warning)] shrink-0">⚠</span>{item}
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div>
+        <div class="jv-label text-[9px] mb-2 text-[var(--jv-success)] opacity-80">Oportunidades</div>
+        <ul class="space-y-2">
+          {brief.opportunities.map((item) => (
+            <li class="text-[12px] text-[var(--jv-text-muted)] leading-snug flex gap-2">
+              <span class="text-[var(--jv-success)] shrink-0">◆</span>{item}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  )}
+</div>
+
+<style>
+  .jv-intel-headline {
+    text-shadow: 0 0 30px rgba(0, 212, 255, 0.15);
+  }
+</style>

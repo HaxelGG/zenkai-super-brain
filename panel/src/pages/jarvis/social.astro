@@ -1,6 +1,7 @@
 ---
 import JarvisLayout from "../../layouts/JarvisLayout.astro";
 import JarvisMobileNav from "../../components/jarvis/JarvisMobileNav.astro";
+import HudPanel from "../../components/jarvis/HudPanel.astro";
 import MetricCard from "../../components/jarvis/MetricCard.astro";
 import SocialChannelCard from "../../components/jarvis/SocialChannelCard.astro";
 import BarChart from "../../components/jarvis/BarChart.astro";
@@ -43,64 +44,60 @@ const calendarStatusStyle = {
     {socialKpis.map((kpi, i) => <MetricCard metric={kpi} index={i} />)}
   </section>
 
-  <section class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
-    {data.socialChannels.map((ch) => (
-      <SocialChannelCard channel={ch} />
+  <section class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 mb-8">
+    {data.socialChannels.map((ch, i) => (
+      <div data-jv-animate={String(i + 2)}><SocialChannelCard channel={ch} /></div>
     ))}
   </section>
 
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-    <div class="card-base p-6">
-      <h2 class="text-h3 mb-4">Top performers</h2>
-      <ul class="space-y-4">
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
+    <HudPanel animate={3}>
+      <h2 class="jv-display text-sm font-semibold text-[var(--jv-cyan)] mb-4">Top performers</h2>
+      <ul class="space-y-3">
         {data.topPosts.map((post, i) => (
-          <li class="flex gap-4 p-3 rounded-card bg-bg-muted/50">
-            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-accent to-[#1E6FFF] flex items-center justify-center text-white text-micro font-bold shrink-0">
-              #{i + 1}
+          <li class="flex gap-3 p-3 border border-[var(--jv-border)] rounded-sm hover:border-[var(--jv-cyan)] transition-colors">
+            <div class="w-8 h-8 rounded-sm bg-gradient-to-br from-[#1E6FFF] to-[#00D4FF] flex items-center justify-center text-[#030810] jv-display text-[10px] font-bold shrink-0">
+              {i + 1}
             </div>
             <div class="min-w-0 flex-1">
-              <p class="font-medium text-body leading-snug">{post.hook}</p>
-              <div class="mt-2 flex flex-wrap gap-3 text-micro text-text-muted">
+              <p class="font-medium text-[13px] leading-snug text-[var(--jv-text)]">{post.hook}</p>
+              <div class="mt-1.5 flex flex-wrap gap-2 jv-mono text-[10px] text-[var(--jv-text-dim)]">
                 <span>{post.platform.toUpperCase()}</span>
                 <span>{post.reach.toLocaleString("es-CO")} alcance</span>
-                <span>{post.engagement}% engagement</span>
+                <span>{post.engagement}% eng.</span>
                 {post.saves && <span>{post.saves} saves</span>}
               </div>
             </div>
           </li>
         ))}
       </ul>
-    </div>
+    </HudPanel>
 
-    <div class="card-base p-6">
-      <h2 class="text-h3 mb-4">Calendario · próximos 7 días</h2>
-      <ul class="space-y-3">
+    <HudPanel animate={4}>
+      <h2 class="jv-display text-sm font-semibold text-[var(--jv-cyan)] mb-4">Calendario · 7 días</h2>
+      <ul class="space-y-2.5">
         {data.contentCalendar.map((item) => (
-          <li class="flex items-center gap-3 text-small">
-            <time class="font-mono text-micro text-text-faint w-16 shrink-0">
+          <li class="flex items-center gap-3 text-[13px] py-1.5 border-b border-[var(--jv-border)] last:border-0">
+            <time class="jv-mono text-[10px] text-[var(--jv-cyan)] w-14 shrink-0">
               {new Date(item.date + "T12:00:00").toLocaleDateString("es-CO", { day: "numeric", month: "short" })}
             </time>
-            <span class="w-8 text-center text-micro font-bold text-text-muted">{platformLabels[item.platform]}</span>
-            <span class="flex-1 truncate">{item.title}</span>
-            <span class:list={["text-micro px-2 py-0.5 rounded-full shrink-0", calendarStatusStyle[item.status]]}>
-              {item.status}
-            </span>
+            <span class="jv-display text-[9px] w-6 text-[var(--jv-text-dim)]">{platformLabels[item.platform]}</span>
+            <span class="flex-1 truncate text-[var(--jv-text-muted)]">{item.title}</span>
+            <span class:list={["jv-mono text-[9px] px-1.5 py-0.5 rounded-sm shrink-0", calendarStatusStyle[item.status]]}>{item.status}</span>
           </li>
         ))}
       </ul>
-    </div>
+    </HudPanel>
   </div>
 
-  <div class="card-base p-6">
+  <HudPanel animate={5}>
     <BarChart
-      title="Alcance por canal · tendencia 7 días (último valor)"
-      data={data.socialChannels
-        .filter((c) => c.platform !== "meta_ads")
-        .map((c) => ({
-          label: c.label.slice(0, 2).toUpperCase(),
-          value: c.reach,
-        }))}
-      color="#1E6FFF"
+      title="Alcance por canal"
+      data={data.socialChannels.filter((c) => c.platform !== "meta_ads").map((c) => ({
+        label: c.label.slice(0, 2).toUpperCase(),
+        value: c.reach,
+      }))}
+      color="#00D4FF"
     />
-  </div>
+  </HudPanel>
 </JarvisLayout>

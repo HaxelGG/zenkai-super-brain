@@ -29,6 +29,7 @@ npm run preview # sirve dist/ localmente
 Rutas internas (local y producción):
 
 - `/jarvis` — Command Center (HUD · estilo Iron Man)
+- `/jarvis/intel` — Intelligence Brief · reporte ZEUS semanal
 - `/jarvis/agentes` — 12 agentes IA · estado en tiempo real
 - `/jarvis/pipeline` — CRM · embudo de ventas
 - `/jarvis/clientes` — Portfolio · health score

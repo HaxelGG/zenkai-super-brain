@@ -2,6 +2,7 @@
 import "../styles/global.css";
 import "../styles/jarvis.css";
 import JarvisSidebar from "../components/jarvis/JarvisSidebar.astro";
+import JarvisBoot from "../components/jarvis/JarvisBoot.astro";
 import { JARVIS_URL } from "../lib/jarvis/config";
 
 interface Props {
@@ -22,10 +23,11 @@ const canonical = new URL(Astro.url.pathname, JARVIS_URL).href;
     <meta name="robots" content="noindex, nofollow" />
     <meta name="theme-color" content="#030810" />
     <link rel="canonical" href={canonical} />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href="/jarvis-favicon.svg" />
     <title>{title} · JARVIS · ZENKAI</title>
   </head>
   <body>
+    <JarvisBoot />
     <div class="jarvis-scanline" aria-hidden="true"></div>
     <div class="jarvis-shell flex min-h-screen">
       <JarvisSidebar />

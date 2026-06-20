@@ -447,3 +447,86 @@
 /* Chart overrides */
 .jv-chart text { fill: var(--jv-text-muted) !important; }
 .jv-chart line { stroke: var(--jv-border) !important; }
+
+/* Scrollbar */
+.jarvis-app ::-webkit-scrollbar { width: 6px; height: 6px; }
+.jarvis-app ::-webkit-scrollbar-track { background: rgba(0, 212, 255, 0.03); }
+.jarvis-app ::-webkit-scrollbar-thumb { background: rgba(0, 212, 255, 0.2); border-radius: 3px; }
+.jarvis-app ::-webkit-scrollbar-thumb:hover { background: rgba(0, 212, 255, 0.35); }
+
+/* Boot sequence */
+.jv-boot {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: #030810;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.6s ease, visibility 0.6s;
+}
+
+.jv-boot-out {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.jv-boot-inner {
+  text-align: center;
+  padding: 2rem;
+}
+
+.jv-boot-reactor {
+  margin: 0 auto;
+}
+
+.jv-boot-line {
+  font-family: "JetBrains Mono Variable", monospace;
+  font-size: 11px;
+  color: var(--jv-text-dim);
+  opacity: 0;
+  animation: jv-boot-line 0.4s ease forwards;
+}
+
+@keyframes jv-boot-line {
+  from { opacity: 0; transform: translateX(-8px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.jv-boot-progress {
+  width: 200px;
+  height: 2px;
+  background: rgba(0, 212, 255, 0.1);
+  margin: 0 auto;
+  border-radius: 1px;
+  overflow: hidden;
+}
+
+.jv-boot-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--jv-blue), var(--jv-cyan));
+  animation: jv-boot-progress 2s ease-out forwards;
+  box-shadow: 0 0 10px var(--jv-glow);
+}
+
+@keyframes jv-boot-progress {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+/* Intel page sections */
+.jv-intel-section {
+  border-left: 2px solid var(--jv-border);
+  padding-left: 1rem;
+}
+
+.jv-intel-section:hover {
+  border-left-color: var(--jv-cyan);
+}
+
+/* Avatar glow */
+.jv-avatar-glow {
+  box-shadow: 0 0 12px color-mix(in srgb, var(--avatar-color) 50%, transparent);
+  outline: 1px solid color-mix(in srgb, var(--avatar-color) 30%, transparent);
+}

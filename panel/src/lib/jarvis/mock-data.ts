@@ -621,4 +621,36 @@ export const MOCK_JARVIS_DATA: JarvisData = {
       { model: "Opus 4.7", pct: 6, color: "#FFB800" },
     ],
   },
+
+  intelligence: {
+    headline: "Run rate en rampa · pipeline saludable · capacidad al límite",
+    summary:
+      "Semana 25 muestra aceleración en inbound orgánico (+12% IG) y un pipeline ponderado de $45K que cubre el 90% del objetivo trimestral. El cuello de botella principal es capacidad humana (78%) — ZEUS recomienda evaluar freelancer comercial antes de julio. La propuesta clínica dental Medellín ($8.5K) es el cierre más probable esta semana.",
+    insights: [
+      "ROAS Meta Ads en e-commerce superó 3x por tercera semana consecutiva — replicar creativos en sector salud.",
+      "LinkedIn generó 2 leads inbound sin paid — el caso de estudio GJS debe publicarse esta semana.",
+      "ECHO procesó 210 ops con Haiku a $0.02/call — escalar FAQ bot reduce carga humana 40%.",
+    ],
+    risks: [
+      "Cuenta por cobrar E-commerce Cali · $2.4K · 34 días — riesgo de cash flow junio.",
+      "Make.com en estado degraded — latencia 1.2s puede afectar SLA leads web.",
+    ],
+    opportunities: [
+      "Clínica dental Medellín cierra esta semana → $8.5K setup + $1.5K/mes retainer.",
+      "Restaurante Madrid en propuesta — mercado España ×1.8 pricing.",
+      "Sector salud trending en Meta CPM — ventana de 2 semanas para ads.",
+    ],
+    generatedAt: "2026-06-20T09:00:00",
+    agent: "ZEUS",
+    weekNumber: 25,
+  },
+
+  sectorPerformance: [
+    { sector: "E-commerce", leads: 18, revenue: 11700, growth: 15 },
+    { sector: "Salud", leads: 12, revenue: 8500, growth: 28 },
+    { sector: "Restaurantes", leads: 6, revenue: 0, growth: 8 },
+    { sector: "Inmobiliaria", leads: 4, revenue: 0, growth: -5 },
+    { sector: "Startups", leads: 5, revenue: 0, growth: 22 },
+    { sector: "Servicios Prof.", leads: 3, revenue: 3200, growth: 10 },
+  ],
 };

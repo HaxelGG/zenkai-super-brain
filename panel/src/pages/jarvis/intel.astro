@@ -1,0 +1,90 @@
+---
+import JarvisLayout from "../../layouts/JarvisLayout.astro";
+import JarvisMobileNav from "../../components/jarvis/JarvisMobileNav.astro";
+import HudPanel from "../../components/jarvis/HudPanel.astro";
+import IntelligenceBrief from "../../components/jarvis/IntelligenceBrief.astro";
+import SectorChart from "../../components/jarvis/SectorChart.astro";
+import DualBarChart from "../../components/jarvis/DualBarChart.astro";
+import MetricCard from "../../components/jarvis/MetricCard.astro";
+import { getJarvisData } from "../../lib/jarvis";
+
+const data = await getJarvisData();
+const intel = data.intelligence;
+const f = data.finance;
+
+const reportKpis = [
+  { id: "r1", label: "Revenue semana", value: `$${f.revenueWeek.toLocaleString("en-US")}`, caption: "USD" },
+  { id: "r2", label: "Pipeline", value: `$${(f.pipelineWeighted / 1000).toFixed(0)}K`, caption: "ponderado" },
+  { id: "r3", label: "Leads semana", value: "8", caption: "2 cualificados", delta: { value: 2, label: "vs ant.", direction: "up" as const } },
+  { id: "r4", label: "Capacidad", value: "78%", caption: "semáforo 🟡" },
+];
+---
+
+<JarvisLayout title="Intel Brief">
+  <JarvisMobileNav />
+
+  <header class="mb-8" data-jv-animate="1">
+    <div class="jv-label mb-2">ZEUS · Opus 4.7 · Reporte Interno</div>
+    <h1 class="jv-display text-2xl sm:text-3xl font-bold">Intelligence Brief</h1>
+    <p class="mt-2 jv-mono text-[12px] text-[var(--jv-text-muted)]">
+      Semana {intel.weekNumber} · Análisis estratégico generado por {intel.agent}
+    </p>
+  </header>
+
+  <section class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+    {reportKpis.map((k, i) => <MetricCard metric={k} index={i} />)}
+  </section>
+
+  <HudPanel class="mb-6" padding="lg" animate={2}>
+    <IntelligenceBrief brief={intel} />
+  </HudPanel>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-6">
+    <HudPanel animate={3}>
+      <h2 class="jv-display text-sm font-semibold text-[var(--jv-cyan)] mb-4">Leads vs Cierres · 8 semanas</h2>
+      <DualBarChart data={data.weeklyLeads} />
+    </HudPanel>
+
+    <HudPanel animate={4}>
+      <h2 class="jv-display text-sm font-semibold text-[var(--jv-cyan)] mb-4">Performance por sector</h2>
+      <SectorChart sectors={data.sectorPerformance} />
+    </HudPanel>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+    <HudPanel animate={5}>
+      <h2 class="jv-display text-sm font-semibold text-[var(--jv-cyan)] mb-4">Prioridades</h2>
+      <ol class="space-y-3">
+        {data.priorities.map((p, i) => (
+          <li class="jv-intel-section text-[13px] text-[var(--jv-text-muted)] leading-snug flex gap-2">
+            <span class="jv-display text-[10px] text-[var(--jv-cyan)] shrink-0">{i + 1}.</span>{p}
+          </li>
+        ))}
+      </ol>
+    </HudPanel>
+
+    <HudPanel animate={6}>
+      <h2 class="jv-display text-sm font-semibold text-[var(--jv-warning)] mb-4">Alertas activas</h2>
+      <ul class="space-y-2">
+        {data.alerts.map((a) => (
+          <li class="text-[12px] text-[var(--jv-text-muted)] leading-snug pl-3 border-l-2 border-[var(--jv-warning)]">{a.message}</li>
+        ))}
+      </ul>
+    </HudPanel>
+
+    <HudPanel animate={7}>
+      <h2 class="jv-display text-sm font-semibold text-[var(--jv-success)] mb-4">Proyectos · snapshot</h2>
+      <ul class="space-y-3">
+        {data.projects.map((p) => (
+          <li>
+            <div class="flex justify-between text-[13px] mb-1">
+              <span class="font-medium">{p.client}</span>
+              <span class="jv-mono text-[10px] text-[var(--jv-text-dim)]">{p.progress}%</span>
+            </div>
+            <div class="jv-progress-bar h-1"><div class="jv-progress-fill" style={`width:${p.progress}%`} /></div>
+          </li>
+        ))}
+      </ul>
+    </HudPanel>
+  </div>
+</JarvisLayout>

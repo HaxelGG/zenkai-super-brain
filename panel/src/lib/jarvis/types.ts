@@ -230,4 +230,24 @@ export type JarvisData = {
   systemConnections: SystemConnection[];
   clients: ClientOverview[];
   aiUsage: AiUsage;
+  intelligence: IntelligenceBrief;
+  sectorPerformance: SectorPerformance[];
+};
+
+export type IntelligenceBrief = {
+  headline: string;
+  summary: string;
+  insights: string[];
+  risks: string[];
+  opportunities: string[];
+  generatedAt: string;
+  agent: AgentId;
+  weekNumber: number;
+};
+
+export type SectorPerformance = {
+  sector: string;
+  leads: number;
+  revenue: number;
+  growth: number;
 };

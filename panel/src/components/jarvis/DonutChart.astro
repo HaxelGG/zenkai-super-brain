@@ -23,31 +23,23 @@ const arcs = segments.map((seg) => {
 });
 ---
 
-<div class="jarvis-chart">
-  {title && <h3 class="text-small font-semibold mb-3">{title}</h3>}
+<div class="jv-chart">
+  {title && <h3 class="jv-label text-[10px] mb-3 opacity-80">{title}</h3>}
   <div class="flex items-center gap-4">
     <svg width={size} height={size} viewBox="0 0 100 100" role="img" aria-label={title}>
-      <circle cx={cx} cy={cy} r={r} fill="none" stroke="rgb(var(--border))" stroke-width="12" />
+      <circle cx={cx} cy={cy} r={r} fill="none" stroke="rgba(0,212,255,0.1)" stroke-width="12" />
       {arcs.map((arc) => (
-        <circle
-          cx={cx}
-          cy={cy}
-          r={r}
-          fill="none"
-          stroke={arc.color}
-          stroke-width="12"
-          stroke-dasharray={`${arc.dash} ${circumference - arc.dash}`}
-          stroke-dashoffset={-arc.offset}
-          class="transition-all"
-        />
+        <circle cx={cx} cy={cy} r={r} fill="none" stroke={arc.color} stroke-width="12"
+          stroke-dasharray={`${arc.dash} ${circumference - arc.dash}`} stroke-dashoffset={-arc.offset}
+          style="transition: stroke-dashoffset 1s ease" />
       ))}
     </svg>
-    <ul class="space-y-1.5 text-small">
+    <ul class="space-y-1.5 text-[12px] flex-1">
       {arcs.map((arc) => (
         <li class="flex items-center gap-2">
-          <span class="w-2.5 h-2.5 rounded-full shrink-0" style={`background: ${arc.color}`} />
-          <span class="text-text-muted">{arc.label}</span>
-          <span class="font-mono font-medium ml-auto">${(arc.amount / 1000).toFixed(1)}K</span>
+          <span class="w-2 h-2 rounded-full shrink-0" style={`background: ${arc.color}`} />
+          <span class="text-[var(--jv-text-muted)]">{arc.label}</span>
+          <span class="jv-mono font-medium ml-auto text-[var(--jv-cyan)]">${(arc.amount / 1000).toFixed(1)}K</span>
         </li>
       ))}
     </ul>

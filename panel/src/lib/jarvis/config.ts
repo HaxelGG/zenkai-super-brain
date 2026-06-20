@@ -17,11 +17,13 @@ export const JARVIS_ROUTES = {
   pipeline: `${JARVIS_BASE}/pipeline`,
   clientes: `${JARVIS_BASE}/clientes`,
   sistemas: `${JARVIS_BASE}/sistemas`,
+  intel: `${JARVIS_BASE}/intel`,
 } as const;
 
 /** Nav items for sidebar / mobile */
 export const JARVIS_NAV = [
   { href: JARVIS_ROUTES.home, label: "Command Center", icon: "home" },
+  { href: JARVIS_ROUTES.intel, label: "Intel Brief", icon: "intel" },
   { href: JARVIS_ROUTES.agentes, label: "Agentes IA", icon: "agents" },
   { href: JARVIS_ROUTES.pipeline, label: "Pipeline", icon: "pipeline" },
   { href: JARVIS_ROUTES.clientes, label: "Clientes", icon: "clients" },

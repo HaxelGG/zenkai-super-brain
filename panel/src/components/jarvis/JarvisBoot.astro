@@ -1,0 +1,26 @@
+<div id="jv-boot" class="jv-boot" aria-hidden="true">
+  <div class="jv-boot-inner">
+    <div class="arc-reactor arc-reactor-lg jv-boot-reactor"></div>
+    <div class="jv-display text-lg font-bold text-[var(--jv-cyan)] mt-6 tracking-widest">JARVIS</div>
+    <div class="jv-boot-lines mt-4 space-y-1">
+      <div class="jv-boot-line">Initializing neural network...</div>
+      <div class="jv-boot-line" style="animation-delay: 0.3s">Loading 12 Master Agents...</div>
+      <div class="jv-boot-line" style="animation-delay: 0.6s">Syncing ZENKAI ops data...</div>
+      <div class="jv-boot-line" style="animation-delay: 0.9s">Systems online.</div>
+    </div>
+    <div class="jv-boot-progress mt-6">
+      <div class="jv-boot-progress-fill"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const boot = document.getElementById("jv-boot");
+  if (boot && !sessionStorage.getItem("jv-booted")) {
+    sessionStorage.setItem("jv-booted", "1");
+    setTimeout(() => boot.classList.add("jv-boot-out"), 2200);
+    setTimeout(() => boot.remove(), 2800);
+  } else if (boot) {
+    boot.remove();
+  }
+</script>
