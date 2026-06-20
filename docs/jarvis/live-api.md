@@ -9,6 +9,23 @@ Endpoints serverless en Vercel para refrescar datos sin redeploy del panel está
 | `GET /api/jarvis/crm` | Leads + clientes activos desde Airtable | 45s |
 | `GET /api/jarvis/finance` | Revenue YTD, pipeline ponderado, run rate | 120s |
 | `GET /api/jarvis/social` | Instagram insights + Meta Ads (7d) | 5min |
+| `POST /api/jarvis/run` | Orquestador · instrucción voz/texto → acción + respuesta | no-store |
+| `POST /api/jarvis/speak` | TTS ElevenLabs voz JARVIS-ZENKAI | no-store |
+| `GET /api/jarvis/runs` | Placeholder · historial en localStorage del panel | 0 |
+
+## Orquestador (voz)
+
+- Wake word: «Jarvis despierta» / «Jarvis wake up» (Chrome/Edge)
+- Clic en orb → activa escucha continua · doble clic → comando directo
+- Clic derecho en orb → panel de voz (API key · transcript · runs)
+- Auth: `Authorization: Bearer ZENKAI_API_KEY` **o** origen dashboard
+- TTS: ElevenLabs si `ELEVENLABS_API_KEY` · fallback `speechSynthesis`
+
+```bash
+ELEVENLABS_API_KEY=sk_...
+ELEVENLABS_VOICE_ID=FqHzPCWiAfnd8t6A5LN4
+ZENKAI_API_KEY=...
+```
 
 ## Variables requeridas (Vercel · zenkaibrain)
 
