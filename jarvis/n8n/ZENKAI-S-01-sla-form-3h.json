@@ -52,9 +52,9 @@
         "table": {
           "__rl": true,
           "mode": "name",
-          "value": "leads"
+          "value": "Leads"
         },
-        "filterByFormula": "AND({respondido_at}=BLANK(), OR({sla_alert_sent}=FALSE(), {sla_alert_sent}=BLANK()), IS_BEFORE({created_at}, DATEADD(NOW(), -3, 'hours')))",
+        "filterByFormula": "AND({respondido_at}=BLANK(), OR({sla_alert_sent}=FALSE(), {sla_alert_sent}=BLANK()), IS_BEFORE({Fecha Entrada}, DATEADD(NOW(), -3, 'hours')))",
         "options": {}
       },
       "id": "d1b2c3d4-e5f6-7890-abcd-ef1234560303",
@@ -71,7 +71,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const demos = $('Demos SLA vencido').all().map(i => ({ ...i.json, _table: 'demos' }));\nconst leads = $('Leads SLA vencido').all().map(i => ({ ...i.json, _table: 'leads' }));\nconst all = [...demos, ...leads];\nif (!all.length) return [{ json: { empty: true } }];\nreturn all.map(r => ({ json: r }));"
+        "jsCode": "const demos = $('Demos SLA vencido').all().map(i => ({ ...i.json, _table: 'demos' }));\nconst leads = $('Leads SLA vencido').all().map(i => ({ ...i.json, _table: 'Leads' }));\nconst all = [...demos, ...leads];\nif (!all.length) return [{ json: { empty: true } }];\nreturn all.map(r => ({ json: r }));"
       },
       "id": "d1b2c3d4-e5f6-7890-abcd-ef1234560304",
       "name": "Merge Records",
