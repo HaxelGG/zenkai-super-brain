@@ -312,3 +312,5 @@ ZENKAI **no reemplaza** los skills del plugin `superpowers`. Los integra. Mapeo 
 
 ZENKAI Growth Systems · Super Cerebro v2.0 · Mayo 2026
 "La plataforma primero. El servicio después. Dos rutas siempre."
+
+@AGENTS.md

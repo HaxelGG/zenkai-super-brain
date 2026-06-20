@@ -11,8 +11,18 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "verbatimModuleSyntax": false,
-    "types": ["node"]
+    "types": [
+      "node"
+    ]
   },
-  "include": ["scripts/**/*.ts", "api/**/*.ts"],
-  "exclude": ["node_modules", "panel", "dist"]
+  "include": [
+    "scripts/**/*.ts",
+    "api/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "panel",
+    "dist"
+  ],
+  "extends": "./tsconfig.wmill.json"
 }

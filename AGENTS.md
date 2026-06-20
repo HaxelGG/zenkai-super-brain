@@ -38,3 +38,5 @@ This is an N3–N4 program (per `CLAUDE.md` §3); built incrementally as self-co
 - **Pending (need design + provider keys):** any Cursor-style agentic features. Add each as its own `web/src/lib/*` module + `/api/*` route + mocked test, gated behind its own env var.
 
 **Provider keys/accounts cannot be created by the agent**, and the agent **cannot create new GitHub repos or Vercel/Airtable/n8n connections** — those need each provider's dashboard and are user-only external actions. The git remote token is scoped to this repo only; `gh` is read-only. The only credential generated in-repo is the app's own `ZENKAI_API_KEY` (random bearer token; set it as a secret, never commit it).
+
+@AGENTS.wmill.md
