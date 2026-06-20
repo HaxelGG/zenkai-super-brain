@@ -63,6 +63,11 @@ export function renderBlock(block: OutputBlock): HTMLElement {
     case "error":
       row.append(el("div", "jvt-error-text", block.text));
       break;
+    default: {
+      // Exhaustividad: si se agrega una variante a OutputBlock sin su case, esto es error de tipos.
+      const _exhaustive: never = block;
+      return _exhaustive;
+    }
   }
   return row;
 }

@@ -2,6 +2,9 @@ import { parseInput } from "./parse-input";
 import { SLASH_COMMANDS, resolveCommand, filterCommands, type SlashCommand } from "./slash-commands";
 import { renderBlock, type OutputBlock } from "./render";
 
+// Subconjunto estructural del JarvisRunResult del orquestador
+// (fuente de verdad: scripts/jarvis/orchestrator.ts). Mantener en sync si
+// cambia la respuesta de /api/jarvis/run.
 type JarvisRunResult = {
   reply: string;
   speech?: string;
