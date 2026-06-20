@@ -1,0 +1,60 @@
+---
+interface Props {
+  title?: string;
+  series: { label: string; actual?: number; projected?: number }[];
+  height?: number;
+}
+
+const { title, series, height = 180 } = Astro.props;
+
+const maxVal = Math.max(...series.flatMap((s) => [s.actual ?? 0, s.projected ?? 0]), 1);
+const step = 36;
+const chartW = series.length * step + 20;
+const chartH = height - 36;
+const baseline = chartH + 8;
+
+function y(val: number): number {
+  return baseline - (val / maxVal) * (chartH - 10);
+}
+---
+
+<div class="jarvis-chart">
+  {title && <h3 class="text-small font-semibold mb-3">{title}</h3>}
+  <svg width="100%" viewBox={`0 0 ${chartW} ${height}`} preserveAspectRatio="xMidYMid meet" role="img" aria-label={title}>
+    <line x1="10" y1={baseline} x2={chartW - 10} y2={baseline} stroke="rgb(var(--border))" stroke-width="1" />
+    {series.map((s, i) => {
+      const x = 16 + i * step;
+      const hasActual = s.actual !== undefined && s.actual > 0;
+      return (
+        <g>
+          {s.projected !== undefined && (
+            <circle cx={x} cy={y(s.projected)} r="3" fill="none" stroke="#1E6FFF" stroke-width="1.5" opacity="0.5" />
+          )}
+          {hasActual && (
+            <>
+              {i > 0 && series[i - 1].actual !== undefined && series[i - 1].actual! > 0 && (
+                <line
+                  x1={16 + (i - 1) * step}
+                  y1={y(series[i - 1].actual!)}
+                  x2={x}
+                  y2={y(s.actual!)}
+                  stroke="#4F46E5"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                />
+              )}
+              <circle cx={x} cy={y(s.actual!)} r="4" fill="#4F46E5" />
+            </>
+          )}
+          <text x={x} y={height - 6} text-anchor="middle" font-size="9" fill="rgb(var(--text-faint))" font-family="Inter Variable, sans-serif">
+            {s.label}
+          </text>
+        </g>
+      );
+    })}
+  </svg>
+  <div class="flex gap-4 mt-2 text-micro text-text-faint">
+    <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-accent" /> Actual</span>
+    <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full border border-[#1E6FFF]" /> Proyección</span>
+  </div>
+</div>

@@ -1,0 +1,69 @@
+---
+import type { KpiMetric } from "../../lib/jarvis/types";
+
+interface Props {
+  metric: KpiMetric;
+}
+
+const { metric } = Astro.props;
+
+const deltaColors = {
+  up: "text-success",
+  down: "text-danger",
+  flat: "text-text-faint",
+};
+
+const deltaPrefix = {
+  up: "↑",
+  down: "↓",
+  flat: "→",
+};
+
+function sparklinePath(values: number[], w: number, h: number): string {
+  if (values.length < 2) return "";
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const range = max - min || 1;
+  const step = w / (values.length - 1);
+  return values
+    .map((v, i) => {
+      const x = i * step;
+      const y = h - ((v - min) / range) * (h - 4) - 2;
+      return `${i === 0 ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`;
+    })
+    .join(" ");
+}
+---
+
+<div class="jarvis-metric-card card-base p-4 sm:p-5 relative overflow-hidden group">
+  <div class="absolute inset-0 bg-gradient-to-br from-accent-soft/0 to-accent-soft/40 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+  <div class="relative">
+    <div class="label-micro">{metric.label}</div>
+    <div class="mt-1 flex items-end justify-between gap-2">
+      <div class="text-[26px] sm:text-[28px] font-semibold tracking-tight leading-none font-mono text-text">
+        {metric.value}
+      </div>
+      {metric.sparkline && metric.sparkline.length > 1 && (
+        <svg width="56" height="24" viewBox="0 0 56 24" class="shrink-0 opacity-60" aria-hidden="true">
+          <path
+            d={sparklinePath(metric.sparkline, 56, 24)}
+            fill="none"
+            stroke="rgb(var(--accent))"
+            stroke-width="1.5"
+            stroke-linecap="round"
+          />
+        </svg>
+      )}
+    </div>
+    <div class="mt-2 flex items-center justify-between gap-2">
+      {metric.caption && (
+        <span class="text-micro text-text-faint normal-case tracking-normal">{metric.caption}</span>
+      )}
+      {metric.delta && (
+        <span class:list={["text-micro font-medium", deltaColors[metric.delta.direction]]}>
+          {deltaPrefix[metric.delta.direction]} {metric.delta.value}{metric.delta.label.includes("pp") ? "pp" : "%"} {metric.delta.label.replace("pp", "").trim()}
+        </span>
+      )}
+    </div>
+  </div>
+</div>

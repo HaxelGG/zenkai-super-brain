@@ -1,0 +1,28 @@
+---
+import type { Semaphore } from "../../lib/jarvis/types";
+
+interface Props {
+  status: Semaphore;
+  label?: string;
+  size?: "sm" | "md";
+}
+
+const { status, label, size = "md" } = Astro.props;
+
+const config = {
+  green: { emoji: "🟢", text: "En curso", class: "bg-emerald-50 text-success border-emerald-200" },
+  yellow: { emoji: "🟡", text: "Atención", class: "bg-amber-50 text-warning border-amber-200" },
+  red: { emoji: "🔴", text: "Crítico", class: "bg-red-50 text-danger border-red-200" },
+}[status];
+---
+
+<span
+  class:list={[
+    "inline-flex items-center gap-1.5 rounded-full border font-medium",
+    config.class,
+    size === "sm" ? "px-2 py-0.5 text-micro" : "px-2.5 py-1 text-small",
+  ]}
+>
+  <span aria-hidden="true">{config.emoji}</span>
+  {label ?? config.text}
+</span>

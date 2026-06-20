@@ -1,0 +1,226 @@
+---
+import JarvisLayout from "../../layouts/JarvisLayout.astro";
+import MetricCard from "../../components/jarvis/MetricCard.astro";
+import SemaphoreBadge from "../../components/jarvis/SemaphoreBadge.astro";
+import TaskCard from "../../components/jarvis/TaskCard.astro";
+import AlertItem from "../../components/jarvis/AlertItem.astro";
+import SocialChannelCard from "../../components/jarvis/SocialChannelCard.astro";
+import ProgressRing from "../../components/jarvis/ProgressRing.astro";
+import BarChart from "../../components/jarvis/BarChart.astro";
+import LineChart from "../../components/jarvis/LineChart.astro";
+import { getJarvisData } from "../../lib/jarvis";
+
+const data = await getJarvisData();
+
+const pendingTasks = data.tasks.filter((t) => t.status === "pending");
+const workingTasks = data.tasks.filter((t) => t.status === "working");
+const doneThisWeek = data.tasks.filter((t) => t.status === "done");
+
+const riskEmoji = { green: "🟢", yellow: "🟡", red: "🔴" };
+
+const navItems = [
+  { href: "/jarvis", label: "Command Center" },
+  { href: "/jarvis/finanzas", label: "Finanzas" },
+  { href: "/jarvis/social", label: "Social" },
+  { href: "/jarvis/tareas", label: "Tareas" },
+  { href: "/jarvis/goals", label: "Goals" },
+];
+const path = Astro.url.pathname;
+---
+
+<JarvisLayout title="Command Center">
+  <nav class="lg:hidden flex gap-1 overflow-x-auto pb-4 mb-2 -mx-1 px-1">
+    {navItems.map((item) => (
+      <a
+        href={item.href}
+        class:list={[
+          "shrink-0 px-3 py-1.5 rounded-full text-small no-underline transition-colors",
+          (item.href === "/jarvis" ? path === "/jarvis" || path === "/jarvis/" : path.startsWith(item.href))
+            ? "bg-accent text-white font-medium"
+            : "bg-bg-muted text-text-muted",
+        ]}
+      >
+        {item.label}
+      </a>
+    ))}
+  </nav>
+
+  <!-- Hero -->
+  <header class="jarvis-hero card-base p-6 sm:p-8 mb-6 bg-gradient-to-br from-bg via-bg to-accent-soft/30">
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+      <div>
+        <div class="label-micro mb-2">ZENKAI · Ops Center</div>
+        <h1 class="text-h1">{data.greeting}</h1>
+        <p class="mt-2 text-body text-text-muted">{data.dateLabel}</p>
+        <div class="mt-4">
+          <SemaphoreBadge status={data.agencySemaphore} label="Estado agencia" />
+        </div>
+      </div>
+      <ProgressRing
+        current={data.finance.revenueYtd}
+        target={data.finance.goal2026}
+        label="Meta $100K USD 2026"
+        format="usd"
+      />
+    </div>
+  </header>
+
+  <!-- KPI Strip -->
+  <section class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
+    {data.kpis.map((kpi) => (
+      <MetricCard metric={kpi} />
+    ))}
+  </section>
+
+  <!-- Bento Grid -->
+  <div class="grid grid-cols-1 xl:grid-cols-12 gap-4 sm:gap-6">
+
+    <!-- Tasks column -->
+    <section class="xl:col-span-3 space-y-4">
+      <div class="card-base p-5">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-h3">Tareas</h2>
+          <a href="/jarvis/tareas" class="text-micro text-accent no-underline hover:underline">Ver todo →</a>
+        </div>
+
+        <div class="mb-4">
+          <div class="flex items-center justify-between mb-2">
+            <span class="label-micro">Pendientes</span>
+            <span class="text-micro font-mono text-text-faint">{pendingTasks.length}</span>
+          </div>
+          <div class="space-y-2">
+            {pendingTasks.slice(0, 3).map((t) => <TaskCard task={t} compact />)}
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <div class="flex items-center justify-between mb-2">
+            <span class="label-micro">Working now</span>
+            <span class="text-micro font-mono text-text-faint">{workingTasks.length}</span>
+          </div>
+          <div class="space-y-2">
+            {workingTasks.slice(0, 3).map((t) => <TaskCard task={t} compact />)}
+          </div>
+        </div>
+
+        <div class="pt-3 border-t border-border text-micro text-text-faint">
+          ✅ {doneThisWeek.length} completadas esta semana
+        </div>
+      </div>
+    </section>
+
+    <!-- Performance center -->
+    <section class="xl:col-span-5 space-y-4">
+      <div class="card-base p-5">
+        <h2 class="text-h3 mb-4">Rendimiento de agencia</h2>
+        <LineChart
+          title="Revenue mensual 2026 (USD)"
+          series={data.finance.monthlyRevenue.map((m) => ({
+            label: m.month,
+            actual: m.actual,
+            projected: m.projected,
+          }))}
+        />
+      </div>
+
+      <div class="card-base p-5">
+        <BarChart
+          title="Leads vs Cierres · últimas 8 semanas"
+          data={data.weeklyLeads.flatMap((w) => [
+            { label: w.week, value: w.leads },
+          ])}
+          color="#4F46E5"
+        />
+        <div class="mt-2 flex gap-4 text-micro text-text-faint">
+          <span>Barras = leads semanales</span>
+        </div>
+      </div>
+
+      <div class="card-base p-5 overflow-x-auto">
+        <h3 class="text-small font-semibold mb-3">Proyectos activos</h3>
+        <table class="w-full text-small">
+          <thead>
+            <tr class="text-left text-micro text-text-faint border-b border-border">
+              <th class="pb-2 font-medium">Cliente</th>
+              <th class="pb-2 font-medium">Estado</th>
+              <th class="pb-2 font-medium">Avance</th>
+              <th class="pb-2 font-medium">Riesgo</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.projects.map((p) => (
+              <tr class="border-b border-border last:border-0">
+                <td class="py-2.5 font-medium">{p.client}</td>
+                <td class="py-2.5 text-text-muted">{p.status}</td>
+                <td class="py-2.5">
+                  <div class="flex items-center gap-2">
+                    <div class="w-16 h-1.5 bg-bg-muted rounded-full overflow-hidden">
+                      <div class="h-full bg-accent rounded-full" style={`width: ${p.progress}%`} />
+                    </div>
+                    <span class="font-mono text-micro">{p.progress}%</span>
+                  </div>
+                </td>
+                <td class="py-2.5">{riskEmoji[p.risk]}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Social column -->
+    <section class="xl:col-span-4 space-y-4">
+      <div class="card-base p-5">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-h3">Social & Engagement</h2>
+          <a href="/jarvis/social" class="text-micro text-accent no-underline hover:underline">Detalle →</a>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-3">
+          {data.socialChannels.map((ch) => (
+            <SocialChannelCard channel={ch} />
+          ))}
+        </div>
+      </div>
+
+      <div class="card-base p-5">
+        <h3 class="text-small font-semibold mb-3">Top posts de la semana</h3>
+        <ul class="space-y-3">
+          {data.topPosts.map((post, i) => (
+            <li class="flex gap-3 text-small">
+              <span class="text-micro font-mono text-text-faint w-4">{i + 1}</span>
+              <div class="min-w-0">
+                <p class="font-medium leading-snug truncate">{post.hook}</p>
+                <p class="text-micro text-text-faint mt-0.5">
+                  {post.platform.toUpperCase()} · {post.reach.toLocaleString("es-CO")} alcance · {post.engagement}% eng.
+                </p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  </div>
+
+  <!-- Footer: Alerts + Priorities -->
+  <section class="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <div class="card-base p-5">
+      <h2 class="text-h3 mb-4">Alertas</h2>
+      <div class="space-y-2">
+        {data.alerts.map((a) => <AlertItem alert={a} />)}
+      </div>
+    </div>
+    <div class="card-base p-5">
+      <h2 class="text-h3 mb-4">Prioridades esta semana</h2>
+      <ol class="space-y-3">
+        {data.priorities.map((p, i) => (
+          <li class="flex gap-3 text-body">
+            <span class="flex-shrink-0 w-6 h-6 rounded-full bg-accent-soft text-accent flex items-center justify-center text-micro font-semibold">
+              {i + 1}
+            </span>
+            <span class="leading-snug pt-0.5">{p}</span>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+</JarvisLayout>

@@ -1,0 +1,54 @@
+---
+interface Props {
+  current: number;
+  target: number;
+  label?: string;
+  format?: "usd" | "percent" | "count";
+}
+
+const { current, target, label = "Meta 2026", format = "usd" } = Astro.props;
+
+const pct = Math.min(100, Math.round((current / target) * 100));
+const circumference = 2 * Math.PI * 42;
+const offset = circumference - (pct / 100) * circumference;
+
+function formatValue(n: number): string {
+  if (format === "usd") return `$${(n / 1000).toFixed(1)}K`;
+  if (format === "percent") return `${n}%`;
+  return String(n);
+}
+---
+
+<div class="flex items-center gap-4">
+  <div class="relative w-[100px] h-[100px] shrink-0">
+    <svg viewBox="0 0 100 100" class="w-full h-full -rotate-90">
+      <circle cx="50" cy="50" r="42" fill="none" stroke="rgb(var(--border))" stroke-width="8" />
+      <circle
+        cx="50"
+        cy="50"
+        r="42"
+        fill="none"
+        stroke="url(#jarvis-gradient)"
+        stroke-width="8"
+        stroke-linecap="round"
+        stroke-dasharray={circumference}
+        stroke-dashoffset={offset}
+        class="transition-all duration-700"
+      />
+      <defs>
+        <linearGradient id="jarvis-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#4F46E5" />
+          <stop offset="100%" stop-color="#1E6FFF" />
+        </linearGradient>
+      </defs>
+    </svg>
+    <div class="absolute inset-0 flex flex-col items-center justify-center">
+      <span class="text-h3 font-mono font-semibold">{pct}%</span>
+    </div>
+  </div>
+  <div>
+    <div class="label-micro">{label}</div>
+    <div class="text-h2 font-mono mt-1">{formatValue(current)}</div>
+    <div class="text-small text-text-muted mt-0.5">de {format === "usd" ? "$100K USD" : formatValue(target)}</div>
+  </div>
+</div>

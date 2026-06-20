@@ -1,0 +1,134 @@
+---
+import JarvisLayout from "../../layouts/JarvisLayout.astro";
+import ProgressRing from "../../components/jarvis/ProgressRing.astro";
+import SemaphoreBadge from "../../components/jarvis/SemaphoreBadge.astro";
+import { getJarvisData } from "../../lib/jarvis";
+
+const data = await getJarvisData();
+
+function formatGoalValue(current: number, target: number, unit: string): string {
+  if (unit === "usd") return `$${current.toLocaleString("en-US")} / $${target.toLocaleString("en-US")}`;
+  if (unit === "percent") return `${current}% / ${target}%`;
+  return `${current} / ${target}`;
+}
+
+const platformMilestones = [
+  { label: "12 Agentes Master documentados", done: true },
+  { label: "11 Sectores con KPIs", done: true },
+  { label: "6 Workflows end-to-end", done: true },
+  { label: "Panel + JARVIS live", done: true },
+  { label: "7 Conexiones API activas", done: false, progress: 29 },
+  { label: "Primer caso de estudio publicado", done: false, progress: 60 },
+  { label: "Segundo cliente Pro activo", done: false, progress: 50 },
+];
+---
+
+<JarvisLayout title="Goals & OKRs">
+  <header class="mb-8">
+    <div class="label-micro mb-2">JARVIS · Estrategia</div>
+    <h1 class="text-h1">Goals & OKRs 2026</h1>
+    <p class="mt-2 text-body text-text-muted max-w-2xl">
+      Meta principal $100K USD · OKRs por departamento · hitos de Capa 1.
+    </p>
+  </header>
+
+  <!-- Main goal hero -->
+  <section class="card-base p-8 mb-8 bg-gradient-to-br from-bg via-accent-soft/20 to-[#1E6FFF]/5">
+    <div class="flex flex-col lg:flex-row items-center gap-8">
+      <ProgressRing
+        current={data.finance.revenueYtd}
+        target={data.finance.goal2026}
+        label="Meta principal 2026"
+        format="usd"
+      />
+      <div class="flex-1 text-center lg:text-left">
+        <h2 class="text-h2">$100,000 USD facturados</h2>
+        <p class="mt-2 text-body text-text-muted">
+          Antes de diciembre 2026 · Run rate necesario $12,500/mes · Actual ${(data.finance.runRateMonthly / 1000).toFixed(1)}K/mes
+        </p>
+        <div class="mt-4 flex flex-wrap gap-2 justify-center lg:justify-start">
+          <SemaphoreBadge status="yellow" label="Q2 en rampa" />
+          <span class="text-small text-text-muted px-3 py-1 bg-bg-muted rounded-full">
+            {Math.round((data.finance.revenueYtd / data.finance.goal2026) * 100)}% completado
+          </span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Quarterly goals -->
+  <section class="mb-8">
+    <h2 class="text-h2 mb-4">Metas trimestrales</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {data.goals.map((goal) => {
+        const pct = Math.min(100, Math.round((goal.current / goal.target) * 100));
+        return (
+          <div class="card-base p-5">
+            <div class="flex items-start justify-between gap-2 mb-3">
+              <h3 class="text-h3 leading-snug">{goal.title}</h3>
+              <SemaphoreBadge status={goal.status} size="sm" />
+            </div>
+            <p class="text-small font-mono text-text-muted mb-3">
+              {formatGoalValue(goal.current, goal.target, goal.unit)}
+            </p>
+            <div class="h-2 bg-bg-muted rounded-full overflow-hidden">
+              <div
+                class="h-full bg-gradient-to-r from-accent to-[#1E6FFF] rounded-full transition-all"
+                style={`width: ${pct}%`}
+              />
+            </div>
+            <p class="text-micro text-text-faint mt-2">Deadline {goal.deadline}</p>
+          </div>
+        );
+      })}
+    </div>
+  </section>
+
+  <!-- OKRs -->
+  <section class="mb-8">
+    <h2 class="text-h2 mb-4">OKRs por departamento</h2>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      {data.okrs.map((okr) => (
+        <div class="card-base p-5">
+          <div class="label-micro mb-1">{okr.department}</div>
+          <h3 class="text-h3 mb-4">{okr.objective}</h3>
+          <ul class="space-y-3">
+            {okr.keyResults.map((kr) => (
+              <li>
+                <div class="flex justify-between text-small mb-1">
+                  <span class="text-text-muted">{kr.label}</span>
+                  <span class="font-mono font-medium">{kr.progress}%</span>
+                </div>
+                <div class="h-1.5 bg-bg-muted rounded-full overflow-hidden">
+                  <div
+                    class:list={[
+                      "h-full rounded-full",
+                      kr.progress >= 80 ? "bg-success" : kr.progress >= 50 ? "bg-warning" : "bg-accent",
+                    ]}
+                    style={`width: ${kr.progress}%`}
+                  />
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- Platform milestones -->
+  <section class="card-base p-6">
+    <h2 class="text-h2 mb-4">Hitos Capa 1 · Plataforma</h2>
+    <ul class="space-y-3">
+      {platformMilestones.map((m) => (
+        <li class="flex items-center gap-3 text-body">
+          <span class="text-lg" aria-hidden="true">{m.done ? "✅" : "⬜"}</span>
+          <span class:list={[m.done ? "text-text" : "text-text-muted", "flex-1"]}>{m.label}</span>
+          {!m.done && m.progress !== undefined && (
+            <span class="text-micro font-mono text-text-faint">{m.progress}%</span>
+          )}
+        </li>
+      ))}
+    </ul>
+  </section>
+</JarvisLayout>

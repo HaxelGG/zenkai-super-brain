@@ -1,0 +1,153 @@
+---
+import JarvisLayout from "../../layouts/JarvisLayout.astro";
+import MetricCard from "../../components/jarvis/MetricCard.astro";
+import SemaphoreBadge from "../../components/jarvis/SemaphoreBadge.astro";
+import LineChart from "../../components/jarvis/LineChart.astro";
+import DonutChart from "../../components/jarvis/DonutChart.astro";
+import AlertItem from "../../components/jarvis/AlertItem.astro";
+import { getJarvisData } from "../../lib/jarvis";
+
+const data = await getJarvisData();
+const f = data.finance;
+
+const runRateStatus = f.runRateMonthly >= f.runRateNeeded ? "green" : f.runRateMonthly >= f.runRateNeeded * 0.8 ? "yellow" : "red";
+
+const financeKpis = [
+  { id: "rev-week", label: "Revenue semana", value: `$${f.revenueWeek.toLocaleString("en-US")}`, caption: "USD" },
+  { id: "rev-month", label: "Revenue mes", value: `$${f.revenueMonth.toLocaleString("en-US")}`, caption: "Junio 2026 · parcial" },
+  { id: "rev-ytd", label: "Revenue YTD", value: `$${f.revenueYtd.toLocaleString("en-US")}`, caption: "14.2% de meta $100K" },
+  { id: "pipeline", label: "Pipeline ponderado", value: `$${(f.pipelineWeighted / 1000).toFixed(0)}K`, caption: "USD cualificado" },
+  { id: "run-rate", label: "Run rate mensual", value: `$${(f.runRateMonthly / 1000).toFixed(1)}K`, caption: `necesario $${(f.runRateNeeded / 1000).toFixed(1)}K/mes` },
+  { id: "expenses", label: "Gastos operativos", value: `$${f.expensesMonth}`, caption: `de $${f.expensesBudget} presupuesto` },
+];
+---
+
+<JarvisLayout title="Finanzas">
+  <header class="mb-8">
+    <div class="label-micro mb-2">JARVIS · Finanzas</div>
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <h1 class="text-h1">Finanzas</h1>
+      <SemaphoreBadge status={runRateStatus} label={`Run rate ${runRateStatus === "green" ? "en meta" : "bajo meta"}`} />
+    </div>
+    <p class="mt-2 text-body text-text-muted max-w-2xl">
+      Revenue, run rate hacia $100K USD 2026, cuentas por cobrar y margen por proyecto.
+    </p>
+  </header>
+
+  <section class="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-8">
+    {financeKpis.map((kpi) => (
+      <MetricCard metric={kpi} />
+    ))}
+  </section>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+    <div class="card-base p-6">
+      <LineChart
+        title="Revenue mensual · actual vs proyección (USD)"
+        series={f.monthlyRevenue.map((m) => ({
+          label: m.month,
+          actual: m.actual,
+          projected: m.projected,
+        }))}
+      />
+      <div class="mt-4 p-4 rounded-card bg-bg-muted text-small">
+        <div class="flex justify-between">
+          <span class="text-text-muted">Acumulado YTD</span>
+          <span class="font-mono font-semibold">${f.revenueYtd.toLocaleString("en-US")}</span>
+        </div>
+        <div class="flex justify-between mt-2">
+          <span class="text-text-muted">Meta 2026</span>
+          <span class="font-mono font-semibold">${f.goal2026.toLocaleString("en-US")}</span>
+        </div>
+        <div class="mt-3 h-2 bg-border rounded-full overflow-hidden">
+          <div
+            class="h-full bg-gradient-to-r from-accent to-[#1E6FFF] rounded-full"
+            style={`width: ${Math.round((f.revenueYtd / f.goal2026) * 100)}%`}
+          />
+        </div>
+      </div>
+    </div>
+
+    <div class="card-base p-6">
+      <DonutChart
+        title="Ingresos por tier"
+        segments={f.revenueByTier.map((t) => ({
+          label: t.tier,
+          amount: t.amount,
+          color: t.color,
+        }))}
+      />
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="card-base p-6">
+      <h2 class="text-h3 mb-4">Cuentas por cobrar</h2>
+      {f.accountsReceivable.length === 0 ? (
+        <p class="text-small text-text-muted">Sin cuentas pendientes.</p>
+      ) : (
+        <table class="w-full text-small">
+          <thead>
+            <tr class="text-left text-micro text-text-faint border-b border-border">
+              <th class="pb-2">Cliente</th>
+              <th class="pb-2">Monto</th>
+              <th class="pb-2">Días</th>
+            </tr>
+          </thead>
+          <tbody>
+            {f.accountsReceivable.map((ar) => (
+              <tr class="border-b border-border last:border-0">
+                <td class="py-3 font-medium">{ar.client}</td>
+                <td class="py-3 font-mono">${ar.amount.toLocaleString("en-US")}</td>
+                <td class="py-3">
+                  <span class:list={[ar.days > 30 ? "text-danger font-medium" : "text-text-muted"]}>
+                    {ar.days} días
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
+
+    <div class="card-base p-6">
+      <h2 class="text-h3 mb-4">Margen por proyecto</h2>
+      <table class="w-full text-small">
+        <thead>
+          <tr class="text-left text-micro text-text-faint border-b border-border">
+            <th class="pb-2">Cliente</th>
+            <th class="pb-2">Revenue</th>
+            <th class="pb-2">Costo</th>
+            <th class="pb-2">Margen</th>
+          </tr>
+        </thead>
+        <tbody>
+          {f.marginByProject.map((m) => (
+            <tr class="border-b border-border last:border-0">
+              <td class="py-3 font-medium">{m.client}</td>
+              <td class="py-3 font-mono">${m.revenue.toLocaleString("en-US")}</td>
+              <td class="py-3 font-mono text-text-muted">${m.cost.toLocaleString("en-US")}</td>
+              <td class="py-3">
+                <span class:list={[m.margin >= 70 ? "text-success" : m.margin >= 60 ? "text-warning" : "text-danger", "font-mono font-semibold"]}>
+                  {m.margin}%
+                </span>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {data.alerts.filter((a) => a.message.includes("cobrar")).length > 0 && (
+    <section class="mt-6">
+      <h2 class="text-h3 mb-3">Alertas financieras</h2>
+      <div class="space-y-2">
+        {data.alerts.filter((a) => a.message.includes("cobrar")).map((a) => (
+          <AlertItem alert={a} />
+        ))}
+      </div>
+    </section>
+  )}
+</JarvisLayout>

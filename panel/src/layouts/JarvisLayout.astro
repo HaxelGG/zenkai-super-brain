@@ -1,0 +1,46 @@
+---
+import "../styles/global.css";
+import JarvisSidebar from "../components/jarvis/JarvisSidebar.astro";
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = "JARVIS · Command Center · ZENKAI Growth Systems" } = Astro.props;
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title} · JARVIS · ZENKAI</title>
+  </head>
+  <body class="bg-bg text-text">
+    <div class="flex min-h-screen">
+      <JarvisSidebar />
+      <div class="flex-1 flex flex-col min-w-0">
+        <header class="sticky top-0 z-40 bg-bg/95 backdrop-blur border-b border-border px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
+          <div class="lg:hidden flex items-center gap-2">
+            <div class="w-7 h-7 rounded-md bg-gradient-to-br from-accent to-[#1E6FFF] flex items-center justify-center text-white text-[10px] font-bold">J</div>
+            <span class="text-small font-semibold">JARVIS</span>
+          </div>
+          <div class="hidden lg:block text-micro text-text-faint uppercase tracking-wider">
+            ZENKAI Growth Systems · Ops Center
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="hidden sm:inline text-micro text-text-faint font-mono">{new Date().toLocaleDateString("es-CO", { weekday: "short", day: "numeric", month: "short" })}</span>
+            <div class="w-8 h-8 rounded-full bg-accent-soft text-accent flex items-center justify-center text-micro font-semibold">JG</div>
+          </div>
+        </header>
+        <main class="flex-1 px-4 sm:px-6 lg:px-8 py-6 sm:py-8 overflow-x-hidden">
+          <slot />
+        </main>
+      </div>
+    </div>
+  </body>
+</html>
