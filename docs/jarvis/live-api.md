@@ -13,20 +13,23 @@ Endpoints serverless en Vercel para refrescar datos sin redeploy del panel está
 | `POST /api/jarvis/speak` | TTS ElevenLabs voz JARVIS-ZENKAI | no-store |
 | `GET /api/jarvis/runs` | Placeholder · historial en localStorage del panel | 0 |
 
-## Orquestador (voz)
+## Orquestador (voz · Telegram · cerebro)
 
+- **Cerebro:** DeepSeek (`DEEPSEEK_API_KEY` + `JARVIS_LLM_PROVIDER=deepseek`) en cada instrucción — respuestas naturales, contexto CRM live, navegación y agente sugerido.
+- Fallback sin DeepSeek: rutas locales + clasificador Haiku.
 - Wake word: «Jarvis despierta» / «Jarvis wake up» (Chrome/Edge)
-- Clic en orb → activa escucha continua · doble clic → comando directo
-- Clic derecho en orb → panel de voz (API key · transcript · runs)
+- Clic en orb → escucha · doble clic → comando directo
 - Auth: `Authorization: Bearer ZENKAI_API_KEY` **o** origen dashboard
 - TTS: ElevenLabs si `ELEVENLABS_API_KEY` · fallback `speechSynthesis`
 
 ```bash
+DEEPSEEK_API_KEY=sk-...
+DEEPSEEK_MODEL=deepseek-chat
+JARVIS_LLM_PROVIDER=deepseek
 ELEVENLABS_API_KEY=sk_...
-# Vercel zenkaibrain usa ELEVENLABS_JARVIS_VOICE_ID · fallback ELEVENLABS_VOICE_ID
 ELEVENLABS_JARVIS_VOICE_ID=FqHzPCWiAfnd8t6A5LN4
-ELEVENLABS_VOICE_ID=FqHzPCWiAfnd8t6A5LN4
 ZENKAI_API_KEY=...
+AIRTABLE_TOKEN=pat...   # contexto operativo live en el cerebro
 ```
 
 ## Variables requeridas (Vercel · zenkaibrain)

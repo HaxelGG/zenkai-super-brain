@@ -26,15 +26,15 @@ Motor de automatización comercial ZENKAI. Importar en **n8n Cloud** (`zenkai-gr
 | `SLACK_WEBHOOK_URL` | `https://hooks.slack.com/...` (opcional) |
 | `N8N_JARVIS_CALLBACK_URL` | `https://zenkai-growth-systems.app.n8n.cloud/webhook/jarvis-callback` |
 
-Los workflows Sprint 1 usan **`$env.*`** en headers HTTP — no requieren credenciales vault en n8n (solo estas variables).
+Los workflows Sprint 1 usan **`$vars.*`** en headers HTTP — no requieren credenciales vault en n8n (solo Variables de instancia).
 
 ## Credenciales (legacy · ya no requeridas en Sprint 1 env-based)
 
 | Nombre sugerido | Tipo | Uso |
 |-----------------|------|-----|
-| ~~Airtable PAT~~ | — | Reemplazado por `$env.AIRTABLE_TOKEN` |
-| ~~Resend API Bearer~~ | — | Reemplazado por `$env.RESEND_API_KEY` |
-| ~~Anthropic API Key~~ | — | Reemplazado por `$env.ANTHROPIC_API_KEY` |
+| ~~Airtable PAT~~ | — | Reemplazado por `$vars.AIRTABLE_TOKEN` |
+| ~~Resend API Bearer~~ | — | Reemplazado por `$vars.RESEND_API_KEY` |
+| ~~Anthropic API Key~~ | — | Reemplazado por `$vars.ANTHROPIC_API_KEY` |
 
 ## Checklist operativo
 

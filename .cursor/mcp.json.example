@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "n8n-mcp": {
+      "type": "http",
+      "url": "https://zenkai-growth-systems.app.n8n.cloud/mcp-server/http",
+      "headers": {
+        "Authorization": "Bearer PEGAR_N8N_MCP_ACCESS_TOKEN",
+        "Accept": "application/json, text/event-stream"
+      }
+    },
+    "windmill-mcp": {
+      "type": "http",
+      "url": "https://app.windmill.dev/api/mcp/w/zenkai/mcp?token=PEGAR_WINDMILL_MCP_TOKEN",
+      "headers": {
+        "Accept": "application/json, text/event-stream"
+      }
+    }
+  }
+}

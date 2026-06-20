@@ -13,6 +13,10 @@
     "n8n:import": "tsx scripts/n8n/import-to-cloud.ts",
     "n8n:import:mcp": "tsx scripts/n8n/import-via-mcp.ts",
     "n8n:publish": "tsx scripts/n8n/publish-all.ts",
+    "n8n:vars": "tsx scripts/n8n/setup-variables.ts",
+    "n8n:smoke": "tsx scripts/n8n/smoke-test.ts",
+    "wmill:pull": "tsx scripts/windmill/sync.ts pull",
+    "wmill:push": "tsx scripts/windmill/sync.ts push",
     "jarvis:setup-sprint1": "tsx scripts/airtable/setup-sprint1-schema.ts",
     "jarvis:telegram": "tsx scripts/jarvis/telegram-bridge.ts",
     "jarvis:telegram:setup": "tsx scripts/jarvis/telegram-setup.ts"

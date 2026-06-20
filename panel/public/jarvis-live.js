@@ -216,8 +216,43 @@
     }
   }
 
+  function setBrainBadge(state, label, title) {
+    const brain = document.getElementById("jv-brain-badge");
+    if (!brain) return;
+    brain.dataset.state = state;
+    brain.textContent = label;
+    brain.title = title;
+  }
+
+  async function refreshBrainStatus() {
+    try {
+      const res = await fetch(apiUrl("/api/jarvis/status"), fetchOpts);
+      if (!res.ok) {
+        setBrainBadge("offline", "BRAIN", "Cerebro no disponible · HTTP " + res.status);
+        window.__jvBrainOnline = false;
+        return;
+      }
+      const data = await res.json();
+      window.__jvBrainOnline = !!data.ok;
+      if (data.ok) {
+        const provider = (data.capabilities?.brainProvider || "llm").toUpperCase();
+        setBrainBadge("online", provider, data.message || "Cerebro activo");
+      } else {
+        setBrainBadge(
+          "offline",
+          "BRAIN",
+          data.message || "Configurá DEEPSEEK_API_KEY o ANTHROPIC_API_KEY en Vercel",
+        );
+        showToast(data.message || "Cerebro JARVIS offline");
+      }
+    } catch {
+      setBrainBadge("offline", "BRAIN", "No se pudo consultar /api/jarvis/status");
+      window.__jvBrainOnline = false;
+    }
+  }
+
   async function refreshAll() {
-    await Promise.all([refreshCrm(), refreshFinance(), refreshSocial()]);
+    await Promise.all([refreshBrainStatus(), refreshCrm(), refreshFinance(), refreshSocial()]);
   }
 
   refreshAll();

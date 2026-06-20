@@ -6,7 +6,7 @@ Marcar en orden. Tiempo estimado restante: **15–20 min** (variables + Airtable
 
 - [x] `npm run n8n:checklist` — 4 JSON válidos
 - [x] `npm run jarvis:setup-sprint1` — campos Airtable OK
-- [x] Workflows refactorizados a `$env.*` (sin credenciales vault)
+- [x] Workflows refactorizados a `$vars.*` (sin credenciales vault · Slack opcional)
 - [x] `npm run n8n:import:mcp -- --apply --force` — 4 workflows recreados + publicados
 
 ## n8n Cloud
@@ -16,7 +16,8 @@ Marcar en orden. Tiempo estimado restante: **15–20 min** (variables + Airtable
 - [x] M-03 `leads-qualify` — **active** · webhook 200
 - [x] M-02 `demo-autoreply` — **active** · webhook 200
 - [x] S-01 cron horario — **active**
-- [ ] **Variables** en Settings → ver `docs/jarvis/n8n-variables-sprint1.md`
+- [ ] **Variables** `$vars.*` → `npm run n8n:vars -- --apply` (requiere `N8N_API_KEY`) o `--print` + pegar en UI
+- [ ] `npm run n8n:smoke` — sin errores en ejecuciones
 
 ## Airtable VENTAS
 

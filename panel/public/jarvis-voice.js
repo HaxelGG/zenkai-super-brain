@@ -357,13 +357,35 @@
         headers: authHeaders(),
         body: JSON.stringify({ instruction }),
       },
-      25000,
+      45000,
     );
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
-      throw new Error(err.error || `HTTP ${res.status}`);
+      const e = new Error(err.error || `HTTP ${res.status}`);
+      e.status = res.status;
+      throw e;
     }
     return res.json();
+  }
+
+  function sourceLabel(source) {
+    if (source === "deepseek") return "DeepSeek";
+    if (source === "anthropic") return "Claude";
+    if (source === "clasificar") return "clasificador";
+    return "local";
+  }
+
+  function notifyRunSource(result) {
+    if (!result?.source) return;
+    if (result.source === "deepseek" || result.source === "anthropic") {
+      if (result.dispatch?.event) {
+        const d = result.dispatch.ok ? "enviado" : "falló";
+        showVoiceToast(`n8n ${d} · ${result.dispatch.event}`);
+      }
+      return;
+    }
+    const reason = result.meta?.fallbackReason || sourceLabel(result.source);
+    showVoiceToast(`Cerebro degradado · ${reason}`);
   }
 
   function localFallback(cmd, fromWake) {
@@ -433,15 +455,22 @@
     let result;
     try {
       result = await runOrchestrator(cmd);
+      notifyRunSource(result);
     } catch (err) {
+      const status = err && typeof err === "object" ? err.status : 0;
       const msg = err instanceof Error ? err.message : "API offline";
-      if (/401|403|unauthorized/i.test(msg)) {
+      const authFail = status === 401 || status === 403 || /401|403|unauthorized/i.test(msg);
+      if (authFail) {
         showVoiceToast("Sin autorización · abrí ⋯ y pegá ZENKAI_API_KEY");
-      } else if (/failed to fetch|network/i.test(msg)) {
-        showVoiceToast("Sin conexión a API · modo local");
-      } else {
-        showVoiceToast(`${msg} · modo local`);
+        await speak("Necesito la clave ZENKAI API para conectar el cerebro.", resumeAfterCommand);
+        return;
       }
+      if (/failed to fetch|network|abort/i.test(msg)) {
+        showVoiceToast("Sin conexión al cerebro · revisá red o Vercel");
+        await speak("No puedo conectar con el cerebro JARVIS. Revisá la conexión.", resumeAfterCommand);
+        return;
+      }
+      showVoiceToast(`${msg} · modo local`);
       result = localFallback(cmd, fromWake);
     }
 

@@ -16,11 +16,11 @@
     {
       "parameters": {
         "method": "GET",
-        "url": "={{ 'https://api.airtable.com/v0/' + $env.AIRTABLE_BASE_VENTAS + '/demos?filterByFormula=' + encodeURIComponent('AND({respondido_at}=BLANK(), OR({sla_alert_sent}=FALSE(), {sla_alert_sent}=BLANK()), IS_BEFORE({created_at}, DATEADD(NOW(), -3, \\'hours\\')))') }}",
+        "url": "={{ 'https://api.airtable.com/v0/' + $vars.AIRTABLE_BASE_VENTAS + '/demos?filterByFormula=' + encodeURIComponent('AND({respondido_at}=BLANK(), OR({sla_alert_sent}=FALSE(), {sla_alert_sent}=BLANK()), IS_BEFORE({created_at}, DATEADD(NOW(), -3, \\'hours\\')))') }}",
         "authentication": "none",
         "sendHeaders": true,
         "headerParameters": {
-          "parameters": [{ "name": "Authorization", "value": "=Bearer {{ $env.AIRTABLE_TOKEN }}" }]
+          "parameters": [{ "name": "Authorization", "value": "=Bearer {{ $vars.AIRTABLE_TOKEN }}" }]
         },
         "options": {}
       },
@@ -33,11 +33,11 @@
     {
       "parameters": {
         "method": "GET",
-        "url": "={{ 'https://api.airtable.com/v0/' + $env.AIRTABLE_BASE_VENTAS + '/Leads?filterByFormula=' + encodeURIComponent('AND({respondido_at}=BLANK(), OR({sla_alert_sent}=FALSE(), {sla_alert_sent}=BLANK()), IS_BEFORE({Fecha Entrada}, DATEADD(NOW(), -3, \\'hours\\')))') }}",
+        "url": "={{ 'https://api.airtable.com/v0/' + $vars.AIRTABLE_BASE_VENTAS + '/Leads?filterByFormula=' + encodeURIComponent('AND({respondido_at}=BLANK(), OR({sla_alert_sent}=FALSE(), {sla_alert_sent}=BLANK()), IS_BEFORE({Fecha Entrada}, DATEADD(NOW(), -3, \\'hours\\')))') }}",
         "authentication": "none",
         "sendHeaders": true,
         "headerParameters": {
-          "parameters": [{ "name": "Authorization", "value": "=Bearer {{ $env.AIRTABLE_TOKEN }}" }]
+          "parameters": [{ "name": "Authorization", "value": "=Bearer {{ $vars.AIRTABLE_TOKEN }}" }]
         },
         "options": {}
       },
@@ -88,8 +88,37 @@
     },
     {
       "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "slack-url",
+              "leftValue": "={{ $vars.SLACK_WEBHOOK_URL || '' }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "d1b2c3d4-e5f6-7890-abcd-ef1234560309",
+      "name": "Slack configurado",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1060, 220]
+    },
+    {
+      "parameters": {
         "method": "POST",
-        "url": "={{ $env.SLACK_WEBHOOK_URL }}",
+        "url": "={{ $vars.SLACK_WEBHOOK_URL }}",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ { text: `⚠️ SLA formulario >3h\\nTabla: ${$json._table}\\nRecord: ${$json.id}\\nRevisar y marcar respondido_at en Airtable.` } }}",
@@ -110,12 +139,12 @@
     {
       "parameters": {
         "method": "PATCH",
-        "url": "=https://api.airtable.com/v0/{{ $env.AIRTABLE_BASE_VENTAS }}/{{ $json._table }}/{{ $json.id }}",
+        "url": "=https://api.airtable.com/v0/{{ $vars.AIRTABLE_BASE_VENTAS }}/{{ $json._table }}/{{ $json.id }}",
         "authentication": "none",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "Authorization", "value": "=Bearer {{ $env.AIRTABLE_TOKEN }}" },
+            { "name": "Authorization", "value": "=Bearer {{ $vars.AIRTABLE_TOKEN }}" },
             { "name": "Content-Type", "value": "application/json" }
           ]
         },
@@ -159,8 +188,14 @@
     },
     "Hay pendientes": {
       "main": [
-        [{ "node": "Slack SLA Alert", "type": "main", "index": 0 }],
+        [{ "node": "Slack configurado", "type": "main", "index": 0 }],
         [{ "node": "No-op OK", "type": "main", "index": 0 }]
+      ]
+    },
+    "Slack configurado": {
+      "main": [
+        [{ "node": "Slack SLA Alert", "type": "main", "index": 0 }],
+        [{ "node": "Marcar sla_alert_sent", "type": "main", "index": 0 }]
       ]
     },
     "Slack SLA Alert": {
