@@ -19,6 +19,44 @@ criticidad: media
 
 ## Resumen
 
+JARVIS HUD vive en el proyecto **`zenkaibrain`** (build `panel/dist`).  
+**NO** en `zenkai-jarvis` (consola de voz legacy).
+
+Si ves 404 en `/finanzas` o la UI de micrófono en `/`, el dominio está en el proyecto equivocado o la rama no está en producción.
+
+---
+
+## ⚠️ Troubleshooting · 404 en jarvis.zenkai.systems
+
+### Síntoma
+- `jarvis.zenkai.systems/` → consola de voz (micrófono), no el HUD
+- `jarvis.zenkai.systems/finanzas` → **404 NOT_FOUND**
+
+### Causa
+| Proyecto Vercel | Dominio actual | Contenido |
+|-----------------|----------------|-----------|
+| `zenkai-jarvis` | `jarvis.zenkai.systems` ❌ | Consola voz legacy (solo `/`) |
+| `zenkaibrain` | `panel.zenkai.systems` ✅ | Panel + HUD en `/jarvis/*` |
+
+### Fix (5 min)
+
+1. **Merge PR #3** → `main` (despliega HUD en zenkaibrain producción)
+2. **Vercel → zenkai-jarvis → Settings → Domains** → Remove `jarvis.zenkai.systems`
+3. **Vercel → zenkaibrain → Settings → Domains** → Add `jarvis.zenkai.systems`
+4. Esperar 1–2 min · verificar:
+   - `https://jarvis.zenkai.systems/` → Command Center HUD
+   - `https://jarvis.zenkai.systems/finanzas` → Finanzas HUD
+
+### Preview mientras tanto
+
+```
+https://zenkaibrain-git-cursor-jarvis-fa94ef-mrhaxel26-sketchs-projects.vercel.app/jarvis
+```
+
+---
+
+## Resumen original
+
 JARVIS comparte el build estático del panel (`panel/dist`). No requiere un proyecto Vercel separado. Solo hay que:
 
 1. Añadir el subdominio en Vercel project `zenkaibrain`
