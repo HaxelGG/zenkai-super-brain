@@ -7,12 +7,8 @@
 
   function getApiBase() {
     const h = window.location.hostname.toLowerCase();
-    if (
-      h === "jarvis.zenkai.systems" ||
-      h.endsWith(".jarvis.zenkai.systems") ||
-      h === "panel.zenkai.systems"
-    ) {
-      return "";
+    if (h === "jarvis.zenkai.systems" || h.endsWith(".jarvis.zenkai.systems")) {
+      return "https://panel.zenkai.systems";
     }
     if (h === "localhost" || h === "127.0.0.1") {
       return "https://panel.zenkai.systems";

@@ -125,8 +125,9 @@ Reiniciá el dev server después de editar `.env`.
 
 | Host | Comportamiento API |
 |------|-------------------|
-| `jarvis.zenkai.systems` / `panel.zenkai.systems` | Same-origin `/api/jarvis/*` (mismo deploy Vercel) |
-| `localhost:4321` | Proxy a `https://panel.zenkai.systems` (astro dev no sirve APIs) |
+| `jarvis.zenkai.systems` | Proxy a `https://panel.zenkai.systems/api/jarvis/*` (CORS) |
+| `panel.zenkai.systems` | Same-origin `/api/jarvis/*` |
+| `localhost:4321` | Proxy a `panel.zenkai.systems` (astro dev no sirve APIs) |
 | Raíz + `vercel dev` | APIs locales en el mismo puerto |
 
 **Opción recomendada para probar voz:** https://jarvis.zenkai.systems (producción).
