@@ -32,7 +32,7 @@ const routesJson = JSON.stringify(routes);
           <a class="jvt-back" href={routes.home}>← HUD</a>
         </div>
       </header>
-      <section id="jvt-output" class="jvt-output" aria-live="polite"></section>
+      <section id="jvt-output" class="jvt-output" role="log" aria-live="polite"></section>
       <div class="jvt-suggest-wrap">
         <div id="jvt-suggest" class="jvt-suggest" hidden></div>
         <div class="jvt-input-row">
@@ -45,6 +45,7 @@ const routesJson = JSON.stringify(routes);
             spellcheck="false"
             placeholder="comando o lenguaje natural · /help"
             enterkeyhint="send"
+            aria-label="Comando o lenguaje natural"
           />
           <button id="jvt-mic" class="jvt-mic" type="button" aria-label="Dictar por voz">●</button>
         </div>
