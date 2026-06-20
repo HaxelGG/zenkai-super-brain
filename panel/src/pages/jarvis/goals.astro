@@ -25,7 +25,7 @@ const platformMilestones = [
 ];
 ---
 
-<JarvisLayout title="Goals & OKRs">
+<JarvisLayout title="Goals & OKRs" dataSource={data.meta?.dataSource ?? "mock"} liveRecords={data.meta?.liveRecords}>
   <JarvisMobileNav />
 
   <header class="mb-8" data-jv-animate="1">

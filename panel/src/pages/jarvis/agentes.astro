@@ -10,7 +10,7 @@ const active = data.agentStatuses.filter((a) => a.state === "active").length;
 const totalOps = data.agentStatuses.reduce((s, a) => s + a.opsToday, 0);
 ---
 
-<JarvisLayout title="Agentes IA">
+<JarvisLayout title="Agentes IA" dataSource={data.meta?.dataSource ?? "mock"} liveRecords={data.meta?.liveRecords}>
   <JarvisMobileNav />
 
   <header class="mb-8" data-jv-animate="1">

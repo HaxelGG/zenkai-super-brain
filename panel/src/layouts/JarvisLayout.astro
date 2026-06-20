@@ -3,14 +3,23 @@ import "../styles/global.css";
 import "../styles/jarvis.css";
 import JarvisSidebar from "../components/jarvis/JarvisSidebar.astro";
 import JarvisBoot from "../components/jarvis/JarvisBoot.astro";
+import DataSourceBadge from "../components/jarvis/DataSourceBadge.astro";
 import { JARVIS_URL } from "../lib/jarvis/config";
+import type { DataSource } from "../lib/jarvis/types";
 
 interface Props {
   title: string;
   description?: string;
+  dataSource?: DataSource;
+  liveRecords?: { leads: number; clients: number };
 }
 
-const { title, description = "JARVIS · Command Center · ZENKAI Growth Systems" } = Astro.props;
+const {
+  title,
+  description = "JARVIS · Command Center · ZENKAI Growth Systems",
+  dataSource = "mock",
+  liveRecords,
+} = Astro.props;
 const canonical = new URL(Astro.url.pathname, JARVIS_URL).href;
 ---
 
@@ -44,6 +53,7 @@ const canonical = new URL(Astro.url.pathname, JARVIS_URL).href;
             <span class="jv-mono text-[10px] text-[var(--jv-text-muted)]" id="jv-live-clock">--:--:--</span>
           </div>
           <div class="flex items-center gap-3">
+            <DataSourceBadge source={dataSource} liveRecords={liveRecords} />
             <span class="hidden sm:inline jv-mono text-[10px] text-[var(--jv-text-muted)]">
               {new Date().toLocaleDateString("es-CO", { weekday: "short", day: "numeric", month: "short", year: "numeric" })}
             </span>

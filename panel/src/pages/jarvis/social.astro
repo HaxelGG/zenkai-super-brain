@@ -29,7 +29,7 @@ const calendarStatusStyle = {
 };
 ---
 
-<JarvisLayout title="Social Media">
+<JarvisLayout title="Social Media" dataSource={data.meta?.dataSource ?? "mock"} liveRecords={data.meta?.liveRecords}>
   <JarvisMobileNav />
 
   <header class="mb-8" data-jv-animate="1">

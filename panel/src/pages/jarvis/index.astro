@@ -24,7 +24,7 @@ const doneThisWeek = data.tasks.filter((t) => t.status === "done");
 const onlineSystems = data.systemConnections.filter((s) => s.status === "online").length;
 ---
 
-<JarvisLayout title="Command Center">
+<JarvisLayout title="Command Center" dataSource={data.meta?.dataSource ?? "mock"} liveRecords={data.meta?.liveRecords}>
   <JarvisMobileNav />
 
   <header class="mb-8" data-jv-animate="1">

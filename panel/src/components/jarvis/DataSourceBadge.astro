@@ -1,0 +1,32 @@
+---
+interface Props {
+  source: 'mock' | 'live';
+  liveRecords?: { leads: number; clients: number };
+}
+
+const { source, liveRecords } = Astro.props;
+const isLive = source === 'live';
+---
+
+<div
+  class:list={[
+    'inline-flex items-center gap-2 px-2.5 py-1 rounded border text-[10px] font-mono uppercase tracking-wider',
+    isLive
+      ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-400'
+      : 'border-amber-500/30 bg-amber-500/5 text-amber-400/90',
+  ]}
+  title={isLive ? 'Datos CRM desde Airtable' : 'Datos de demostración — configura AIRTABLE_TOKEN'}
+>
+  <span
+    class:list={[
+      'w-1.5 h-1.5 rounded-full',
+      isLive ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400/70',
+    ]}
+  />
+  {isLive ? 'LIVE' : 'MOCK'}
+  {isLive && liveRecords && (
+    <span class="text-white/40 normal-case tracking-normal">
+      · {liveRecords.leads}L · {liveRecords.clients}C
+    </span>
+  )}
+</div>

@@ -26,7 +26,7 @@ const kpis = [
 ];
 ---
 
-<JarvisLayout title="Pipeline CRM">
+<JarvisLayout title="Pipeline CRM" dataSource={data.meta?.dataSource ?? "mock"} liveRecords={data.meta?.liveRecords}>
   <JarvisMobileNav />
 
   <header class="mb-8" data-jv-animate="1">

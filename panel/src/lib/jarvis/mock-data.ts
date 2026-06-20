@@ -654,3 +654,4 @@ export const MOCK_JARVIS_DATA: JarvisData = {
     { sector: "Servicios Prof.", leads: 3, revenue: 3200, growth: 10 },
   ],
 };
+export const mockJarvisData = MOCK_JARVIS_DATA;

@@ -206,6 +206,16 @@ export type AiUsage = {
   modelSplit: { model: string; pct: number; color: string }[];
 };
 
+export type DataSource = "mock" | "live";
+
+export type JarvisMeta = {
+  dataSource: DataSource;
+  liveRecords?: {
+    leads: number;
+    clients: number;
+  };
+};
+
 export type JarvisData = {
   agencySemaphore: Semaphore;
   greeting: string;
@@ -232,6 +242,7 @@ export type JarvisData = {
   aiUsage: AiUsage;
   intelligence: IntelligenceBrief;
   sectorPerformance: SectorPerformance[];
+  meta?: JarvisMeta;
 };
 
 export type IntelligenceBrief = {

@@ -32,7 +32,7 @@ const listTasks = [...data.tasks]
   .sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
 ---
 
-<JarvisLayout title="Tareas">
+<JarvisLayout title="Tareas" dataSource={data.meta?.dataSource ?? "mock"} liveRecords={data.meta?.liveRecords}>
   <JarvisMobileNav />
 
   <header class="mb-8" data-jv-animate="1">
