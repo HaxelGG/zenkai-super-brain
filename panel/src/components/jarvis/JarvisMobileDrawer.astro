@@ -1,6 +1,7 @@
 ---
 import { resolveJarvisRoutes } from "../../lib/jarvis/config";
 import JarvisNavList from "./JarvisNavList.astro";
+import JarvisWordmark from "./JarvisWordmark.astro";
 
 const routes = resolveJarvisRoutes(Astro.url.hostname);
 const path = Astro.url.pathname;
@@ -20,11 +21,8 @@ const path = Astro.url.pathname;
 <div id="jv-drawer-backdrop" class="jv-drawer-backdrop" aria-hidden="true"></div>
 
 <aside id="jv-mobile-drawer" class="jv-mobile-drawer" aria-hidden="true">
-  <div class="px-4 py-3 border-b border-[var(--jv-border)] flex items-center justify-between shrink-0">
-    <a href={routes.home} class="flex items-center gap-2.5 no-underline">
-      <div class="arc-reactor shrink-0" aria-hidden="true"></div>
-      <span class="jv-display text-[11px] font-semibold text-[var(--jv-cyan)] tracking-wider">JARVIS</span>
-    </a>
+  <div class="jv-brand-block jv-brand-block--drawer shrink-0">
+    <JarvisWordmark href={routes.home} size="md" />
     <button type="button" id="jv-menu-close" class="jv-drawer-close" aria-label="Cerrar menú">✕</button>
   </div>
 

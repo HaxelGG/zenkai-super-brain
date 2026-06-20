@@ -1,0 +1,228 @@
+{
+  "name": "LEADS-05-qualify-on-create",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "leads-qualify",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "b1b2c3d4-e5f6-7890-abcd-ef1234560101",
+      "name": "Webhook Lead Creado",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "webhookId": "zenkai-leads-qualify"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $env.AIRTABLE_BASE_VENTAS }}"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "name",
+          "value": "leads"
+        },
+        "id": "={{ $json.body?.record_id || $json.record_id }}"
+      },
+      "id": "b1b2c3d4-e5f6-7890-abcd-ef1234560102",
+      "name": "Get Lead Airtable",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [480, 300],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "CONFIGURE_AIRTABLE",
+          "name": "Airtable PAT ZENKAI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const f = $input.first().json.fields || $input.first().json;\nconst recordId = $input.first().json.id || $('Webhook Lead Creado').first().json.body?.record_id;\nconst text = [\n  f.mensaje_original || f.Mensaje || f.notes || f.Notas || '',\n  f.empresa ? `Empresa: ${f.empresa}` : '',\n  f.sector ? `Sector: ${f.sector}` : '',\n  f.source ? `Source: ${f.source}` : '',\n  f.email ? `Email: ${f.email}` : '',\n].filter(Boolean).join('\\n');\n\nconst system = `Sos HERMES de ZENKAI. Cualificá el lead con la rúbrica oficial (skill-cualificar-lead).\nDevolvé SOLO JSON válido:\n{\"score\": number, \"etapa\": \"hot\"|\"nurturing\"|\"descalificado\", \"razon\": string, \"brief\": string}\n\nRúbrica: presupuesto +2, decision-maker +2, urgencia +2, sector conocido +2, +6 meses +1, mercado prio +1, pide gratis -3, copy-paste -2.\n≥6 hot · 4-5 nurturing · ≤3 descalificado.`;\n\nreturn [{ json: { recordId, text, anthropicBody: {\n  model: 'claude-sonnet-4-6',\n  max_tokens: 1024,\n  system,\n  messages: [{ role: 'user', content: text || 'Sin mensaje — score conservador 3.' }]\n} } }];"
+      },
+      "id": "b1b2c3d4-e5f6-7890-abcd-ef1234560103",
+      "name": "Build Qualify Prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [720, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "anthropic-version", "value": "2023-06-01" },
+            { "name": "content-type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.anthropicBody }}",
+        "options": {}
+      },
+      "id": "b1b2c3d4-e5f6-7890-abcd-ef1234560104",
+      "name": "Anthropic Qualify",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [960, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "CONFIGURE_ANTHROPIC",
+          "name": "Anthropic API Key"
+        }
+      },
+      "notes": "Credential: Header Auth · x-api-key=<ANTHROPIC_API_KEY> (add header in node if needed)"
+    },
+    {
+      "parameters": {
+        "jsCode": "const recordId = $('Build Qualify Prompt').first().json.recordId;\nconst raw = $input.first().json.content?.[0]?.text || '{}';\nlet parsed;\ntry {\n  const match = raw.match(/\\{[\\s\\S]*\\}/);\n  parsed = JSON.parse(match ? match[0] : raw);\n} catch {\n  parsed = { score: 3, etapa: 'nurturing', razon: 'parse error', brief: '' };\n}\nconst score = Number(parsed.score) || 3;\nconst etapa = parsed.etapa || (score >= 6 ? 'hot' : score >= 4 ? 'nurturing' : 'descalificado');\nreturn [{ json: { recordId, score, etapa, razon: parsed.razon || '', brief: parsed.brief || '' } }];"
+      },
+      "id": "b1b2c3d4-e5f6-7890-abcd-ef1234560105",
+      "name": "Parse Score",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1180, 300]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $env.AIRTABLE_BASE_VENTAS }}"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "name",
+          "value": "leads"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "score": "={{ $json.score }}",
+            "etapa": "={{ $json.etapa }}",
+            "cualificacion_razon": "={{ $json.razon }}",
+            "cualificacion_brief": "={{ $json.brief }}"
+          }
+        },
+        "options": {},
+        "id": "={{ $json.recordId }}"
+      },
+      "id": "b1b2c3d4-e5f6-7890-abcd-ef1234560106",
+      "name": "Update Lead Score",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [1400, 300],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "CONFIGURE_AIRTABLE",
+          "name": "Airtable PAT ZENKAI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "hot",
+              "leftValue": "={{ $('Parse Score').first().json.score }}",
+              "rightValue": 6,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "b1b2c3d4-e5f6-7890-abcd-ef1234560107",
+      "name": "Score >= 6",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1620, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.N8N_JARVIS_CALLBACK_URL || 'https://zenkai-growth-systems.app.n8n.cloud/webhook/jarvis-callback' }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { event: 'lead.hot', record_id: $('Parse Score').first().json.recordId, score: $('Parse Score').first().json.score, etapa: $('Parse Score').first().json.etapa, brief: $('Parse Score').first().json.brief } }}",
+        "options": {}
+      },
+      "id": "b1b2c3d4-e5f6-7890-abcd-ef1234560108",
+      "name": "Trigger M-04 Alert",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1860, 220]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { ok: true, flow: 'LEADS-05', record_id: $('Parse Score').first().json.recordId, score: $('Parse Score').first().json.score, etapa: $('Parse Score').first().json.etapa } }}",
+        "options": {}
+      },
+      "id": "b1b2c3d4-e5f6-7890-abcd-ef1234560109",
+      "name": "Respond OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1860, 400]
+    }
+  ],
+  "connections": {
+    "Webhook Lead Creado": {
+      "main": [[{ "node": "Get Lead Airtable", "type": "main", "index": 0 }]]
+    },
+    "Get Lead Airtable": {
+      "main": [[{ "node": "Build Qualify Prompt", "type": "main", "index": 0 }]]
+    },
+    "Build Qualify Prompt": {
+      "main": [[{ "node": "Anthropic Qualify", "type": "main", "index": 0 }]]
+    },
+    "Anthropic Qualify": {
+      "main": [[{ "node": "Parse Score", "type": "main", "index": 0 }]]
+    },
+    "Parse Score": {
+      "main": [[{ "node": "Update Lead Score", "type": "main", "index": 0 }]]
+    },
+    "Update Lead Score": {
+      "main": [[{ "node": "Score >= 6", "type": "main", "index": 0 }]]
+    },
+    "Score >= 6": {
+      "main": [
+        [{ "node": "Trigger M-04 Alert", "type": "main", "index": 0 }],
+        [{ "node": "Respond OK", "type": "main", "index": 0 }]
+      ]
+    },
+    "Trigger M-04 Alert": {
+      "main": [[{ "node": "Respond OK", "type": "main", "index": 0 }]]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [{ "name": "zenkai-sprint1" }, { "name": "M-03" }, { "name": "LEADS-05" }],
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}

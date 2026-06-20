@@ -1,0 +1,165 @@
+{
+  "name": "ZENKAI-M-02-demo-autoreply",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "demo-autoreply",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234560001",
+      "name": "Webhook Demo Creado",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "webhookId": "zenkai-m02-demo-autoreply"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "has-email",
+              "leftValue": "={{ $json.body?.email || $json.email || $json.body?.email_capturado || $json.email_capturado }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            },
+            {
+              "id": "not-sent",
+              "leftValue": "={{ $json.body?.autoreply_sent ?? $json.autoreply_sent ?? false }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234560002",
+      "name": "Tiene email y sin autoreply",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [480, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.resend.com/emails",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"from\": \"{{ $env.ZENKAI_FROM_EMAIL || 'ZENKAI <hola@zenkai.systems>' }}\",\n  \"to\": \"{{ $json.body?.email || $json.email || $json.body?.email_capturado || $json.email_capturado }}\",\n  \"reply_to\": \"hola@zenkai.systems\",\n  \"subject\": \"Recibimos tu demo · ZENKAI\",\n  \"html\": \"<p>Hola,</p><p>Recibimos tu solicitud de propuesta personalizada. Un fundador de ZENKAI te responderá en <strong>menos de 4 horas hábiles</strong>.</p><p>Sector detectado: <strong>{{ $json.body?.sector || $json.sector || $json.body?.sector_detectado || $json.sector_detectado || 'general' }}</strong></p><p>Si querés adelantar: <a href=\\\"https://cal.com/zenkai-growth-systems/strategy-call\\\">agendá 30 min gratis</a>.</p><p>— ZENKAI Growth Systems</p>\"\n}",
+        "options": {}
+      },
+      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234560003",
+      "name": "Resend Auto-reply",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [720, 220],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "CONFIGURE_RESEND",
+          "name": "Resend API Bearer"
+        }
+      },
+      "notes": "Credential: Header Auth · Name=Authorization · Value=Bearer <RESEND_API_KEY>"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $env.AIRTABLE_BASE_VENTAS }}"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "name",
+          "value": "demos"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "autoreply_sent": true
+          }
+        },
+        "options": {},
+        "id": "={{ $('Webhook Demo Creado').first().json.body?.record_id || $('Webhook Demo Creado').first().json.record_id }}"
+      },
+      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234560004",
+      "name": "Marcar autoreply_sent",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [960, 220],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "CONFIGURE_AIRTABLE",
+          "name": "Airtable PAT ZENKAI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { ok: true, flow: 'M-02', record_id: $json.body?.record_id || $json.record_id } }}",
+        "options": {}
+      },
+      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234560005",
+      "name": "Respond OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1200, 220]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { ok: true, skipped: true, reason: 'no email or already sent' } }}",
+        "options": {}
+      },
+      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234560006",
+      "name": "Respond Skip",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [720, 420]
+    }
+  ],
+  "connections": {
+    "Webhook Demo Creado": {
+      "main": [[{ "node": "Tiene email y sin autoreply", "type": "main", "index": 0 }]]
+    },
+    "Tiene email y sin autoreply": {
+      "main": [
+        [{ "node": "Resend Auto-reply", "type": "main", "index": 0 }],
+        [{ "node": "Respond Skip", "type": "main", "index": 0 }]
+      ]
+    },
+    "Resend Auto-reply": {
+      "main": [[{ "node": "Marcar autoreply_sent", "type": "main", "index": 0 }]]
+    },
+    "Marcar autoreply_sent": {
+      "main": [[{ "node": "Respond OK", "type": "main", "index": 0 }]]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [{ "name": "zenkai-sprint1" }, { "name": "M-02" }],
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}

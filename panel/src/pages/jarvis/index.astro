@@ -28,10 +28,13 @@ const onlineSystems = data.systemConnections.filter((s) => s.status === "online"
 <JarvisLayout title="Command Center" dataSource={data.meta?.dataSource ?? "mock"} liveRecords={data.meta?.liveRecords}>
   <JarvisMobileNav />
 
-  <header class="mb-6" data-jv-animate="1">
+  <header class="mb-6 jv-command-hero" data-jv-animate="1">
     <div class="flex flex-col xl:flex-row xl:items-end xl:justify-between gap-5">
       <div>
-        <div class="jv-label mb-2">ZENKAI · Intelligence Systems Online</div>
+        <div class="flex flex-wrap items-center gap-2 mb-3">
+          <span class="jv-hero-badge">JARVIS</span>
+          <span class="jv-label">ZENKAI · Intelligence Systems Online</span>
+        </div>
         <h1 class="jv-greeting">{data.greeting}</h1>
         <p class="mt-1.5 jv-mono text-[var(--jv-text-muted)]">{data.dateLabel}</p>
         <div class="mt-3 flex flex-wrap gap-2">
@@ -49,7 +52,7 @@ const onlineSystems = data.systemConnections.filter((s) => s.status === "online"
     <IntelligenceBrief brief={data.intelligence} compact />
   </HudPanel>
 
-  <section class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-2.5 mb-6" data-jv-social-root>
+  <section class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-2.5 mb-6" data-jv-social-root>
     {data.kpis.map((kpi, i) => (
       <MetricCard
         metric={kpi}

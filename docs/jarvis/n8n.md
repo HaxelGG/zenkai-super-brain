@@ -1,46 +1,57 @@
 # JARVIS · n8n automations
 
-Motor de automatización oficial de ZENKAI (junto con Make). JARVIS no reemplaza n8n — lo orquesta vía webhooks y Airtable.
+Motor de automatización oficial de ZENKAI. JARVIS no reemplaza n8n — lo orquesta vía webhooks y Airtable.
 
 ## Instancia
 
 | Campo | Valor |
 |-------|--------|
 | Cloud | `https://zenkai-growth-systems.app.n8n.cloud` |
-| MCP (Cursor) | Configurado en `.cursor/mcp.json` → servidor `n8n-mcp` |
+| Exports | `jarvis/n8n/*.json` |
+| MCP (Cursor) | `.cursor/mcp.json.example` → servidor `n8n-mcp` |
 
-Si el MCP de n8n falla en Cursor, revisa **Settings → MCP → n8n-mcp** y regenera el token en n8n Cloud.
+## Sprint 1 (comercial · 2026-06-19)
 
-## Flujos esperados (Capa 1)
+| ID | Archivo | Webhook |
+|----|---------|---------|
+| M-04 | `ZENKAI-M-04-hot-lead-alert.json` | `/webhook/jarvis-callback` |
+| M-03 | `LEADS-05-qualify-on-create.json` | `/webhook/leads-qualify` |
+| M-02 | `ZENKAI-M-02-demo-autoreply.json` | `/webhook/demo-autoreply` |
+| S-01 | `ZENKAI-S-01-sla-form-3h.json` | Cron horario |
+
+Checklist: `docs/jarvis/CHECKLIST-SPRINT1.md`  
+Plan: `docs/plans/2026-06-19-sprint1-automatizaciones-n8n.md`
+
+```bash
+npm run n8n:checklist
+npm run jarvis:setup-sprint1
+```
+
+## Flujos canónicos (roadmap)
 
 | Workflow | Trigger | Destino |
 |----------|---------|---------|
 | Lead web → CRM | Webhook / form | Airtable VENTAS |
-| Cualificación HERMES | Airtable / webhook | Actualiza etapa lead |
+| Cualificación HERMES | Airtable / webhook | M-03 |
 | Reporte semanal | Cron (lunes) | Email + Airtable |
-| Aprobación WhatsApp | JARVIS `/api/jarvis/approve` | **Human-in-the-loop** — nunca auto-envía |
+| Aprobación WhatsApp | JARVIS approve | **Human-in-the-loop** |
 
-Referencia de diseño: `workflows/workflow-reporte-semanal.md`, `conexiones/conexiones-make.md`.
+Referencia: `workflows/workflow-reporte-semanal.md`, `conexiones/conexiones-make.md`.
 
 ## Integración con JARVIS HUD
 
-- **CRM / finanzas:** Airtable (build + runtime `/api/jarvis/crm`, `/api/jarvis/finance`)
-- **Social:** Meta Graph (`/api/jarvis/social`) — independiente de n8n
-- **Runs / voz:** `/api/jarvis/run`, `/api/jarvis/runs`, `/api/jarvis/speak` en zenkaibrain
+- **CRM / finanzas:** Airtable (`/api/jarvis/crm`, `/api/jarvis/finance`)
+- **Runs / voz:** `/api/jarvis/run`, `/api/jarvis/speak`
+- **Orquestador web:** `/api/orquestar` (propuesta + optional n8n notify)
 
-Los webhooks de n8n deben apuntar a:
+## Self-host (dev / Premium)
 
-- `https://panel.zenkai.systems/api/...` (orquestador)
-- Bases Airtable documentadas en `.env.example`
-
-## Self-host (Premium)
-
-Ver `infra/n8n/docker-compose.yml` y `infra/n8n/.env.example` para despliegue local o VPS.
+Ver `infra/n8n/.env.example` para Docker local.
 
 ## Checklist operativo
 
-1. [ ] Workflows activos en n8n Cloud (no solo draft)
-2. [ ] Credenciales Airtable + Anthropic en n8n (no duplicar en repo)
-3. [ ] Webhooks de producción usan HTTPS y tokens de verificación
-4. [ ] Flujos de envío WA / propuesta / cobro tienen paso de aprobación humana
-5. [ ] MCP n8n conectado en Cursor para auditar desde el IDE
+1. [ ] Workflows Sprint 1 activos en n8n Cloud
+2. [ ] Credenciales Airtable + Anthropic + Resend en n8n
+3. [ ] Airtable automations → webhooks M-02 / M-03
+4. [ ] Flujos WA / propuesta / cobro con aprobación humana
+5. [ ] MCP n8n conectado en Cursor

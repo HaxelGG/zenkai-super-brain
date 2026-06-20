@@ -5,6 +5,27 @@
   const badge = document.getElementById("jv-data-badge");
   if (!badge) return;
 
+  function getApiBase() {
+    const h = window.location.hostname.toLowerCase();
+    if (
+      h === "jarvis.zenkai.systems" ||
+      h.endsWith(".jarvis.zenkai.systems") ||
+      h === "localhost" ||
+      h === "127.0.0.1"
+    ) {
+      return "https://panel.zenkai.systems";
+    }
+    return "";
+  }
+
+  function apiUrl(path) {
+    return `${getApiBase()}${path}`;
+  }
+
+  const fetchOpts = getApiBase()
+    ? { headers: { Accept: "application/json" }, credentials: "omit" }
+    : { headers: { Accept: "application/json" }, credentials: "same-origin" };
+
   const stageColors = {
     nuevo: "#6B8CAE",
     cualificado: "#1E6FFF",
@@ -106,10 +127,7 @@
   async function refreshCrm() {
     try {
       badge?.classList.add("jv-badge-loading");
-      const res = await fetch("/api/jarvis/crm", {
-        headers: { Accept: "application/json" },
-        credentials: "same-origin",
-      });
+      const res = await fetch(apiUrl("/api/jarvis/crm"), fetchOpts);
       if (!res.ok) return;
       const data = await res.json();
       if (data.source !== "live") return;
@@ -140,10 +158,7 @@
 
   async function refreshFinance() {
     try {
-      const res = await fetch("/api/jarvis/finance", {
-        headers: { Accept: "application/json" },
-        credentials: "same-origin",
-      });
+      const res = await fetch(apiUrl("/api/jarvis/finance"), fetchOpts);
       if (!res.ok) return;
       const data = await res.json();
       if (data.source !== "live") return;
@@ -169,10 +184,7 @@
   async function refreshSocial() {
     if (!document.querySelector("[data-jv-social-root], [data-jv-social], [data-jv-live='roas'], [data-jv-live='ig-engagement']")) return;
     try {
-      const res = await fetch("/api/jarvis/social", {
-        headers: { Accept: "application/json" },
-        credentials: "same-origin",
-      });
+      const res = await fetch(apiUrl("/api/jarvis/social"), fetchOpts);
       if (!res.ok) return;
       const data = await res.json();
       if (data.source !== "live") return;

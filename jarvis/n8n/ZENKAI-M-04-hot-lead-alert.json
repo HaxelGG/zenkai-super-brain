@@ -1,0 +1,176 @@
+{
+  "name": "ZENKAI-M-04-hot-lead-alert",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "jarvis-callback",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "c1b2c3d4-e5f6-7890-abcd-ef1234560201",
+      "name": "Webhook JARVIS Callback",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "webhookId": "zenkai-jarvis-callback"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "hot-event",
+              "leftValue": "={{ $json.body?.event || $json.event || '' }}",
+              "rightValue": "lead.hot",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "hot-score",
+              "leftValue": "={{ Number($json.body?.score ?? $json.score ?? 0) }}",
+              "rightValue": 6,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "c1b2c3d4-e5f6-7890-abcd-ef1234560202",
+      "name": "Es lead caliente",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [480, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const b = $input.first().json.body || $input.first().json;\nconst score = b.score ?? '?';\nconst recordId = b.record_id || b.recordId || 'unknown';\nconst brief = b.brief || '';\nconst text = `🔥 *Lead caliente* (score ${score}/10)\\nRecord: ${recordId}\\n${brief}`.slice(0, 3000);\nreturn [{ json: { slackText: text, recordId, score } }];"
+      },
+      "id": "c1b2c3d4-e5f6-7890-abcd-ef1234560203",
+      "name": "Format Alert",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [720, 220]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.SLACK_WEBHOOK_URL }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { text: $json.slackText } }}",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "c1b2c3d4-e5f6-7890-abcd-ef1234560204",
+      "name": "Slack Alert",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [960, 220],
+      "notes": "Opcional · omitir si SLACK_WEBHOOK_URL vacío"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.resend.com/emails",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"from\": \"{{ $env.ZENKAI_FROM_EMAIL || 'ZENKAI <hola@zenkai.systems>' }}\",\n  \"to\": \"{{ $env.ZENKAI_ALERT_EMAIL || 'hola@zenkai.systems' }}\",\n  \"subject\": \"🔥 Lead caliente · score {{ $json.score }}\",\n  \"html\": \"<p><strong>Lead caliente</strong> (score {{ $json.score }}/10)</p><p>Record: {{ $json.recordId }}</p><p>Revisar Airtable VENTAS / leads.</p>\"\n}",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "c1b2c3d4-e5f6-7890-abcd-ef1234560205",
+      "name": "Email Alert Fundador",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [960, 380],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "CONFIGURE_RESEND",
+          "name": "Resend API Bearer"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { ok: true, flow: 'M-04', alerted: true } }}",
+        "options": {}
+      },
+      "id": "c1b2c3d4-e5f6-7890-abcd-ef1234560206",
+      "name": "Respond Alerted",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1200, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { ok: true, flow: 'M-04', alerted: false } }}",
+        "options": {}
+      },
+      "id": "c1b2c3d4-e5f6-7890-abcd-ef1234560207",
+      "name": "Respond Ignored",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [720, 420]
+    }
+  ],
+  "connections": {
+    "Webhook JARVIS Callback": {
+      "main": [[{ "node": "Es lead caliente", "type": "main", "index": 0 }]]
+    },
+    "Es lead caliente": {
+      "main": [
+        [{ "node": "Format Alert", "type": "main", "index": 0 }],
+        [{ "node": "Respond Ignored", "type": "main", "index": 0 }]
+      ]
+    },
+    "Format Alert": {
+      "main": [
+        [
+          { "node": "Slack Alert", "type": "main", "index": 0 },
+          { "node": "Email Alert Fundador", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Slack Alert": {
+      "main": [[{ "node": "Respond Alerted", "type": "main", "index": 0 }]]
+    },
+    "Email Alert Fundador": {
+      "main": [[{ "node": "Respond Alerted", "type": "main", "index": 0 }]]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [{ "name": "zenkai-sprint1" }, { "name": "M-04" }],
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}

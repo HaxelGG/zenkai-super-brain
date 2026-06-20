@@ -13,12 +13,65 @@
   const ELEVEN_KEY = "zenkai_jarvis_use_elevenlabs";
 
   const STATUS = {
-    idle: "En línea",
-    wake: "Escuchando wake…",
+    idle: "Clic en orb · hablá",
+    wake: "Decí «Jarvis despierta»…",
     listening: "Escuchando…",
     processing: "Procesando…",
     speaking: "Hablando…",
   };
+
+  const PANEL_API = "https://panel.zenkai.systems";
+
+  function isJarvisHost() {
+    const h = window.location.hostname.toLowerCase();
+    return h === "jarvis.zenkai.systems" || h.endsWith(".jarvis.zenkai.systems");
+  }
+
+  /** jarvis subdomain y localhost dev no sirven /api — usa panel.zenkai.systems */
+  function getApiBase() {
+    const h = window.location.hostname.toLowerCase();
+    if (isJarvisHost() || h === "localhost" || h === "127.0.0.1") {
+      return PANEL_API;
+    }
+    return "";
+  }
+
+  function apiUrl(path) {
+    return `${getApiBase()}${path}`;
+  }
+
+  function normalizeNavPath(path) {
+    if (!path) return path;
+    if (isJarvisHost()) {
+      const clean = path.replace(/^\/jarvis(\/|$)/, "/");
+      return clean || "/";
+    }
+    return path;
+  }
+
+  function showVoiceToast(msg) {
+    const toast = document.getElementById("jv-voice-toast");
+    if (!toast || !msg) return;
+    toast.textContent = msg;
+    toast.classList.add("jv-voice-toast-visible");
+    clearTimeout(showVoiceToast._t);
+    showVoiceToast._t = setTimeout(() => toast.classList.remove("jv-voice-toast-visible"), 4500);
+  }
+
+  function unlockAudio() {
+    if (window.__jvAudioUnlocked) return;
+    window.__jvAudioUnlocked = true;
+    try {
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if (Ctx) {
+        const ctx = new Ctx();
+        ctx.resume();
+      }
+      if (window.speechSynthesis) window.speechSynthesis.getVoices();
+    } catch {
+      /* ignore */
+    }
+  }
 
   const WAKE_GREETINGS = [
     "Sí, señor. JARVIS en línea.",
@@ -30,6 +83,8 @@
   let mode = "off";
   let recognition = null;
   let wakeEnabled = false;
+  let pendingWake = false;
+  let clickTimer = null;
   let commandTimeout = null;
   let synthUtterance = null;
   let currentAudio = null;
@@ -148,8 +203,10 @@
     );
     document.body.classList.add(`jv-voice-${next}`);
     if (next !== "listening" || !statusEl.dataset.interim) {
-      statusEl.textContent = STATUS[next] ?? next;
+      const label = STATUS[next] ?? next;
+      statusEl.textContent = label;
       delete statusEl.dataset.interim;
+      if (next !== "idle") showVoiceToast(label);
     }
     btn.setAttribute("aria-pressed", next === "listening" || next === "wake" ? "true" : "false");
   }
@@ -172,9 +229,13 @@
       onDone?.();
       return;
     }
+    window.speechSynthesis.cancel();
     synthUtterance = new SpeechSynthesisUtterance(text.slice(0, 500));
     synthUtterance.lang = "es-CO";
     synthUtterance.rate = 1;
+    const voices = window.speechSynthesis.getVoices();
+    const esVoice = voices.find((v) => /es/i.test(v.lang));
+    if (esVoice) synthUtterance.voice = esVoice;
     synthUtterance.onend = () => {
       synthUtterance = null;
       onDone?.();
@@ -195,12 +256,16 @@
 
     if (useElevenLabs()) {
       try {
-        const res = await fetch("/api/jarvis/speak", {
+        const res = await fetch(apiUrl("/api/jarvis/speak"), {
           method: "POST",
           headers: authHeaders(),
           body: JSON.stringify({ text: text.slice(0, 500) }),
         });
-        if (res.ok && res.headers.get("content-type")?.includes("audio")) {
+        if (res.status === 401 || res.status === 403) {
+          showVoiceToast("Sin autorización · pegá ZENKAI_API_KEY en panel ⋯");
+        } else if (res.status === 503) {
+          showVoiceToast("ElevenLabs no configurado · voz del navegador");
+        } else if (res.ok && res.headers.get("content-type")?.includes("audio")) {
           const blob = await res.blob();
           const url = URL.createObjectURL(blob);
           currentAudio = new Audio(url);
@@ -213,18 +278,24 @@
             URL.revokeObjectURL(url);
             speakBrowser(text, onDone);
           };
-          await currentAudio.play();
-          return;
+          try {
+            await currentAudio.play();
+            return;
+          } catch {
+            URL.revokeObjectURL(url);
+            currentAudio = null;
+            showVoiceToast("Audio bloqueado · voz del navegador");
+          }
         }
       } catch {
-        /* fallback */
+        /* fallback to browser TTS */
       }
     }
     speakBrowser(text, onDone);
   }
 
   async function runOrchestrator(instruction) {
-    const res = await fetch("/api/jarvis/run", {
+    const res = await fetch(apiUrl("/api/jarvis/run"), {
       method: "POST",
       headers: authHeaders(),
       body: JSON.stringify({ instruction }),
@@ -243,22 +314,22 @@
     if (/recap|resumen|estado/.test(lower)) reply = "Revisando el estado operativo.";
     else if (/finanzas|revenue|ingresos/.test(lower)) {
       reply = "Abriendo finanzas.";
-      path = "/jarvis/finanzas/";
+      path = normalizeNavPath("/jarvis/finanzas/");
     } else if (/pipeline|leads/.test(lower)) {
       reply = "Abriendo pipeline.";
-      path = "/jarvis/pipeline/";
+      path = normalizeNavPath("/jarvis/pipeline/");
     } else if (/clientes/.test(lower)) {
       reply = "Abriendo clientes.";
-      path = "/jarvis/clientes/";
+      path = normalizeNavPath("/jarvis/clientes/");
     } else if (/agentes/.test(lower)) {
       reply = "Abriendo agentes.";
-      path = "/jarvis/agentes/";
+      path = normalizeNavPath("/jarvis/agentes/");
     } else if (/social|instagram/.test(lower)) {
       reply = "Abriendo social.";
-      path = "/jarvis/social/";
+      path = normalizeNavPath("/jarvis/social/");
     } else if (/tareas/.test(lower)) {
       reply = "Abriendo tareas.";
-      path = "/jarvis/tareas/";
+      path = normalizeNavPath("/jarvis/tareas/");
     } else if (fromWake && /^(hola|hey|buenos)/.test(lower)) reply = pickGreeting();
 
     return {
@@ -270,6 +341,23 @@
       source: "local",
       timestamp: new Date().toISOString(),
     };
+  }
+
+  async function deliverRun(result) {
+    if (!result) return;
+    unlockAudio();
+    stopRecognition();
+    stopAudio();
+    setState("processing");
+    logTranscript(`Telegram: ${result.instruction || ""}`, "in");
+    saveRun(result);
+    if (result.action?.type === "navigate" && result.action.path) {
+      const target = normalizeNavPath(result.action.path);
+      setTimeout(() => {
+        window.location.href = target;
+      }, 900);
+    }
+    await speak(result.speech || result.reply, () => setState("idle"));
   }
 
   async function handleTranscript(text, fromWake) {
@@ -285,14 +373,23 @@
     let result;
     try {
       result = await runOrchestrator(cmd);
-    } catch {
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "API offline";
+      if (/401|403|unauthorized/i.test(msg)) {
+        showVoiceToast("Sin autorización · abrí ⋯ y pegá ZENKAI_API_KEY");
+      } else if (/failed to fetch|network/i.test(msg)) {
+        showVoiceToast("Sin conexión a API · modo local");
+      } else {
+        showVoiceToast(`${msg} · modo local`);
+      }
       result = localFallback(cmd, fromWake);
     }
 
     saveRun(result);
     if (result.action?.type === "navigate" && result.action.path) {
+      const target = normalizeNavPath(result.action.path);
       setTimeout(() => {
-        window.location.href = result.action.path;
+        window.location.href = target;
       }, 900);
     }
 
@@ -398,6 +495,7 @@
       }
       if (ev.error === "not-allowed") {
         statusEl.textContent = "Micrófono requerido";
+        showVoiceToast("Permití el micrófono en el navegador");
         disableWakeMode();
         return;
       }
@@ -472,9 +570,16 @@
     }, 15000);
   }
 
-  btn.addEventListener("click", () => {
+  function handleSingleClick() {
     if (!SpeechRecognition) {
       statusEl.textContent = "Usá Chrome o Edge";
+      showVoiceToast("Usá Chrome o Edge para voz");
+      return;
+    }
+    unlockAudio();
+    if (pendingWake) {
+      pendingWake = false;
+      enableWakeMode();
       return;
     }
     if (wakeEnabled && mode === "wake") {
@@ -485,34 +590,67 @@
       resumeAfterCommand();
       return;
     }
-    enableWakeMode();
+    // Clic simple = escuchar comando directo (sin wake word)
+    startCommandMode();
+  }
+
+  btn.addEventListener("click", () => {
+    if (clickTimer) {
+      clearTimeout(clickTimer);
+      clickTimer = null;
+      return;
+    }
+    clickTimer = setTimeout(() => {
+      clickTimer = null;
+      handleSingleClick();
+    }, 280);
   });
 
   btn.addEventListener("dblclick", (e) => {
     e.preventDefault();
+    if (clickTimer) {
+      clearTimeout(clickTimer);
+      clickTimer = null;
+    }
+    unlockAudio();
     startCommandMode();
   });
 
   setState("idle");
   renderRuns();
 
+  function armPendingWake() {
+    if (!pendingWake || !SpeechRecognition) return;
+    pendingWake = false;
+    unlockAudio();
+    enableWakeMode();
+  }
+
   if (SpeechRecognition) {
     try {
       if (localStorage.getItem(WAKE_KEY) === "1") {
-        setTimeout(enableWakeMode, 800);
+        pendingWake = true;
+        statusEl.textContent = "Tocá pantalla · wake word";
+        document.addEventListener("pointerdown", armPendingWake, { once: true, passive: true });
       }
     } catch {
       /* ignore */
     }
+  } else {
+    statusEl.textContent = "Sin voz";
+    showVoiceToast("Usá Chrome o Edge para JARVIS por voz");
   }
 
   window.JarvisVoice = {
     setState,
     speak,
+    deliverRun,
     enableWakeMode,
     disableWakeMode,
     startCommandMode,
+    submitTextCommand: (text) => handleTranscript(String(text || "").trim(), false),
     getState: () => state,
     getMode: () => mode,
   };
+  window.dispatchEvent(new CustomEvent("jarvis-voice-ready"));
 })();

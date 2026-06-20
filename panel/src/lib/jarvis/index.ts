@@ -320,7 +320,7 @@ export async function getJarvisData(): Promise<JarvisData> {
                 {
                   id: "live-finance",
                   level: "info" as const,
-                  message: `Finanzas · YTD ${fmtUsd(finance!.revenueYtd)} · Pipeline ${fmtUsd(finance!.pipelineWeighted)}`,
+                  message: `Finanzas · YTD ${fmtUsd(finance!.revenueYtd, true)} · Pipeline ${fmtUsd(finance!.pipelineWeighted, true)}`,
                   action: "Ver finanzas",
                 },
               ]
