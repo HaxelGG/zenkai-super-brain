@@ -39,6 +39,11 @@
         </label>
       </div>
 
+      <div class="mb-4 flex flex-wrap gap-2">
+        <button type="button" id="jv-test-speak" class="jv-voice-send-btn">Probar voz</button>
+        <button type="button" id="jv-test-run" class="jv-voice-send-btn">Probar comando</button>
+      </div>
+
       <div class="mb-4 flex gap-2">
         <input
           id="jv-text-cmd"
@@ -171,6 +176,13 @@
       e.preventDefault();
       sendTextCommand();
     }
+  });
+
+  document.getElementById("jv-test-speak")?.addEventListener("click", () => {
+    window.JarvisVoice?.testVoice?.();
+  });
+  document.getElementById("jv-test-run")?.addEventListener("click", () => {
+    window.JarvisVoice?.submitTextCommand?.("hola jarvis");
   });
 
   if (elevenToggle instanceof HTMLInputElement) {

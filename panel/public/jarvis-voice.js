@@ -78,9 +78,27 @@
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), ms);
     try {
-      return await fetch(url, { ...options, signal: ctrl.signal });
+      return await fetch(url, {
+        ...options,
+        credentials: "same-origin",
+        signal: ctrl.signal,
+      });
     } finally {
       clearTimeout(timer);
+    }
+  }
+
+  /** Pide permiso de micrófono antes de STT (Chrome a veces no dispara onresult sin esto) */
+  async function ensureMicPermission() {
+    if (!navigator.mediaDevices?.getUserMedia) return true;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach((t) => t.stop());
+      return true;
+    } catch {
+      statusEl.textContent = "Micrófono requerido";
+      showVoiceToast("Permití el micrófono en el navegador (candado en la barra)");
+      return false;
     }
   }
 
@@ -101,6 +119,8 @@
   let currentAudio = null;
   let lastInterim = "";
   let recognitionStarting = false;
+  let wakeArmGuard = false;
+  const VOICE_JS_VER = "20260620b";
 
   const transcriptEl = document.getElementById("jv-voice-transcript");
   const runsEl = document.getElementById("jv-voice-runs");
@@ -528,6 +548,10 @@
           onWakeDetected(final, trailing);
           return;
         }
+        // Comando directo sin wake phrase (ej. «abre finanzas»)
+        if (final.trim().length > 2) {
+          commitCommandTranscript(final);
+        }
       }
       if (mode === "wake" && interim) {
         statusEl.dataset.interim = "1";
@@ -638,7 +662,14 @@
     mode = "wake";
     btn.classList.add("jv-voice-active");
     setState("wake");
-    startRecognition("wake");
+    wakeArmGuard = true;
+    setTimeout(() => {
+      wakeArmGuard = false;
+    }, 800);
+    void ensureMicPermission().then((ok) => {
+      if (ok) startRecognition("wake");
+      else disableWakeMode();
+    });
   }
 
   function disableWakeMode() {
@@ -657,24 +688,33 @@
   }
 
   function startCommandMode() {
-    stopRecognition();
-    stopAudio();
-    lastInterim = "";
-    mode = "command";
-    btn.classList.add("jv-voice-active");
-    setState("listening");
-    showVoiceToast("Hablá ahora · te escucho");
-    startRecognition("command");
-    commandTimeout = setTimeout(() => {
-      if (mode === "command" && state === "listening") {
-        if (lastInterim.trim()) {
-          commitCommandTranscript(lastInterim);
-          return;
-        }
-        showVoiceToast("No te escuché · tocá orb de nuevo");
-        resumeAfterCommand();
+    void (async () => {
+      stopRecognition();
+      stopAudio();
+      lastInterim = "";
+      unlockAudio();
+      const micOk = await ensureMicPermission();
+      if (!micOk) {
+        mode = "off";
+        setState("idle");
+        return;
       }
-    }, 12000);
+      mode = "command";
+      btn.classList.add("jv-voice-active");
+      setState("listening");
+      showVoiceToast("Hablá ahora · te escucho");
+      startRecognition("command");
+      commandTimeout = setTimeout(() => {
+        if (mode === "command" && state === "listening") {
+          if (lastInterim.trim()) {
+            commitCommandTranscript(lastInterim);
+            return;
+          }
+          showVoiceToast("No te escuché · tocá orb de nuevo");
+          resumeAfterCommand();
+        }
+      }, 12000);
+    })();
   }
 
   function handleSingleClick() {
@@ -684,20 +724,17 @@
       return;
     }
     unlockAudio();
-    if (pendingWake) {
-      pendingWake = false;
-      enableWakeMode();
-      return;
-    }
-    if (wakeEnabled && mode === "wake") {
-      disableWakeMode();
-      return;
-    }
+    // Si ya escucha, segundo clic = cancelar
     if (mode === "command" || state === "listening") {
       resumeAfterCommand();
       return;
     }
-    // Clic simple = escuchar comando directo (sin wake word)
+    if (wakeEnabled && mode === "wake") {
+      if (wakeArmGuard) return;
+      disableWakeMode();
+      return;
+    }
+    // Clic en orb = hablar directo (siempre)
     startCommandMode();
   }
 
@@ -750,18 +787,13 @@
   }
 
   function armPendingWake() {
-    if (!pendingWake || !SpeechRecognition) return;
-    pendingWake = false;
-    unlockAudio();
-    enableWakeMode();
+    /* desactivado: el pointerdown competía con el clic del orb y apagaba el mic */
   }
 
   if (SpeechRecognition) {
     try {
       if (localStorage.getItem(WAKE_KEY) === "1") {
-        pendingWake = true;
-        statusEl.textContent = "Tocá pantalla · wake word";
-        document.addEventListener("pointerdown", armPendingWake, { once: true, passive: true });
+        statusEl.textContent = "Wake en panel ⋯";
       }
     } catch {
       /* ignore */
@@ -781,8 +813,10 @@
     disableWakeMode,
     startCommandMode,
     submitTextCommand: (text) => handleTranscript(String(text || "").trim(), false),
+    testVoice: () => speak("Sistemas en línea, señor.", () => setState("idle")),
     getState: () => state,
     getMode: () => mode,
+    version: VOICE_JS_VER,
   };
   window.dispatchEvent(new CustomEvent("jarvis-voice-ready"));
 })();
