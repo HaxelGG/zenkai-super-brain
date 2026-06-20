@@ -36,8 +36,8 @@ const STAGE_LABELS: Record<PipelineLead["stage"], string> = {
 const ECO_CAPACITY = 5;
 const EMPTY = "—";
 
-function fmtUsd(n: number): string {
-  if (n <= 0) return EMPTY;
+function fmtUsd(n: number, live = false): string {
+  if (n <= 0) return live ? "$0" : EMPTY;
   if (n >= 1000) return `$${(n / 1000).toFixed(n >= 10000 ? 0 : 1)}K`;
   return `$${n.toLocaleString("en-US")}`;
 }
@@ -90,26 +90,33 @@ function buildLiveKpis(
   clientsActive: number,
   finance: Awaited<ReturnType<typeof getJarvisFinanceSnapshot>>,
   hasToken: boolean,
+  dealsTotal = 0,
 ): KpiMetric[] {
   const conversion = fmtPct(clientsActive, leadsTotal);
   const capacityPct = clientsActive > 0 ? `${Math.round((clientsActive / ECO_CAPACITY) * 100)}%` : EMPTY;
+  const hasLiveFinance = Boolean(finance);
+  const dealCount = Math.max(dealsTotal, finance?.dealsCount ?? 0, leadsTotal);
 
   return [
     {
       id: "revenue-ytd",
       label: "Revenue YTD",
-      value: finance ? fmtUsd(finance.revenueYtd) : EMPTY,
+      value: finance ? fmtUsd(finance.revenueYtd, hasLiveFinance) : EMPTY,
       caption: finance?.dealsWon
         ? `${finance.dealsWon} cierre(s) registrados`
-        : "Registra deals cerrados en CRM",
+        : leadsTotal > 0
+          ? `${leadsTotal} leads · sin cierres aún`
+          : "Registra deals cerrados en CRM",
     },
     {
       id: "pipeline",
       label: "Pipeline ponderado",
-      value: finance ? fmtUsd(finance.pipelineWeighted) : EMPTY,
+      value: finance ? fmtUsd(finance.pipelineWeighted, hasLiveFinance) : EMPTY,
       caption: finance?.pipelineTotal
         ? `$${finance.pipelineTotal.toLocaleString("en-US")} estimado`
-        : "Asigna valor a leads en pipeline",
+        : leadsTotal > 0
+          ? `${leadsTotal} leads sin valorar`
+          : "Asigna valor a leads en pipeline",
     },
     {
       id: "leads-week",
@@ -132,13 +139,17 @@ function buildLiveKpis(
     {
       id: "deals-total",
       label: "Deals en CRM",
-      value: finance?.dealsCount ? String(finance.dealsCount) : EMPTY,
-      caption: finance?.avgDealUsd ? `Ticket prom. ${fmtUsd(finance.avgDealUsd)}` : "Sin deals registrados",
+      value: dealCount > 0 ? String(dealCount) : EMPTY,
+      caption: finance?.avgDealUsd
+        ? `Ticket prom. ${fmtUsd(finance.avgDealUsd)}`
+        : dealCount > 0
+          ? `${dealCount} en pipeline CRM`
+          : "Sin deals registrados",
     },
     {
       id: "run-rate",
       label: "Run rate mensual",
-      value: finance?.runRateMonthly ? fmtUsd(finance.runRateMonthly) : EMPTY,
+      value: finance ? fmtUsd(finance.runRateMonthly, hasLiveFinance) : EMPTY,
       caption: finance ? `Meta ${fmtUsd(finance.runRateNeeded)}/mes` : "Calculado desde CRM",
     },
     {
@@ -282,7 +293,9 @@ export async function getJarvisData(): Promise<JarvisData> {
   const liveClientCount = crm?.clientesActivos ?? liveClients.length;
 
   const hasLiveCrm = liveLeadCount > 0 || liveClientCount > 0;
-  const hasLiveFinance = Boolean(finance && (finance.revenueYtd > 0 || finance.pipelineWeighted > 0 || finance.dealsCount > 0));
+  const hasLiveFinance = Boolean(
+    finance && (finance.revenueYtd > 0 || finance.pipelineWeighted > 0 || finance.dealsCount > 0 || liveLeadCount > 0),
+  );
   const dataSource: DataSource = hasLiveCrm || hasLiveFinance ? "live" : "mock";
 
   const pipelineLeads = hasLiveCrm ? livePipelineLeads : base.pipelineLeads;
@@ -290,7 +303,7 @@ export async function getJarvisData(): Promise<JarvisData> {
 
   const kpis =
     hasToken || hasLiveCrm || hasLiveFinance
-      ? buildLiveKpis(liveLeadCount, liveClientCount, finance, hasToken)
+      ? buildLiveKpis(liveLeadCount, liveClientCount, finance, hasToken, crm?.dealsTotal ?? 0)
       : base.kpis;
 
   const alerts =
@@ -360,6 +373,7 @@ export async function getJarvisData(): Promise<JarvisData> {
       liveRecords: {
         leads: liveLeadCount,
         clients: liveClientCount,
+        deals: crm?.dealsTotal ?? Math.max(liveLeadCount, finance?.dealsCount ?? 0),
       },
       financeConnected: hasLiveFinance,
       socialConnected: hasMetaEnv,

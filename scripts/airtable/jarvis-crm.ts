@@ -159,7 +159,7 @@ export async function getJarvisCrmSnapshot(token?: string): Promise<JarvisCrmSna
     clientesActivos: activos.length,
     clientes: activos,
     leadsTotal: leadsRec.length,
-    dealsTotal: dealsRec.length,
+    dealsTotal: dealsRec.length || leadsRec.length,
     leads,
     pipelineFunnel: buildPipelineFunnel(leads),
   };

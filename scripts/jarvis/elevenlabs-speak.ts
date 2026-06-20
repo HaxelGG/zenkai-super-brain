@@ -6,6 +6,15 @@
 const DEFAULT_VOICE_ID = "FqHzPCWiAfnd8t6A5LN4";
 const DEFAULT_MODEL = "eleven_multilingual_v2";
 
+/** Vercel usa ELEVENLABS_JARVIS_VOICE_ID; web/legacy usa ELEVENLABS_VOICE_ID. */
+export function resolveJarvisVoiceId(): string {
+  return (
+    process.env.ELEVENLABS_JARVIS_VOICE_ID?.trim() ||
+    process.env.ELEVENLABS_VOICE_ID?.trim() ||
+    DEFAULT_VOICE_ID
+  );
+}
+
 export type JarvisSpeechResult = {
   audio: Buffer;
   mimeType: string;
@@ -16,7 +25,7 @@ export async function synthesizeJarvisSpeech(text: string): Promise<JarvisSpeech
   const apiKey = process.env.ELEVENLABS_API_KEY;
   if (!apiKey?.trim()) return null;
 
-  const voiceId = process.env.ELEVENLABS_VOICE_ID?.trim() || DEFAULT_VOICE_ID;
+  const voiceId = resolveJarvisVoiceId();
   const modelId = process.env.ELEVENLABS_MODEL_ID?.trim() || DEFAULT_MODEL;
   const payload = text.trim().slice(0, 800);
   if (!payload) return null;

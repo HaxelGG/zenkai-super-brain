@@ -50,8 +50,8 @@
     });
   }
 
-  function fmtUsd(n) {
-    if (!n || n <= 0) return "—";
+  function fmtUsd(n, live) {
+    if (!n || n <= 0) return live ? "$0" : "—";
     if (n >= 1000) return `$${(n / 1000).toFixed(n >= 10000 ? 0 : 1)}K`;
     return `$${Math.round(n).toLocaleString("en-US")}`;
   }
@@ -148,17 +148,19 @@
       const data = await res.json();
       if (data.source !== "live") return;
 
-      patchText('[data-jv-live="revenue-ytd"]', fmtUsd(data.revenueYtd));
-      patchText('[data-jv-live="pipeline-weighted"]', fmtUsd(data.pipelineWeighted));
-      patchText('[data-jv-live="run-rate"]', fmtUsd(data.runRateMonthly));
-      patchText('[data-jv-live="deals-total"]', String(data.dealsCount || "—"));
+      patchText('[data-jv-live="revenue-ytd"]', fmtUsd(data.revenueYtd, true));
+      patchText('[data-jv-live="pipeline-weighted"]', fmtUsd(data.pipelineWeighted, true));
+      patchText('[data-jv-live="run-rate"]', fmtUsd(data.runRateMonthly, true));
+      if (data.dealsCount > 0) {
+        patchText('[data-jv-live="deals-total"]', String(data.dealsCount));
+      }
 
       const leads = document.querySelector('[data-jv-live="leads-count"]')?.textContent;
       const clients = document.querySelector('[data-jv-live="clients-count"]')?.textContent;
       if (leads && clients) setBadgeLive(leads, clients, "fin");
 
       window.dispatchEvent(new CustomEvent("jarvis:finance", { detail: data }));
-      showToast(`Finanzas · YTD ${fmtUsd(data.revenueYtd)} · Pipeline ${fmtUsd(data.pipelineWeighted)}`);
+      showToast(`Finanzas · YTD ${fmtUsd(data.revenueYtd, true)} · Pipeline ${fmtUsd(data.pipelineWeighted, true)}`);
     } catch {
       /* silent */
     }

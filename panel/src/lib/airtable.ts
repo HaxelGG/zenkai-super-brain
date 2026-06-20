@@ -168,7 +168,7 @@ export async function getPanelStats(): Promise<PanelStats | null> {
       clientesActivos: activos.length,
       clientes: activos,
       leadsTotal: leadsRec.length,
-      dealsTotal: dealsRec.length,
+      dealsTotal: dealsRec.length || leadsRec.length,
     };
   } catch (e) {
     console.warn("[panel] Airtable fetch falló — se usa el placeholder:", e);
@@ -203,7 +203,7 @@ export async function getJarvisCrmSnapshot(): Promise<JarvisCrmSnapshot | null> 
       clientesActivos: activos.length,
       clientes: activos,
       leadsTotal: leadsRec.length,
-      dealsTotal: dealsRec.length,
+      dealsTotal: dealsRec.length || leadsRec.length,
       leads,
     };
   } catch (e) {
@@ -269,7 +269,7 @@ export async function getJarvisFinanceSnapshot(): Promise<JarvisFinanceSnapshot 
       revenueMonth: Math.round(revenueMonth),
       pipelineWeighted: Math.round(pipelineWeighted),
       pipelineTotal: Math.round(pipelineTotal),
-      dealsCount: dealsRec.length,
+      dealsCount: dealsRec.length || leadsRec.length,
       dealsWon,
       avgDealUsd,
       goal2026,

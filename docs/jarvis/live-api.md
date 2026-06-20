@@ -23,6 +23,8 @@ Endpoints serverless en Vercel para refrescar datos sin redeploy del panel está
 
 ```bash
 ELEVENLABS_API_KEY=sk_...
+# Vercel zenkaibrain usa ELEVENLABS_JARVIS_VOICE_ID · fallback ELEVENLABS_VOICE_ID
+ELEVENLABS_JARVIS_VOICE_ID=FqHzPCWiAfnd8t6A5LN4
 ELEVENLABS_VOICE_ID=FqHzPCWiAfnd8t6A5LN4
 ZENKAI_API_KEY=...
 ```

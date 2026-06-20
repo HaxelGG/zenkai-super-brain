@@ -166,7 +166,7 @@ export async function getJarvisFinanceSnapshot(token?: string): Promise<JarvisFi
     revenueMonth: Math.round(revenueMonth),
     pipelineWeighted: Math.round(pipelineWeighted),
     pipelineTotal: Math.round(pipelineTotal),
-    dealsCount: dealsRec.length,
+    dealsCount: dealsRec.length || leadsRec.length,
     dealsWon,
     avgDealUsd,
     goal2026,
