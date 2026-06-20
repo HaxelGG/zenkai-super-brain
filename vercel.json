@@ -85,5 +85,15 @@
       "has": [{ "type": "host", "value": "jarvis.zenkai.systems" }],
       "destination": "/jarvis/goals/"
     }
+  ],
+  "headers": [
+    {
+      "source": "/jarvis-voice.js",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }]
+    },
+    {
+      "source": "/jarvis-live.js",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }]
+    }
   ]
 }
