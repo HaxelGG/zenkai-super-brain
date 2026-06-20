@@ -94,6 +94,8 @@ if (printOnly) {
   process.exit(0);
 }
 
+if (!apiKey) process.exit(1);
+
 const list = await api<{ data?: Variable[] }>("GET", "/api/v1/variables?limit=100", apiKey);
 if (!list.ok) {
   console.error(`GET /variables → ${list.status}: ${list.detail}`);

@@ -1,8 +1,17 @@
 /**
- * Proveedores de media · ElevenLabs · HeyGen · Higgsfield
+ * Proveedores de media · ElevenLabs · HeyGen · Higgsfield.
+ * Todos los fetch con timeout (no cuelgan el tick) y HeyGen con recolector
+ * de video (pollHeyGenVideo) para cerrar el ciclo de generación asíncrona.
  */
 import { synthesizeJarvisSpeech } from "../../jarvis/elevenlabs-speak.js";
-import type { MediaJob, MediaProvider } from "../types.js";
+import type { MediaJob } from "../types.js";
+import { fetchWithTimeout } from "./http.js";
+
+const HEYGEN_BASE = process.env.HEYGEN_API_URL?.trim() || "https://api.heygen.com";
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((r) => setTimeout(r, ms));
+}
 
 export async function runVoicePipeline(text: string): Promise<MediaJob> {
   if (!process.env.ELEVENLABS_API_KEY?.trim()) {
@@ -14,42 +23,78 @@ export async function runVoicePipeline(text: string): Promise<MediaJob> {
     return {
       provider: "elevenlabs",
       status: "done",
-      artifactUrl: `data:${result.mimeType};base64,${result.audio.toString("base64").slice(0, 40)}…`,
+      artifactUrl: `elevenlabs:audio:${result.audio.length}bytes`,
     };
   } catch (e) {
-    return {
-      provider: "elevenlabs",
-      status: "error",
-      error: e instanceof Error ? e.message : String(e),
-    };
+    return { provider: "elevenlabs", status: "error", error: e instanceof Error ? e.message : String(e) };
   }
 }
 
-export async function runHeyGenVideo(script: string, title?: string): Promise<MediaJob> {
+/**
+ * Recolector: consulta el estado del video HeyGen hasta completarse.
+ * Lo usa el job-runner/scheduler (con maxDuration alto), no el request corto.
+ */
+export async function pollHeyGenVideo(
+  videoId: string,
+  maxMs = 240_000,
+): Promise<{ status: "completed" | "failed" | "processing"; url?: string; error?: string }> {
+  const apiKey = process.env.HEYGEN_API_KEY?.trim();
+  if (!apiKey) return { status: "failed", error: "HEYGEN_API_KEY missing" };
+  const started = Date.now();
+  while (Date.now() - started < maxMs) {
+    let res: Response;
+    try {
+      res = await fetchWithTimeout(
+        `${HEYGEN_BASE}/v1/video_status.get?video_id=${encodeURIComponent(videoId)}`,
+        { headers: { "x-api-key": apiKey, accept: "application/json" } },
+        15_000,
+      );
+    } catch (e) {
+      return { status: "processing", error: e instanceof Error ? e.message : String(e) };
+    }
+    if (!res.ok) return { status: "processing", error: `status HTTP ${res.status}` };
+    const body = (await res.json()) as { data?: { status?: string; video_url?: string; error?: unknown } };
+    const s = body.data?.status || "processing";
+    if (s === "completed") return { status: "completed", url: body.data?.video_url };
+    if (s === "failed") return { status: "failed", error: String(body.data?.error || "heygen failed") };
+    await sleep(5000);
+  }
+  return { status: "processing", error: "poll timeout" };
+}
+
+/**
+ * Genera un video con avatar HeyGen. Por defecto encola y devuelve `processing`
+ * (apto para funciones serverless cortas). Si se pasa awaitMs > 0, espera la URL
+ * final hasta ese límite (apto para jobs con maxDuration alto).
+ */
+export async function runHeyGenVideo(script: string, title?: string, awaitMs = 0): Promise<MediaJob> {
   const apiKey = process.env.HEYGEN_API_KEY?.trim();
   const avatarId = process.env.HEYGEN_AVATAR_ID?.trim();
-  if (!apiKey) {
-    return { provider: "heygen", status: "skipped", error: "HEYGEN_API_KEY missing" };
-  }
+  if (!apiKey) return { provider: "heygen", status: "skipped", error: "HEYGEN_API_KEY missing" };
 
   try {
-    const res = await fetch("https://api.heygen.com/v2/video/generate", {
-      method: "POST",
-      headers: {
-        "x-api-key": apiKey,
-        "content-type": "application/json",
+    const res = await fetchWithTimeout(
+      `${HEYGEN_BASE}/v2/video/generate`,
+      {
+        method: "POST",
+        headers: { "x-api-key": apiKey, "content-type": "application/json" },
+        body: JSON.stringify({
+          video_inputs: [
+            {
+              character: { type: "avatar", avatar_id: avatarId || "default" },
+              voice: {
+                type: "text",
+                input_text: script.slice(0, 1500),
+                voice_id: process.env.HEYGEN_VOICE_ID || undefined,
+              },
+            },
+          ],
+          title: title || "ZENKAI Content",
+          dimension: { width: 1080, height: 1920 },
+        }),
       },
-      body: JSON.stringify({
-        video_inputs: [
-          {
-            character: { type: "avatar", avatar_id: avatarId || "default" },
-            voice: { type: "text", input_text: script.slice(0, 1500), voice_id: process.env.HEYGEN_VOICE_ID || undefined },
-          },
-        ],
-        title: title || "ZENKAI Content",
-        dimension: { width: 1080, height: 1920 },
-      }),
-    });
+      30_000,
+    );
 
     if (!res.ok) {
       const detail = await res.text();
@@ -58,11 +103,20 @@ export async function runHeyGenVideo(script: string, title?: string): Promise<Me
 
     const body = (await res.json()) as { data?: { video_id?: string } };
     const videoId = body.data?.video_id;
-    return {
-      provider: "heygen",
-      status: videoId ? "processing" : "queued",
-      artifactUrl: videoId ? `heygen:video:${videoId}` : undefined,
-    };
+    if (!videoId) return { provider: "heygen", status: "queued" };
+
+    if (awaitMs > 0) {
+      const polled = await pollHeyGenVideo(videoId, awaitMs);
+      if (polled.status === "completed") {
+        return { provider: "heygen", status: "done", artifactUrl: polled.url || `heygen:video:${videoId}` };
+      }
+      if (polled.status === "failed") {
+        return { provider: "heygen", status: "error", error: polled.error, artifactUrl: `heygen:video:${videoId}` };
+      }
+      return { provider: "heygen", status: "processing", artifactUrl: `heygen:video:${videoId}`, error: polled.error };
+    }
+
+    return { provider: "heygen", status: "processing", artifactUrl: `heygen:video:${videoId}` };
   } catch (e) {
     return { provider: "heygen", status: "error", error: e instanceof Error ? e.message : String(e) };
   }
@@ -71,23 +125,18 @@ export async function runHeyGenVideo(script: string, title?: string): Promise<Me
 export async function runHiggsfieldClip(prompt: string): Promise<MediaJob> {
   const apiKey = process.env.HIGGSFIELD_API_KEY?.trim();
   const baseUrl = process.env.HIGGSFIELD_API_URL?.trim() || "https://api.higgsfield.ai/v1";
-  if (!apiKey) {
-    return { provider: "higgsfield", status: "skipped", error: "HIGGSFIELD_API_KEY missing" };
-  }
+  if (!apiKey) return { provider: "higgsfield", status: "skipped", error: "HIGGSFIELD_API_KEY missing" };
 
   try {
-    const res = await fetch(`${baseUrl}/generations`, {
-      method: "POST",
-      headers: {
-        authorization: `Bearer ${apiKey}`,
-        "content-type": "application/json",
+    const res = await fetchWithTimeout(
+      `${baseUrl}/generations`,
+      {
+        method: "POST",
+        headers: { authorization: `Bearer ${apiKey}`, "content-type": "application/json" },
+        body: JSON.stringify({ prompt: prompt.slice(0, 800), aspect_ratio: "9:16", duration_seconds: 8 }),
       },
-      body: JSON.stringify({
-        prompt: prompt.slice(0, 800),
-        aspect_ratio: "9:16",
-        duration_seconds: 8,
-      }),
-    });
+      30_000,
+    );
 
     if (!res.ok) {
       const detail = await res.text();
@@ -107,7 +156,7 @@ export async function runHiggsfieldClip(prompt: string): Promise<MediaJob> {
 
 export async function runMediaPipeline(
   script: string,
-  opts: { voice?: boolean; video?: boolean; videoProvider?: "heygen" | "higgsfield" },
+  opts: { voice?: boolean; video?: boolean; videoProvider?: "heygen" | "higgsfield"; awaitVideoMs?: number },
 ): Promise<MediaJob[]> {
   const jobs: MediaJob[] = [];
   if (opts.voice) jobs.push(await runVoicePipeline(script));
@@ -115,7 +164,7 @@ export async function runMediaPipeline(
     const provider = opts.videoProvider || (process.env.HEYGEN_API_KEY ? "heygen" : "higgsfield");
     jobs.push(
       provider === "heygen"
-        ? await runHeyGenVideo(script)
+        ? await runHeyGenVideo(script, undefined, opts.awaitVideoMs ?? 0)
         : await runHiggsfieldClip(script),
     );
   }
