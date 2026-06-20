@@ -19,7 +19,11 @@
     "wmill:push": "tsx scripts/windmill/sync.ts push",
     "jarvis:setup-sprint1": "tsx scripts/airtable/setup-sprint1-schema.ts",
     "jarvis:telegram": "tsx scripts/jarvis/telegram-bridge.ts",
-    "jarvis:telegram:setup": "tsx scripts/jarvis/telegram-setup.ts"
+    "jarvis:telegram:setup": "tsx scripts/jarvis/telegram-setup.ts",
+    "agency:status": "tsx scripts/agency/cli.ts status",
+    "agency:director": "tsx scripts/agency/cli.ts director",
+    "agency:content": "tsx scripts/agency/cli.ts content",
+    "agency:agent": "tsx scripts/agency/cli.ts agent"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.92.0",

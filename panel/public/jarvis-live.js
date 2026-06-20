@@ -251,12 +251,31 @@
     }
   }
 
+  async function refreshAgencyStatus() {
+    try {
+      const res = await fetch(apiUrl("/api/agency/status"), fetchOpts);
+      if (!res.ok) return;
+      const data = await res.json();
+      window.__jvAgencyOnline = !!data.ok;
+      const badge = document.getElementById("jv-agency-badge");
+      if (!badge) return;
+      const configured = (data.providers || []).filter((p) => p.configured).length;
+      const total = (data.providers || []).length;
+      badge.dataset.state = data.ok ? "online" : "offline";
+      badge.textContent = "AGENCY";
+      badge.title = data.message || `Proveedores ${configured}/${total}`;
+    } catch {
+      /* silent */
+    }
+  }
+
   async function refreshAll() {
-    await Promise.all([refreshBrainStatus(), refreshCrm(), refreshFinance(), refreshSocial()]);
+    await Promise.all([refreshBrainStatus(), refreshAgencyStatus(), refreshCrm(), refreshFinance(), refreshSocial()]);
   }
 
   refreshAll();
   setInterval(refreshCrm, 5 * 60 * 1000);
   setInterval(refreshFinance, 8 * 60 * 1000);
   setInterval(refreshSocial, 10 * 60 * 1000);
+  setInterval(refreshAgencyStatus, 12 * 60 * 1000);
 })();
