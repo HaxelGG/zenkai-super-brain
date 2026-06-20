@@ -20,16 +20,20 @@ existen. **No** se construye backend nuevo.
 ## Arquitectura
 
 ```
-panel/src/pages/jarvis/terminal.astro   → markup full-screen + carga de scripts
+panel/src/pages/jarvis/terminal.astro   → markup full-screen + <script> que importa el runtime (Astro lo bundlea)
 panel/src/lib/jarvis/terminal/
   parse-input.ts                         → parseInput() (puro, testeable)
-  slash-commands.ts                      → registro de comandos (datos puros + resolución)
-panel/public/jarvis-terminal.js          → runtime REPL (DOM, historial, autocompletado, bridge)
+  slash-commands.ts                      → registro + resolución (puro; usa JarvisRouteKey de ../config)
+  render.ts                              → renderBlock(): OutputBlock → HTMLElement
+  main.ts                                → runtime REPL (DOM, historial, autocompletado, bridge, voz)
 panel/src/styles/jarvis.css              → bloque .jvt-* (estética terminal)
 ```
 
-Los dos `.ts` contienen la lógica pura y testeable; `jarvis-terminal.js` es el runtime que los usa (cargado como
-módulo) y maneja DOM, fetch y voz. Separar permite testear `parseInput` y la resolución de comandos sin DOM.
+El runtime vive en `src/` (no `public/`) para que Astro lo bundlee y pueda importar los módulos tipados; un archivo
+en `public/` se sirve crudo y no puede importar TS. `terminal.astro` lo carga con
+`<script>import "../../lib/jarvis/terminal/main";</script>`. `window.JarvisVoice` (de `jarvis-voice.js` en
+`public/`, cargado aparte) se accede como global. Los puros (`parse-input`, `slash-commands`) y `render` (con
+happy-dom) se testean sin navegador.
 
 ## Módulos e interfaces
 
