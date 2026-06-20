@@ -1569,6 +1569,12 @@ body.jv-drawer-lock {
   color: var(--jv-text-dim);
 }
 
+.jv-voice-widget[data-state="wake"] .jv-voice-status::after {
+  content: " · 👏👏";
+  opacity: 0.5;
+  font-size: 0.9em;
+}
+
 @media (min-width: 640px) {
   .jv-voice-status {
     max-width: 6rem;

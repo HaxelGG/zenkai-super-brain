@@ -30,12 +30,16 @@
 
       <div class="flex flex-wrap gap-2 mb-4">
         <label class="jv-voice-toggle">
-          <input type="checkbox" id="jv-wake-toggle" />
-          <span>Wake word activo</span>
+          <input type="checkbox" id="jv-wake-toggle" checked />
+          <span>Wake · palmadas + voz</span>
         </label>
         <label class="jv-voice-toggle">
           <input type="checkbox" id="jv-tts-eleven" checked />
           <span>Voz ElevenLabs</span>
+        </label>
+        <label class="jv-voice-toggle">
+          <input type="checkbox" id="jv-boot-sound" checked />
+          <span>Tema boot JARVIS</span>
         </label>
       </div>
 
@@ -69,10 +73,10 @@
 
       <footer class="mt-4 pt-3 border-t border-[var(--jv-border)]">
         <p class="jv-mono text-[10px] text-[var(--jv-text-dim)] leading-relaxed">
-          Hablá completo · pausá ~2 s o decí «listo» para enviar · orb = hablar ya · ⋯ panel de voz
+          Wake: 2 palmadas seguidas · o decí «Jarvis despierta» · orb = hablar ya · ⋯ panel de voz
         </p>
         <p class="jv-mono text-[10px] text-[var(--jv-text-dim)] mt-1 opacity-70">
-          Simple → Haiku/DeepSeek · Complejo → Reasoner/Sonnet
+          Tema boot: sintetizado al encender · podés poner tu MP3 en /sounds/jarvis-boot.mp3
         </p>
       </footer>
     </div>
@@ -85,6 +89,7 @@
   const API_KEY_LEGACY = "zenkai_api_key";
   const WAKE_KEY = "zenkai_jarvis_wake_enabled";
   const ELEVEN_KEY = "zenkai_jarvis_use_elevenlabs";
+  const BOOT_KEY = "zenkai_jarvis_boot_sound";
 
   const shell = document.getElementById("jv-voice-console");
   const backdrop = document.getElementById("jv-voice-console-backdrop");
@@ -92,6 +97,7 @@
   const apiKeyInput = document.getElementById("jv-api-key");
   const wakeToggle = document.getElementById("jv-wake-toggle");
   const elevenToggle = document.getElementById("jv-tts-eleven");
+  const bootToggle = document.getElementById("jv-boot-sound");
 
   function openConsole() {
     shell?.removeAttribute("hidden");
@@ -154,13 +160,23 @@
   }
 
   if (wakeToggle instanceof HTMLInputElement) {
-    try { wakeToggle.checked = localStorage.getItem(WAKE_KEY) === "1"; } catch { /* ignore */ }
+    try {
+      wakeToggle.checked = localStorage.getItem(WAKE_KEY) !== "0";
+    } catch { /* ignore */ }
     wakeToggle.addEventListener("change", () => {
       try { localStorage.setItem(WAKE_KEY, wakeToggle.checked ? "1" : "0"); } catch { /* ignore */ }
       if (window.JarvisVoice) {
         if (wakeToggle.checked) window.JarvisVoice.enableWakeMode?.();
         else window.JarvisVoice.disableWakeMode?.();
       }
+    });
+  }
+
+  if (bootToggle instanceof HTMLInputElement) {
+    try { bootToggle.checked = localStorage.getItem(BOOT_KEY) !== "0"; } catch { /* ignore */ }
+    bootToggle.addEventListener("change", () => {
+      window.JarvisSounds?.setBootEnabled?.(bootToggle.checked);
+      try { localStorage.setItem(BOOT_KEY, bootToggle.checked ? "1" : "0"); } catch { /* ignore */ }
     });
   }
 

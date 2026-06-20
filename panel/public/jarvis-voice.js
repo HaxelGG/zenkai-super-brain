@@ -14,8 +14,8 @@
   const ELEVEN_KEY = "zenkai_jarvis_use_elevenlabs";
 
   const STATUS = {
-    idle: "Clic en orb · hablá",
-    wake: "Decí «Jarvis despierta»…",
+    idle: "2 palmadas · o clic en orb",
+    wake: "2 palmadas o «Jarvis despierta»…",
     listening: "Te escucho…",
     processing: "Procesando…",
     speaking: "Hablando…",
@@ -132,7 +132,7 @@
   let silenceTimer = null;
   let recognitionStarting = false;
   let wakeArmGuard = false;
-  const VOICE_JS_VER = "20260620d";
+  const VOICE_JS_VER = "20260620f";
 
   const transcriptEl = document.getElementById("jv-voice-transcript");
   const runsEl = document.getElementById("jv-voice-runs");
@@ -220,6 +220,7 @@
     if (!t) return null;
     const patterns = [
       /^jarvis\s+(wake\s*up|wakeup|despierta|despertar|despiertate|activa|activate|online|en linea)(?:\s+(.*))?$/,
+      /^(despierta|despertar|despiertate|activa|wake\s*up|wakeup)\s+jarvis(?:\s+(.*))?$/,
       /^(wake\s*up|wakeup)\s+jarvis(?:\s+(.*))?$/,
       /^(hey|hola|oye|ok)\s+jarvis(?:\s+(.*))?$/,
       /^jarvis\s+(.+)$/,
@@ -521,6 +522,7 @@
     mode = "command";
     btn.classList.add("jv-voice-active");
     logTranscript(`Wake: ${final}`, "wake");
+    window.JarvisSounds?.playWakeChime?.();
 
     if (trailing) {
       handleTranscript(trailing, true);
@@ -754,6 +756,20 @@
     }
   }
 
+  function startClapWake() {
+    if (!window.JarvisClapWake) return;
+    window.JarvisClapWake.start(() => {
+      if (!wakeEnabled || mode !== "wake") return;
+      if (state === "processing" || state === "speaking") return;
+      showVoiceToast("👏 Wake detectado");
+      onWakeDetected("👏👏 palmadas", null);
+    });
+  }
+
+  function stopClapWake() {
+    window.JarvisClapWake?.stop?.();
+  }
+
   function enableWakeMode() {
     wakeEnabled = true;
     try {
@@ -769,8 +785,10 @@
       wakeArmGuard = false;
     }, 800);
     void ensureMicPermission().then((ok) => {
-      if (ok) startRecognition("wake");
-      else disableWakeMode();
+      if (ok) {
+        startRecognition("wake");
+        startClapWake();
+      } else disableWakeMode();
     });
   }
 
@@ -779,6 +797,7 @@
     mode = "off";
     clearTimeout(commandTimeout);
     stopRecognition();
+    stopClapWake();
     stopAudio();
     btn.classList.remove("jv-voice-active");
     try {
@@ -896,7 +915,23 @@
     showVoiceToast("Usá Chrome o Edge para JARVIS por voz");
   }
 
+  function initAutoWake() {
+    if (!SpeechRecognition) return;
+    try {
+      if (localStorage.getItem(WAKE_KEY) === "0") return;
+      if (localStorage.getItem(WAKE_KEY) !== "1") {
+        localStorage.setItem(WAKE_KEY, "1");
+      }
+    } catch {
+      return;
+    }
+    setTimeout(() => {
+      if (!wakeEnabled && mode === "off") enableWakeMode();
+    }, 2600);
+  }
+
   initBrowserHints();
+  initAutoWake();
 
   window.JarvisVoice = {
     setState,

@@ -15,13 +15,25 @@
   </div>
 </div>
 
-<script>
-  const boot = document.getElementById("jv-boot");
-  if (boot && !sessionStorage.getItem("jv-booted")) {
-    sessionStorage.setItem("jv-booted", "1");
-    setTimeout(() => boot.classList.add("jv-boot-out"), 2200);
-    setTimeout(() => boot.remove(), 2800);
-  } else if (boot) {
-    boot.remove();
-  }
+<script is:inline>
+  (function () {
+    function runBoot() {
+      const boot = document.getElementById("jv-boot");
+      if (!boot) return;
+      if (sessionStorage.getItem("jv-booted")) {
+        boot.remove();
+        return;
+      }
+      sessionStorage.setItem("jv-booted", "1");
+      window.JarvisSounds?.playBoot?.();
+      setTimeout(function () {
+        boot.classList.add("jv-boot-out");
+      }, 2200);
+      setTimeout(function () {
+        boot.remove();
+      }, 2800);
+    }
+    if (window.JarvisSounds) runBoot();
+    else window.addEventListener("jarvis-sounds-ready", runBoot, { once: true });
+  })();
 </script>

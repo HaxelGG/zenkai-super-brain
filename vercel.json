@@ -35,8 +35,8 @@
     }
   ],
   "rewrites": [
-    { "source": "/api/jarvis/:path*", "destination": "/api/jarvis" },
-    { "source": "/api/agency/:path*", "destination": "/api/agency" },
+    { "source": "/api/jarvis/:path*", "destination": "/api/jarvis?route=:path*" },
+    { "source": "/api/agency/:path*", "destination": "/api/agency?route=:path*" },
     {
       "source": "/",
       "has": [{ "type": "host", "value": "jarvis.zenkai.systems" }],
@@ -99,6 +99,14 @@
     }
   ],
   "headers": [
+    {
+      "source": "/jarvis-sounds.js",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }]
+    },
+    {
+      "source": "/jarvis-clap-wake.js",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }]
+    },
     {
       "source": "/jarvis-voice.js",
       "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }]
