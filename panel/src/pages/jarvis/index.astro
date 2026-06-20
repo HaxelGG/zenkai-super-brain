@@ -12,6 +12,7 @@ import LineChart from "../../components/jarvis/LineChart.astro";
 import ActivityFeed from "../../components/jarvis/ActivityFeed.astro";
 import AgentStatusGrid from "../../components/jarvis/AgentStatusGrid.astro";
 import IntelligenceBrief from "../../components/jarvis/IntelligenceBrief.astro";
+import JarvisDepartmentGrid from "../../components/jarvis/JarvisDepartmentGrid.astro";
 import SectorChart from "../../components/jarvis/SectorChart.astro";
 import DualBarChart from "../../components/jarvis/DualBarChart.astro";
 import { getJarvisData } from "../../lib/jarvis";
@@ -51,6 +52,8 @@ const onlineSystems = data.systemConnections.filter((s) => s.status === "online"
   <HudPanel class="mb-6" padding="lg" animate={2}>
     <IntelligenceBrief brief={data.intelligence} compact />
   </HudPanel>
+
+  <JarvisDepartmentGrid />
 
   <section class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-2.5 mb-6" data-jv-social-root>
     {data.kpis.map((kpi, i) => (

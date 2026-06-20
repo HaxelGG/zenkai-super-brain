@@ -17,8 +17,6 @@ interface Props {
 
 const { department, path } = Astro.props;
 const routes = resolveJarvisRoutes(Astro.url.hostname);
-const hubKey = department.id as JarvisRouteKey;
-const hubHref = routes[hubKey];
 
 const icons: Record<string, string> = {
   pipeline: "M3 3v18h18M7 16l4-8 4 5 5-9",
@@ -35,7 +33,6 @@ const icons: Record<string, string> = {
 function iconFor(key: JarvisRouteKey): string {
   if (key === "pipeline" || key === "finanzas") return icons.pipeline;
   if (key === "clientes") return icons.clients;
-  if (key === "finanzas") return icons.finance;
   if (key === "social") return icons.social;
   if (key === "tareas" || key === "jobs") return icons.tasks;
   if (key === "agentes") return icons.agents;
