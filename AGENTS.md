@@ -44,6 +44,7 @@ This is an N3–N4 program (per `CLAUDE.md` §3); built incrementally as self-co
 - **Sales** HERMES + **Ops** ATLAS tasks/goals (`scripts/agency/departments/`).
 - CLI: `npm run agency:status` · `agency:director` · `agency:content` · `agency:agent`.
 - n8n export: `jarvis/n8n/ZENKAI-M-05-content-pipeline.json`.
+- **Sprint 2 autonomous stack:** department pipelines (finance, IA/FORGE, strategy/ZEUS, marketing calendar/publish), Meta publish provider, Airtable Tasks/ContentCalendar/Goals schema (`npm run agency:setup-schema`), Vercel cron `/api/agency/cron/tick`, Windmill scripts `f/agency/*`, n8n M-06/OPS-01/IA-01, keys audit `GET /api/agency/keys`.
 
 **Provider keys/accounts cannot be created by the agent**, and the agent **cannot create new GitHub repos or Vercel/Airtable/n8n connections** — those need each provider's dashboard and are user-only external actions. The git remote token is scoped to this repo only; `gh` is read-only. The only credential generated in-repo is the app's own `ZENKAI_API_KEY` (random bearer token; set it as a secret, never commit it).
 

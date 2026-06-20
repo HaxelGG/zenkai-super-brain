@@ -1,7 +1,8 @@
 /**
  * MUSE + ARES · pipeline de contenido automatizado
  */
-import { dispatchJarvisEvent } from "../../jarvis/n8n-dispatch.js";
+import { saveCalendarItem } from "../calendar.js";
+import { dispatchAgencyEvent, dispatchToN8nResult } from "../dispatch.js";
 import { callAgencyLlm } from "../llm.js";
 import { getAgent } from "../registry.js";
 import { runMediaPipeline } from "../providers/media.js";
@@ -71,7 +72,7 @@ Español LATAM · hook en 3 segundos · valor concreto · CTA suave.`,
   });
 
   let dispatch: AgencyRunResult["dispatch"];
-  const d = await dispatchJarvisEvent("agency.marketing.content", {
+  const d = await dispatchAgencyEvent("agency.marketing.content", {
     platform,
     format,
     hook: content.hook,
@@ -81,7 +82,18 @@ Español LATAM · hook en 3 segundos · valor concreto · CTA suave.`,
     schedule: input.schedule,
     mediaJobs: media.map((m) => ({ provider: m.provider, status: m.status })),
   });
-  dispatch = { event: "agency.marketing.content", ok: d.ok, error: d.ok ? undefined : d.error };
+  dispatch = dispatchToN8nResult(d);
+
+  await saveCalendarItem({
+    title: content.hook.slice(0, 80),
+    platform,
+    format,
+    status: input.schedule ? "scheduled" : "draft",
+    scheduledAt: input.schedule,
+    hook: content.hook,
+    caption: content.caption,
+    script: content.script,
+  });
 
   const task = await createOpsTask({
     title: `Publicar ${format} · ${platform}: ${content.hook.slice(0, 50)}`,

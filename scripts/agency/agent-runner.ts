@@ -3,7 +3,7 @@
  */
 import { fetchJarvisOps, formatJarvisOpsContext } from "../jarvis/ops-context.js";
 import { callAgencyLlm } from "./llm.js";
-import { dispatchJarvisEvent } from "../jarvis/n8n-dispatch.js";
+import { dispatchAgencyEvent, dispatchToN8nResult } from "./dispatch.js";
 import { getAgent } from "./registry.js";
 import type { AgencyRunInput, AgencyRunResult, AgentId } from "./types.js";
 import { createOpsTask } from "./departments/operations.js";
@@ -36,12 +36,12 @@ export async function runAgent(input: AgencyRunInput): Promise<AgencyRunResult> 
   const primaryEvent = agent.n8nEvents[0];
   let dispatch: AgencyRunResult["dispatch"];
   if (primaryEvent) {
-    const d = await dispatchJarvisEvent(primaryEvent, {
+    const d = await dispatchAgencyEvent(primaryEvent, {
       agent: agentId,
       instruction: input.instruction,
       reply: llm.text,
     });
-    dispatch = { event: primaryEvent, ok: d.ok, error: d.ok ? undefined : d.error };
+    dispatch = dispatchToN8nResult(d);
   }
 
   const task = await createOpsTask({

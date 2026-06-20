@@ -30,7 +30,7 @@ export type DepartmentId =
 
 export type LlmTier = "opus" | "sonnet" | "haiku" | "deepseek";
 
-export type MediaProvider = "elevenlabs" | "heygen" | "higgsfield" | "none";
+export type MediaProvider = "elevenlabs" | "heygen" | "higgsfield" | "meta" | "none";
 
 export type AgentDefinition = {
   id: AgentId;

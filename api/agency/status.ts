@@ -13,10 +13,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
 
   const providers = getProviderCapabilities();
   const configured = providers.filter((p) => p.configured).length;
+  const keys = auditRequiredKeys();
 
   res.status(200).json({
-    ok: configured >= 3,
+    ok: keys.ready,
     director: JARVIS_DIRECTOR,
+    keys: {
+      ready: keys.ready,
+      criticalMissing: keys.criticalMissing,
+      missing: keys.requirements.filter((r) => !r.configured).map((r) => r.env),
+    },
     agents: Object.values(AGENT_REGISTRY).map((a) => ({
       id: a.id,
       department: a.department,
@@ -27,9 +33,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     providers,
     mcp: getMcpManifest(),
     departments: getDirectorStatus().departments,
-    message:
-      configured >= 3
-        ? `Agencia operativa · ${configured}/${providers.length} proveedores`
-        : "Configurá API keys en Vercel para operación autónoma",
+    message: keys.ready
+      ? `Agencia autónoma lista · ${configured}/${providers.length} proveedores`
+      : `Faltan keys críticas: ${keys.criticalMissing.join(", ")}`,
   });
 }

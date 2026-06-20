@@ -19,7 +19,7 @@ export type JarvisRunResult = {
   source: "deepseek" | "anthropic" | "local" | "clasificar";
   timestamp: string;
   dispatch?: { event: string; ok: boolean; error?: string };
-  meta?: { fallbackReason?: string; contextLive?: boolean; agency?: boolean; department?: string };
+  meta?: { fallbackReason?: string; contextLive?: boolean; agency?: boolean; department?: string; jobId?: string };
 };
 
 function makeId(): string {
@@ -103,7 +103,7 @@ export async function executeJarvisInstruction(instruction: string): Promise<Jar
           source: primary.provider,
           timestamp,
           dispatch: primary.dispatch,
-          meta: { agency: true, department: routed.department, contextLive: !!primary.meta?.contextLive },
+          meta: { agency: true, department: routed.department, contextLive: !!primary.meta?.contextLive, jobId: primary.meta?.jobId as string | undefined },
         };
       }
     } catch (e) {
