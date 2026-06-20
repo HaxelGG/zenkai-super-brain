@@ -13,7 +13,7 @@ Configurar en **n8n Cloud → Settings → Variables** (una sola vez).
 | `N8N_JARVIS_CALLBACK_URL` | `https://zenkai-growth-systems.app.n8n.cloud/webhook/jarvis-callback` | ✅ M-03 |
 | `SLACK_WEBHOOK_URL` | Slack incoming webhook | Opcional |
 
-Los workflows Sprint 1 **no usan credenciales vault** — leen secrets vía `$env.*`.
+Los workflows Sprint 1 **no usan credenciales vault** — leen secrets vía `$vars.*` (Settings → Variables).
 
 ## Verificar
 

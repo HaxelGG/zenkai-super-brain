@@ -18,11 +18,11 @@
     {
       "parameters": {
         "method": "GET",
-        "url": "=https://api.airtable.com/v0/{{ $env.AIRTABLE_BASE_VENTAS }}/Leads/{{ $json.body?.record_id || $json.record_id }}",
+        "url": "=https://api.airtable.com/v0/{{ $vars.AIRTABLE_BASE_VENTAS }}/Leads/{{ $json.body?.record_id || $json.record_id }}",
         "authentication": "none",
         "sendHeaders": true,
         "headerParameters": {
-          "parameters": [{ "name": "Authorization", "value": "=Bearer {{ $env.AIRTABLE_TOKEN }}" }]
+          "parameters": [{ "name": "Authorization", "value": "=Bearer {{ $vars.AIRTABLE_TOKEN }}" }]
         },
         "options": {}
       },
@@ -50,7 +50,7 @@
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "x-api-key", "value": "={{ $env.ANTHROPIC_API_KEY }}" },
+            { "name": "x-api-key", "value": "={{ $vars.ANTHROPIC_API_KEY }}" },
             { "name": "anthropic-version", "value": "2023-06-01" },
             { "name": "content-type", "value": "application/json" }
           ]
@@ -79,12 +79,12 @@
     {
       "parameters": {
         "method": "PATCH",
-        "url": "=https://api.airtable.com/v0/{{ $env.AIRTABLE_BASE_VENTAS }}/Leads/{{ $json.recordId }}",
+        "url": "=https://api.airtable.com/v0/{{ $vars.AIRTABLE_BASE_VENTAS }}/Leads/{{ $json.recordId }}",
         "authentication": "none",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "Authorization", "value": "=Bearer {{ $env.AIRTABLE_TOKEN }}" },
+            { "name": "Authorization", "value": "=Bearer {{ $vars.AIRTABLE_TOKEN }}" },
             { "name": "Content-Type", "value": "application/json" }
           ]
         },
@@ -131,7 +131,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "={{ $env.N8N_JARVIS_CALLBACK_URL || 'https://zenkai-growth-systems.app.n8n.cloud/webhook/jarvis-callback' }}",
+        "url": "={{ $vars.N8N_JARVIS_CALLBACK_URL || 'https://zenkai-growth-systems.app.n8n.cloud/webhook/jarvis-callback' }}",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ { event: 'lead.hot', record_id: $('Parse Score').first().json.recordId, score: $('Parse Score').first().json.score, etapa: $('Parse Score').first().json.etapa, brief: $('Parse Score').first().json.brief } }}",
