@@ -1430,6 +1430,7 @@ body.jv-drawer-lock {
   .jv-voice-widget[data-state="processing"] .jv-voice-status,
   .jv-voice-widget[data-state="speaking"] .jv-voice-status {
     display: inline;
+    max-width: 14rem;
   }
 }
 
@@ -1537,6 +1538,37 @@ body.jv-voice-console-open .jv-voice-console-panel {
 .jv-voice-log-out { color: var(--jv-cyan); }
 .jv-voice-log-wake { color: var(--jv-gold); }
 .jv-voice-log-dim { color: var(--jv-text-dim); }
+
+.jv-voice-tier {
+  display: inline-block;
+  margin: 0 4px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.jv-voice-tier-simple {
+  background: rgba(52, 211, 153, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(52, 211, 153, 0.25);
+}
+.jv-voice-tier-complex {
+  background: rgba(255, 184, 0, 0.12);
+  color: var(--jv-gold);
+  border: 1px solid rgba(255, 184, 0, 0.25);
+}
+.jv-voice-model {
+  display: inline-block;
+  margin: 0 4px;
+  font-size: 9px;
+  color: var(--jv-text-dim);
+  opacity: 0.85;
+}
+
+.jv-voice-widget[data-state="listening"] .jv-voice-core {
+  box-shadow: 0 0 20px rgba(52, 211, 153, 0.25);
+}
 
 @media (prefers-reduced-motion: reduce) {
   [data-jv-animate],
