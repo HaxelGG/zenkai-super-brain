@@ -4,32 +4,14 @@
   "buildCommand": "cd panel && npm run build",
   "outputDirectory": "panel/dist",
   "functions": {
-    "api/*.ts": {
-      "maxDuration": 60
-    },
-    "api/jarvis/run.ts": {
-      "maxDuration": 60
-    },
-    "api/jarvis/speak.ts": {
-      "maxDuration": 30
-    },
-    "api/agency/cron/tick.ts": {
+    "api/**/*.ts": {
       "maxDuration": 120
-    },
-    "api/agency/director.ts": {
-      "maxDuration": 300
-    },
-    "api/agency/marketing/content.ts": {
-      "maxDuration": 90
-    },
-    "api/agency/jobs.ts": {
-      "maxDuration": 300
     }
   },
   "crons": [
     {
       "path": "/api/agency/cron/tick",
-      "schedule": "0 13,19,1 * * *"
+      "schedule": "0 13 * * *"
     }
   ],
   "redirects": [
@@ -53,6 +35,8 @@
     }
   ],
   "rewrites": [
+    { "source": "/api/jarvis/:path*", "destination": "/api/jarvis" },
+    { "source": "/api/agency/:path*", "destination": "/api/agency" },
     {
       "source": "/",
       "has": [{ "type": "host", "value": "jarvis.zenkai.systems" }],

@@ -22,7 +22,7 @@
   };
 
   /** Espera silencio antes de enviar comando (no cortar al hablar largo) */
-  const SILENCE_COMMIT_MS = 2400;
+  const SILENCE_COMMIT_MS = 1600;
   /** Tiempo máximo escuchando sin actividad */
   const COMMAND_IDLE_MS = 45000;
   const COMMIT_TRIGGERS =
@@ -132,7 +132,7 @@
   let silenceTimer = null;
   let recognitionStarting = false;
   let wakeArmGuard = false;
-  const VOICE_JS_VER = "20260620c";
+  const VOICE_JS_VER = "20260620d";
 
   const transcriptEl = document.getElementById("jv-voice-transcript");
   const runsEl = document.getElementById("jv-voice-runs");
@@ -279,10 +279,14 @@
 
     const run = () => {
       synthUtterance = new SpeechSynthesisUtterance(text.slice(0, 500));
-      synthUtterance.lang = "es-ES";
-      synthUtterance.rate = 1;
+      synthUtterance.lang = "es-CO";
+      synthUtterance.rate = 0.98;
+      synthUtterance.pitch = 0.95;
       const voices = window.speechSynthesis.getVoices();
-      const esVoice = voices.find((v) => /es/i.test(v.lang));
+      const esVoice =
+        voices.find((v) => /es-CO/i.test(v.lang)) ||
+        voices.find((v) => /es-MX/i.test(v.lang)) ||
+        voices.find((v) => /es/i.test(v.lang));
       if (esVoice) synthUtterance.voice = esVoice;
       synthUtterance.onend = () => {
         synthUtterance = null;
@@ -368,7 +372,7 @@
         headers: authHeaders(),
         body: JSON.stringify({ instruction }),
       },
-      45000,
+      55000,
     );
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
@@ -389,11 +393,11 @@
   function notifyRunSource(result) {
     if (!result?.source) return;
     if (result.source === "deepseek" || result.source === "anthropic") {
-      const tier = result.meta?.tier ? ` · ${result.meta.tier}` : "";
-      const model = result.meta?.model ? ` · ${result.meta.model}` : "";
+      const who = result.source === "anthropic" ? "Claude" : "DeepSeek";
+      showVoiceToast(`${who} respondió`);
       if (result.dispatch?.event) {
         const d = result.dispatch.ok ? "enviado" : "falló";
-        showVoiceToast(`n8n ${d}${tier}${model}`);
+        showVoiceToast(`n8n ${d} · ${result.dispatch.event}`);
       }
       return;
     }
@@ -564,6 +568,7 @@
     silenceTimer = setTimeout(() => {
       const pending = `${commandBuffer} ${lastInterim}`.replace(/\s+/g, " ").trim();
       if (pending && mode === "command" && state === "listening") {
+        statusEl.textContent = "Enviando…";
         commitCommandTranscript(pending);
       }
     }, SILENCE_COMMIT_MS);
@@ -614,6 +619,7 @@
     stopRecognition();
     btn.classList.remove("jv-voice-active");
     mode = "off";
+    showVoiceToast("Procesando…");
     void handleTranscript(cmd, false);
     return true;
   }
@@ -661,7 +667,6 @@
         if (interim) {
           lastInterim = interim;
           updateListeningStatus();
-          scheduleSilenceCommit();
         }
         if (final) {
           appendToCommandBuffer(final);

@@ -1,10 +1,6 @@
-/**
- * Auth para endpoints POST del orquestador JARVIS (run · speak).
- * Acepta Bearer ZENKAI_API_KEY o origen del dashboard (panel/jarvis).
- */
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { hasValidBearer } from "../_auth.js";
-import { isAllowedJarvisOrigin, setJarvisCors } from "./_origins.js";
+import { hasValidBearer } from "./auth.js";
+import { isAllowedJarvisOrigin, setJarvisCors } from "./jarvis-origins.js";
 
 export function setOrchestratorCors(req: VercelRequest, res: VercelResponse): void {
   setJarvisCors(req, res, "POST, OPTIONS", "Authorization, Content-Type");

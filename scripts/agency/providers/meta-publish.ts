@@ -48,13 +48,18 @@ export async function publishToInstagram(input: PublishInput): Promise<PublishRe
     }
 
     const container = await graphPost<{ id: string }>(token, `${igId}/media`, {
-      image_url: input.imageUrl,
+      image_url: input.imageUrl!,
       caption: input.caption.slice(0, 2200),
     });
     const published = await graphPost<{ id: string }>(token, `${igId}/media_publish`, {
       creation_id: container.id,
     });
-    return { provider: "meta", status: "done", artifactUrl: input.imageUrl, postId: published.id };
+    return {
+      provider: "meta",
+      status: "done",
+      artifactUrl: input.imageUrl ?? "",
+      postId: published.id,
+    };
   } catch (e) {
     return {
       provider: "meta",

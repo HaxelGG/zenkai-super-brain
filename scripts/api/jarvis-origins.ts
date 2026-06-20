@@ -1,6 +1,3 @@
-/**
- * Validación estricta de orígenes para endpoints JARVIS (sin prefix-match).
- */
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
 const ALLOWED_ORIGINS = new Set([

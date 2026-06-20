@@ -96,6 +96,25 @@ export function isJarvisBrainEnabled(): boolean {
   return getBrainCapabilities().brain;
 }
 
+const LLM_TIMEOUT_SIMPLE_MS = 22_000;
+const LLM_TIMEOUT_COMPLEX_MS = 38_000;
+
+async function fetchLlm(url: string, init: RequestInit, tier: JarvisComplexityTier): Promise<Response> {
+  const ms = tier === "complex" ? LLM_TIMEOUT_COMPLEX_MS : LLM_TIMEOUT_SIMPLE_MS;
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), ms);
+  try {
+    return await fetch(url, { ...init, signal: ctrl.signal });
+  } catch (err) {
+    if (err instanceof Error && err.name === "AbortError") {
+      throw new Error(`LLM timeout after ${ms}ms`);
+    }
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 function trimSpeech(text: string, max = 220): string {
   const t = text.replace(/\s+/g, " ").trim();
   return t.length <= max ? t : `${t.slice(0, max - 1)}…`;
@@ -168,7 +187,7 @@ async function callDeepSeek(
   const isReasoner = model.includes("reasoner");
   let res: Response;
   try {
-    res = await fetch("https://api.deepseek.com/chat/completions", {
+    res = await fetchLlm("https://api.deepseek.com/chat/completions", {
       method: "POST",
       headers: {
         "content-type": "application/json",
@@ -187,7 +206,7 @@ async function callDeepSeek(
           },
         ],
       }),
-    });
+    }, tier);
   } catch (err) {
     return {
       ok: false,
@@ -202,10 +221,16 @@ async function callDeepSeek(
   }
 
   const body = (await res.json()) as {
-    choices?: { message?: { content?: unknown } }[];
+    choices?: { message?: { content?: unknown; reasoning_content?: unknown } }[];
   };
-  const content = body.choices?.[0]?.message?.content;
-  if (typeof content !== "string") {
+  const msg = body.choices?.[0]?.message;
+  const content =
+    typeof msg?.content === "string"
+      ? msg.content
+      : typeof msg?.reasoning_content === "string"
+        ? msg.reasoning_content
+        : null;
+  if (!content) {
     return { ok: false, error: "deepseek empty response" };
   }
 
@@ -218,6 +243,13 @@ async function callDeepSeek(
       data: parseBrainOutput(extractJson(content)),
     };
   } catch (err) {
+    if (isReasoner) {
+      const chatModel = process.env.DEEPSEEK_MODEL?.trim() || "deepseek-chat";
+      if (chatModel !== model) {
+        console.warn("[jarvis/brain] reasoner json failed · retry deepseek-chat");
+        return callDeepSeek(chatModel, context, instruction, tier);
+      }
+    }
     return {
       ok: false,
       error: "invalid brain json",
@@ -237,7 +269,7 @@ async function callAnthropic(
 
   let res: Response;
   try {
-    res = await fetch("https://api.anthropic.com/v1/messages", {
+    res = await fetchLlm("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
         "content-type": "application/json",
@@ -255,7 +287,7 @@ async function callAnthropic(
           },
         ],
       }),
-    });
+    }, tier);
   } catch (err) {
     return {
       ok: false,
@@ -307,7 +339,12 @@ export async function askJarvisBrain(
     `[jarvis/brain] tier=${route.tier} score=${route.score} ds=${route.deepseekModel} ant=${route.anthropicModel}`,
   );
 
-  if (!route.preferAnthropic && caps.deepseek) {
+  const skipDeepseek =
+    route.preferAnthropic ||
+    process.env.JARVIS_SKIP_DEEPSEEK?.trim() === "1" ||
+    process.env.JARVIS_LLM_PROVIDER?.toLowerCase() === "anthropic";
+
+  if (!skipDeepseek && caps.deepseek) {
     const ds = await callDeepSeek(route.deepseekModel, opsContext, instruction, route.tier);
     if (ds.ok) return ds;
     console.warn("[jarvis/brain] deepseek failed:", ds.error, ds.detail ?? "");

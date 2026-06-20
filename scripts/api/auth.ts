@@ -1,11 +1,8 @@
 // Helper de auth · Bearer token con timing-safe comparison.
-// Compartido entre /api/clasificar y /api/protocolo.
 
 import { timingSafeEqual } from "node:crypto";
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
-// Devuelve true si el request está autenticado · false si no (y manda 401 directamente).
-// Patrón: requireBearer(req, res); if (!authed) return;
 export function requireBearer(req: VercelRequest, res: VercelResponse): boolean {
   const expected = process.env.ZENKAI_API_KEY;
   if (!expected) {
@@ -20,7 +17,6 @@ export function requireBearer(req: VercelRequest, res: VercelResponse): boolean 
   }
 
   const provided = auth.slice("Bearer ".length);
-  // timingSafeEqual requiere buffers de igual longitud; padeamos al máximo de los dos
   const a = Buffer.from(provided);
   const b = Buffer.from(expected);
   if (a.length !== b.length) {
@@ -35,7 +31,6 @@ export function requireBearer(req: VercelRequest, res: VercelResponse): boolean 
   return true;
 }
 
-/** Valida Bearer sin enviar respuesta HTTP (para auth compuesta). */
 export function hasValidBearer(req: VercelRequest): boolean {
   const expected = process.env.ZENKAI_API_KEY;
   if (!expected) return false;

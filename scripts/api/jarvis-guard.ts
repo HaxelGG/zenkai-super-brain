@@ -1,9 +1,5 @@
-/**
- * Guard interno para endpoints JARVIS dashboard.
- * Asume Vercel Deployment Protection en producción.
- */
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { isAllowedJarvisOrigin, setJarvisCors } from "./_origins.js";
+import { isAllowedJarvisOrigin, setJarvisCors } from "./jarvis-origins.js";
 
 export function allowDashboardRequest(req: VercelRequest, res: VercelResponse): boolean {
   setJarvisCors(req, res, "GET, OPTIONS", "Accept");

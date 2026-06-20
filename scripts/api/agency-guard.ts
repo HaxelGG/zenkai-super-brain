@@ -1,9 +1,6 @@
-/**
- * Auth compuesta para endpoints agency · GET (dashboard) + POST (Bearer / dashboard)
- */
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { hasValidBearer } from "../_auth.js";
-import { isAllowedJarvisOrigin, setJarvisCors } from "../jarvis/_origins.js";
+import { hasValidBearer } from "./auth.js";
+import { isAllowedJarvisOrigin, setJarvisCors } from "./jarvis-origins.js";
 
 export function allowAgencyJobsRequest(req: VercelRequest, res: VercelResponse): boolean {
   const method = req.method || "GET";
