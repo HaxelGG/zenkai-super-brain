@@ -73,11 +73,12 @@ const getClient = (): Anthropic => {
   return cachedClient;
 };
 
-export const generateProposal = async (texto: string): Promise<GenerateResult> => {
-  const parsed = InputSchema.safeParse({ texto });
-  if (!parsed.success) {
-    return { ok: false, status: 400, error: 'invalid input', detail: parsed.error.flatten().fieldErrors };
-  }
+type RawResult =
+  | { ok: true; raw: string }
+  | { ok: false; status: number; error: string; detail?: unknown };
+
+// Proveedor Anthropic (Claude). Mantiene el comportamiento original.
+const callAnthropic = async (texto: string): Promise<RawResult> => {
   let client: Anthropic;
   try {
     client = getClient();
@@ -90,7 +91,7 @@ export const generateProposal = async (texto: string): Promise<GenerateResult> =
       model: 'claude-sonnet-4-6',
       max_tokens: 1024,
       system: SYSTEM_PROMPT,
-      messages: [{ role: 'user', content: parsed.data.texto }],
+      messages: [{ role: 'user', content: texto }],
     });
   } catch (err) {
     const detail = err instanceof Error ? err.message : String(err);
@@ -100,7 +101,54 @@ export const generateProposal = async (texto: string): Promise<GenerateResult> =
   if (!textBlock || textBlock.type !== 'text') {
     return { ok: false, status: 502, error: 'modelo no devolvió texto' };
   }
-  const raw = textBlock.text.trim();
+  return { ok: true, raw: textBlock.text };
+};
+
+// Proveedor DeepSeek (API compatible OpenAI · via fetch, sin dependencias nuevas).
+const callDeepseek = async (texto: string): Promise<RawResult> => {
+  const apiKey = import.meta.env.DEEPSEEK_API_KEY;
+  if (!apiKey) {
+    return { ok: false, status: 500, error: 'server misconfigured', detail: 'DEEPSEEK_API_KEY missing' };
+  }
+  const model = import.meta.env.DEEPSEEK_MODEL || 'deepseek-chat';
+  let res: Response;
+  try {
+    res = await fetch('https://api.deepseek.com/chat/completions', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', authorization: `Bearer ${apiKey}` },
+      body: JSON.stringify({
+        model,
+        max_tokens: 1024,
+        response_format: { type: 'json_object' },
+        messages: [
+          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'user', content: texto },
+        ],
+      }),
+    });
+  } catch (err) {
+    return { ok: false, status: 502, error: 'deepseek call failed', detail: err instanceof Error ? err.message : String(err) };
+  }
+  if (!res.ok) {
+    const detail = await res.text().catch(() => '');
+    return { ok: false, status: 502, error: 'deepseek call failed', detail: detail.slice(0, 300) };
+  }
+  let body: unknown;
+  try {
+    body = await res.json();
+  } catch (err) {
+    return { ok: false, status: 502, error: 'deepseek call failed', detail: String(err) };
+  }
+  const raw = (body as { choices?: { message?: { content?: unknown } }[] })?.choices?.[0]?.message?.content;
+  if (typeof raw !== 'string') {
+    return { ok: false, status: 502, error: 'modelo no devolvió texto' };
+  }
+  return { ok: true, raw };
+};
+
+// Parsea el texto crudo del modelo a una propuesta validada (compartido entre proveedores).
+const parseAndValidate = (rawText: string): GenerateResult => {
+  const raw = rawText.trim();
   const jsonStart = raw.indexOf('{');
   const jsonEnd = raw.lastIndexOf('}');
   if (jsonStart === -1 || jsonEnd === -1) {
@@ -117,6 +165,26 @@ export const generateProposal = async (texto: string): Promise<GenerateResult> =
     return { ok: false, status: 502, error: 'schema del modelo inválido', detail: { errors: validated.error.flatten(), raw: parsedJson } };
   }
   return { ok: true, data: validated.data };
+};
+
+const resolveProvider = (): 'anthropic' | 'deepseek' => {
+  const explicit = (import.meta.env.LLM_PROVIDER || '').toLowerCase();
+  if (explicit === 'deepseek' || explicit === 'anthropic') return explicit;
+  if (!import.meta.env.ANTHROPIC_API_KEY && import.meta.env.DEEPSEEK_API_KEY) return 'deepseek';
+  return 'anthropic';
+};
+
+export const generateProposal = async (texto: string): Promise<GenerateResult> => {
+  const parsed = InputSchema.safeParse({ texto });
+  if (!parsed.success) {
+    return { ok: false, status: 400, error: 'invalid input', detail: parsed.error.flatten().fieldErrors };
+  }
+  const provider = resolveProvider();
+  const llm = provider === 'deepseek'
+    ? await callDeepseek(parsed.data.texto)
+    : await callAnthropic(parsed.data.texto);
+  if (!llm.ok) return llm;
+  return parseAndValidate(llm.raw);
 };
 
 export const _resetCache = () => {
