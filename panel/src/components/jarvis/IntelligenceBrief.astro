@@ -41,6 +41,16 @@ const generated = new Date(brief.generatedAt).toLocaleString("es-CO", {
 
   <p class="text-[var(--jv-text-sm)] text-[var(--jv-text-muted)] leading-relaxed mb-3">{brief.summary}</p>
 
+  {compact && brief.insights.length > 0 && (
+    <ul class="space-y-1.5 border-t border-[var(--jv-border)] pt-3">
+      {brief.insights.slice(0, 2).map((item) => (
+        <li class="text-[var(--jv-text-xs)] text-[var(--jv-text-muted)] leading-snug flex gap-2">
+          <span class="text-[var(--jv-cyan)] shrink-0">▸</span>{item}
+        </li>
+      ))}
+    </ul>
+  )}
+
   {!compact && (
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
       <div>

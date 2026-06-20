@@ -47,15 +47,19 @@ function sparklinePath(values: number[], w: number, h: number): string {
 
 <div class="jv-metric p-3 sm:p-3.5 relative overflow-hidden" data-jv-animate={String((index % 8) + 1)}>
   <div class="jv-label mb-1.5">{metric.label}</div>
-  <div class="flex items-end justify-between gap-2">
-    <div
-      class:list={["jv-metric-value", metric.value === "—" && "jv-metric-empty opacity-60"]}
-      data-count-up={metric.value !== "—" ? metric.value : undefined}
-      data-jv-live={liveKey}
-      data-jv-social={socialData}
-    >
-      {metric.value}
-    </div>
+  <div class="flex items-end justify-between gap-2 min-h-[1.75rem]">
+    {metric.value === "—" ? (
+      <span class="jv-metric-empty" data-jv-live={liveKey} data-jv-social={socialData}>Sin dato</span>
+    ) : (
+      <div
+        class="jv-metric-value"
+        data-count-up={metric.value}
+        data-jv-live={liveKey}
+        data-jv-social={socialData}
+      >
+        {metric.value}
+      </div>
+    )}
     {metric.sparkline && metric.sparkline.length > 1 && metric.value !== "—" && (
       <svg width="52" height="22" viewBox="0 0 52 22" class="shrink-0 opacity-50" aria-hidden="true">
         <path d={sparklinePath(metric.sparkline, 52, 22)} fill="none" stroke="#00D4FF" stroke-width="1.25" stroke-linecap="round" />

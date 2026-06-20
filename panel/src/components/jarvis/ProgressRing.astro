@@ -8,27 +8,33 @@ interface Props {
 
 const { current, target, label = "Meta 2026", format = "usd" } = Astro.props;
 
-const pct = Math.min(100, Math.round((current / target) * 100));
+const isEmpty = current <= 0;
+const pct = isEmpty ? 0 : Math.min(100, Math.round((current / target) * 100));
 const circumference = 2 * Math.PI * 42;
 const offset = circumference - (pct / 100) * circumference;
 
 function formatValue(n: number): string {
+  if (n <= 0) return "—";
   if (format === "usd") return `$${(n / 1000).toFixed(1)}K`;
   if (format === "percent") return `${n}%`;
   return String(n);
 }
+
+const targetLabel = format === "usd" ? `$${Math.round(target / 1000)}K USD` : formatValue(target);
 ---
 
 <div class="flex items-center gap-4" data-jv-animate="2">
-  <div class="relative w-[88px] h-[88px] shrink-0">
+  <div class="relative w-[88px] h-[88px] shrink-0" class:list={[{ "opacity-70": isEmpty }]}>
     <svg viewBox="0 0 100 100" class="w-full h-full -rotate-90">
       <circle cx="50" cy="50" r="42" fill="none" class="jv-ring-track" stroke-width="5" />
-      <circle
-        cx="50" cy="50" r="42" fill="none" class="jv-ring-fill"
-        stroke-width="5" stroke-linecap="round"
-        stroke-dasharray={circumference} stroke-dashoffset={offset}
-        style="transition: stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1)"
-      />
+      {!isEmpty && (
+        <circle
+          cx="50" cy="50" r="42" fill="none" class="jv-ring-fill"
+          stroke-width="5" stroke-linecap="round"
+          stroke-dasharray={circumference} stroke-dashoffset={offset}
+          style="transition: stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1)"
+        />
+      )}
       <defs>
         <linearGradient id="jv-ring-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
           <stop offset="0%" stop-color="#1E6FFF" />
@@ -37,12 +43,25 @@ function formatValue(n: number): string {
       </defs>
     </svg>
     <div class="absolute inset-0 flex flex-col items-center justify-center">
-      <span class="jv-mono text-[var(--jv-text-md)] font-semibold text-[var(--jv-cyan)]" data-count-up={String(pct)}>{pct}%</span>
+      {isEmpty ? (
+        <span class="jv-mono text-[var(--jv-text-2xs)] text-[var(--jv-text-dim)]">—</span>
+      ) : (
+        <span class="jv-mono text-[var(--jv-text-md)] font-semibold text-[var(--jv-cyan)]" data-count-up={String(pct)}>{pct}%</span>
+      )}
     </div>
   </div>
   <div>
     <div class="jv-label">{label}</div>
-    <div class="jv-metric-value jv-metric-value-lg mt-0.5" data-count-up={formatValue(current)}>{formatValue(current)}</div>
-    <div class="jv-mono text-[var(--jv-text-dim)] mt-0.5">de {format === "usd" ? "$100K USD" : formatValue(target)}</div>
+    {isEmpty ? (
+      <>
+        <div class="jv-metric-value jv-metric-empty mt-0.5">Sin dato</div>
+        <div class="jv-mono text-[var(--jv-text-dim)] mt-0.5">Registra revenue en CRM</div>
+      </>
+    ) : (
+      <>
+        <div class="jv-metric-value jv-metric-value-lg mt-0.5" data-count-up={formatValue(current)}>{formatValue(current)}</div>
+        <div class="jv-mono text-[var(--jv-text-dim)] mt-0.5">de {targetLabel}</div>
+      </>
+    )}
   </div>
 </div>

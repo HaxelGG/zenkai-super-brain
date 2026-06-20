@@ -1,7 +1,5 @@
 /**
- * JARVIS Voice Orb · idle | wake | listening | processing | speaking
- * Wake word: "Jarvis despierta", "Jarvis wake up", "Hey Jarvis", etc.
- * Web Speech API (Chrome/Edge). TTS vía speechSynthesis.
+ * JARVIS Orquestador · voz + wake word + API run/speak (ElevenLabs)
  */
 (function () {
   const widget = document.getElementById("jv-voice");
@@ -10,9 +8,13 @@
   if (!widget || !btn || !statusEl) return;
 
   const WAKE_KEY = "zenkai_jarvis_wake_enabled";
+  const API_KEY_STORAGE = "zenkai_jarvis_api_key";
+  const RUNS_KEY = "zenkai_jarvis_runs";
+  const ELEVEN_KEY = "zenkai_jarvis_use_elevenlabs";
+
   const STATUS = {
     idle: "En línea",
-    wake: "Di «Jarvis despierta»…",
+    wake: "Escuchando wake…",
     listening: "Escuchando…",
     processing: "Procesando…",
     speaking: "Hablando…",
@@ -25,13 +27,81 @@
   ];
 
   let state = "idle";
-  let mode = "off"; // off | wake | command
+  let mode = "off";
   let recognition = null;
   let wakeEnabled = false;
   let commandTimeout = null;
   let synthUtterance = null;
+  let currentAudio = null;
+
+  const transcriptEl = document.getElementById("jv-voice-transcript");
+  const runsEl = document.getElementById("jv-voice-runs");
 
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  function getApiKey() {
+    try {
+      return localStorage.getItem(API_KEY_STORAGE) || "";
+    } catch {
+      return "";
+    }
+  }
+
+  function useElevenLabs() {
+    try {
+      return localStorage.getItem(ELEVEN_KEY) !== "0";
+    } catch {
+      return true;
+    }
+  }
+
+  function authHeaders() {
+    const h = { "Content-Type": "application/json" };
+    const key = getApiKey();
+    if (key) h.Authorization = `Bearer ${key}`;
+    return h;
+  }
+
+  function logTranscript(line, kind) {
+    if (!transcriptEl) return;
+    const row = document.createElement("div");
+    row.className = `jv-voice-log-line jv-voice-log-${kind || "info"}`;
+    row.textContent = line;
+    transcriptEl.prepend(row);
+    while (transcriptEl.children.length > 24) transcriptEl.lastChild?.remove();
+  }
+
+  function saveRun(run) {
+    try {
+      const prev = JSON.parse(localStorage.getItem(RUNS_KEY) || "[]");
+      prev.unshift(run);
+      localStorage.setItem(RUNS_KEY, JSON.stringify(prev.slice(0, 20)));
+    } catch {
+      /* ignore */
+    }
+    renderRuns();
+  }
+
+  function renderRuns() {
+    if (!runsEl) return;
+    let runs = [];
+    try {
+      runs = JSON.parse(localStorage.getItem(RUNS_KEY) || "[]");
+    } catch {
+      runs = [];
+    }
+    runsEl.innerHTML = "";
+    if (!runs.length) {
+      runsEl.innerHTML = '<div class="jv-voice-log-line jv-voice-log-dim">Sin runs aún.</div>';
+      return;
+    }
+    runs.slice(0, 8).forEach((r) => {
+      const row = document.createElement("div");
+      row.className = "jv-voice-log-line";
+      row.innerHTML = `<span class="jv-voice-log-dim">${new Date(r.timestamp).toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" })}</span> · ${r.speech || r.reply || r.instruction}`;
+      runsEl.appendChild(row);
+    });
+  }
 
   function norm(text) {
     return (text || "")
@@ -43,11 +113,9 @@
       .trim();
   }
 
-  /** Detecta frase de activación y devuelve el comando restante (string vacío = solo wake). */
   function parseWakePhrase(raw) {
     const t = norm(raw);
     if (!t) return null;
-
     const patterns = [
       /^jarvis\s+(wake\s*up|wakeup|despierta|despertar|despiertate|activa|activate|online|en linea)(?:\s+(.*))?$/,
       /^(wake\s*up|wakeup)\s+jarvis(?:\s+(.*))?$/,
@@ -55,7 +123,6 @@
       /^jarvis\s+(.+)$/,
       /^jarvis$/,
     ];
-
     for (let i = 0; i < patterns.length; i++) {
       const m = t.match(patterns[i]);
       if (!m) continue;
@@ -87,7 +154,11 @@
     btn.setAttribute("aria-pressed", next === "listening" || next === "wake" ? "true" : "false");
   }
 
-  function stopSynth() {
+  function stopAudio() {
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio = null;
+    }
     if (window.speechSynthesis?.speaking) window.speechSynthesis.cancel();
     synthUtterance = null;
   }
@@ -96,15 +167,11 @@
     return WAKE_GREETINGS[Math.floor(Math.random() * WAKE_GREETINGS.length)];
   }
 
-  function speak(text, onDone) {
+  function speakBrowser(text, onDone) {
     if (!text?.trim() || !window.speechSynthesis) {
-      setState(mode === "wake" ? "wake" : "idle");
       onDone?.();
       return;
     }
-    stopRecognition();
-    stopSynth();
-    setState("speaking");
     synthUtterance = new SpeechSynthesisUtterance(text.slice(0, 500));
     synthUtterance.lang = "es-CO";
     synthUtterance.rate = 1;
@@ -116,39 +183,120 @@
     window.speechSynthesis.speak(synthUtterance);
   }
 
-  function handleTranscript(text, fromWake) {
+  async function speak(text, onDone) {
+    if (!text?.trim()) {
+      onDone?.();
+      return;
+    }
+    stopRecognition();
+    stopAudio();
+    setState("speaking");
+    logTranscript(`JARVIS: ${text}`, "out");
+
+    if (useElevenLabs()) {
+      try {
+        const res = await fetch("/api/jarvis/speak", {
+          method: "POST",
+          headers: authHeaders(),
+          body: JSON.stringify({ text: text.slice(0, 500) }),
+        });
+        if (res.ok && res.headers.get("content-type")?.includes("audio")) {
+          const blob = await res.blob();
+          const url = URL.createObjectURL(blob);
+          currentAudio = new Audio(url);
+          currentAudio.onended = () => {
+            URL.revokeObjectURL(url);
+            currentAudio = null;
+            onDone?.();
+          };
+          currentAudio.onerror = () => {
+            URL.revokeObjectURL(url);
+            speakBrowser(text, onDone);
+          };
+          await currentAudio.play();
+          return;
+        }
+      } catch {
+        /* fallback */
+      }
+    }
+    speakBrowser(text, onDone);
+  }
+
+  async function runOrchestrator(instruction) {
+    const res = await fetch("/api/jarvis/run", {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify({ instruction }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || `HTTP ${res.status}`);
+    }
+    return res.json();
+  }
+
+  function localFallback(cmd, fromWake) {
+    const lower = norm(cmd);
+    let reply = "Entendido.";
+    let path = null;
+    if (/recap|resumen|estado/.test(lower)) reply = "Revisando el estado operativo.";
+    else if (/finanzas|revenue|ingresos/.test(lower)) {
+      reply = "Abriendo finanzas.";
+      path = "/jarvis/finanzas/";
+    } else if (/pipeline|leads/.test(lower)) {
+      reply = "Abriendo pipeline.";
+      path = "/jarvis/pipeline/";
+    } else if (/clientes/.test(lower)) {
+      reply = "Abriendo clientes.";
+      path = "/jarvis/clientes/";
+    } else if (/agentes/.test(lower)) {
+      reply = "Abriendo agentes.";
+      path = "/jarvis/agentes/";
+    } else if (/social|instagram/.test(lower)) {
+      reply = "Abriendo social.";
+      path = "/jarvis/social/";
+    } else if (/tareas/.test(lower)) {
+      reply = "Abriendo tareas.";
+      path = "/jarvis/tareas/";
+    } else if (fromWake && /^(hola|hey|buenos)/.test(lower)) reply = pickGreeting();
+
+    return {
+      id: `local_${Date.now()}`,
+      instruction: cmd,
+      reply,
+      speech: reply,
+      action: path ? { type: "navigate", path } : undefined,
+      source: "local",
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  async function handleTranscript(text, fromWake) {
     const cmd = text.trim();
     if (!cmd) {
       resumeAfterCommand();
       return;
     }
     setState("processing");
+    logTranscript(`Tú: ${cmd}`, "in");
     window.dispatchEvent(new CustomEvent("jarvis-voice-command", { detail: { text: cmd, wake: fromWake } }));
 
-    const lower = norm(cmd);
-    let reply = "Entendido.";
-    if (/recap|resumen|estado/.test(lower)) {
-      reply = "Revisando el estado operativo de ZENKAI.";
-    } else if (/finanzas|revenue|ingresos/.test(lower)) {
-      reply = "Abriendo métricas financieras.";
-      window.location.href = "/jarvis/finanzas/";
-    } else if (/pipeline|leads|clientes/.test(lower)) {
-      reply = "Consultando pipeline y CRM.";
-      window.location.href = "/jarvis/pipeline/";
-    } else if (/agentes|equipo/.test(lower)) {
-      reply = "Mostrando estado de agentes.";
-      window.location.href = "/jarvis/agentes/";
-    } else if (/social|instagram|meta/.test(lower)) {
-      reply = "Abriendo métricas sociales.";
-      window.location.href = "/jarvis/social/";
-    } else if (/tareas|pendientes/.test(lower)) {
-      reply = "Revisando tareas pendientes.";
-      window.location.href = "/jarvis/tareas/";
-    } else if (fromWake && /^(hola|hey|buenos|buenas)/.test(lower)) {
-      reply = pickGreeting();
+    let result;
+    try {
+      result = await runOrchestrator(cmd);
+    } catch {
+      result = localFallback(cmd, fromWake);
     }
 
-    speak(reply, resumeAfterCommand);
+    saveRun(result);
+    if (result.action?.type === "navigate" && result.action.path) {
+      setTimeout(() => {
+        window.location.href = result.action.path;
+      }, 900);
+    }
+
+    await speak(result.speech || result.reply, resumeAfterCommand);
   }
 
   function resumeAfterCommand() {
@@ -163,13 +311,14 @@
     }
   }
 
-  function onWakeDetected(raw, trailingCmd) {
+  function onWakeDetected(final, trailing) {
     stopRecognition();
     mode = "command";
     btn.classList.add("jv-voice-active");
+    logTranscript(`Wake: ${final}`, "wake");
 
-    if (trailingCmd) {
-      handleTranscript(trailingCmd, true);
+    if (trailing) {
+      handleTranscript(trailing, true);
       return;
     }
     speak(pickGreeting(), () => {
@@ -216,19 +365,16 @@
         else interim += t;
       }
 
-      const chunk = final || interim;
-      if (mode === "wake" && chunk) {
-        if (final) {
-          const trailing = parseWakePhrase(final);
-          if (trailing !== null) {
-            onWakeDetected(final, trailing);
-            return;
-          }
+      if (mode === "wake" && final) {
+        const trailing = parseWakePhrase(final);
+        if (trailing !== null) {
+          onWakeDetected(final, trailing);
+          return;
         }
-        if (interim && mode === "wake") {
-          statusEl.dataset.interim = "1";
-          statusEl.textContent = `«${interim.slice(0, 36)}»`;
-        }
+      }
+      if (mode === "wake" && interim) {
+        statusEl.dataset.interim = "1";
+        statusEl.textContent = `«${interim.slice(0, 36)}»`;
       }
 
       if (mode === "command" && final) {
@@ -251,25 +397,12 @@
         return;
       }
       if (ev.error === "not-allowed") {
-        statusEl.textContent = "Permiso de micrófono requerido";
-        wakeEnabled = false;
-        mode = "off";
-        setState("idle");
-        try {
-          localStorage.removeItem(WAKE_KEY);
-        } catch {
-          /* ignore */
-        }
+        statusEl.textContent = "Micrófono requerido";
+        disableWakeMode();
         return;
       }
-      if (ev.error !== "aborted") {
-        if (mode === "wake") {
-          setTimeout(() => startRecognition("wake"), 800);
-        } else {
-          statusEl.textContent = "Micrófono no disponible";
-          mode = "off";
-          setState("idle");
-        }
+      if (ev.error !== "aborted" && mode === "wake") {
+        setTimeout(() => startRecognition("wake"), 800);
       }
     };
 
@@ -317,10 +450,10 @@
     mode = "off";
     clearTimeout(commandTimeout);
     stopRecognition();
-    stopSynth();
+    stopAudio();
     btn.classList.remove("jv-voice-active");
     try {
-      localStorage.removeItem(WAKE_KEY);
+      localStorage.setItem(WAKE_KEY, "0");
     } catch {
       /* ignore */
     }
@@ -329,7 +462,7 @@
 
   function startCommandMode() {
     stopRecognition();
-    stopSynth();
+    stopAudio();
     mode = "command";
     btn.classList.add("jv-voice-active");
     setState("listening");
@@ -361,20 +494,16 @@
   });
 
   setState("idle");
+  renderRuns();
 
   if (SpeechRecognition) {
     try {
       if (localStorage.getItem(WAKE_KEY) === "1") {
-        statusEl.textContent = "Activando wake word…";
-        setTimeout(enableWakeMode, 600);
-      } else {
-        statusEl.textContent = "Pulsa orb · «Jarvis despierta»";
+        setTimeout(enableWakeMode, 800);
       }
     } catch {
-      statusEl.textContent = "Pulsa orb para activar voz";
+      /* ignore */
     }
-  } else {
-    statusEl.textContent = "Voz: Chrome/Edge";
   }
 
   window.JarvisVoice = {

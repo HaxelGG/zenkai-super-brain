@@ -32,7 +32,7 @@ const onlineSystems = data.systemConnections.filter((s) => s.status === "online"
     <div class="flex flex-col xl:flex-row xl:items-end xl:justify-between gap-5">
       <div>
         <div class="jv-label mb-2">ZENKAI · Intelligence Systems Online</div>
-        <h1 class="jv-greeting jv-typing-cursor">{data.greeting}</h1>
+        <h1 class="jv-greeting">{data.greeting}</h1>
         <p class="mt-1.5 jv-mono text-[var(--jv-text-muted)]">{data.dateLabel}</p>
         <div class="mt-3 flex flex-wrap gap-2">
           <SemaphoreBadge status={data.agencySemaphore} label="Estado agencia" />

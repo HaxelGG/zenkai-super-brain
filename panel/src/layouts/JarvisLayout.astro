@@ -7,6 +7,7 @@ import JarvisCommandPalette from "../components/jarvis/JarvisCommandPalette.astr
 import JarvisBoot from "../components/jarvis/JarvisBoot.astro";
 import DataSourceBadge from "../components/jarvis/DataSourceBadge.astro";
 import JarvisVoiceOrb from "../components/jarvis/JarvisVoiceOrb.astro";
+import JarvisVoiceConsole from "../components/jarvis/JarvisVoiceConsole.astro";
 import { JARVIS_URL, toJarvisCanonicalPath } from "../lib/jarvis/config";
 import type { DataSource } from "../lib/jarvis/types";
 
@@ -43,6 +44,7 @@ const canonical = new URL(toJarvisCanonicalPath(Astro.url.pathname), JARVIS_URL)
   <body>
     <JarvisBoot />
     <JarvisCommandPalette />
+    <JarvisVoiceConsole />
     <div id="jv-sync-toast" class="jv-sync-toast" aria-live="polite"></div>
     <div class="jarvis-scanline" aria-hidden="true"></div>
     <div class="jarvis-shell flex min-h-screen">

@@ -346,9 +346,11 @@
 }
 
 .jv-metric-empty {
-  font-size: var(--jv-text-md);
+  font-family: "Inter Variable", system-ui, sans-serif;
+  font-size: var(--jv-text-sm);
   color: var(--jv-text-dim);
   font-weight: 500;
+  letter-spacing: 0.01em;
 }
 
 .jarvis-sidebar {
@@ -980,14 +982,21 @@ body.jv-drawer-lock {
   display: none;
   font-size: var(--jv-text-2xs);
   color: var(--jv-text-dim);
-  max-width: 7rem;
+  max-width: 5.5rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-@media (min-width: 768px) {
-  .jv-voice-status {
+.jv-voice-widget[data-state="idle"] .jv-voice-status,
+.jv-voice-widget[data-state="wake"] .jv-voice-status {
+  display: none;
+}
+
+@media (min-width: 1280px) {
+  .jv-voice-widget[data-state="listening"] .jv-voice-status,
+  .jv-voice-widget[data-state="processing"] .jv-voice-status,
+  .jv-voice-widget[data-state="speaking"] .jv-voice-status {
     display: inline;
   }
 }
@@ -1005,6 +1014,76 @@ body.jv-drawer-lock {
 .jv-voice-widget[data-state="speaking"] .jv-voice-status {
   color: #a78bfa;
 }
+
+/* Voice console · orquestador */
+.jv-voice-console {
+  position: fixed;
+  inset: 0;
+  z-index: 10002;
+  pointer-events: none;
+}
+.jv-voice-console:not([hidden]) {
+  pointer-events: auto;
+}
+.jv-voice-console-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+}
+.jv-voice-console-panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(380px, 100vw);
+  transform: translateX(100%);
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  border-left: 1px solid var(--jv-border-bright);
+}
+body.jv-voice-console-open .jv-voice-console-panel {
+  transform: translateX(0);
+}
+.jv-voice-input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--jv-border);
+  border-radius: 4px;
+  background: rgba(0, 212, 255, 0.04);
+  color: var(--jv-text);
+  font-family: "JetBrains Mono Variable", monospace;
+  font-size: 11px;
+}
+.jv-voice-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--jv-text-muted);
+  cursor: pointer;
+}
+.jv-voice-log {
+  overflow-y: auto;
+  border: 1px solid var(--jv-border);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 8px;
+  font-family: "JetBrains Mono Variable", monospace;
+  font-size: 10px;
+  line-height: 1.5;
+}
+.jv-voice-log-line {
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(0, 212, 255, 0.06);
+  color: var(--jv-text-muted);
+}
+.jv-voice-log-line:last-child {
+  border-bottom: none;
+}
+.jv-voice-log-in { color: var(--jv-text); }
+.jv-voice-log-out { color: var(--jv-cyan); }
+.jv-voice-log-wake { color: var(--jv-gold); }
+.jv-voice-log-dim { color: var(--jv-text-dim); }
 
 @media (prefers-reduced-motion: reduce) {
   [data-jv-animate],

@@ -42,9 +42,11 @@
   }
 
   function patchText(selector, value) {
+    const empty = !value || value === "—";
     document.querySelectorAll(selector).forEach((el) => {
-      el.textContent = value;
-      el.classList.remove("jv-metric-empty", "opacity-60");
+      el.textContent = empty ? "Sin dato" : value;
+      el.classList.toggle("jv-metric-empty", empty);
+      el.classList.toggle("jv-metric-value", !empty);
     });
   }
 

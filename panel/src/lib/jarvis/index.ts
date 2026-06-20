@@ -34,11 +34,17 @@ const STAGE_LABELS: Record<PipelineLead["stage"], string> = {
 };
 
 const ECO_CAPACITY = 5;
+const EMPTY = "—";
 
 function fmtUsd(n: number): string {
-  if (n <= 0) return "—";
+  if (n <= 0) return EMPTY;
   if (n >= 1000) return `$${(n / 1000).toFixed(n >= 10000 ? 0 : 1)}K`;
   return `$${n.toLocaleString("en-US")}`;
+}
+
+function fmtPct(n: number, total: number): string {
+  if (total <= 0 || n <= 0) return EMPTY;
+  return `${Math.round((n / total) * 100)}%`;
 }
 
 function mapLiveLead(row: LiveLeadRow): PipelineLead {
@@ -85,79 +91,73 @@ function buildLiveKpis(
   finance: Awaited<ReturnType<typeof getJarvisFinanceSnapshot>>,
   hasToken: boolean,
 ): KpiMetric[] {
-  const hint = hasToken ? "Sin registros en CRM" : "Configura AIRTABLE_TOKEN";
-  const conversion =
-    leadsTotal > 0 && clientsActive > 0
-      ? `${Math.round((clientsActive / leadsTotal) * 100)}%`
-      : "—";
-  const capacityPct = clientsActive > 0 ? `${Math.round((clientsActive / ECO_CAPACITY) * 100)}%` : "—";
+  const conversion = fmtPct(clientsActive, leadsTotal);
+  const capacityPct = clientsActive > 0 ? `${Math.round((clientsActive / ECO_CAPACITY) * 100)}%` : EMPTY;
 
   return [
     {
       id: "revenue-ytd",
       label: "Revenue YTD",
-      value: finance ? fmtUsd(finance.revenueYtd) : "—",
+      value: finance ? fmtUsd(finance.revenueYtd) : EMPTY,
       caption: finance?.dealsWon
-        ? `${finance.dealsWon} deal(s) cerrados`
-        : finance
-          ? "Desde deals Airtable"
-          : hint,
+        ? `${finance.dealsWon} cierre(s) registrados`
+        : "Registra deals cerrados en CRM",
     },
     {
       id: "pipeline",
       label: "Pipeline ponderado",
-      value: finance ? fmtUsd(finance.pipelineWeighted) : "—",
+      value: finance ? fmtUsd(finance.pipelineWeighted) : EMPTY,
       caption: finance?.pipelineTotal
-        ? `$${finance.pipelineTotal.toLocaleString("en-US")} total estimado`
-        : hint,
+        ? `$${finance.pipelineTotal.toLocaleString("en-US")} estimado`
+        : "Asigna valor a leads en pipeline",
     },
     {
       id: "leads-week",
       label: "Leads CRM",
-      value: leadsTotal > 0 ? String(leadsTotal) : "—",
-      caption: leadsTotal > 0 ? `${leadsTotal} en base ventas` : hint,
+      value: leadsTotal > 0 ? String(leadsTotal) : EMPTY,
+      caption: leadsTotal > 0 ? "En base de ventas" : hasToken ? "Sin leads registrados" : "CRM pendiente de conectar",
     },
     {
       id: "clients",
       label: "Clientes activos",
-      value: clientsActive > 0 ? String(clientsActive) : "—",
-      caption: clientsActive > 0 ? "Estado Activo · Airtable" : hint,
+      value: clientsActive > 0 ? String(clientsActive) : EMPTY,
+      caption: clientsActive > 0 ? "Operación activa" : "Sin clientes activos",
     },
     {
       id: "conversion-rate",
       label: "Conversión lead→cliente",
       value: conversion,
-      caption: leadsTotal > 0 ? `${clientsActive}/${leadsTotal} convertidos` : hint,
+      caption: leadsTotal > 0 ? `${clientsActive} de ${leadsTotal} convertidos` : "Sin datos de conversión",
     },
     {
       id: "deals-total",
       label: "Deals en CRM",
-      value: finance?.dealsCount ? String(finance.dealsCount) : "—",
-      caption: finance?.avgDealUsd ? `Ticket prom. ${fmtUsd(finance.avgDealUsd)}` : hint,
+      value: finance?.dealsCount ? String(finance.dealsCount) : EMPTY,
+      caption: finance?.avgDealUsd ? `Ticket prom. ${fmtUsd(finance.avgDealUsd)}` : "Sin deals registrados",
     },
     {
       id: "run-rate",
       label: "Run rate mensual",
-      value: finance?.runRateMonthly ? fmtUsd(finance.runRateMonthly) : "—",
-      caption: finance ? `Meta ${fmtUsd(finance.runRateNeeded)}/mes` : hint,
+      value: finance?.runRateMonthly ? fmtUsd(finance.runRateMonthly) : EMPTY,
+      caption: finance ? `Meta ${fmtUsd(finance.runRateNeeded)}/mes` : "Calculado desde CRM",
     },
     {
       id: "capacity",
       label: "Capacidad Eco",
       value: capacityPct,
-      caption: clientsActive > 0 ? `${clientsActive}/${ECO_CAPACITY} clientes max` : hint,
+      caption: clientsActive > 0 ? `${clientsActive}/${ECO_CAPACITY} clientes` : "Tier Eco · máx. 5",
     },
     {
       id: "roas",
       label: "ROAS Meta Ads",
-      value: "—",
-      caption: "Conectar Meta Ads en Vercel",
+      value: EMPTY,
+      caption: "Conectar cuenta de anuncios",
     },
     {
       id: "engagement-ig",
       label: "Engagement IG",
-      value: "—",
-      caption: "Conectar Instagram en Vercel",
+      value: EMPTY,
+      caption: "Conectar Instagram Business",
     },
   ];
 }
@@ -171,26 +171,49 @@ function buildLiveIntelligence(
   clients: number,
   finance: Awaited<ReturnType<typeof getJarvisFinanceSnapshot>>,
 ): IntelligenceBrief {
-  const pipelineStr = finance?.pipelineWeighted ? fmtUsd(finance.pipelineWeighted) : "sin valorar";
-  const ytdStr = finance?.revenueYtd ? fmtUsd(finance.revenueYtd) : "—";
-  const conversion =
-    leads > 0 && clients > 0 ? `${Math.round((clients / leads) * 100)}%` : "—";
+  const pipelineStr = finance?.pipelineWeighted ? fmtUsd(finance.pipelineWeighted) : "sin valorar aún";
+  const ytdStr = finance?.revenueYtd ? fmtUsd(finance.revenueYtd) : "pendiente";
+  const conversion = fmtPct(clients, leads);
+  const capacityPct = clients > 0 ? Math.round((clients / ECO_CAPACITY) * 100) : 0;
+
+  let headline = "Operación en rampa · pipeline por activar";
+  if (leads > 0 && clients > 0) {
+    headline = `${leads} leads en seguimiento · ${clients} cliente(s) activo(s)`;
+  } else if (leads > 0) {
+    headline = `${leads} leads en CRM · sin clientes activos aún`;
+  }
+
+  const summary =
+    clients > 0
+      ? `Capacidad operativa al ${capacityPct}%. Revenue acumulado ${ytdStr} con pipeline ponderado ${pipelineStr}. Prioridad: convertir leads calificados y sostener entrega a clientes activos.`
+      : `Hay ${leads} prospecto(s) en seguimiento. Revenue YTD ${ytdStr} · pipeline ${pipelineStr}. Prioridad: cualificar leads y cerrar el primer cliente del trimestre.`;
 
   return {
-    headline: `${leads} leads en CRM · ${clients} cliente(s) activo(s)`,
-    summary: `Datos en vivo desde Airtable. Revenue YTD ${ytdStr} · pipeline ponderado ${pipelineStr}. Asigna valor_estimado_USD en leads para activar métricas de pipeline y run rate.`,
+    headline,
+    summary,
     insights: [
-      `${leads} prospectos en base VENTAS — priorizar cualificación con HERMES.`,
-      clients > 0 ? `${clients} cliente(s) activo(s) · capacidad Eco ${clients}/${ECO_CAPACITY}.` : "Sin clientes activos registrados en CRM.",
+      leads > 0
+        ? `${leads} prospectos en pipeline — HERMES debe priorizar score ≥7 esta semana.`
+        : "Sin leads en CRM — activar prospección con ARES.",
+      clients > 0
+        ? `${clients} cliente(s) activo(s) · margen de capacidad Eco ${ECO_CAPACITY - clients} slot(s).`
+        : "Sin clientes activos — enfocar cierre de propuestas pendientes.",
     ],
     risks: [
-      clients >= ECO_CAPACITY - 1 ? `Capacidad Eco al ${Math.round((clients / ECO_CAPACITY) * 100)}% — evaluar tier Pro.` : "Completa etapas y valores en Airtable para forecast preciso.",
-      finance && finance.dealsCount === 0 ? "Sin deals en tabla CRM — revenue YTD depende de pipeline ponderado." : "",
-    ].filter(Boolean),
+      capacityPct >= 80
+        ? `Capacidad Eco al ${capacityPct}% — evaluar upgrade a tier Pro antes de nuevo cliente.`
+        : finance && finance.pipelineWeighted <= 0
+          ? "Pipeline sin valorar — forecast financiero incompleto."
+          : "Run rate por debajo de meta si no se cierran deals en 30 días.",
+    ],
     opportunities: [
-      conversion !== "—" ? `Conversión lead→cliente: ${conversion}.` : "Registra cierres en Airtable para medir conversión.",
-      finance && finance.runRateNeeded > 0 ? `Run rate requerido: ${fmtUsd(finance.runRateNeeded)}/mes hacia meta $100K.` : "",
-    ].filter(Boolean),
+      conversion !== EMPTY
+        ? `Conversión actual ${conversion} — optimizar follow-up en etapa propuesta.`
+        : "Primer cierre del mes desbloquea métricas de conversión.",
+      finance && finance.runRateNeeded > 0
+        ? `Run rate objetivo ${fmtUsd(finance.runRateNeeded)}/mes hacia meta anual.`
+        : "Completar valores en leads para proyectar run rate.",
+    ],
     generatedAt: new Date().toISOString(),
     agent: "ZEUS",
     weekNumber: weekNumber(),

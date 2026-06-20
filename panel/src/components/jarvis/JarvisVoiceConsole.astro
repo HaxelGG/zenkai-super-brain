@@ -1,0 +1,127 @@
+---
+/** Panel deslizable del orquestador · transcript · runs · API key */
+---
+
+<div id="jv-voice-console" class="jv-voice-console" hidden aria-hidden="true">
+  <div class="jv-voice-console-backdrop" id="jv-voice-console-backdrop"></div>
+  <aside class="jv-voice-console-panel hud-panel" role="dialog" aria-labelledby="jv-voice-console-title">
+    <div class="hud-panel-inner p-4 sm:p-5 flex flex-col h-full">
+      <header class="flex items-start justify-between gap-3 mb-4">
+        <div>
+          <div class="jv-label mb-1">Orquestador</div>
+          <h2 id="jv-voice-console-title" class="jv-heading-section">JARVIS · Voz</h2>
+        </div>
+        <button type="button" id="jv-voice-console-close" class="jv-drawer-close" aria-label="Cerrar panel de voz">×</button>
+      </header>
+
+      <div class="mb-4 space-y-2">
+        <label for="jv-api-key" class="jv-label opacity-70">ZENKAI_API_KEY (opcional)</label>
+        <input
+          id="jv-api-key"
+          type="password"
+          class="jv-voice-input"
+          placeholder="Bearer token · localStorage"
+          autocomplete="off"
+        />
+        <p class="jv-mono text-[var(--jv-text-dim)] text-[10px] leading-relaxed">
+          Sin key usa origen del dashboard. Con key habilita runs desde cualquier cliente.
+        </p>
+      </div>
+
+      <div class="flex flex-wrap gap-2 mb-4">
+        <label class="jv-voice-toggle">
+          <input type="checkbox" id="jv-wake-toggle" checked />
+          <span>Wake word activo</span>
+        </label>
+        <label class="jv-voice-toggle">
+          <input type="checkbox" id="jv-tts-eleven" checked />
+          <span>Voz ElevenLabs</span>
+        </label>
+      </div>
+
+      <div class="flex-1 min-h-0 flex flex-col gap-3">
+        <section class="flex-1 min-h-0 flex flex-col">
+          <div class="jv-label mb-2 opacity-70">Transcript</div>
+          <div id="jv-voice-transcript" class="jv-voice-log flex-1 min-h-[120px]"></div>
+        </section>
+        <section class="flex-1 min-h-0 flex flex-col max-h-[40%]">
+          <div class="jv-label mb-2 opacity-70">Últimos runs</div>
+          <div id="jv-voice-runs" class="jv-voice-log flex-1 min-h-[80px]"></div>
+        </section>
+      </div>
+
+      <footer class="mt-4 pt-3 border-t border-[var(--jv-border)]">
+        <p class="jv-mono text-[10px] text-[var(--jv-text-dim)]">
+          Di «Jarvis despierta» · «Jarvis wake up» · o doble clic en el orb para hablar directo.
+        </p>
+      </footer>
+    </div>
+  </aside>
+</div>
+
+<script is:inline>
+  const CONSOLE_KEY = "zenkai_jarvis_console_open";
+  const API_KEY_STORAGE = "zenkai_jarvis_api_key";
+  const WAKE_KEY = "zenkai_jarvis_wake_enabled";
+  const ELEVEN_KEY = "zenkai_jarvis_use_elevenlabs";
+
+  const shell = document.getElementById("jv-voice-console");
+  const backdrop = document.getElementById("jv-voice-console-backdrop");
+  const closeBtn = document.getElementById("jv-voice-console-close");
+  const apiKeyInput = document.getElementById("jv-api-key");
+  const wakeToggle = document.getElementById("jv-wake-toggle");
+  const elevenToggle = document.getElementById("jv-tts-eleven");
+
+  function openConsole() {
+    shell?.removeAttribute("hidden");
+    shell?.setAttribute("aria-hidden", "false");
+    document.body.classList.add("jv-voice-console-open");
+    try { localStorage.setItem(CONSOLE_KEY, "1"); } catch { /* ignore */ }
+  }
+
+  function closeConsole() {
+    shell?.setAttribute("hidden", "");
+    shell?.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("jv-voice-console-open");
+    try { localStorage.removeItem(CONSOLE_KEY); } catch { /* ignore */ }
+  }
+
+  closeBtn?.addEventListener("click", closeConsole);
+  backdrop?.addEventListener("click", closeConsole);
+
+  document.getElementById("jv-voice-btn")?.addEventListener("contextmenu", (e) => {
+    e.preventDefault();
+    openConsole();
+  });
+
+  if (apiKeyInput instanceof HTMLInputElement) {
+    try { apiKeyInput.value = localStorage.getItem(API_KEY_STORAGE) || ""; } catch { /* ignore */ }
+    apiKeyInput.addEventListener("change", () => {
+      try {
+        const v = apiKeyInput.value.trim();
+        if (v) localStorage.setItem(API_KEY_STORAGE, v);
+        else localStorage.removeItem(API_KEY_STORAGE);
+      } catch { /* ignore */ }
+    });
+  }
+
+  if (wakeToggle instanceof HTMLInputElement) {
+    try { wakeToggle.checked = localStorage.getItem(WAKE_KEY) !== "0"; } catch { /* ignore */ }
+    wakeToggle.addEventListener("change", () => {
+      try { localStorage.setItem(WAKE_KEY, wakeToggle.checked ? "1" : "0"); } catch { /* ignore */ }
+      if (window.JarvisVoice) {
+        if (wakeToggle.checked) window.JarvisVoice.enableWakeMode?.();
+        else window.JarvisVoice.disableWakeMode?.();
+      }
+    });
+  }
+
+  if (elevenToggle instanceof HTMLInputElement) {
+    try { elevenToggle.checked = localStorage.getItem(ELEVEN_KEY) !== "0"; } catch { /* ignore */ }
+    elevenToggle.addEventListener("change", () => {
+      try { localStorage.setItem(ELEVEN_KEY, elevenToggle.checked ? "1" : "0"); } catch { /* ignore */ }
+    });
+  }
+
+  window.JarvisVoiceConsole = { open: openConsole, close: closeConsole };
+</script>
