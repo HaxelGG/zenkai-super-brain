@@ -1,0 +1,121 @@
+---
+import "../styles/global.css";
+import "../styles/jarvis.css";
+import JarvisSidebar from "../components/jarvis/JarvisSidebar.astro";
+import JarvisMobileDrawer from "../components/jarvis/JarvisMobileDrawer.astro";
+import JarvisCommandPalette from "../components/jarvis/JarvisCommandPalette.astro";
+import JarvisBoot from "../components/jarvis/JarvisBoot.astro";
+import DataSourceBadge from "../components/jarvis/DataSourceBadge.astro";
+import JarvisVoiceOrb from "../components/jarvis/JarvisVoiceOrb.astro";
+import JarvisVoiceConsole from "../components/jarvis/JarvisVoiceConsole.astro";
+import { JARVIS_URL, toJarvisCanonicalPath } from "../lib/jarvis/config";
+import type { DataSource } from "../lib/jarvis/types";
+
+interface Props {
+  title: string;
+  description?: string;
+  dataSource?: DataSource;
+  liveRecords?: { leads: number; clients: number };
+}
+
+const {
+  title,
+  description = "JARVIS · Command Center · ZENKAI Growth Systems",
+  dataSource = "mock",
+  liveRecords,
+} = Astro.props;
+const canonical = new URL(toJarvisCanonicalPath(Astro.url.pathname), JARVIS_URL).href;
+---
+
+<!doctype html>
+<html lang="es" class="jarvis-app">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="theme-color" content="#030810" />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href="/jarvis-favicon.svg" />
+    <script src="/jarvis-live.js" defer></script>
+    <script src="/jarvis-voice.js" defer></script>
+    <title>{title} · JARVIS · ZENKAI</title>
+  </head>
+  <body>
+    <JarvisBoot />
+    <JarvisCommandPalette />
+    <JarvisVoiceConsole />
+    <div id="jv-sync-toast" class="jv-sync-toast" aria-live="polite"></div>
+    <div class="jarvis-scanline" aria-hidden="true"></div>
+    <div class="jarvis-shell flex min-h-screen">
+      <JarvisSidebar />
+      <div class="flex-1 flex flex-col min-w-0">
+        <header class="jarvis-header sticky top-0 z-40 px-4 sm:px-6 lg:px-8 h-12 flex items-center justify-between border-b">
+          <div class="flex items-center gap-2.5 min-w-0">
+            <JarvisMobileDrawer />
+            <div class="lg:hidden flex items-center gap-2 min-w-0">
+              <span class="jv-heading-section truncate">{title}</span>
+            </div>
+            <div class="hidden lg:flex items-center gap-2 min-w-0">
+              <span class="jarvis-status-dot shrink-0" aria-hidden="true"></span>
+              <span class="jv-label shrink-0 opacity-60">JARVIS</span>
+              <span class="jv-mono text-[var(--jv-text-dim)]">/</span>
+              <span class="jv-mono text-[var(--jv-text-muted)] truncate">{title}</span>
+              <span class="jv-mono text-[var(--jv-text-dim)]">·</span>
+              <span class="jv-mono text-[var(--jv-text-dim)]" id="jv-live-clock">--:--:--</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 shrink-0">
+            <JarvisVoiceOrb />
+            <button type="button" id="jv-cmd-trigger" class="jv-cmd-trigger hidden sm:flex" title="Navegación rápida (⌘K)">
+              <span class="jv-mono text-[var(--jv-text-dim)]">⌘K</span>
+            </button>
+            <DataSourceBadge source={dataSource} liveRecords={liveRecords} />
+            <span class="hidden sm:inline jv-mono text-[var(--jv-text-dim)]">
+              {new Date().toLocaleDateString("es-CO", { weekday: "short", day: "numeric", month: "short", year: "numeric" })}
+            </span>
+            <div class="w-7 h-7 rounded-full border border-[var(--jv-border)] bg-[rgba(0,212,255,0.06)] text-[var(--jv-cyan)] flex items-center justify-center text-[var(--jv-text-2xs)] font-semibold jv-display">JG</div>
+          </div>
+        </header>
+        <main class="flex-1 px-4 sm:px-6 lg:px-8 py-5 sm:py-6 overflow-x-hidden">
+          <slot />
+        </main>
+        <footer class="border-t border-[var(--jv-border)] px-4 sm:px-6 lg:px-8 py-3 flex flex-col sm:flex-row justify-between gap-1 text-[10px] text-[var(--jv-text-dim)] jv-mono">
+          <span class="jv-label opacity-60">JARVIS v3 · ZENKAI Growth Systems</span>
+          <a href={JARVIS_URL} class="hover:text-[var(--jv-cyan)] no-underline transition-colors">{JARVIS_URL.replace("https://", "")}</a>
+        </footer>
+      </div>
+    </div>
+    <script>
+      function tick() {
+        const el = document.getElementById("jv-live-clock");
+        if (el) el.textContent = new Date().toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+      }
+      tick();
+      setInterval(tick, 1000);
+
+      document.querySelectorAll("[data-count-up]").forEach((el) => {
+        const target = el.getAttribute("data-count-up");
+        if (!target) return;
+        const num = parseFloat(target.replace(/[^0-9.]/g, ""));
+        if (isNaN(num)) return;
+        const prefix = target.match(/^[^\d]*/)?.[0] ?? "";
+        const suffix = target.match(/[^\d.]*$/)?.[0] ?? "";
+        const duration = 1200;
+        const start = performance.now();
+        const step = (now: number) => {
+          const p = Math.min((now - start) / duration, 1);
+          const eased = 1 - Math.pow(1 - p, 3);
+          const val = num * eased;
+          el.textContent = prefix + (Number.isInteger(num) ? Math.round(val).toLocaleString("es-CO") : val.toFixed(1)) + suffix;
+          if (p < 1) requestAnimationFrame(step);
+        };
+        requestAnimationFrame(step);
+      });
+
+      document.getElementById("jv-cmd-trigger")?.addEventListener("click", () => {
+        document.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true, bubbles: true }));
+      });
+    </script>
+  </body>
+</html>

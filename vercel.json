@@ -6,6 +6,84 @@
   "functions": {
     "api/*.ts": {
       "maxDuration": 60
+    },
+    "api/jarvis/run.ts": {
+      "maxDuration": 60
+    },
+    "api/jarvis/speak.ts": {
+      "maxDuration": 30
     }
-  }
+  },
+  "redirects": [
+    {
+      "source": "/jarvis",
+      "has": [{ "type": "host", "value": "jarvis.zenkai.systems" }],
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/jarvis/",
+      "has": [{ "type": "host", "value": "jarvis.zenkai.systems" }],
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/jarvis/:path*",
+      "has": [{ "type": "host", "value": "jarvis.zenkai.systems" }],
+      "destination": "/:path*",
+      "permanent": true
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/",
+      "has": [{ "type": "host", "value": "jarvis.zenkai.systems" }],
+      "destination": "/jarvis/"
+    },
+    {
+      "source": "/intel",
+      "has": [{ "type": "host", "value": "jarvis.zenkai.systems" }],
+      "destination": "/jarvis/intel/"
+    },
+    {
+      "source": "/agentes",
+      "has": [{ "type": "host", "value": "jarvis.zenkai.systems" }],
+      "destination": "/jarvis/agentes/"
+    },
+    {
+      "source": "/pipeline",
+      "has": [{ "type": "host", "value": "jarvis.zenkai.systems" }],
+      "destination": "/jarvis/pipeline/"
+    },
+    {
+      "source": "/clientes",
+      "has": [{ "type": "host", "value": "jarvis.zenkai.systems" }],
+      "destination": "/jarvis/clientes/"
+    },
+    {
+      "source": "/finanzas",
+      "has": [{ "type": "host", "value": "jarvis.zenkai.systems" }],
+      "destination": "/jarvis/finanzas/"
+    },
+    {
+      "source": "/social",
+      "has": [{ "type": "host", "value": "jarvis.zenkai.systems" }],
+      "destination": "/jarvis/social/"
+    },
+    {
+      "source": "/tareas",
+      "has": [{ "type": "host", "value": "jarvis.zenkai.systems" }],
+      "destination": "/jarvis/tareas/"
+    },
+    {
+      "source": "/sistemas",
+      "has": [{ "type": "host", "value": "jarvis.zenkai.systems" }],
+      "destination": "/jarvis/sistemas/"
+    },
+    {
+      "source": "/goals",
+      "has": [{ "type": "host", "value": "jarvis.zenkai.systems" }],
+      "destination": "/jarvis/goals/"
+    }
+  ]
 }

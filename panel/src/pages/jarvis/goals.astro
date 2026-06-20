@@ -1,0 +1,121 @@
+---
+import JarvisLayout from "../../layouts/JarvisLayout.astro";
+import JarvisMobileNav from "../../components/jarvis/JarvisMobileNav.astro";
+import HudPanel from "../../components/jarvis/HudPanel.astro";
+import ProgressRing from "../../components/jarvis/ProgressRing.astro";
+import SemaphoreBadge from "../../components/jarvis/SemaphoreBadge.astro";
+import { getJarvisData } from "../../lib/jarvis";
+
+const data = await getJarvisData();
+
+function formatGoalValue(current: number, target: number, unit: string): string {
+  if (unit === "usd") return `$${current.toLocaleString("en-US")} / $${target.toLocaleString("en-US")}`;
+  if (unit === "percent") return `${current}% / ${target}%`;
+  return `${current} / ${target}`;
+}
+
+const platformMilestones = [
+  { label: "12 Agentes Master documentados", done: true },
+  { label: "11 Sectores con KPIs", done: true },
+  { label: "6 Workflows end-to-end", done: true },
+  { label: "Panel + JARVIS live", done: true },
+  { label: "7 Conexiones API activas", done: false, progress: 29 },
+  { label: "Primer caso de estudio publicado", done: false, progress: 60 },
+  { label: "Segundo cliente Pro activo", done: false, progress: 50 },
+];
+---
+
+<JarvisLayout title="Goals & OKRs" dataSource={data.meta?.dataSource ?? "mock"} liveRecords={data.meta?.liveRecords}>
+  <JarvisMobileNav />
+
+  <header class="mb-6" data-jv-animate="1">
+    <div class="jv-label mb-2">ZEUS · Estrategia 2026</div>
+    <h1 class="jv-heading-page">Goals & OKRs</h1>
+    <p class="mt-2 jv-mono text-[12px] text-[var(--jv-text-muted)] max-w-2xl">
+      Meta $100K USD · OKRs por departamento · hitos Capa 1
+    </p>
+  </header>
+
+  <HudPanel class="mb-8" padding="lg" animate={2}>
+    <div class="flex flex-col lg:flex-row items-center gap-8">
+      <ProgressRing current={data.finance.revenueYtd} target={data.finance.goal2026} label="Meta principal 2026" format="usd" />
+      <div class="flex-1 text-center lg:text-left">
+        <h2 class="jv-heading-page normal-case tracking-normal">$100,000 USD facturados</h2>
+        <p class="mt-2 text-[13px] text-[var(--jv-text-muted)]">
+          Antes de diciembre 2026 · Run rate $12,500/mes · Actual ${(data.finance.runRateMonthly / 1000).toFixed(1)}K/mes
+        </p>
+        <div class="mt-4 flex flex-wrap gap-2 justify-center lg:justify-start">
+          <SemaphoreBadge status="yellow" label="Q2 en rampa" />
+          <span class="jv-mono text-[10px] text-[var(--jv-text-dim)] px-2 py-1 border border-[var(--jv-border)] rounded-sm">
+            {Math.round((data.finance.revenueYtd / data.finance.goal2026) * 100)}% completado
+          </span>
+        </div>
+      </div>
+    </div>
+  </HudPanel>
+
+  <section class="mb-8">
+    <h2 class="jv-heading-section mb-4">Metas trimestrales</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {data.goals.map((goal, i) => {
+        const pct = Math.min(100, Math.round((goal.current / goal.target) * 100));
+        return (
+          <HudPanel animate={i + 3}>
+            <div class="flex items-start justify-between gap-2 mb-3">
+              <h3 class="font-semibold text-sm leading-snug">{goal.title}</h3>
+              <SemaphoreBadge status={goal.status} size="sm" />
+            </div>
+            <p class="jv-mono text-[11px] text-[var(--jv-text-muted)] mb-3">{formatGoalValue(goal.current, goal.target, goal.unit)}</p>
+            <div class="jv-progress-bar h-2">
+              <div class="jv-progress-fill" style={`width: ${pct}%`} />
+            </div>
+            <p class="jv-mono text-[10px] text-[var(--jv-text-dim)] mt-2">Deadline {goal.deadline}</p>
+          </HudPanel>
+        );
+      })}
+    </div>
+  </section>
+
+  <section class="mb-8">
+    <h2 class="jv-heading-section mb-4">OKRs por departamento</h2>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      {data.okrs.map((okr, i) => (
+        <HudPanel animate={i + 4}>
+          <div class="jv-label text-[9px] opacity-70 mb-1">{okr.department}</div>
+          <h3 class="font-semibold text-sm mb-4">{okr.objective}</h3>
+          <ul class="space-y-3">
+            {okr.keyResults.map((kr) => (
+              <li>
+                <div class="flex justify-between text-[12px] mb-1">
+                  <span class="text-[var(--jv-text-muted)]">{kr.label}</span>
+                  <span class="jv-mono font-medium text-[var(--jv-cyan)]">{kr.progress}%</span>
+                </div>
+                <div class="jv-progress-bar h-1.5">
+                  <div
+                    class="jv-progress-fill"
+                    style={`width: ${kr.progress}%; background: ${kr.progress >= 80 ? "var(--jv-success)" : kr.progress >= 50 ? "var(--jv-warning)" : "linear-gradient(90deg,var(--jv-blue),var(--jv-cyan))"}`}
+                  />
+                </div>
+              </li>
+            ))}
+          </ul>
+        </HudPanel>
+      ))}
+    </div>
+  </section>
+
+  <HudPanel animate={8}>
+    <h2 class="jv-heading-section mb-4">Hitos Capa 1</h2>
+    <ul class="space-y-3">
+      {platformMilestones.map((m) => (
+        <li class="flex items-center gap-3 text-[13px]">
+          <span class:list={[m.done ? "text-[var(--jv-success)]" : "text-[var(--jv-text-dim)]"]} aria-hidden="true">{m.done ? "◆" : "◇"}</span>
+          <span class:list={[m.done ? "text-[var(--jv-text)]" : "text-[var(--jv-text-muted)]", "flex-1"]}>{m.label}</span>
+          {!m.done && m.progress !== undefined && (
+            <span class="jv-mono text-[10px] text-[var(--jv-cyan)]">{m.progress}%</span>
+          )}
+        </li>
+      ))}
+    </ul>
+  </HudPanel>
+</JarvisLayout>

@@ -1,0 +1,23 @@
+---
+import { resolveJarvisRoutes } from "../../lib/jarvis/config";
+import JarvisNavList from "./JarvisNavList.astro";
+
+const routes = resolveJarvisRoutes(Astro.url.hostname);
+const path = Astro.url.pathname;
+---
+
+<aside class="jarvis-sidebar hidden lg:flex flex-col shrink-0 border-r min-h-screen overflow-hidden">
+  <div class="px-4 py-3.5 border-b border-[var(--jv-border)] shrink-0">
+    <a href={routes.home} class="flex items-center gap-2.5 no-underline group">
+      <div class="arc-reactor shrink-0" aria-hidden="true"></div>
+      <div class="min-w-0">
+        <div class="jv-display text-[11px] font-semibold text-[var(--jv-cyan)] group-hover:text-white transition-colors tracking-wider">JARVIS</div>
+        <div class="jv-mono text-[var(--jv-text-2xs)] text-[var(--jv-text-dim)] mt-0.5 truncate">Intelligent System</div>
+      </div>
+    </a>
+  </div>
+
+  <nav class="flex-1 min-h-0 overflow-y-auto px-2 py-2">
+    <JarvisNavList path={path} />
+  </nav>
+</aside>

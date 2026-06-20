@@ -1,0 +1,54 @@
+---
+import { resolveJarvisRoutes } from "../../lib/jarvis/config";
+import JarvisNavList from "./JarvisNavList.astro";
+
+const routes = resolveJarvisRoutes(Astro.url.hostname);
+const path = Astro.url.pathname;
+---
+
+<button
+  type="button"
+  id="jv-menu-btn"
+  class="lg:hidden jv-menu-btn"
+  aria-label="Abrir menú JARVIS"
+  aria-expanded="false"
+  aria-controls="jv-mobile-drawer"
+>
+  <span></span><span></span><span></span>
+</button>
+
+<div id="jv-drawer-backdrop" class="jv-drawer-backdrop" aria-hidden="true"></div>
+
+<aside id="jv-mobile-drawer" class="jv-mobile-drawer" aria-hidden="true">
+  <div class="px-4 py-3 border-b border-[var(--jv-border)] flex items-center justify-between shrink-0">
+    <a href={routes.home} class="flex items-center gap-2.5 no-underline">
+      <div class="arc-reactor shrink-0" aria-hidden="true"></div>
+      <span class="jv-display text-[11px] font-semibold text-[var(--jv-cyan)] tracking-wider">JARVIS</span>
+    </a>
+    <button type="button" id="jv-menu-close" class="jv-drawer-close" aria-label="Cerrar menú">✕</button>
+  </div>
+
+  <nav class="flex-1 min-h-0 overflow-y-auto px-2 py-2">
+    <JarvisNavList path={path} itemPadding="px-2.5 py-2" />
+  </nav>
+</aside>
+
+<script>
+  const btn = document.getElementById("jv-menu-btn");
+  const close = document.getElementById("jv-menu-close");
+  const drawer = document.getElementById("jv-mobile-drawer");
+  const backdrop = document.getElementById("jv-drawer-backdrop");
+
+  function setOpen(open: boolean) {
+    drawer?.classList.toggle("jv-drawer-open", open);
+    backdrop?.classList.toggle("jv-drawer-open", open);
+    btn?.setAttribute("aria-expanded", open ? "true" : "false");
+    drawer?.setAttribute("aria-hidden", open ? "false" : "true");
+    document.body.classList.toggle("jv-drawer-lock", open);
+  }
+
+  btn?.addEventListener("click", () => setOpen(true));
+  close?.addEventListener("click", () => setOpen(false));
+  backdrop?.addEventListener("click", () => setOpen(false));
+  drawer?.querySelectorAll("a").forEach((a) => a.addEventListener("click", () => setOpen(false)));
+</script>

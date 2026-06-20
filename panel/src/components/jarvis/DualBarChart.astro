@@ -1,0 +1,39 @@
+---
+interface Props {
+  title?: string;
+  data: { week?: string; label?: string; leads: number; closes: number }[];
+  height?: number;
+}
+
+const { title, data, height = 160 } = Astro.props;
+
+const maxVal = Math.max(...data.flatMap((d) => [d.leads, d.closes]), 1);
+const barW = Math.max(8, Math.floor(240 / data.length) - 4);
+const groupW = barW * 2 + 4;
+const chartW = data.length * (groupW + 6) + 10;
+const chartH = height - 30;
+const label = (d: (typeof data)[0]) => d.label ?? d.week ?? "";
+---
+
+<div class="jv-chart">
+  {title && <h3 class="jv-label text-[10px] mb-3 opacity-80">{title}</h3>}
+  <svg width="100%" viewBox={`0 0 ${chartW} ${height}`} preserveAspectRatio="xMidYMid meet" role="img" aria-label={title}>
+    {data.map((d, i) => {
+      const x = 8 + i * (groupW + 6);
+      const leadH = (d.leads / maxVal) * chartH;
+      const closeH = (d.closes / maxVal) * chartH;
+      const base = chartH + 8;
+      return (
+        <g>
+          <rect x={x} y={base - leadH} width={barW} height={leadH} rx="2" fill="#00D4FF" opacity="0.85" />
+          <rect x={x + barW + 2} y={base - closeH} width={barW} height={closeH} rx="2" fill="#1E6FFF" opacity="0.85" />
+          <text x={x + groupW / 2} y={height - 4} text-anchor="middle" font-size="8" fill="#6B8CAE" font-family="JetBrains Mono, monospace">{label(d)}</text>
+        </g>
+      );
+    })}
+  </svg>
+  <div class="flex gap-4 mt-2 jv-mono text-[10px] text-[var(--jv-text-dim)]">
+    <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-sm bg-[#00D4FF]" /> Leads</span>
+    <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-sm bg-[#1E6FFF]" /> Cierres</span>
+  </div>
+</div>

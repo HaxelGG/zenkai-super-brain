@@ -1,8 +1,10 @@
 ---
 import Logo from "./Logo.astro";
+import { JARVIS_ROUTES } from "../lib/jarvis/config";
 
 const items = [
   { href: "/", label: "Home" },
+  { href: JARVIS_ROUTES.home, label: "JARVIS" },
   { href: "/agentes", label: "Agentes" },
   { href: "/sectores", label: "Sectores" },
   { href: "/workflows", label: "Workflows" },

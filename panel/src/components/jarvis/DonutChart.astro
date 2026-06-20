@@ -1,0 +1,47 @@
+---
+interface Props {
+  title?: string;
+  segments: { label: string; amount: number; color: string }[];
+  size?: number;
+}
+
+const { title, segments, size = 120 } = Astro.props;
+
+const total = segments.reduce((s, seg) => s + seg.amount, 0) || 1;
+const r = 40;
+const cx = 50;
+const cy = 50;
+const circumference = 2 * Math.PI * r;
+
+let cumulative = 0;
+const arcs = segments.map((seg) => {
+  const pct = seg.amount / total;
+  const dash = pct * circumference;
+  const offset = -cumulative * circumference + circumference * 0.25;
+  cumulative += pct;
+  return { ...seg, dash, offset, pct };
+});
+---
+
+<div class="jv-chart">
+  {title && <h3 class="jv-label text-[10px] mb-3 opacity-80">{title}</h3>}
+  <div class="flex items-center gap-4">
+    <svg width={size} height={size} viewBox="0 0 100 100" role="img" aria-label={title}>
+      <circle cx={cx} cy={cy} r={r} fill="none" stroke="rgba(0,212,255,0.1)" stroke-width="12" />
+      {arcs.map((arc) => (
+        <circle cx={cx} cy={cy} r={r} fill="none" stroke={arc.color} stroke-width="12"
+          stroke-dasharray={`${arc.dash} ${circumference - arc.dash}`} stroke-dashoffset={-arc.offset}
+          style="transition: stroke-dashoffset 1s ease" />
+      ))}
+    </svg>
+    <ul class="space-y-1.5 text-[12px] flex-1">
+      {arcs.map((arc) => (
+        <li class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full shrink-0" style={`background: ${arc.color}`} />
+          <span class="text-[var(--jv-text-muted)]">{arc.label}</span>
+          <span class="jv-mono font-medium ml-auto text-[var(--jv-cyan)]">${(arc.amount / 1000).toFixed(1)}K</span>
+        </li>
+      ))}
+    </ul>
+  </div>
+</div>

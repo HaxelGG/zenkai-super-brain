@@ -1,0 +1,51 @@
+---
+import type { AgentStatus } from "../../lib/jarvis/types";
+import { AGENTS } from "../../lib/jarvis/mock-data";
+
+interface Props {
+  statuses: AgentStatus[];
+  compact?: boolean;
+}
+
+const { statuses, compact = false } = Astro.props;
+
+const stateColors = {
+  active: "var(--jv-success)",
+  idle: "var(--jv-warning)",
+  offline: "var(--jv-text-dim)",
+};
+---
+
+<div class:list={["grid gap-2", compact ? "grid-cols-3 sm:grid-cols-4" : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4"]}>
+  {statuses.map((s, i) => {
+    const info = AGENTS.find((a) => a.id === s.id);
+    return (
+      <div
+        class:list={["jv-agent-card p-3", s.state === "active" && "jv-agent-active"]}
+        style={`--agent-color: ${info?.color ?? "#00D4FF"}`}
+        data-jv-animate={String((i % 8) + 1)}
+      >
+        <div class="flex items-center justify-between mb-2">
+          <span class="jv-display text-[11px] font-bold" style={`color: ${info?.color}`}>{s.id}</span>
+          <span class="jv-agent-pulse w-1.5 h-1.5 rounded-full" style={`background: ${stateColors[s.state]}`} />
+        </div>
+        {!compact && (
+          <>
+            <p class="text-[10px] text-[var(--jv-text-dim)] mb-2 truncate">{info?.department}</p>
+            {s.currentTask && <p class="text-[11px] text-[var(--jv-text-muted)] leading-snug line-clamp-2 mb-2">{s.currentTask}</p>}
+            <div class="jv-progress-bar mb-1">
+              <div class="jv-progress-fill" style={`width: ${s.load}%`} />
+            </div>
+            <div class="flex justify-between jv-mono text-[9px] text-[var(--jv-text-dim)]">
+              <span>{s.load}% load</span>
+              <span>{s.opsToday} ops</span>
+            </div>
+          </>
+        )}
+        {compact && (
+          <div class="jv-mono text-[9px] text-[var(--jv-text-dim)]">{s.state}</div>
+        )}
+      </div>
+    );
+  })}
+</div>

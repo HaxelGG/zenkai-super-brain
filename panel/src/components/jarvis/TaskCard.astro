@@ -1,0 +1,43 @@
+---
+import type { Task } from "../../lib/jarvis/types";
+import AgentAvatar from "./AgentAvatar.astro";
+
+interface Props {
+  task: Task;
+  compact?: boolean;
+}
+
+const { task, compact = false } = Astro.props;
+
+const priorityDot = {
+  high: "bg-[var(--jv-danger)] shadow-[0_0_6px_var(--jv-danger)]",
+  medium: "bg-[var(--jv-warning)]",
+  low: "bg-[var(--jv-text-dim)]",
+};
+---
+
+<div class:list={["jv-task p-3", compact && "p-2.5"]}>
+  <div class="flex items-start gap-2.5">
+    <span class:list={["w-1.5 h-1.5 rounded-full mt-2 shrink-0", priorityDot[task.priority]]} />
+    <div class="flex-1 min-w-0">
+      <div class="flex items-start justify-between gap-2">
+        <p class:list={["font-medium text-[var(--jv-text)] leading-snug", compact ? "text-[13px]" : "text-sm"]}>{task.title}</p>
+        <AgentAvatar agent={task.agent} />
+      </div>
+      {!compact && (
+        <div class="mt-1.5 flex flex-wrap items-center gap-2 jv-mono text-[10px] text-[var(--jv-text-dim)]">
+          <span class="px-1.5 py-0.5 border border-[var(--jv-border)] rounded-sm text-[var(--jv-cyan)]">{task.status}</span>
+          {task.client && <span>{task.client}</span>}
+        </div>
+      )}
+      {task.progress !== undefined && task.status === "working" && (
+        <div class="mt-2">
+          <div class="jv-progress-bar">
+            <div class="jv-progress-fill" style={`width: ${task.progress}%`} />
+          </div>
+          <span class="jv-mono text-[10px] text-[var(--jv-cyan)] mt-0.5 block">{task.progress}%</span>
+        </div>
+      )}
+    </div>
+  </div>
+</div>

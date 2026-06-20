@@ -1,0 +1,92 @@
+---
+import { JARVIS_NAV, resolveJarvisRoutes } from "../../lib/jarvis/config";
+
+const routes = resolveJarvisRoutes(Astro.url.hostname);
+const navJson = JSON.stringify(JARVIS_NAV.map((item) => ({ label: item.label, href: routes[item.key] })));
+---
+
+<div id="jv-cmd" class="jv-cmd" aria-hidden="true" role="dialog" aria-label="Navegación rápida JARVIS">
+  <div class="jv-cmd-backdrop" id="jv-cmd-backdrop"></div>
+  <div class="jv-cmd-panel">
+    <div class="flex items-center gap-2 px-4 py-3 border-b border-[var(--jv-border)]">
+      <span class="jv-label opacity-70">Ir a</span>
+      <input
+        id="jv-cmd-input"
+        type="search"
+        placeholder="Finanzas, Pipeline, Agentes…"
+        class="flex-1 bg-transparent border-0 outline-none text-sm text-[var(--jv-text)] placeholder:text-[var(--jv-text-dim)] jv-mono"
+        autocomplete="off"
+      />
+      <kbd class="jv-kbd hidden sm:inline">ESC</kbd>
+    </div>
+    <ul id="jv-cmd-list" class="max-h-72 overflow-y-auto py-2"></ul>
+    <div class="px-4 py-2 border-t border-[var(--jv-border)] jv-mono text-[10px] text-[var(--jv-text-dim)]">
+      <kbd class="jv-kbd">⌘K</kbd> o <kbd class="jv-kbd">Ctrl+K</kbd> · navegación rápida
+    </div>
+  </div>
+</div>
+
+<script define:vars={{ navJson }}>
+  const nav = JSON.parse(navJson);
+  const cmd = document.getElementById("jv-cmd");
+  const backdrop = document.getElementById("jv-cmd-backdrop");
+  const input = document.getElementById("jv-cmd-input");
+  const list = document.getElementById("jv-cmd-list");
+  let active = 0;
+
+  function render(filter = "") {
+    if (!list) return;
+    const q = filter.toLowerCase();
+    const items = nav.filter((n) => n.label.toLowerCase().includes(q));
+    active = 0;
+    list.innerHTML = items
+      .map(
+        (n, i) =>
+          `<li><a href="${n.href}" class="jv-cmd-item${i === 0 ? " jv-cmd-active" : ""}" data-idx="${i}">${n.label}</a></li>`,
+      )
+      .join("");
+  }
+
+  function open() {
+    cmd?.classList.add("jv-cmd-open");
+    cmd?.setAttribute("aria-hidden", "false");
+    render("");
+    input?.focus();
+  }
+
+  function close() {
+    cmd?.classList.remove("jv-cmd-open");
+    cmd?.setAttribute("aria-hidden", "true");
+    if (input) input.value = "";
+  }
+
+  document.addEventListener("keydown", (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+      e.preventDefault();
+      cmd?.classList.contains("jv-cmd-open") ? close() : open();
+    }
+    if (e.key === "Escape") close();
+    if (!cmd?.classList.contains("jv-cmd-open") || !list) return;
+    const items = list.querySelectorAll(".jv-cmd-item");
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      active = Math.min(active + 1, items.length - 1);
+      items.forEach((el, i) => el.classList.toggle("jv-cmd-active", i === active));
+    }
+    if (e.key === "ArrowUp") {
+      e.preventDefault();
+      active = Math.max(active - 1, 0);
+      items.forEach((el, i) => el.classList.toggle("jv-cmd-active", i === active));
+    }
+    if (e.key === "Enter") {
+      const target = items[active];
+      if (target instanceof HTMLAnchorElement) {
+        window.location.href = target.href;
+      }
+    }
+  });
+
+  backdrop?.addEventListener("click", close);
+  input?.addEventListener("input", () => render(input.value));
+  render("");
+</script>

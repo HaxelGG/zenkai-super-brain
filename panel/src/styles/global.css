@@ -102,4 +102,16 @@
   .prose-zenkai ol li {
     @apply list-decimal mb-1;
   }
+
+  .jarvis-hero {
+    @apply relative overflow-hidden;
+  }
+
+  .jarvis-metric-card {
+    @apply transition-shadow hover:shadow-sm;
+  }
+
+  .jarvis-kanban-col {
+    @apply min-h-[120px];
+  }
 }

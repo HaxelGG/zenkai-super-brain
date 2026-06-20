@@ -1,0 +1,29 @@
+---
+import type { Task, TaskStatus } from "../../lib/jarvis/types";
+import TaskCard from "./TaskCard.astro";
+
+interface Props {
+  status: TaskStatus;
+  tasks: Task[];
+  label: string;
+}
+
+const { status, tasks, label } = Astro.props;
+const filtered = tasks.filter((t) => t.status === status);
+---
+
+<div class="jarvis-kanban-col flex flex-col min-h-[200px]">
+  <div class="flex items-center justify-between mb-3 px-1">
+    <h3 class="jv-label text-[10px]">{label}</h3>
+    <span class="jv-mono text-[10px] text-[var(--jv-cyan)] px-2 py-0.5 border border-[var(--jv-border)] rounded-sm">{filtered.length}</span>
+  </div>
+  <div class="space-y-2 flex-1">
+    {filtered.length === 0 ? (
+      <div class="jv-mono text-[10px] text-[var(--jv-text-dim)] text-center py-6 border border-dashed border-[var(--jv-border)] rounded-sm">
+        Sin tareas
+      </div>
+    ) : (
+      filtered.map((task) => <TaskCard task={task} compact />)
+    )}
+  </div>
+</div>

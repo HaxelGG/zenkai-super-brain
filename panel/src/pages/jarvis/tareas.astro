@@ -1,0 +1,77 @@
+---
+import JarvisLayout from "../../layouts/JarvisLayout.astro";
+import JarvisMobileNav from "../../components/jarvis/JarvisMobileNav.astro";
+import HudPanel from "../../components/jarvis/HudPanel.astro";
+import KanbanColumn from "../../components/jarvis/KanbanColumn.astro";
+import TaskCard from "../../components/jarvis/TaskCard.astro";
+import AgentAvatar from "../../components/jarvis/AgentAvatar.astro";
+import { getJarvisData } from "../../lib/jarvis";
+import type { AgentId } from "../../lib/jarvis/types";
+
+const data = await getJarvisData();
+
+const columns: { status: "backlog" | "pending" | "working" | "review" | "done"; label: string }[] = [
+  { status: "backlog", label: "Backlog" },
+  { status: "pending", label: "Pendiente" },
+  { status: "working", label: "Working" },
+  { status: "review", label: "Review" },
+  { status: "done", label: "Done" },
+];
+
+const agentCounts = data.agents
+  .map((agent) => ({
+    ...agent,
+    count: data.tasks.filter((t) => t.agent === agent.id && t.status !== "done").length,
+  }))
+  .filter((a) => a.count > 0)
+  .sort((a, b) => b.count - a.count);
+
+const priorityOrder = { high: 0, medium: 1, low: 2 };
+const listTasks = [...data.tasks]
+  .filter((t) => t.status !== "done")
+  .sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
+---
+
+<JarvisLayout title="Tareas" dataSource={data.meta?.dataSource ?? "mock"} liveRecords={data.meta?.liveRecords}>
+  <JarvisMobileNav />
+
+  <header class="mb-6" data-jv-animate="1">
+    <div class="jv-label mb-2">ATLAS · Operaciones</div>
+    <h1 class="jv-heading-page">Task Board</h1>
+    <p class="mt-2 jv-mono text-[12px] text-[var(--jv-text-muted)] max-w-2xl">
+      {data.tasks.filter((t) => t.status !== "done").length} tareas activas · {data.tasks.filter((t) => t.status === "working").length} en working · {data.tasks.filter((t) => t.status === "done").length} completadas
+    </p>
+  </header>
+
+  <HudPanel class="mb-6" animate={2}>
+    <h2 class="jv-heading-section mb-3">Carga por agente</h2>
+    <div class="flex flex-wrap gap-3">
+      {agentCounts.map((a) => (
+        <div class="flex items-center gap-2 px-3 py-2 rounded-sm border border-[var(--jv-border)] text-[13px] hover:border-[var(--jv-cyan)] transition-colors">
+          <AgentAvatar agent={a.id as AgentId} glow />
+          <span class="font-medium text-[var(--jv-text)]">{a.id}</span>
+          <span class="jv-mono text-[10px] text-[var(--jv-cyan)] ml-auto px-2 py-0.5 border border-[var(--jv-border)] rounded-sm">{a.count}</span>
+        </div>
+      ))}
+    </div>
+  </HudPanel>
+
+  <section class="mb-8 overflow-x-auto pb-2">
+    <div class="flex gap-3 min-w-[900px]">
+      {columns.map((col) => (
+        <HudPanel class="flex-1 min-w-[180px] !p-3" padding="sm">
+          <KanbanColumn status={col.status} tasks={data.tasks} label={col.label} />
+        </HudPanel>
+      ))}
+    </div>
+  </section>
+
+  <HudPanel animate={3}>
+    <h2 class="jv-heading-section mb-4">Vista lista · prioridad</h2>
+    <div class="space-y-2">
+      {listTasks.map((task) => (
+        <TaskCard task={task} />
+      ))}
+    </div>
+  </HudPanel>
+</JarvisLayout>

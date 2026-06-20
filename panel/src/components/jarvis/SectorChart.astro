@@ -1,0 +1,33 @@
+---
+import type { SectorPerformance } from "../../lib/jarvis/types";
+
+interface Props {
+  sectors: SectorPerformance[];
+}
+
+const { sectors } = Astro.props;
+const maxLeads = Math.max(...sectors.map((s) => s.leads), 1);
+---
+
+<div class="jv-sector-chart space-y-3">
+  {sectors.map((s, i) => (
+    <div data-jv-animate={String((i % 6) + 1)}>
+      <div class="flex items-center justify-between mb-1">
+        <span class="text-[12px] text-[var(--jv-text-muted)]">{s.sector}</span>
+        <div class="flex items-center gap-3 jv-mono text-[10px]">
+          <span class="text-[var(--jv-cyan)]">{s.leads} leads</span>
+          {s.revenue > 0 && <span class="text-[var(--jv-success)]">${(s.revenue / 1000).toFixed(1)}K</span>}
+          <span class:list={[s.growth >= 0 ? "text-[var(--jv-success)]" : "text-[var(--jv-danger)]"]}>
+            {s.growth >= 0 ? "+" : ""}{s.growth}%
+          </span>
+        </div>
+      </div>
+      <div class="jv-progress-bar h-1.5">
+        <div
+          class="jv-progress-fill"
+          style={`width: ${(s.leads / maxLeads) * 100}%; transition-delay: ${i * 80}ms`}
+        />
+      </div>
+    </div>
+  ))}
+</div>
