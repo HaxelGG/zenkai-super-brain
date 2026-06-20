@@ -269,8 +269,70 @@
     }
   }
 
+  function escG(s) {
+    const d = document.createElement("div");
+    d.textContent = String(s == null ? "" : s);
+    return d.innerHTML;
+  }
+
+  function goalSemaphore(status) {
+    const color =
+      status === "green" ? "var(--jv-success)" : status === "red" ? "var(--jv-danger)" : "var(--jv-warning)";
+    const text = status === "green" ? "Operativo" : status === "red" ? "Crítico" : "Atención";
+    return (
+      '<span class="inline-flex items-center gap-2 rounded-sm border font-medium jv-mono px-2 py-0.5 text-[10px]" ' +
+      `style="border-color: ${color}; color: ${color}; background: color-mix(in srgb, ${color} 10%, transparent)">` +
+      `<span class="w-1.5 h-1.5 rounded-full animate-pulse" style="background: ${color}; box-shadow: 0 0 6px ${color}"></span>${text}</span>`
+    );
+  }
+
+  function goalValueText(current, target, unit) {
+    const c = Number(current) || 0;
+    const t = Number(target) || 0;
+    const u = String(unit || "").toLowerCase();
+    if (u === "usd") return `$${c.toLocaleString("en-US")} / $${t.toLocaleString("en-US")}`;
+    if (u === "percent") return `${c}% / ${t}%`;
+    return `${c} / ${t}`;
+  }
+
+  function goalCard(goal, i) {
+    const target = Number(goal.target) || 0;
+    const pct = target > 0 ? Math.min(100, Math.round((Number(goal.current) / target) * 100)) : 0;
+    return (
+      `<div class="hud-panel p-4" data-jv-animate="${i + 3}"><div class="hud-panel-inner">` +
+      '<div class="flex items-start justify-between gap-2 mb-3">' +
+      `<h3 class="font-semibold text-sm leading-snug">${escG(goal.title)}</h3>${goalSemaphore(goal.status)}</div>` +
+      `<p class="jv-mono text-[11px] text-[var(--jv-text-muted)] mb-3">${goalValueText(goal.current, goal.target, goal.unit)}</p>` +
+      `<div class="jv-progress-bar h-2"><div class="jv-progress-fill" style="width: ${pct}%"></div></div>` +
+      `<p class="jv-mono text-[10px] text-[var(--jv-text-dim)] mt-2">${escG(goal.caption || "")}</p>` +
+      "</div></div>"
+    );
+  }
+
+  async function refreshGoals() {
+    const grid = document.getElementById("jv-goals-grid");
+    if (!grid) return;
+    try {
+      const res = await fetch(apiUrl("/api/agency/tasks"), fetchOpts);
+      if (!res.ok) return;
+      const data = await res.json();
+      const goals = Array.isArray(data.goals) ? data.goals : [];
+      if (!goals.length) return;
+      grid.innerHTML = goals.map((g, i) => goalCard(g, i)).join("");
+    } catch {
+      /* silent */
+    }
+  }
+
   async function refreshAll() {
-    await Promise.all([refreshBrainStatus(), refreshAgencyStatus(), refreshCrm(), refreshFinance(), refreshSocial()]);
+    await Promise.all([
+      refreshBrainStatus(),
+      refreshAgencyStatus(),
+      refreshGoals(),
+      refreshCrm(),
+      refreshFinance(),
+      refreshSocial(),
+    ]);
   }
 
   refreshAll();
@@ -278,4 +340,5 @@
   setInterval(refreshFinance, 8 * 60 * 1000);
   setInterval(refreshSocial, 10 * 60 * 1000);
   setInterval(refreshAgencyStatus, 12 * 60 * 1000);
+  setInterval(refreshGoals, 9 * 60 * 1000);
 })();
