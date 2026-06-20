@@ -10,9 +10,7 @@ Marcar en orden. Tiempo estimado: **45–60 min**.
 
 ## n8n Cloud
 
-- [ ] **Bloqueador:** webhooks producción responden **404** (workflows no importados/activos aún)
-- [ ] **MCP token:** si `npm run n8n:import:mcp` → 401, regenerar en Settings → Instance-level MCP → Access Token
-- [ ] **Alternativa:** `N8N_API_KEY` + `npm run n8n:import -- --apply`
+- [x] Workflows importados vía `npm run n8n:import:mcp -- --apply` (2026-06-19)
 - [ ] Variables: `AIRTABLE_BASE_VENTAS`, `ZENKAI_FROM_EMAIL`, `ZENKAI_ALERT_EMAIL`
 - [ ] Variable opcional: `SLACK_WEBHOOK_URL`
 - [ ] Credencial Airtable PAT
@@ -21,11 +19,12 @@ Marcar en orden. Tiempo estimado: **45–60 min**.
 
 ## Import + activar (orden)
 
-- [ ] M-04 `jarvis-callback`
-- [ ] M-03 `leads-qualify`
-- [ ] M-02 `demo-autoreply`
-- [ ] S-01 cron horario
-- [ ] Todos: **Available in MCP** + **Active**
+- [ ] M-04 `jarvis-callback` — publicado
+- [ ] M-03 `leads-qualify` — publicado
+- [ ] M-02 `demo-autoreply` — publicado
+- [ ] S-01 cron horario — publicado
+- [ ] Credenciales mapeadas en UI (Airtable · Resend · Anthropic)
+- [ ] Todos: **Available in MCP** (ya ON si creados vía MCP builder)
 
 ## Airtable VENTAS
 

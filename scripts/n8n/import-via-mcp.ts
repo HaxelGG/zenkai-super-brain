@@ -1,6 +1,8 @@
 /**
  * Importa workflows Sprint 1 via n8n Instance MCP (HTTP JSON-RPC).
  *
+ * Estrategia: create_workflow_from_code (nodo trigger) + update_workflow (resto del JSON).
+ *
  * Requiere en .env:
  *   N8N_MCP_ACCESS_TOKEN  — Settings → Instance-level MCP → Access Token
  *   N8N_BASE_URL          — default zenkai-growth-systems.app.n8n.cloud
@@ -20,9 +22,20 @@ const ORDER = [
   "ZENKAI-S-01-sla-form-3h.json",
 ] as const;
 
+type JsonNode = {
+  name: string;
+  type: string;
+  typeVersion: number;
+  parameters: Record<string, unknown>;
+  position?: [number, number];
+  credentials?: Record<string, unknown>;
+  disabled?: boolean;
+  notes?: string;
+};
+
 type WorkflowExport = {
   name: string;
-  nodes: Record<string, unknown>[];
+  nodes: JsonNode[];
   connections: Record<string, unknown>;
   settings?: Record<string, unknown>;
 };
@@ -45,29 +58,80 @@ function loadExport(filename: string): WorkflowExport {
   return raw;
 }
 
-/** Minimal SDK program that materializes our JSON export inside n8n MCP. */
-function toSdkCode(exp: WorkflowExport): string {
-  const payload = JSON.stringify({
-    name: exp.name,
-    nodes: exp.nodes,
-    connections: exp.connections,
-    settings: exp.settings ?? { executionOrder: "v1" },
-  });
+function escapeForTemplate(s: string): string {
+  return s.replace(/\\/g, "\\\\").replace(/`/g, "\\`").replace(/\$/g, "\\$");
+}
+
+/** Primer nodo (webhook/cron) via SDK — el resto se añade con update_workflow. */
+function toStubSdkCode(exp: WorkflowExport): string {
+  const first = exp.nodes[0];
+  const paramsJson = JSON.stringify(first.parameters ?? {});
+  const pos = first.position ?? [240, 300];
+  const slug = exp.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 40);
+
   return `
-import { workflow, node, jsonParse } from 'n8n-workflow';
+import { workflow, node, trigger } from '@n8n/workflow-sdk';
 
-const def = jsonParse(${JSON.stringify(payload)});
+const isTrigger = ${JSON.stringify(first.type.includes("Trigger") || first.type.includes("trigger"))};
+const root = isTrigger
+  ? trigger({ type: '${first.type}', version: ${first.typeVersion}, config: { name: '${first.name.replace(/'/g, "\\'")}', parameters: ${paramsJson} } })
+  : node({ type: '${first.type}', version: ${first.typeVersion}, config: { name: '${first.name.replace(/'/g, "\\'")}', parameters: ${paramsJson}, position: ${JSON.stringify(pos)} } });
 
-export default workflow({
-  name: def.name,
-  nodes: def.nodes.map((n) => node(n)),
-  connections: def.connections,
-  settings: def.settings,
-});
+export default workflow('${slug}', '${escapeForTemplate(exp.name)}').add(root);
 `.trim();
 }
 
+function buildUpdateOps(exp: WorkflowExport): Record<string, unknown>[] {
+  const ops: Record<string, unknown>[] = [];
+
+  for (let i = 1; i < exp.nodes.length; i++) {
+    const n = exp.nodes[i];
+    ops.push({
+      type: "addNode",
+      node: {
+        name: n.name,
+        type: n.type,
+        typeVersion: n.typeVersion,
+        parameters: n.parameters ?? {},
+        ...(n.position ? { position: n.position } : {}),
+        ...(n.disabled != null ? { disabled: n.disabled } : {}),
+        ...(n.notes ? { notes: n.notes } : {}),
+      },
+    });
+  }
+
+  for (const [source, raw] of Object.entries(exp.connections)) {
+    const main = (raw as { main?: { node: string; type?: string; index?: number }[][] }).main;
+    if (!main) continue;
+    for (let outIdx = 0; outIdx < main.length; outIdx++) {
+      for (const target of main[outIdx] ?? []) {
+        ops.push({
+          type: "addConnection",
+          source,
+          target: target.node,
+          sourceIndex: outIdx,
+          targetIndex: target.index ?? 0,
+          ...(target.type ? { connectionType: target.type } : {}),
+        });
+      }
+    }
+  }
+
+  return ops;
+}
+
 let rpcId = 0;
+
+function parseMcpPayload(text: string): unknown {
+  const line =
+    text
+      .split("\n")
+      .map((l) => l.trim())
+      .find((l) => l.startsWith("data:"))
+      ?.slice(5)
+      .trim() ?? text.trim();
+  return JSON.parse(line);
+}
 
 async function mcpCall<T>(
   token: string,
@@ -88,21 +152,35 @@ async function mcpCall<T>(
   if (!res.ok) {
     if (res.status === 401) {
       throw new Error(
-        "MCP HTTP 401 Unauthorized — regenera el token en n8n Cloud → Settings → Instance-level MCP → Access Token, actualiza N8N_MCP_ACCESS_TOKEN en .env y ~/.cursor/mcp.json, reinicia Cursor.",
+        "MCP HTTP 401 — regenera token en n8n Cloud → Settings → Instance-level MCP → Access Token",
       );
     }
     throw new Error(`MCP HTTP ${res.status}: ${text.slice(0, 400)}`);
   }
-  let parsed: { result?: T; error?: { message?: string; code?: number } };
-  try {
-    parsed = JSON.parse(text) as typeof parsed;
-  } catch {
-    throw new Error(`MCP non-JSON response: ${text.slice(0, 400)}`);
-  }
+
+  const parsed = parseMcpPayload(text) as {
+    result?: T;
+    error?: { message?: string; code?: number };
+  };
   if (parsed.error) {
     throw new Error(parsed.error.message ?? `MCP error ${parsed.error.code ?? "?"}`);
   }
   return parsed.result as T;
+}
+
+/** MCP tools/call devuelve { content: [{ type:'text', text:'{...json...}' }] }. */
+function unwrapToolResult<T>(result: unknown): T {
+  if (!result || typeof result !== "object") return result as T;
+  const r = result as { content?: { type?: string; text?: string }[] };
+  const text = r.content?.find((c) => c.type === "text" && c.text)?.text;
+  if (text) {
+    try {
+      return JSON.parse(text) as T;
+    } catch {
+      return text as unknown as T;
+    }
+  }
+  return result as T;
 }
 
 async function mcpTool<T>(
@@ -110,7 +188,8 @@ async function mcpTool<T>(
   name: string,
   args: Record<string, unknown>,
 ): Promise<T> {
-  return mcpCall<T>(token, "tools/call", { name, arguments: args });
+  const raw = await mcpCall<unknown>(token, "tools/call", { name, arguments: args });
+  return unwrapToolResult<T>(raw);
 }
 
 async function initMcp(token: string): Promise<void> {
@@ -119,16 +198,25 @@ async function initMcp(token: string): Promise<void> {
     capabilities: {},
     clientInfo: { name: "zenkai-import", version: "1.0.0" },
   });
-  try {
-    await mcpCall(token, "notifications/initialized", {});
-  } catch {
-    /* some servers omit this */
-  }
 }
 
 type SearchResult = {
   data?: { id: string; name: string | null; active?: boolean | null }[];
   count?: number;
+};
+
+type CreateResult = {
+  workflowId?: string;
+  name?: string;
+  url?: string;
+  error?: string;
+  hint?: string;
+};
+
+type ValidateResult = {
+  valid?: boolean;
+  error?: string;
+  errors?: string[];
 };
 
 async function main(): Promise<void> {
@@ -140,7 +228,7 @@ async function main(): Promise<void> {
 
   for (const file of ORDER) {
     const exp = loadExport(file);
-    console.log(`  • ${file} → ${exp.name}`);
+    console.log(`  • ${file} → ${exp.name} (${exp.nodes.length} nodes)`);
   }
 
   if (!token) {
@@ -152,21 +240,13 @@ async function main(): Promise<void> {
   const tools = await mcpCall<{ tools?: { name: string }[] }>(token, "tools/list", {});
   const names = (tools.tools ?? []).map((t) => t.name);
   console.log(`\nMCP conectado · ${names.length} tools`);
-  const required = ["search_workflows", "validate_workflow", "create_workflow_from_code", "publish_workflow"];
-  for (const r of required) {
-    console.log(names.includes(r) ? `  ✓ ${r}` : `  ✗ missing ${r}`);
-  }
-  if (required.some((r) => !names.includes(r))) {
-    console.error("\nInstancia n8n muy antigua o MCP sin workflow builder (v2.12+).");
-    process.exit(1);
-  }
 
   const search = await mcpTool<SearchResult>(token, "search_workflows", {
     query: "ZENKAI",
     limit: 50,
   });
   const existing = search.data ?? [];
-  console.log(`\nWorkflows ZENKAI en instancia: ${existing.length}`);
+  console.log(`Workflows ZENKAI en instancia: ${existing.length}`);
 
   if (!apply) {
     console.log("\nDry-run OK. Para importar: npm run n8n:import:mcp -- --apply");
@@ -178,39 +258,64 @@ async function main(): Promise<void> {
   for (const file of ORDER) {
     const exp = loadExport(file);
     const found = existing.find((w) => w.name === exp.name);
-
     let workflowId = found?.id;
-    if (workflowId) {
-      console.log(`[SKIP CREATE] ${exp.name} (${workflowId})`);
-    } else {
-      const code = toSdkCode(exp);
-      const validated = await mcpTool<{ valid?: boolean; error?: string }>(token, "validate_workflow", {
-        code,
+
+    if (!workflowId) {
+      const stubCode = toStubSdkCode(exp);
+      const validated = await mcpTool<ValidateResult>(token, "validate_workflow", {
+        code: stubCode,
       });
       if (validated.valid === false) {
-        console.error(`[FAIL VALIDATE] ${exp.name}: ${validated.error ?? "invalid"}`);
+        console.error(
+          `[FAIL VALIDATE] ${exp.name}: ${validated.error ?? validated.errors?.join("; ") ?? "invalid"}`,
+        );
         process.exit(1);
       }
 
-      const created = await mcpTool<{
-        workflowId?: string;
-        name?: string;
-        url?: string;
-        error?: string;
-      }>(token, "create_workflow_from_code", {
-        code,
+      const created = await mcpTool<CreateResult>(token, "create_workflow_from_code", {
+        code: stubCode,
         name: exp.name,
         description: `ZENKAI Sprint 1 · ${file}`,
       });
 
       if (!created.workflowId) {
-        console.error(`[FAIL CREATE] ${exp.name}: ${created.error ?? "no workflowId"}`);
+        console.error(
+          `[FAIL CREATE] ${exp.name}: ${created.error ?? created.hint ?? JSON.stringify(created)}`,
+        );
         process.exit(1);
       }
       workflowId = created.workflowId;
       existing.push({ id: workflowId, name: exp.name, active: false });
-      console.log(`[CREATED] ${exp.name} → ${workflowId}`);
-      if (created.url) console.log(`          ${created.url}`);
+      console.log(`[CREATED STUB] ${exp.name} → ${workflowId}`);
+
+      const ops = buildUpdateOps(exp);
+      if (ops.length) {
+        const updated = await mcpTool<CreateResult & { appliedOperations?: number }>(
+          token,
+          "update_workflow",
+          { workflowId, operations: ops },
+        );
+        if (updated.error) {
+          console.error(`[FAIL UPDATE] ${exp.name}: ${updated.error}`);
+          process.exit(1);
+        }
+        console.log(`[UPDATED] ${exp.name} · ${updated.appliedOperations ?? ops.length} ops`);
+      }
+    } else {
+      console.log(`[SKIP CREATE] ${exp.name} (${workflowId})`);
+      const ops = buildUpdateOps(exp);
+      if (ops.length) {
+        const updated = await mcpTool<CreateResult & { appliedOperations?: number }>(
+          token,
+          "update_workflow",
+          { workflowId, operations: ops },
+        );
+        if (updated.error) {
+          console.warn(`[WARN UPDATE] ${exp.name}: ${updated.error} (puede estar ya importado)`);
+        } else {
+          console.log(`[UPDATED] ${exp.name} · ${updated.appliedOperations ?? ops.length} ops`);
+        }
+      }
     }
 
     const row = existing.find((w) => w.id === workflowId);
@@ -219,9 +324,7 @@ async function main(): Promise<void> {
       continue;
     }
 
-    const pub = await mcpTool<{ workflowId?: string; error?: string }>(token, "publish_workflow", {
-      workflowId,
-    });
+    const pub = await mcpTool<CreateResult>(token, "publish_workflow", { workflowId });
     if (!pub.workflowId && pub.error) {
       console.error(`[FAIL PUBLISH] ${exp.name}: ${pub.error}`);
       process.exit(1);
@@ -231,8 +334,8 @@ async function main(): Promise<void> {
 
   console.log("\nPost-import manual:");
   console.log("  1. Mapear credenciales Airtable + Resend + Anthropic en UI");
-  console.log("  2. Settings → Variables en n8n Cloud");
-  console.log("  3. Airtable automations → webhooks (ver CHECKLIST-SPRINT1.md)");
+  console.log("  2. Settings → Variables (AIRTABLE_BASE_VENTAS, ZENKAI_FROM_EMAIL, …)");
+  console.log("  3. Airtable automations → webhooks (CHECKLIST-SPRINT1.md)");
 }
 
 main().catch((e) => {
