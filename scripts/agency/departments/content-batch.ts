@@ -9,6 +9,7 @@ import { createJob, updateJob, type JobArtifacts, type JobPostArtifact } from ".
 import { callAgencyLlm } from "../llm.js";
 import { publishToInstagram } from "../providers/meta-publish.js";
 import type { AgencyRunResult } from "../types.js";
+import { generateImagesForJob, imageBatchLimit } from "./content-images.js";
 
 type BatchSlot = {
   hook: string;
@@ -106,12 +107,28 @@ Responde SOLO JSON array (sin markdown):
 
   const updatedJob = job.id.startsWith("rec")
     ? await updateJob(job.id, {
-        status: "pending_approval",
+        status: "generating",
         artifacts_json: JSON.stringify(artifacts),
       })
     : null;
 
   const finalId = updatedJob?.id ?? job.id;
+
+  let imageSummary = "";
+  if (finalId.startsWith("rec")) {
+    const imgLimit = imageBatchLimit(posts.length);
+    const imgResult = await generateImagesForJob(finalId, { limit: imgLimit, onlyMissing: true });
+    imageSummary =
+      imgResult.generated > 0
+        ? `\nImágenes APOLLO: ${imgResult.generated}/${imgLimit} (${imgResult.errors.length ? "con errores" : "listas"}).`
+        : `\nImágenes: pendientes · ${imgResult.errors[0] || "generar en HUD Jobs"}.`;
+    if (posts.length > imgLimit) {
+      imageSummary += `\nRestantes ${posts.length - imgLimit} → botón «Generar imágenes» en Jobs.`;
+    }
+  }
+
+  const d = await dispatchAgencyEvent("agency.content.batch", {
+    jobId: finalId,
     client: params.clientSlug,
     count: posts.length,
     channel: params.channel,
@@ -126,19 +143,20 @@ Responde SOLO JSON array (sin markdown):
     id: `batch_${Date.now()}`,
     agent: "MUSE",
     department: "marketing",
-    reply: `Generé ${posts.length} borradores para ${client.name} (${params.channel}).\n\n${preview}${posts.length > 3 ? `\n… +${posts.length - 3} más` : ""}\n\nJob \`${updated.id}\` · estado: pending_approval.\nRevisá en JARVIS → Aprobar / Editar / Rechazar.`,
+    reply: `Generé ${posts.length} borradores para ${client.name} (${params.channel}).\n\n${preview}${posts.length > 3 ? `\n… +${posts.length - 3} más` : ""}${imageSummary}\n\nJob \`${finalId}\` · estado: pending_approval.\nRevisá en JARVIS → Jobs → Aprobar / Editar / Rechazar.`,
     speech: `${posts.length} publicaciones listas para tu revisión en ${client.name}.`,
     provider: llm.provider,
     model: llm.model,
     timestamp: new Date().toISOString(),
     dispatch: dispatchToN8nResult(d),
-    jobId: updated.id,
+    jobId: finalId,
     artifacts,
     meta: {
-      jobId: updated.id,
+      jobId: finalId,
       status: "pending_approval",
       client: params.clientSlug,
       count: posts.length,
+      jobsUrl: `/jarvis/jobs?job=${finalId}`,
     },
   };
 }
@@ -173,7 +191,7 @@ export async function executeApprovedJob(
 
     if (!post.image_url) {
       post.publish_status = "skipped";
-      post.publish_error = "image_url missing — generar con APOLLO antes de publicar";
+      post.publish_error = "image_url missing — generar con APOLLO (Gemini/Higgsfield) antes de publicar";
       skipped++;
       continue;
     }

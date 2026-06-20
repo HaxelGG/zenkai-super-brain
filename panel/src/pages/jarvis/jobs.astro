@@ -1,0 +1,129 @@
+---
+import JarvisLayout from "../../layouts/JarvisLayout.astro";
+import JarvisMobileNav from "../../components/jarvis/JarvisMobileNav.astro";
+import HudPanel from "../../components/jarvis/HudPanel.astro";
+import { getJarvisData } from "../../lib/jarvis";
+
+const data = await getJarvisData();
+const jobIdParam = Astro.url.searchParams.get("job") || "";
+---
+
+<JarvisLayout
+  title="Jobs · Aprobación"
+  description="HITL · preview batch contenido · Gemini + Higgsfield"
+  dataSource={data.meta?.dataSource ?? "mock"}
+>
+  <JarvisMobileNav />
+  <div id="jv-jobs-root" data-job-id={jobIdParam} hidden aria-hidden="true"></div>
+
+  <header class="mb-6" data-jv-animate="1">
+    <div class="jv-label mb-2">MUSE · APOLLO · HITL</div>
+    <h1 class="jv-heading-page">Jobs · Aprobación</h1>
+    <p class="mt-2 jv-mono text-[12px] text-[var(--jv-text-muted)] max-w-2xl">
+      Preview de batches generados por JARVIS. Imágenes vía
+      <span class="text-[var(--jv-cyan)]">Gemini Imagen</span> y
+      <span class="text-[var(--jv-cyan)]">Higgsfield</span>. Aprobá antes de publicar en Meta.
+    </p>
+  </header>
+
+  <HudPanel class="mb-6" animate={2}>
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+      <h2 class="jv-heading-section">Cola pending_approval</h2>
+      <button type="button" id="jv-jobs-refresh" class="jv-btn-ghost jv-mono text-[10px] uppercase tracking-wider">
+        Actualizar
+      </button>
+    </div>
+    <div id="jv-jobs-queue" class="space-y-2 jv-mono text-[12px] text-[var(--jv-text-muted)]">
+      Cargando jobs…
+    </div>
+  </HudPanel>
+
+  <HudPanel animate={3} padding="lg">
+    <div id="jv-jobs-detail" class="hidden">
+      <div class="flex flex-wrap items-start justify-between gap-4 mb-5">
+        <div>
+          <p class="jv-label mb-1">Job activo</p>
+          <p id="jv-jobs-detail-id" class="jv-mono text-[11px] text-[var(--jv-cyan)]"></p>
+          <p id="jv-jobs-detail-meta" class="mt-2 text-[13px] text-[var(--jv-text-muted)]"></p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button type="button" id="jv-jobs-gen-images" class="jv-btn-secondary jv-mono text-[10px] uppercase">
+            Generar imágenes
+          </button>
+          <button type="button" id="jv-jobs-reject" class="jv-btn-danger jv-mono text-[10px] uppercase">
+            Rechazar
+          </button>
+          <button type="button" id="jv-jobs-approve" class="jv-btn-primary jv-mono text-[10px] uppercase">
+            Aprobar y publicar
+          </button>
+        </div>
+      </div>
+      <p id="jv-jobs-status" class="jv-mono text-[11px] text-[var(--jv-text-dim)] mb-4"></p>
+      <div id="jv-jobs-grid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4"></div>
+    </div>
+    <p id="jv-jobs-empty" class="jv-mono text-[12px] text-[var(--jv-text-dim)]">
+      Seleccioná un job de la cola o pedile a JARVIS un batch de contenido.
+    </p>
+  </HudPanel>
+
+  <script src="/jarvis-jobs.js?v=20260620" defer></script>
+</JarvisLayout>
+
+<style>
+  .jv-btn-primary,
+  .jv-btn-secondary,
+  .jv-btn-danger,
+  .jv-btn-ghost {
+    padding: 0.5rem 0.85rem;
+    border-radius: 2px;
+    border: 1px solid var(--jv-border);
+    background: transparent;
+    color: var(--jv-text);
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .jv-btn-primary {
+    border-color: var(--jv-cyan);
+    color: var(--jv-cyan);
+  }
+  .jv-btn-primary:hover {
+    background: rgba(0, 212, 255, 0.08);
+  }
+  .jv-btn-secondary:hover,
+  .jv-btn-ghost:hover {
+    border-color: var(--jv-cyan);
+  }
+  .jv-btn-danger {
+    border-color: rgba(255, 80, 80, 0.5);
+    color: #ff8888;
+  }
+  .jv-job-card {
+    border: 1px solid var(--jv-border);
+    border-radius: 2px;
+    overflow: hidden;
+    background: rgba(3, 8, 16, 0.6);
+  }
+  .jv-job-card img {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    background: #0a1220;
+  }
+  .jv-job-card-body {
+    padding: 0.75rem;
+  }
+  .jv-job-queue-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.65rem 0.75rem;
+    border: 1px solid var(--jv-border);
+    border-radius: 2px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .jv-job-queue-item:hover,
+  .jv-job-queue-item.active {
+    border-color: var(--jv-cyan);
+  }
+</style>

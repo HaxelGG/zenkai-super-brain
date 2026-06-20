@@ -901,7 +901,7 @@
     disableWakeMode,
     startCommandMode,
     submitTextCommand: (text) => handleTranscript(String(text || "").trim(), false),
-    testVoice: () => speak("Sistemas en línea, señor.", () => setState("idle")),
+    testVoice: () => speak("Parce, JARVIS en línea. Sistemas al peluche.", () => setState("idle")),
     getState: () => state,
     getMode: () => mode,
     version: VOICE_JS_VER,

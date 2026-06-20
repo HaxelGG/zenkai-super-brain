@@ -3,18 +3,22 @@
  *
  * GET ?id=recXXX → un job
  * GET → list pending_approval (max 20)
- * POST { action: "approve"|"reject", jobId, approvedBy?, reason? }
+ * POST { action: "approve"|"reject"|"generate_images"|"update_post", jobId, ... }
  */
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import {
   executeApprovedJob,
   rejectJob,
 } from "../../scripts/agency/departments/content-batch.js";
+import {
+  generateImagesForJob,
+  updateJobPost,
+} from "../../scripts/agency/departments/content-images.js";
 import { getJob, listJobs } from "../../scripts/agency/jobs.js";
-import { allowOrchestratorRequest } from "../jarvis/_orchestrator.js";
+import { allowAgencyJobsRequest } from "./_guard.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
-  if (!allowOrchestratorRequest(req, res)) return;
+  if (!allowAgencyJobsRequest(req, res)) return;
 
   if (req.method === "GET") {
     const id = typeof req.query.id === "string" ? req.query.id : undefined;
@@ -34,16 +38,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     return;
   }
 
-  if (req.method !== "POST") {
-    res.status(405).json({ error: "GET or POST" });
-    return;
-  }
-
   const body = (req.body ?? {}) as {
     action?: string;
     jobId?: string;
     approvedBy?: string;
     reason?: string;
+    index?: number;
+    patch?: { hook?: string; caption?: string; hashtags?: string[]; image_prompt?: string };
+    limit?: number;
   };
 
   if (!body.jobId?.startsWith("rec")) {
@@ -58,13 +60,35 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
       return;
     }
 
+    if (body.action === "generate_images") {
+      const result = await generateImagesForJob(body.jobId, {
+        limit: body.limit,
+        onlyMissing: true,
+      });
+      res.status(200).json({ ok: true, ...result });
+      return;
+    }
+
+    if (body.action === "update_post") {
+      if (!body.index || !body.patch) {
+        res.status(400).json({ error: "index and patch required" });
+        return;
+      }
+      await updateJobPost(body.jobId, body.index, body.patch);
+      const job = await getJob(body.jobId);
+      res.status(200).json({ ok: true, job });
+      return;
+    }
+
     if (body.action === "approve") {
       const result = await executeApprovedJob(body.jobId, body.approvedBy || "founder");
       res.status(200).json({ ok: true, ...result });
       return;
     }
 
-    res.status(400).json({ error: "action must be approve or reject" });
+    res.status(400).json({
+      error: "action must be approve, reject, generate_images, or update_post",
+    });
   } catch (e) {
     res.status(500).json({ error: e instanceof Error ? e.message : String(e) });
   }
