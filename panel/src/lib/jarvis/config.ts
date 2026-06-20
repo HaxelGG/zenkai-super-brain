@@ -19,8 +19,15 @@ export const JARVIS_SEGMENTS = {
   finanzas: "finanzas",
   social: "social",
   tareas: "tareas",
+  jobs: "jobs",
   sistemas: "sistemas",
   goals: "goals",
+  sales: "dept/sales",
+  marketing: "dept/marketing",
+  "customer-service": "dept/customer-service",
+  ai: "dept/ai",
+  creation: "dept/creation",
+  research: "dept/research",
 } as const;
 
 export type JarvisRouteKey = keyof typeof JARVIS_SEGMENTS;
@@ -37,8 +44,15 @@ export const JARVIS_ROUTES: JarvisRoutes = {
   finanzas: `${JARVIS_BASE}/finanzas`,
   social: `${JARVIS_BASE}/social`,
   tareas: `${JARVIS_BASE}/tareas`,
+  jobs: `${JARVIS_BASE}/jobs`,
   sistemas: `${JARVIS_BASE}/sistemas`,
   goals: `${JARVIS_BASE}/goals`,
+  sales: `${JARVIS_BASE}/dept/sales`,
+  marketing: `${JARVIS_BASE}/dept/marketing`,
+  "customer-service": `${JARVIS_BASE}/dept/customer-service`,
+  ai: `${JARVIS_BASE}/dept/ai`,
+  creation: `${JARVIS_BASE}/dept/creation`,
+  research: `${JARVIS_BASE}/dept/research`,
 };
 
 export function isJarvisHost(hostname: string): boolean {
@@ -68,8 +82,15 @@ export function resolveJarvisRoutes(hostname: string): JarvisRoutes {
     finanzas: joinJarvisPath(base, JARVIS_SEGMENTS.finanzas),
     social: joinJarvisPath(base, JARVIS_SEGMENTS.social),
     tareas: joinJarvisPath(base, JARVIS_SEGMENTS.tareas),
+    jobs: joinJarvisPath(base, JARVIS_SEGMENTS.jobs),
     sistemas: joinJarvisPath(base, JARVIS_SEGMENTS.sistemas),
     goals: joinJarvisPath(base, JARVIS_SEGMENTS.goals),
+    sales: joinJarvisPath(base, JARVIS_SEGMENTS.sales),
+    marketing: joinJarvisPath(base, JARVIS_SEGMENTS.marketing),
+    "customer-service": joinJarvisPath(base, JARVIS_SEGMENTS["customer-service"]),
+    ai: joinJarvisPath(base, JARVIS_SEGMENTS.ai),
+    creation: joinJarvisPath(base, JARVIS_SEGMENTS.creation),
+    research: joinJarvisPath(base, JARVIS_SEGMENTS.research),
   };
 }
 
@@ -94,20 +115,27 @@ export function isJarvisNavActive(pathname: string, href: string): boolean {
   return path === target || path.startsWith(`${target}/`);
 }
 
-/** Nav items for sidebar / mobile */
+/** Nav plano legacy · preferir JARVIS_DEPARTMENTS en sidebar */
 export const JARVIS_NAV: ReadonlyArray<{
   key: JarvisRouteKey;
   label: string;
   icon: string;
 }> = [
   { key: "home", label: "Command Center", icon: "home" },
-  { key: "intel", label: "Intel Brief", icon: "intel" },
-  { key: "agentes", label: "Agentes IA", icon: "agents" },
+  { key: "sales", label: "Sales", icon: "pipeline" },
+  { key: "marketing", label: "Marketing", icon: "social" },
+  { key: "customer-service", label: "Customer Service", icon: "clients" },
+  { key: "ai", label: "AI", icon: "agents" },
+  { key: "creation", label: "Creation", icon: "social" },
+  { key: "research", label: "Research", icon: "intel" },
   { key: "pipeline", label: "Pipeline", icon: "pipeline" },
-  { key: "clientes", label: "Clientes", icon: "clients" },
-  { key: "finanzas", label: "Finanzas", icon: "finance" },
+  { key: "clientes", label: "Clients", icon: "clients" },
+  { key: "finanzas", label: "Finance", icon: "finance" },
   { key: "social", label: "Social", icon: "social" },
-  { key: "tareas", label: "Tareas", icon: "tasks" },
-  { key: "sistemas", label: "Sistemas", icon: "systems" },
+  { key: "intel", label: "Intel Brief", icon: "intel" },
+  { key: "agentes", label: "AI Agents", icon: "agents" },
+  { key: "jobs", label: "Jobs HITL", icon: "tasks" },
+  { key: "tareas", label: "Tasks", icon: "tasks" },
+  { key: "sistemas", label: "Systems", icon: "systems" },
   { key: "goals", label: "Goals", icon: "goals" },
 ];

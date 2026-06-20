@@ -21,6 +21,9 @@ export type JobPostArtifact = {
   hashtags: string[];
   image_prompt: string;
   image_url?: string | null;
+  image_preview?: string | null;
+  image_provider?: "gemini" | "higgsfield";
+  image_error?: string;
   calendar_id?: string;
   publish_status?: "draft" | "published" | "skipped" | "error";
   publish_error?: string;
@@ -53,9 +56,9 @@ export type AgencyJob = {
   created_at?: string;
 };
 
-type Record = { id: string; fields: Record<string, unknown>; createdTime?: string };
+type AirtableRecord = { id: string; fields: Record<string, unknown>; createdTime?: string };
 
-function mapJob(r: Record): AgencyJob {
+function mapJob(r: AirtableRecord): AgencyJob {
   const f = r.fields;
   let artifacts: JobArtifacts | null = null;
   if (f.artifacts_json) {
@@ -138,7 +141,7 @@ export async function createJob(input: {
   if (!res.ok) {
     throw new Error(`createJob → HTTP ${res.status}: ${(await res.text()).slice(0, 200)}`);
   }
-  return mapJob((await res.json()) as Record);
+  return mapJob((await res.json()) as AirtableRecord);
 }
 
 export async function updateJob(
@@ -160,7 +163,7 @@ export async function updateJob(
   if (!res.ok) {
     throw new Error(`updateJob → HTTP ${res.status}: ${(await res.text()).slice(0, 200)}`);
   }
-  return mapJob((await res.json()) as Record);
+  return mapJob((await res.json()) as AirtableRecord);
 }
 
 export async function getJob(id: string): Promise<AgencyJob | null> {
@@ -171,19 +174,19 @@ export async function getJob(id: string): Promise<AgencyJob | null> {
     { headers: { Authorization: `Bearer ${t}` } },
   );
   if (!res.ok) return null;
-  return mapJob((await res.json()) as Record);
+  return mapJob((await res.json()) as AirtableRecord);
 }
 
 export async function listJobs(max = 20, status?: JobStatus): Promise<{ source: "live" | "mock"; jobs: AgencyJob[] }> {
   const t = token();
   if (!t) return { source: "mock", jobs: [] };
 
-  let url = `https://api.airtable.com/v0/${BASE}/${encodeURIComponent(TABLE)}?maxRecords=${max}&sort%5B0%5D%5Bfield%5D=created_at&sort%5B0%5D%5Bdirection%5D=desc`;
+  let url = `https://api.airtable.com/v0/${BASE}/${encodeURIComponent(TABLE)}?maxRecords=${max}`;
   if (status) {
     url += `&filterByFormula=${encodeURIComponent(`{status}="${status}"`)}`;
   }
   const res = await fetch(url, { headers: { Authorization: `Bearer ${t}` } });
   if (!res.ok) return { source: "live", jobs: [] };
-  const data = (await res.json()) as { records: Record[] };
+  const data = (await res.json()) as { records: AirtableRecord[] };
   return { source: "live", jobs: (data.records || []).map(mapJob) };
 }

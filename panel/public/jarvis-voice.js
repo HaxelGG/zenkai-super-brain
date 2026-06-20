@@ -16,10 +16,17 @@
   const STATUS = {
     idle: "Clic en orb · hablá",
     wake: "Decí «Jarvis despierta»…",
-    listening: "Escuchando…",
+    listening: "Te escucho…",
     processing: "Procesando…",
     speaking: "Hablando…",
   };
+
+  /** Espera silencio antes de enviar comando (no cortar al hablar largo) */
+  const SILENCE_COMMIT_MS = 1600;
+  /** Tiempo máximo escuchando sin actividad */
+  const COMMAND_IDLE_MS = 45000;
+  const COMMIT_TRIGGERS =
+    /\b(listo|ya est[aá]|ejecut[aá]|dale jarvis|eso es todo|envi[aá]lo|proces[aá]|confirmo|mandale|mandalo)\b/i;
 
   const PANEL_API = "https://panel.zenkai.systems";
 
@@ -105,9 +112,10 @@
   }
 
   const WAKE_GREETINGS = [
-    "Sí, señor. JARVIS en línea.",
-    "Buenos días. Sistemas operativos.",
-    "Presente. ¿En qué puedo ayudarle?",
+    "Listo parce, JARVIS en línea. Contame.",
+    "Qué tal, acá estoy. ¿En qué le ayudo?",
+    "De una, sistemas activos. Hablame pues.",
+    "Presente. Decime qué necesitás.",
   ];
 
   let state = "idle";
@@ -120,9 +128,11 @@
   let synthUtterance = null;
   let currentAudio = null;
   let lastInterim = "";
+  let commandBuffer = "";
+  let silenceTimer = null;
   let recognitionStarting = false;
   let wakeArmGuard = false;
-  const VOICE_JS_VER = "20260620b";
+  const VOICE_JS_VER = "20260620d";
 
   const transcriptEl = document.getElementById("jv-voice-transcript");
   const runsEl = document.getElementById("jv-voice-runs");
@@ -188,7 +198,9 @@
     runs.slice(0, 8).forEach((r) => {
       const row = document.createElement("div");
       row.className = "jv-voice-log-line";
-      row.innerHTML = `<span class="jv-voice-log-dim">${new Date(r.timestamp).toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" })}</span> · ${r.speech || r.reply || r.instruction}`;
+      const tier = r.meta?.tier ? `<span class="jv-voice-tier jv-voice-tier-${r.meta.tier}">${r.meta.tier}</span>` : "";
+      const model = r.meta?.model ? `<span class="jv-voice-model">${r.meta.model}</span>` : "";
+      row.innerHTML = `<span class="jv-voice-log-dim">${new Date(r.timestamp).toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" })}</span>${tier}${model} · ${r.speech || r.reply || r.instruction}`;
       runsEl.appendChild(row);
     });
   }
@@ -241,7 +253,6 @@
       const label = STATUS[next] ?? next;
       statusEl.textContent = label;
       delete statusEl.dataset.interim;
-      if (next !== "idle") showVoiceToast(label);
     }
     btn.setAttribute("aria-pressed", next === "listening" || next === "wake" ? "true" : "false");
   }
@@ -268,10 +279,14 @@
 
     const run = () => {
       synthUtterance = new SpeechSynthesisUtterance(text.slice(0, 500));
-      synthUtterance.lang = "es-ES";
-      synthUtterance.rate = 1;
+      synthUtterance.lang = "es-CO";
+      synthUtterance.rate = 0.98;
+      synthUtterance.pitch = 0.95;
       const voices = window.speechSynthesis.getVoices();
-      const esVoice = voices.find((v) => /es/i.test(v.lang));
+      const esVoice =
+        voices.find((v) => /es-CO/i.test(v.lang)) ||
+        voices.find((v) => /es-MX/i.test(v.lang)) ||
+        voices.find((v) => /es/i.test(v.lang));
       if (esVoice) synthUtterance.voice = esVoice;
       synthUtterance.onend = () => {
         synthUtterance = null;
@@ -357,7 +372,7 @@
         headers: authHeaders(),
         body: JSON.stringify({ instruction }),
       },
-      45000,
+      55000,
     );
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
@@ -378,6 +393,8 @@
   function notifyRunSource(result) {
     if (!result?.source) return;
     if (result.source === "deepseek" || result.source === "anthropic") {
+      const who = result.source === "anthropic" ? "Claude" : "DeepSeek";
+      showVoiceToast(`${who} respondió`);
       if (result.dispatch?.event) {
         const d = result.dispatch.ok ? "enviado" : "falló";
         showVoiceToast(`n8n ${d} · ${result.dispatch.event}`);
@@ -390,26 +407,26 @@
 
   function localFallback(cmd, fromWake) {
     const lower = norm(cmd);
-    let reply = "Entendido.";
+    let reply = "Listo, parce. Entendido.";
     let path = null;
-    if (/recap|resumen|estado/.test(lower)) reply = "Revisando el estado operativo.";
+    if (/recap|resumen|estado/.test(lower)) reply = "De una, vea el estado operativo.";
     else if (/finanzas|revenue|ingresos/.test(lower)) {
-      reply = "Abriendo finanzas.";
+      reply = "Abro finanzas, parce.";
       path = normalizeNavPath("/jarvis/finanzas/");
     } else if (/pipeline|leads/.test(lower)) {
-      reply = "Abriendo pipeline.";
+      reply = "Vamos al pipeline.";
       path = normalizeNavPath("/jarvis/pipeline/");
     } else if (/clientes/.test(lower)) {
-      reply = "Abriendo clientes.";
+      reply = "Abro clientes.";
       path = normalizeNavPath("/jarvis/clientes/");
     } else if (/agentes/.test(lower)) {
-      reply = "Abriendo agentes.";
+      reply = "Veámos los agentes.";
       path = normalizeNavPath("/jarvis/agentes/");
     } else if (/social|instagram/.test(lower)) {
-      reply = "Abriendo social.";
+      reply = "Abro social.";
       path = normalizeNavPath("/jarvis/social/");
     } else if (/tareas/.test(lower)) {
-      reply = "Abriendo tareas.";
+      reply = "Revisemos tareas.";
       path = normalizeNavPath("/jarvis/tareas/");
     } else if (fromWake && /^(hola|hey|buenos)/.test(lower)) reply = pickGreeting();
 
@@ -487,6 +504,8 @@
 
   function resumeAfterCommand() {
     clearTimeout(commandTimeout);
+    clearTimeout(silenceTimer);
+    clearCommandCapture();
     if (wakeEnabled) {
       mode = "wake";
       setState("wake");
@@ -510,15 +529,69 @@
     speak(pickGreeting(), () => {
       setState("listening");
       mode = "command";
+      clearCommandCapture();
       startRecognition("command");
-      commandTimeout = setTimeout(() => {
-        if (mode === "command") resumeAfterCommand();
-      }, 12000);
+      resetCommandIdleTimeout();
     });
   }
 
-  function stopRecognition() {
+  function clearCommandCapture() {
+    commandBuffer = "";
     lastInterim = "";
+    clearTimeout(silenceTimer);
+    silenceTimer = null;
+  }
+
+  function updateListeningStatus() {
+    const preview = `${commandBuffer} ${lastInterim}`.replace(/\s+/g, " ").trim();
+    if (!preview || mode !== "command") return;
+    statusEl.dataset.interim = "1";
+    const short = preview.length > 52 ? `…${preview.slice(-49)}` : preview;
+    statusEl.textContent = `Te escucho… ${short}`;
+  }
+
+  function resetCommandIdleTimeout() {
+    clearTimeout(commandTimeout);
+    commandTimeout = setTimeout(() => {
+      if (mode !== "command" || state !== "listening") return;
+      const pending = `${commandBuffer} ${lastInterim}`.replace(/\s+/g, " ").trim();
+      if (pending) commitCommandTranscript(pending);
+      else {
+        showVoiceToast("No te escuché · tocá orb de nuevo");
+        resumeAfterCommand();
+      }
+    }, COMMAND_IDLE_MS);
+  }
+
+  function scheduleSilenceCommit() {
+    clearTimeout(silenceTimer);
+    silenceTimer = setTimeout(() => {
+      const pending = `${commandBuffer} ${lastInterim}`.replace(/\s+/g, " ").trim();
+      if (pending && mode === "command" && state === "listening") {
+        statusEl.textContent = "Enviando…";
+        commitCommandTranscript(pending);
+      }
+    }, SILENCE_COMMIT_MS);
+  }
+
+  function appendToCommandBuffer(text) {
+    const t = (text || "").trim();
+    if (!t) return;
+    commandBuffer = commandBuffer ? `${commandBuffer} ${t}` : t;
+    lastInterim = "";
+    resetCommandIdleTimeout();
+    updateListeningStatus();
+
+    if (COMMIT_TRIGGERS.test(t) || COMMIT_TRIGGERS.test(commandBuffer)) {
+      const cleaned = commandBuffer.replace(COMMIT_TRIGGERS, "").replace(/\s+/g, " ").trim();
+      commitCommandTranscript(cleaned || commandBuffer);
+      return;
+    }
+    scheduleSilenceCommit();
+  }
+
+  function stopRecognition() {
+    clearCommandCapture();
     if (!recognition) return;
     try {
       recognition.abort();
@@ -541,11 +614,12 @@
   function commitCommandTranscript(text) {
     const cmd = (text || "").trim();
     if (!cmd) return false;
-    lastInterim = "";
+    clearCommandCapture();
     clearTimeout(commandTimeout);
     stopRecognition();
     btn.classList.remove("jv-voice-active");
     mode = "off";
+    showVoiceToast("Procesando…");
     void handleTranscript(cmd, false);
     return true;
   }
@@ -592,12 +666,10 @@
       if (mode === "command") {
         if (interim) {
           lastInterim = interim;
-          statusEl.dataset.interim = "1";
-          statusEl.textContent = `«${interim.slice(0, 40)}»`;
-          showVoiceToast(`Oigo: ${interim.slice(0, 50)}`);
+          updateListeningStatus();
         }
         if (final) {
-          commitCommandTranscript(final);
+          appendToCommandBuffer(final);
         }
       }
     };
@@ -638,13 +710,12 @@
       if (state === "processing" || state === "speaking") return;
 
       if (mode === "command" && state === "listening") {
-        if (lastInterim.trim()) {
-          commitCommandTranscript(lastInterim);
-          return;
+        if (lastInterim.trim() || commandBuffer.trim()) {
+          scheduleSilenceCommit();
         }
         setTimeout(() => {
           if (mode === "command" && state === "listening") startRecognition("command");
-        }, 250);
+        }, 300);
         return;
       }
 
@@ -733,18 +804,9 @@
       mode = "command";
       btn.classList.add("jv-voice-active");
       setState("listening");
-      showVoiceToast("Hablá ahora · te escucho");
+      clearCommandCapture();
       startRecognition("command");
-      commandTimeout = setTimeout(() => {
-        if (mode === "command" && state === "listening") {
-          if (lastInterim.trim()) {
-            commitCommandTranscript(lastInterim);
-            return;
-          }
-          showVoiceToast("No te escuché · tocá orb de nuevo");
-          resumeAfterCommand();
-        }
-      }, 12000);
+      resetCommandIdleTimeout();
     })();
   }
 
@@ -844,7 +906,7 @@
     disableWakeMode,
     startCommandMode,
     submitTextCommand: (text) => handleTranscript(String(text || "").trim(), false),
-    testVoice: () => speak("Sistemas en línea, señor.", () => setState("idle")),
+    testVoice: () => speak("Parce, JARVIS en línea. Sistemas al peluche.", () => setState("idle")),
     getState: () => state,
     getMode: () => mode,
     version: VOICE_JS_VER,

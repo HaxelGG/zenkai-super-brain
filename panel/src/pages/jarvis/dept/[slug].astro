@@ -1,0 +1,26 @@
+---
+import JarvisLayout from "../../../layouts/JarvisLayout.astro";
+import JarvisMobileNav from "../../../components/jarvis/JarvisMobileNav.astro";
+import JarvisDepartmentHub from "../../../components/jarvis/JarvisDepartmentHub.astro";
+import { getJarvisData } from "../../../lib/jarvis";
+import { JARVIS_DEPARTMENTS, getDepartmentBySlug } from "../../../lib/jarvis/departments";
+
+export function getStaticPaths() {
+  return JARVIS_DEPARTMENTS.map((d) => ({ params: { slug: d.slug } }));
+}
+
+const { slug } = Astro.params;
+const department = getDepartmentBySlug(slug ?? "");
+if (!department) return Astro.redirect("/jarvis/");
+
+const data = await getJarvisData();
+---
+
+<JarvisLayout
+  title={department.label}
+  dataSource={data.meta?.dataSource ?? "mock"}
+  liveRecords={data.meta?.liveRecords}
+>
+  <JarvisMobileNav />
+  <JarvisDepartmentHub department={department} path={Astro.url.pathname} />
+</JarvisLayout>

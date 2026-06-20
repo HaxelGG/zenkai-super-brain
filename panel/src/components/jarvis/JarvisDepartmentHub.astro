@@ -1,0 +1,93 @@
+---
+/**
+ * Hub de departamento · enlaces a vistas del área operativa.
+ */
+import HudPanel from "./HudPanel.astro";
+import {
+  JARVIS_DEPARTMENTS,
+  navLabel,
+  type JarvisDepartment,
+} from "../../lib/jarvis/departments";
+import { isJarvisNavActive, resolveJarvisRoutes, type JarvisRouteKey } from "../../lib/jarvis/config";
+
+interface Props {
+  department: JarvisDepartment;
+  path: string;
+}
+
+const { department, path } = Astro.props;
+const routes = resolveJarvisRoutes(Astro.url.hostname);
+
+const icons: Record<string, string> = {
+  pipeline: "M3 3v18h18M7 16l4-8 4 5 5-9",
+  clients: "M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8",
+  finance: "M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6",
+  social: "M7 8h10M7 12h4m-4 4h7M5 4h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z",
+  tasks: "M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11",
+  agents: "M12 2a4 4 0 014 4v1h2a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V9a2 2 0 012-2h2V6a4 4 0 014-4z",
+  systems: "M12 2l3 7h7l-5.5 4.5 2 7L12 17l-6.5 3.5 2-7L2 9h7l3-7z",
+  intel: "M12 2a10 10 0 100 20 10 10 0 000-20zm0 4v8l5 3",
+  goals: "M12 2l2.4 7.4H22l-6 4.6 2.3 7L12 17.8 5.7 21l2.3-7-6-4.6h7.6L12 2z",
+};
+
+function iconFor(key: JarvisRouteKey): string {
+  if (key === "pipeline" || key === "finanzas") return icons.pipeline;
+  if (key === "clientes") return icons.clients;
+  if (key === "social") return icons.social;
+  if (key === "tareas" || key === "jobs") return icons.tasks;
+  if (key === "agentes") return icons.agents;
+  if (key === "sistemas") return icons.systems;
+  if (key === "intel") return icons.intel;
+  if (key === "goals") return icons.goals;
+  return icons.systems;
+}
+---
+
+<header class="mb-6 jv-dept-hero" data-jv-animate="1" style={`--jv-dept-accent: ${department.accent}`}>
+  <div class="jv-label mb-2">{department.leadAgent} · Department</div>
+  <h1 class="jv-heading-page">{department.label}</h1>
+  <p class="mt-2 jv-mono text-[12px] text-[var(--jv-text-muted)]">{department.tagline}</p>
+</header>
+
+<section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
+  {department.items.map((item, i) => {
+    const href = routes[item.key];
+    const label = navLabel(item.key, item.label);
+    return (
+      <a
+        href={href}
+        class:list={[
+          "jv-dept-module no-underline",
+          isJarvisNavActive(path, href) && "jv-dept-module-active",
+        ]}
+        data-jv-animate={String((i % 6) + 2)}
+      >
+        <span class="jv-dept-module-icon" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+            <path d={iconFor(item.key)} />
+          </svg>
+        </span>
+        <span class="jv-dept-module-label">{label}</span>
+        <span class="jv-dept-module-arrow" aria-hidden="true">→</span>
+      </a>
+    );
+  })}
+</section>
+
+<HudPanel animate={3}>
+  <div class="jv-label mb-3 opacity-70">Other departments</div>
+  <div class="flex flex-wrap gap-2">
+    {JARVIS_DEPARTMENTS.filter((d) => d.id !== department.id).map((d) => {
+      const otherHref = routes[d.id as JarvisRouteKey];
+      return (
+        <a
+          href={otherHref}
+          class="jv-dept-pill no-underline"
+          style={`--jv-dept-accent: ${d.accent}`}
+        >
+          {d.label}
+        </a>
+      );
+    })}
+  </div>
+</HudPanel>

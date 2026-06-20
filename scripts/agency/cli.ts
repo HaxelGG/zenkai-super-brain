@@ -43,6 +43,19 @@ async function main() {
     return;
   }
 
+  if (cmd === "batch" && arg) {
+    const { routeOperationalIntent } = await import("./intent-router.js");
+    const { runContentBatchPipeline } = await import("./departments/content-batch.js");
+    const route = routeOperationalIntent(arg);
+    if (!route.contentBatch) {
+      console.error("No CONTENT_BATCH detectado en instrucción");
+      process.exit(1);
+    }
+    const r = await runContentBatchPipeline(arg, route.contentBatch);
+    console.log(JSON.stringify(r, null, 2));
+    return;
+  }
+
   if (cmd === "content" && arg) {
     const { runMarketingContentPipeline } = await import("./departments/marketing.js");
     const r = await runMarketingContentPipeline({ brief: arg, voice: true, video: false });

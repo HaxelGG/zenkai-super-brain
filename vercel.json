@@ -4,29 +4,14 @@
   "buildCommand": "cd panel && npm run build",
   "outputDirectory": "panel/dist",
   "functions": {
-    "api/*.ts": {
-      "maxDuration": 60
-    },
-    "api/jarvis/run.ts": {
-      "maxDuration": 60
-    },
-    "api/jarvis/speak.ts": {
-      "maxDuration": 30
-    },
-    "api/agency/cron/tick.ts": {
+    "api/**/*.ts": {
       "maxDuration": 120
-    },
-    "api/agency/director.ts": {
-      "maxDuration": 90
-    },
-    "api/agency/marketing/content.ts": {
-      "maxDuration": 90
     }
   },
   "crons": [
     {
       "path": "/api/agency/cron/tick",
-      "schedule": "0 13,19,1 * * *"
+      "schedule": "0 13 * * *"
     }
   ],
   "redirects": [
@@ -50,6 +35,8 @@
     }
   ],
   "rewrites": [
+    { "source": "/api/jarvis/:path*", "destination": "/api/jarvis" },
+    { "source": "/api/agency/:path*", "destination": "/api/agency" },
     {
       "source": "/",
       "has": [{ "type": "host", "value": "jarvis.zenkai.systems" }],
@@ -91,6 +78,11 @@
       "destination": "/jarvis/tareas/"
     },
     {
+      "source": "/jobs",
+      "has": [{ "type": "host", "value": "jarvis.zenkai.systems" }],
+      "destination": "/jarvis/jobs/"
+    },
+    {
       "source": "/sistemas",
       "has": [{ "type": "host", "value": "jarvis.zenkai.systems" }],
       "destination": "/jarvis/sistemas/"
@@ -99,6 +91,11 @@
       "source": "/goals",
       "has": [{ "type": "host", "value": "jarvis.zenkai.systems" }],
       "destination": "/jarvis/goals/"
+    },
+    {
+      "source": "/dept/:slug*",
+      "has": [{ "type": "host", "value": "jarvis.zenkai.systems" }],
+      "destination": "/jarvis/dept/:slug*"
     }
   ],
   "headers": [
@@ -108,6 +105,10 @@
     },
     {
       "source": "/jarvis-live.js",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }]
+    },
+    {
+      "source": "/jarvis-jobs.js",
       "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }]
     }
   ]

@@ -1,7 +1,8 @@
 /**
- * JARVIS · cerebro LLM (DeepSeek primero · Anthropic fallback).
+ * JARVIS · cerebro LLM (routing por complejidad · DeepSeek · Anthropic)
  */
 import { getBrainCapabilities } from "./ops-context.js";
+import { routeJarvisModel, type JarvisComplexityTier } from "./model-router.js";
 
 export type BrainOutput = {
   reply: string;
@@ -12,7 +13,13 @@ export type BrainOutput = {
 };
 
 export type BrainResult =
-  | { ok: true; data: BrainOutput; provider: "deepseek" | "anthropic" }
+  | {
+      ok: true;
+      data: BrainOutput;
+      provider: "deepseek" | "anthropic";
+      model: string;
+      tier: JarvisComplexityTier;
+    }
   | { ok: false; error: string; detail?: unknown };
 
 const NAV_PATHS = [
@@ -43,31 +50,39 @@ const AGENTS = [
   "ZEUS",
 ] as const;
 
-const SYSTEM_PROMPT = `Sos JARVIS, el sistema de inteligencia operativa de ZENKAI Growth Systems (Pereira, Colombia). Operás para Jordy, CEO.
+const SYSTEM_PROMPT = `Sos JARVIS, el Super Cerebro operativo de ZENKAI Growth Systems — Pereira, Risaralda, Colombia. Trabajás con Jordy, el parce CEO.
 
-NO sos un chatbot ni un clasificador. Sos el Super Cerebro ejecutivo: interpretás, priorizás, recomendás y actuás con autonomía.
+NO sos un chatbot genérico. Sos director de operaciones con autonomía: interpretás, priorizás, orquestás flujos, API calls, automatizaciones (n8n/Make), y das recomendaciones accionables.
 
-PERSONALIDAD:
-- Sofisticado, estratégico, directo. Calidez controlada.
-- Proactivo: riesgos y oportunidades en los datos operativos → mencionalos.
-- Razonamiento breve cuando aporte valor. Español LATAM. Sin emojis ni markdown en speech.
+PERSONALIDAD PAISA (natural, no caricatura):
+- Calidez eje cafetero: "parce", "pues", "vea", "listo", "¿cierto?", "de una", "qué tal".
+- Profesional y directo — como un socio de confianza en Pereira, no un robot de call center.
+- Escuchás completo antes de responder; en voz, frases cortas y humanas (como hablaría alguien real).
+- Podés usar "usted" con respeto o "vos/parce" según el tono; nunca suenes a manual corporativo.
+- Sin emojis ni markdown en speech. Sin "Input clasificado" ni frases de soporte técnico.
+
+CAPACIDADES DE ORQUESTACIÓN:
+- Navegar módulos del HUD cuando pidan ver algo.
+- Sugerir agente Master (ARES, HERMES, NEXUS, etc.) cuando la tarea lo requiera.
+- Disparar eventos n8n solo si piden acción operativa concreta (alerta, email, workflow).
+- Recomendar siguiente paso único y accionable.
 
 ZENKAI:
 - Meta 2026: USD 100K · e-commerce fase 1 · salud fase 2.
 - Agentes: ${AGENTS.join(", ")}.
-- Stack: Airtable, n8n/Make, DeepSeek, Claude, ElevenLabs, Vercel, Windmill MCP.
+- Stack: Airtable, n8n/Make, DeepSeek, Claude, ElevenLabs, Vercel.
 
 NAVEGACIÓN (action cuando quiera ver/abrir módulo):
 ${NAV_PATHS.map((p) => `- ${p}`).join("\n")}
 
-AUTOMATIZACIÓN n8n (dispatch opcional — solo si pide acción operativa: alerta, email, workflow):
+AUTOMATIZACIÓN n8n (dispatch opcional — solo acción operativa explícita):
 Eventos: jarvis.recap · jarvis.alert · jarvis.lead_followup · jarvis.custom
 "dispatch": { "event": "jarvis.recap", "payload": { "reason": "..." } }
 
 SALIDA — SOLO JSON:
 {
   "reply": "2-4 frases completas para UI/Telegram",
-  "speech": "≤220 chars, natural para voz",
+  "speech": "≤220 chars, natural para voz, tono paisa",
   "action": null | { "type": "navigate", "path": "/jarvis/..." },
   "agent": null | "HERMES",
   "dispatch": null | { "event": "jarvis.recap", "payload": {} }
@@ -75,11 +90,29 @@ SALIDA — SOLO JSON:
 
 REGLAS:
 - Usá números del CONTEXTO OPERATIVO cuando existan.
-- Nunca digas "Input clasificado" ni suenes a bot de soporte.
-- speech = frase hablada, no lista.`;
+- speech = una frase hablada, no lista ni bullets.`;
 
 export function isJarvisBrainEnabled(): boolean {
   return getBrainCapabilities().brain;
+}
+
+const LLM_TIMEOUT_SIMPLE_MS = 22_000;
+const LLM_TIMEOUT_COMPLEX_MS = 38_000;
+
+async function fetchLlm(url: string, init: RequestInit, tier: JarvisComplexityTier): Promise<Response> {
+  const ms = tier === "complex" ? LLM_TIMEOUT_COMPLEX_MS : LLM_TIMEOUT_SIMPLE_MS;
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), ms);
+  try {
+    return await fetch(url, { ...init, signal: ctrl.signal });
+  } catch (err) {
+    if (err instanceof Error && err.name === "AbortError") {
+      throw new Error(`LLM timeout after ${ms}ms`);
+    }
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 function trimSpeech(text: string, max = 220): string {
@@ -142,23 +175,101 @@ function parseBrainOutput(raw: unknown): BrainOutput {
   };
 }
 
-async function callDeepSeek(context: string, instruction: string): Promise<BrainResult> {
+async function callDeepSeek(
+  model: string,
+  context: string,
+  instruction: string,
+  tier: JarvisComplexityTier,
+): Promise<BrainResult> {
   const apiKey = process.env.DEEPSEEK_API_KEY?.trim();
   if (!apiKey) return { ok: false, error: "deepseek not configured" };
 
-  const model = process.env.DEEPSEEK_MODEL?.trim() || "deepseek-chat";
-  return callLlm("deepseek", apiKey, model, context, instruction, true);
+  const isReasoner = model.includes("reasoner");
+  let res: Response;
+  try {
+    res = await fetchLlm("https://api.deepseek.com/chat/completions", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model,
+        max_tokens: tier === "complex" ? 900 : 700,
+        temperature: isReasoner ? 0.5 : 0.7,
+        ...(isReasoner ? {} : { response_format: { type: "json_object" } }),
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT },
+          {
+            role: "user",
+            content: `${context}\n\n[INSTRUCCIÓN]\n${instruction.trim()}${isReasoner ? "\n\nResponde SOLO JSON válido." : ""}`,
+          },
+        ],
+      }),
+    }, tier);
+  } catch (err) {
+    return {
+      ok: false,
+      error: "deepseek call failed",
+      detail: err instanceof Error ? err.message : String(err),
+    };
+  }
+
+  if (!res.ok) {
+    const detail = await res.text().catch(() => "");
+    return { ok: false, error: "deepseek call failed", detail: detail.slice(0, 300) };
+  }
+
+  const body = (await res.json()) as {
+    choices?: { message?: { content?: unknown; reasoning_content?: unknown } }[];
+  };
+  const msg = body.choices?.[0]?.message;
+  const content =
+    typeof msg?.content === "string"
+      ? msg.content
+      : typeof msg?.reasoning_content === "string"
+        ? msg.reasoning_content
+        : null;
+  if (!content) {
+    return { ok: false, error: "deepseek empty response" };
+  }
+
+  try {
+    return {
+      ok: true,
+      provider: "deepseek",
+      model,
+      tier,
+      data: parseBrainOutput(extractJson(content)),
+    };
+  } catch (err) {
+    if (isReasoner) {
+      const chatModel = process.env.DEEPSEEK_MODEL?.trim() || "deepseek-chat";
+      if (chatModel !== model) {
+        console.warn("[jarvis/brain] reasoner json failed · retry deepseek-chat");
+        return callDeepSeek(chatModel, context, instruction, tier);
+      }
+    }
+    return {
+      ok: false,
+      error: "invalid brain json",
+      detail: err instanceof Error ? err.message : String(err),
+    };
+  }
 }
 
-async function callAnthropic(context: string, instruction: string): Promise<BrainResult> {
+async function callAnthropic(
+  model: string,
+  context: string,
+  instruction: string,
+  tier: JarvisComplexityTier,
+): Promise<BrainResult> {
   const apiKey = process.env.ANTHROPIC_API_KEY?.trim();
   if (!apiKey) return { ok: false, error: "anthropic not configured" };
 
-  const model = process.env.JARVIS_ANTHROPIC_MODEL?.trim() || "claude-sonnet-4-6";
-
   let res: Response;
   try {
-    res = await fetch("https://api.anthropic.com/v1/messages", {
+    res = await fetchLlm("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
         "content-type": "application/json",
@@ -167,7 +278,7 @@ async function callAnthropic(context: string, instruction: string): Promise<Brai
       },
       body: JSON.stringify({
         model,
-        max_tokens: 700,
+        max_tokens: tier === "complex" ? 900 : 700,
         system: SYSTEM_PROMPT,
         messages: [
           {
@@ -176,7 +287,7 @@ async function callAnthropic(context: string, instruction: string): Promise<Brai
           },
         ],
       }),
-    });
+    }, tier);
   } catch (err) {
     return {
       ok: false,
@@ -197,69 +308,13 @@ async function callAnthropic(context: string, instruction: string): Promise<Brai
   if (!text) return { ok: false, error: "anthropic empty response" };
 
   try {
-    return { ok: true, provider: "anthropic", data: parseBrainOutput(extractJson(text)) };
-  } catch (err) {
     return {
-      ok: false,
-      error: "invalid brain json",
-      detail: err instanceof Error ? err.message : String(err),
+      ok: true,
+      provider: "anthropic",
+      model,
+      tier,
+      data: parseBrainOutput(extractJson(text)),
     };
-  }
-}
-
-async function callLlm(
-  provider: "deepseek",
-  apiKey: string,
-  model: string,
-  context: string,
-  instruction: string,
-  jsonMode: boolean,
-): Promise<BrainResult> {
-  let res: Response;
-  try {
-    res = await fetch("https://api.deepseek.com/chat/completions", {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model,
-        max_tokens: 700,
-        temperature: 0.7,
-        ...(jsonMode ? { response_format: { type: "json_object" } } : {}),
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          {
-            role: "user",
-            content: `${context}\n\n[INSTRUCCIÓN]\n${instruction.trim()}`,
-          },
-        ],
-      }),
-    });
-  } catch (err) {
-    return {
-      ok: false,
-      error: `${provider} call failed`,
-      detail: err instanceof Error ? err.message : String(err),
-    };
-  }
-
-  if (!res.ok) {
-    const detail = await res.text().catch(() => "");
-    return { ok: false, error: `${provider} call failed`, detail: detail.slice(0, 300) };
-  }
-
-  const body = (await res.json()) as {
-    choices?: { message?: { content?: unknown } }[];
-  };
-  const content = body.choices?.[0]?.message?.content;
-  if (typeof content !== "string") {
-    return { ok: false, error: `${provider} empty response` };
-  }
-
-  try {
-    return { ok: true, provider, data: parseBrainOutput(extractJson(content)) };
   } catch (err) {
     return {
       ok: false,
@@ -277,16 +332,35 @@ export async function askJarvisBrain(
     return { ok: false, error: "brain disabled or no API keys" };
   }
 
+  const route = routeJarvisModel(instruction);
   const caps = getBrainCapabilities();
-  if (caps.deepseek) {
-    const ds = await callDeepSeek(opsContext, instruction);
+
+  console.info(
+    `[jarvis/brain] tier=${route.tier} score=${route.score} ds=${route.deepseekModel} ant=${route.anthropicModel}`,
+  );
+
+  const skipDeepseek =
+    route.preferAnthropic ||
+    process.env.JARVIS_SKIP_DEEPSEEK?.trim() === "1" ||
+    process.env.JARVIS_LLM_PROVIDER?.toLowerCase() === "anthropic";
+
+  if (!skipDeepseek && caps.deepseek) {
+    const ds = await callDeepSeek(route.deepseekModel, opsContext, instruction, route.tier);
     if (ds.ok) return ds;
     console.warn("[jarvis/brain] deepseek failed:", ds.error, ds.detail ?? "");
   }
 
   if (caps.anthropic) {
-    return callAnthropic(opsContext, instruction);
+    const ant = await callAnthropic(route.anthropicModel, opsContext, instruction, route.tier);
+    if (ant.ok) return ant;
+    console.warn("[jarvis/brain] anthropic failed:", ant.error, ant.detail ?? "");
+  }
+
+  if (route.preferAnthropic && caps.deepseek) {
+    return callDeepSeek(route.deepseekModel, opsContext, instruction, route.tier);
   }
 
   return { ok: false, error: "no LLM provider available" };
 }
+
+export { classifyJarvisInstruction, routeJarvisModel } from "./model-router.js";

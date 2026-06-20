@@ -202,5 +202,6 @@ export function getAgent(id: AgentId): AgentDefinition {
 }
 
 export function pickLeadAgent(department: DepartmentId): AgentId {
-  return DEPARTMENT_AGENTS[department][0];
+  const lead = DEPARTMENT_AGENTS[department]?.[0];
+  return lead ?? "ATLAS";
 }

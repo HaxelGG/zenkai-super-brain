@@ -18,15 +18,20 @@
     "wmill:pull": "tsx scripts/windmill/sync.ts pull",
     "wmill:push": "tsx scripts/windmill/sync.ts push",
     "jarvis:setup-jobs": "tsx scripts/airtable/setup-jobs-schema.ts",
+    "jarvis:setup-sprint1": "tsx scripts/airtable/setup-sprint1-schema.ts",
     "jarvis:telegram": "tsx scripts/jarvis/telegram-bridge.ts",
     "jarvis:telegram:setup": "tsx scripts/jarvis/telegram-setup.ts",
+    "jarvis:benchmark": "tsx scripts/jarvis/benchmark.ts",
+    "jarvis:create-paisa-voice": "tsx scripts/jarvis/create-jarvis-paisa-voice.ts",
     "agency:status": "tsx scripts/agency/cli.ts status",
     "agency:keys": "tsx scripts/agency/cli.ts keys",
     "agency:director": "tsx scripts/agency/cli.ts director",
+    "agency:batch": "tsx scripts/agency/cli.ts batch",
     "agency:content": "tsx scripts/agency/cli.ts content",
     "agency:agent": "tsx scripts/agency/cli.ts agent",
     "agency:tick": "tsx scripts/agency/cli.ts tick",
-    "agency:setup-schema": "tsx scripts/airtable/setup-agency-schema.ts"
+    "agency:setup-schema": "tsx scripts/airtable/setup-agency-schema.ts",
+    "vercel:sync-env": "tsx scripts/vercel/sync-env.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.92.0",

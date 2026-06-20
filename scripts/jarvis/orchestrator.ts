@@ -16,10 +16,18 @@ export type JarvisRunResult = {
   speech: string;
   action?: JarvisAction;
   agent?: string;
-  source: "deepseek" | "anthropic" | "local" | "clasificar";
+  source: "deepseek" | "anthropic" | "haiku" | "local" | "clasificar";
   timestamp: string;
   dispatch?: { event: string; ok: boolean; error?: string };
-  meta?: { fallbackReason?: string; contextLive?: boolean; agency?: boolean; department?: string; jobId?: string };
+  meta?: {
+    fallbackReason?: string;
+    contextLive?: boolean;
+    agency?: boolean;
+    department?: string;
+    jobId?: string;
+    tier?: "simple" | "complex";
+    model?: string;
+  };
 };
 
 function makeId(): string {
@@ -91,7 +99,12 @@ export async function executeJarvisInstruction(instruction: string): Promise<Jar
 
   if (shouldDelegateToAgency(trimmed)) {
     try {
-      const routed = await directorRoute(trimmed);
+      const routed = await Promise.race([
+        directorRoute(trimmed),
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error("agency director timeout")), 20_000),
+        ),
+      ]);
       const primary = routed.results[0];
       if (primary) {
         return {
@@ -100,7 +113,7 @@ export async function executeJarvisInstruction(instruction: string): Promise<Jar
           reply: primary.reply,
           speech: primary.speech || primary.reply.slice(0, 220),
           agent: primary.agent,
-          source: primary.provider,
+          source: primary.provider as JarvisRunResult["source"],
           timestamp,
           dispatch: primary.dispatch,
           meta: { agency: true, department: routed.department, contextLive: !!primary.meta?.contextLive, jobId: primary.meta?.jobId as string | undefined },
@@ -140,7 +153,7 @@ export async function executeJarvisInstruction(instruction: string): Promise<Jar
         source: brain.provider,
         timestamp,
         dispatch: dispatchResult,
-        meta: { contextLive: ops.live },
+        meta: { contextLive: ops.live, tier: brain.tier, model: brain.model },
       };
     }
 

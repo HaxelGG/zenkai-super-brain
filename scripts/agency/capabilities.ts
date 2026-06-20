@@ -37,8 +37,18 @@ export function getProviderCapabilities(): ProviderStatus[] {
     {
       id: "higgsfield",
       label: "Higgsfield",
-      configured: !!process.env.HIGGSFIELD_API_KEY?.trim(),
-      role: "Video IA · efectos · clips cortos",
+      configured: !!(
+        process.env.HIGGSFIELD_API_KEY?.trim()?.includes(":") ||
+        (process.env.HIGGSFIELD_API_KEY?.trim() && process.env.HIGGSFIELD_API_SECRET?.trim()) ||
+        process.env.HF_CREDENTIALS?.trim()
+      ),
+      role: "Imágenes editoriales · video IA · clips cortos",
+    },
+    {
+      id: "gemini",
+      label: "Google Gemini",
+      configured: !!process.env.GEMINI_API_KEY?.trim(),
+      role: "Imagen Imagen 3 · multimodal · OCR",
     },
     {
       id: "n8n",

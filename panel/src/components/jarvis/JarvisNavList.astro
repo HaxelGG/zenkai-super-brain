@@ -1,9 +1,14 @@
 ---
 import {
-  JARVIS_NAV,
+  JARVIS_DEPARTMENTS,
+  navLabel,
+  type JarvisDepartment,
+} from "../../lib/jarvis/departments";
+import {
   PANEL_URL,
   isJarvisNavActive,
   resolveJarvisRoutes,
+  type JarvisRouteKey,
 } from "../../lib/jarvis/config";
 
 interface Props {
@@ -27,27 +32,81 @@ const icons: Record<string, string> = {
   intel: "M12 2a10 10 0 100 20 10 10 0 000-20zm0 4v8l5 3",
   panel: "M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z",
 };
+
+function iconFor(key: JarvisRouteKey): string {
+  if (key === "home") return icons.home;
+  if (key === "pipeline" || key === "finanzas" || key === "sales") return icons.pipeline;
+  if (key === "clientes" || key === "customer-service") return icons.clients;
+  if (key === "social" || key === "marketing" || key === "creation") return icons.social;
+  if (key === "tareas" || key === "jobs") return icons.tasks;
+  if (key === "agentes" || key === "ai") return icons.agents;
+  if (key === "sistemas") return icons.systems;
+  if (key === "intel" || key === "research") return icons.intel;
+  if (key === "goals") return icons.goals;
+  return icons.systems;
+}
+
+function deptHubHref(dept: JarvisDepartment): string {
+  return routes[dept.id as JarvisRouteKey];
+}
+
+function isDeptActive(dept: JarvisDepartment): boolean {
+  const hub = deptHubHref(dept);
+  if (isJarvisNavActive(path, hub)) return true;
+  return dept.items.some((item) => isJarvisNavActive(path, routes[item.key]));
+}
 ---
 
-<div class="space-y-0.5">
-  {JARVIS_NAV.map((item) => {
-    const href = routes[item.key];
-    return (
+<div class="space-y-4">
+  <a
+    href={routes.home}
+    class:list={[
+      "jv-nav-item flex items-center gap-2 rounded-sm text-[var(--jv-text-sm)] no-underline transition-colors duration-200",
+      itemPadding,
+      isJarvisNavActive(path, routes.home) ? "jv-nav-active font-medium" : "text-[var(--jv-text-muted)]",
+    ]}
+  >
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d={icons.home} />
+    </svg>
+    Command Center
+  </a>
+
+  {JARVIS_DEPARTMENTS.map((dept) => (
+    <div class="jv-dept-nav-group" style={`--jv-dept-accent: ${dept.accent}`}>
       <a
-        href={href}
+        href={deptHubHref(dept)}
         class:list={[
-          "jv-nav-item flex items-center gap-2 rounded-sm text-[var(--jv-text-sm)] no-underline transition-colors duration-200",
-          itemPadding,
-          isJarvisNavActive(path, href) ? "jv-nav-active font-medium" : "text-[var(--jv-text-muted)]",
+          "jv-dept-nav-head no-underline",
+          isDeptActive(dept) && "jv-dept-nav-head-active",
         ]}
       >
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d={icons[item.icon]} />
-        </svg>
-        {item.label}
+        {dept.label}
       </a>
-    );
-  })}
+      <div class="space-y-0.5 mt-1">
+        {dept.items.map((item) => {
+          const href = routes[item.key];
+          const label = navLabel(item.key, item.label);
+          return (
+            <a
+              href={href}
+              class:list={[
+                "jv-nav-item flex items-center gap-2 rounded-sm text-[var(--jv-text-sm)] no-underline transition-colors duration-200",
+                itemPadding,
+                "pl-3",
+                isJarvisNavActive(path, href) ? "jv-nav-active font-medium" : "text-[var(--jv-text-muted)]",
+              ]}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d={iconFor(item.key)} />
+              </svg>
+              {label}
+            </a>
+          );
+        })}
+      </div>
+    </div>
+  ))}
 
   <div class="jv-nav-divider" role="separator" aria-hidden="true"></div>
 

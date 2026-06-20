@@ -19,9 +19,9 @@ export type CalendarItem = {
   imageUrl?: string;
 };
 
-type Record = { id: string; fields: Record<string, unknown> };
+type AirtableRecord = { id: string; fields: Record<string, unknown> };
 
-function map(r: Record): CalendarItem {
+function map(r: AirtableRecord): CalendarItem {
   const f = r.fields;
   return {
     id: r.id,
@@ -50,7 +50,7 @@ export async function listCalendarDue(withinHours = 24): Promise<{ source: "live
     { headers: { Authorization: `Bearer ${token}` } },
   );
   if (!res.ok) return { source: "live", items: [] };
-  const data = (await res.json()) as { records: Record[] };
+  const data = (await res.json()) as { records: AirtableRecord[] };
   const cutoff = Date.now() + withinHours * 3600_000;
   const items = (data.records || [])
     .map(map)
@@ -89,7 +89,7 @@ export async function saveCalendarItem(
   });
 
   if (!res.ok) return { ...item, id: item.id || `local_${Date.now()}` };
-  return map((await res.json()) as Record);
+  return map((await res.json()) as AirtableRecord);
 }
 
 export async function listCalendarAll(max = 30): Promise<{ source: "live" | "mock"; items: CalendarItem[] }> {
@@ -113,7 +113,7 @@ export async function listCalendarAll(max = 30): Promise<{ source: "live" | "moc
     { headers: { Authorization: `Bearer ${token}` } },
   );
   if (!res.ok) return { source: "live", items: [] };
-  const data = (await res.json()) as { records: Record[] };
+  const data = (await res.json()) as { records: AirtableRecord[] };
   return { source: "live", items: (data.records || []).map(map) };
 }
 
@@ -128,7 +128,7 @@ export async function getCalendarItem(id: string): Promise<CalendarItem | null> 
     { headers: { Authorization: `Bearer ${token}` } },
   );
   if (!res.ok) return null;
-  return map((await res.json()) as Record);
+  return map((await res.json()) as AirtableRecord);
 }
 
 export async function markCalendarPublished(id: string, publishUrl?: string): Promise<void> {

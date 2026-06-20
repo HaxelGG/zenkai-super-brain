@@ -1,0 +1,37 @@
+---
+import { JARVIS_DEPARTMENTS } from "../../lib/jarvis/departments";
+import { resolveJarvisRoutes, type JarvisRouteKey } from "../../lib/jarvis/config";
+
+const routes = resolveJarvisRoutes(Astro.url.hostname);
+---
+
+<section class="mb-6" data-jv-animate="2">
+  <div class="flex items-center justify-between gap-3 mb-3">
+    <h2 class="jv-heading-section">Departments</h2>
+    <span class="jv-mono text-[10px] text-[var(--jv-text-dim)]">6 operational areas</span>
+  </div>
+  <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2.5">
+    {JARVIS_DEPARTMENTS.map((dept, i) => {
+      const href = routes[dept.id as JarvisRouteKey];
+      return (
+        <a
+          href={href}
+          class="jv-dept-card no-underline"
+          style={`--jv-dept-accent: ${dept.accent}`}
+          data-jv-animate={String((i % 6) + 3)}
+        >
+          <div class="jv-dept-card-head">
+            <span class="jv-dept-card-name">{dept.label}</span>
+            <span class="jv-dept-card-agent jv-mono">{dept.leadAgent}</span>
+          </div>
+          <p class="jv-dept-card-tagline">{dept.tagline}</p>
+          <div class="jv-dept-card-modules">
+            {dept.items.slice(0, 3).map((item) => (
+              <span class="jv-dept-card-chip">{item.label ?? item.key}</span>
+            ))}
+          </div>
+        </a>
+      );
+    })}
+  </div>
+</section>

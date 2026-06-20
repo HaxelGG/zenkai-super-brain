@@ -3,7 +3,7 @@
 
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { clasificar, render } from "../scripts/anthropic/clasificar.js";
-import { requireBearer } from "./_auth.js";
+import { requireBearer } from "../scripts/api/auth.js";
 
 export default async function handler(
   req: VercelRequest,

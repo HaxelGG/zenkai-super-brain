@@ -1,18 +1,15 @@
 /**
- * ElevenLabs TTS para voz JARVIS · servidor (Vercel).
- * Fallback: el cliente usa speechSynthesis si no hay API key.
+ * ElevenLabs TTS para voz JARVIS · acento paisa · servidor (Vercel).
  */
+import {
+  JARVIS_PAISA_VOICE_SETTINGS,
+  JARVIS_VOICE_ID_DEFAULT,
+  resolveJarvisTtsModel,
+  resolveJarvisVoiceIdFromEnv,
+} from "../../jarvis/voice/config.js";
 
-const DEFAULT_VOICE_ID = "FqHzPCWiAfnd8t6A5LN4";
-const DEFAULT_MODEL = "eleven_multilingual_v2";
-
-/** Vercel usa ELEVENLABS_JARVIS_VOICE_ID; web/legacy usa ELEVENLABS_VOICE_ID. */
 export function resolveJarvisVoiceId(): string {
-  return (
-    process.env.ELEVENLABS_JARVIS_VOICE_ID?.trim() ||
-    process.env.ELEVENLABS_VOICE_ID?.trim() ||
-    DEFAULT_VOICE_ID
-  );
+  return resolveJarvisVoiceIdFromEnv();
 }
 
 export type JarvisSpeechResult = {
@@ -26,7 +23,7 @@ export async function synthesizeJarvisSpeech(text: string): Promise<JarvisSpeech
   if (!apiKey?.trim()) return null;
 
   const voiceId = resolveJarvisVoiceId();
-  const modelId = process.env.ELEVENLABS_MODEL_ID?.trim() || DEFAULT_MODEL;
+  const modelId = resolveJarvisTtsModel();
   const payload = text.trim().slice(0, 800);
   if (!payload) return null;
 
@@ -40,12 +37,7 @@ export async function synthesizeJarvisSpeech(text: string): Promise<JarvisSpeech
     body: JSON.stringify({
       text: payload,
       model_id: modelId,
-      voice_settings: {
-        stability: 0.45,
-        similarity_boost: 0.78,
-        style: 0.15,
-        use_speaker_boost: true,
-      },
+      voice_settings: JARVIS_PAISA_VOICE_SETTINGS,
     }),
   });
 
@@ -61,3 +53,5 @@ export async function synthesizeJarvisSpeech(text: string): Promise<JarvisSpeech
     provider: "elevenlabs",
   };
 }
+
+export { JARVIS_VOICE_ID_DEFAULT };
