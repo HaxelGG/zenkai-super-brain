@@ -99,6 +99,8 @@
   let commandTimeout = null;
   let synthUtterance = null;
   let currentAudio = null;
+  let lastInterim = "";
+  let recognitionStarting = false;
 
   const transcriptEl = document.getElementById("jv-voice-transcript");
   const runsEl = document.getElementById("jv-voice-runs");
@@ -241,18 +243,31 @@
       return;
     }
     window.speechSynthesis.cancel();
-    synthUtterance = new SpeechSynthesisUtterance(text.slice(0, 500));
-    synthUtterance.lang = "es-CO";
-    synthUtterance.rate = 1;
-    const voices = window.speechSynthesis.getVoices();
-    const esVoice = voices.find((v) => /es/i.test(v.lang));
-    if (esVoice) synthUtterance.voice = esVoice;
-    synthUtterance.onend = () => {
-      synthUtterance = null;
-      onDone?.();
+
+    const run = () => {
+      synthUtterance = new SpeechSynthesisUtterance(text.slice(0, 500));
+      synthUtterance.lang = "es-ES";
+      synthUtterance.rate = 1;
+      const voices = window.speechSynthesis.getVoices();
+      const esVoice = voices.find((v) => /es/i.test(v.lang));
+      if (esVoice) synthUtterance.voice = esVoice;
+      synthUtterance.onend = () => {
+        synthUtterance = null;
+        onDone?.();
+      };
+      synthUtterance.onerror = () => onDone?.();
+      window.speechSynthesis.speak(synthUtterance);
     };
-    synthUtterance.onerror = () => onDone?.();
-    window.speechSynthesis.speak(synthUtterance);
+
+    if (window.speechSynthesis.getVoices().length) {
+      run();
+    } else {
+      window.speechSynthesis.onvoiceschanged = () => {
+        window.speechSynthesis.onvoiceschanged = null;
+        run();
+      };
+      setTimeout(run, 120);
+    }
   }
 
   async function speak(text, onDone) {
@@ -452,6 +467,7 @@
   }
 
   function stopRecognition() {
+    lastInterim = "";
     if (!recognition) return;
     try {
       recognition.abort();
@@ -462,16 +478,37 @@
         /* ignore */
       }
     }
+    recognitionStarting = false;
+  }
+
+  function resolveSpeechLang() {
+    const nav = (navigator.language || "es-ES").toLowerCase();
+    if (nav.startsWith("es")) return nav;
+    return "es-ES";
+  }
+
+  function commitCommandTranscript(text) {
+    const cmd = (text || "").trim();
+    if (!cmd) return false;
+    lastInterim = "";
+    clearTimeout(commandTimeout);
+    stopRecognition();
+    btn.classList.remove("jv-voice-active");
+    mode = "off";
+    void handleTranscript(cmd, false);
+    return true;
   }
 
   function initRecognition() {
     if (!SpeechRecognition) return null;
     const rec = new SpeechRecognition();
-    rec.lang = "es-CO";
+    rec.lang = resolveSpeechLang();
     rec.interimResults = true;
     rec.maxAlternatives = 1;
+    rec.continuous = true;
 
     rec.onstart = () => {
+      recognitionStarting = false;
       if (mode === "command") setState("listening");
       else if (mode === "wake") setState("wake");
     };
@@ -497,21 +534,27 @@
         statusEl.textContent = `«${interim.slice(0, 36)}»`;
       }
 
-      if (mode === "command" && final) {
-        stopRecognition();
-        btn.classList.remove("jv-voice-active");
-        handleTranscript(final, true);
-      } else if (mode === "command" && interim) {
-        statusEl.dataset.interim = "1";
-        statusEl.textContent = `«${interim.slice(0, 40)}»`;
+      if (mode === "command") {
+        if (interim) {
+          lastInterim = interim;
+          statusEl.dataset.interim = "1";
+          statusEl.textContent = `«${interim.slice(0, 40)}»`;
+          showVoiceToast(`Oigo: ${interim.slice(0, 50)}`);
+        }
+        if (final) {
+          commitCommandTranscript(final);
+        }
       }
     };
 
     rec.onerror = (ev) => {
+      recognitionStarting = false;
       if (ev.error === "no-speech") {
         if (mode === "wake" || mode === "command") {
           setTimeout(() => {
-            if (mode !== "off") startRecognition(mode);
+            if (mode !== "off" && state !== "processing" && state !== "speaking") {
+              startRecognition(mode);
+            }
           }, 300);
         }
         return;
@@ -522,13 +565,35 @@
         disableWakeMode();
         return;
       }
-      if (ev.error !== "aborted" && mode === "wake") {
-        setTimeout(() => startRecognition("wake"), 800);
+      if (ev.error === "audio-capture") {
+        showVoiceToast("Micrófono no detectado · revisá dispositivo");
+        resumeAfterCommand();
+        return;
+      }
+      if (ev.error === "network") {
+        showVoiceToast("Red STT · reintentando…");
+      }
+      if (ev.error !== "aborted" && (mode === "wake" || mode === "command")) {
+        setTimeout(() => startRecognition(mode), 800);
       }
     };
 
     rec.onend = () => {
-      if (mode === "wake" && wakeEnabled && state !== "speaking" && state !== "processing") {
+      recognitionStarting = false;
+      if (state === "processing" || state === "speaking") return;
+
+      if (mode === "command" && state === "listening") {
+        if (lastInterim.trim()) {
+          commitCommandTranscript(lastInterim);
+          return;
+        }
+        setTimeout(() => {
+          if (mode === "command" && state === "listening") startRecognition("command");
+        }, 250);
+        return;
+      }
+
+      if (mode === "wake" && wakeEnabled) {
         setTimeout(() => {
           if (mode === "wake") startRecognition("wake");
         }, 200);
@@ -543,13 +608,23 @@
       statusEl.textContent = "Usá Chrome o Edge";
       return;
     }
+    if (recognitionStarting) return;
     if (!recognition) recognition = initRecognition();
     mode = nextMode;
-    recognition.continuous = nextMode === "wake";
+    recognition.continuous = true;
+    recognitionStarting = true;
     try {
       recognition.start();
     } catch {
-      /* already running */
+      recognitionStarting = false;
+      recognition = initRecognition();
+      if (!recognition) return;
+      mode = nextMode;
+      try {
+        recognition.start();
+      } catch {
+        showVoiceToast("Mic ocupado · clic de nuevo en orb");
+      }
     }
   }
 
@@ -584,13 +659,22 @@
   function startCommandMode() {
     stopRecognition();
     stopAudio();
+    lastInterim = "";
     mode = "command";
     btn.classList.add("jv-voice-active");
     setState("listening");
+    showVoiceToast("Hablá ahora · te escucho");
     startRecognition("command");
     commandTimeout = setTimeout(() => {
-      if (mode === "command") resumeAfterCommand();
-    }, 15000);
+      if (mode === "command" && state === "listening") {
+        if (lastInterim.trim()) {
+          commitCommandTranscript(lastInterim);
+          return;
+        }
+        showVoiceToast("No te escuché · tocá orb de nuevo");
+        resumeAfterCommand();
+      }
+    }, 12000);
   }
 
   function handleSingleClick() {
@@ -618,11 +702,6 @@
   }
 
   btn.addEventListener("click", () => {
-    if (clickTimer) {
-      clearTimeout(clickTimer);
-      clickTimer = null;
-      return;
-    }
     clickTimer = setTimeout(() => {
       clickTimer = null;
       handleSingleClick();

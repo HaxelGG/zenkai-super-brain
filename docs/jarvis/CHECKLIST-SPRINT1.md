@@ -1,46 +1,38 @@
 # Checklist Sprint 1 · n8n comercial ZENKAI
 
-Marcar en orden. Tiempo estimado: **45–60 min**.
+Marcar en orden. Tiempo estimado restante: **15–20 min** (variables + Airtable automations).
 
 ## Repo (local)
 
-- [x] `npm run n8n:checklist` — 4 JSON válidos (2026-06-19)
-- [x] `npm run jarvis:setup-sprint1` — campos `demos` + `Leads` OK en Airtable VENTAS
-- [ ] `npm run n8n:import -- --apply` — requiere `N8N_API_KEY` en `.env`
+- [x] `npm run n8n:checklist` — 4 JSON válidos
+- [x] `npm run jarvis:setup-sprint1` — campos Airtable OK
+- [x] Workflows refactorizados a `$env.*` (sin credenciales vault)
+- [x] `npm run n8n:import:mcp -- --apply --force` — 4 workflows recreados + publicados
 
 ## n8n Cloud
 
-- [x] Workflows importados vía `npm run n8n:import:mcp -- --apply` (2026-06-19)
-- [ ] Variables: `AIRTABLE_BASE_VENTAS`, `ZENKAI_FROM_EMAIL`, `ZENKAI_ALERT_EMAIL`
-- [ ] Variable opcional: `SLACK_WEBHOOK_URL`
-- [ ] Credencial Airtable PAT
-- [ ] Credencial Resend (HTTP Bearer)
-- [ ] Credencial Anthropic (`x-api-key`)
-
-## Import + activar (orden)
-
-- [ ] M-04 `jarvis-callback` — publicado
-- [ ] M-03 `leads-qualify` — publicado
-- [ ] M-02 `demo-autoreply` — publicado
-- [ ] S-01 cron horario — publicado
-- [ ] Credenciales mapeadas en UI (Airtable · Resend · Anthropic)
-- [ ] Todos: **Available in MCP** (ya ON si creados vía MCP builder)
+- [x] MCP token válido · HTTP 200
+- [x] M-04 `jarvis-callback` — **active** · webhook 200
+- [x] M-03 `leads-qualify` — **active** · webhook 200
+- [x] M-02 `demo-autoreply` — **active** · webhook 200
+- [x] S-01 cron horario — **active**
+- [ ] **Variables** en Settings → ver `docs/jarvis/n8n-variables-sprint1.md`
 
 ## Airtable VENTAS
 
-- [ ] Campos en `demos`: `autoreply_sent`, `respondido_at`, `sla_alert_sent`
-- [ ] Campos en `Leads`: `score`, `etapa`, `cualificacion_*`, `respondido_at`, `sla_alert_sent`
-- [ ] Automation demo → webhook M-02
+- [x] Campos `demos` + `Leads` (schema Sprint 1)
+- [ ] Automation demo → webhook M-02 — ver `docs/jarvis/airtable-automations-sprint1.md`
 - [ ] Automation lead → webhook M-03
 
-## Smoke test
+## Smoke test end-to-end
 
-- [ ] POST manual M-02 con email test
-- [ ] POST manual M-03 con `record_id` real
-- [ ] POST manual M-04 con `score: 8`
-- [ ] Esperar cron S-01 o forzar record demo >3h sin `respondido_at`
+- [ ] Variables n8n cargadas (sin error en Executions)
+- [ ] POST M-02 con `record_id` real + email
+- [ ] POST M-03 con `record_id` lead real
+- [ ] POST M-04 con `score: 8` → email/Slack fundador
+- [ ] Demo en landing con email → Airtable automation → M-02
 
 ## Done
 
-- [ ] Fundador recibe alerta lead caliente
-- [ ] SLA alerta una sola vez (`sla_alert_sent`)
+- [ ] Fundador recibe alerta lead caliente (score ≥ 6)
+- [ ] SLA S-01 alerta una sola vez (`sla_alert_sent`)

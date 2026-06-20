@@ -89,8 +89,14 @@
       "parameters": {
         "method": "POST",
         "url": "https://api.resend.com/emails",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpHeaderAuth",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $env.RESEND_API_KEY }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={\n  \"from\": \"{{ $env.ZENKAI_FROM_EMAIL || 'ZENKAI <hola@zenkai.systems>' }}\",\n  \"to\": \"{{ $env.ZENKAI_ALERT_EMAIL || 'hola@zenkai.systems' }}\",\n  \"subject\": \"🔥 Lead caliente · score {{ $json.score }}\",\n  \"html\": \"<p><strong>Lead caliente</strong> (score {{ $json.score }}/10)</p><p>Record: {{ $json.recordId }}</p><p>Revisar Airtable VENTAS / leads.</p>\"\n}",
@@ -106,13 +112,7 @@
       "name": "Email Alert Fundador",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [960, 380],
-      "credentials": {
-        "httpHeaderAuth": {
-          "id": "CONFIGURE_RESEND",
-          "name": "Resend API Bearer"
-        }
-      }
+      "position": [960, 380]
     },
     {
       "parameters": {

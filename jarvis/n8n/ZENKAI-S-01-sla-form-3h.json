@@ -15,63 +15,41 @@
     },
     {
       "parameters": {
-        "operation": "search",
-        "base": {
-          "__rl": true,
-          "mode": "id",
-          "value": "={{ $env.AIRTABLE_BASE_VENTAS }}"
+        "method": "GET",
+        "url": "={{ 'https://api.airtable.com/v0/' + $env.AIRTABLE_BASE_VENTAS + '/demos?filterByFormula=' + encodeURIComponent('AND({respondido_at}=BLANK(), OR({sla_alert_sent}=FALSE(), {sla_alert_sent}=BLANK()), IS_BEFORE({created_at}, DATEADD(NOW(), -3, \\'hours\\')))') }}",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [{ "name": "Authorization", "value": "=Bearer {{ $env.AIRTABLE_TOKEN }}" }]
         },
-        "table": {
-          "__rl": true,
-          "mode": "name",
-          "value": "demos"
-        },
-        "filterByFormula": "AND({respondido_at}=BLANK(), OR({sla_alert_sent}=FALSE(), {sla_alert_sent}=BLANK()), IS_BEFORE({created_at}, DATEADD(NOW(), -3, 'hours')))",
         "options": {}
       },
       "id": "d1b2c3d4-e5f6-7890-abcd-ef1234560302",
       "name": "Demos SLA vencido",
-      "type": "n8n-nodes-base.airtable",
-      "typeVersion": 2.1,
-      "position": [480, 200],
-      "credentials": {
-        "airtableTokenApi": {
-          "id": "CONFIGURE_AIRTABLE",
-          "name": "Airtable PAT ZENKAI"
-        }
-      }
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [480, 200]
     },
     {
       "parameters": {
-        "operation": "search",
-        "base": {
-          "__rl": true,
-          "mode": "id",
-          "value": "={{ $env.AIRTABLE_BASE_VENTAS }}"
+        "method": "GET",
+        "url": "={{ 'https://api.airtable.com/v0/' + $env.AIRTABLE_BASE_VENTAS + '/Leads?filterByFormula=' + encodeURIComponent('AND({respondido_at}=BLANK(), OR({sla_alert_sent}=FALSE(), {sla_alert_sent}=BLANK()), IS_BEFORE({Fecha Entrada}, DATEADD(NOW(), -3, \\'hours\\')))') }}",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [{ "name": "Authorization", "value": "=Bearer {{ $env.AIRTABLE_TOKEN }}" }]
         },
-        "table": {
-          "__rl": true,
-          "mode": "name",
-          "value": "Leads"
-        },
-        "filterByFormula": "AND({respondido_at}=BLANK(), OR({sla_alert_sent}=FALSE(), {sla_alert_sent}=BLANK()), IS_BEFORE({Fecha Entrada}, DATEADD(NOW(), -3, 'hours')))",
         "options": {}
       },
       "id": "d1b2c3d4-e5f6-7890-abcd-ef1234560303",
       "name": "Leads SLA vencido",
-      "type": "n8n-nodes-base.airtable",
-      "typeVersion": 2.1,
-      "position": [480, 420],
-      "credentials": {
-        "airtableTokenApi": {
-          "id": "CONFIGURE_AIRTABLE",
-          "name": "Airtable PAT ZENKAI"
-        }
-      }
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [480, 420]
     },
     {
       "parameters": {
-        "jsCode": "const demos = $('Demos SLA vencido').all().map(i => ({ ...i.json, _table: 'demos' }));\nconst leads = $('Leads SLA vencido').all().map(i => ({ ...i.json, _table: 'Leads' }));\nconst all = [...demos, ...leads];\nif (!all.length) return [{ json: { empty: true } }];\nreturn all.map(r => ({ json: r }));"
+        "jsCode": "const demos = ($('Demos SLA vencido').first().json.records || []).map(r => ({ ...r, _table: 'demos' }));\nconst leads = ($('Leads SLA vencido').first().json.records || []).map(r => ({ ...r, _table: 'Leads' }));\nconst all = [...demos, ...leads];\nif (!all.length) return [{ json: { empty: true } }];\nreturn all.map(r => ({ json: r }));"
       },
       "id": "d1b2c3d4-e5f6-7890-abcd-ef1234560304",
       "name": "Merge Records",
@@ -131,37 +109,26 @@
     },
     {
       "parameters": {
-        "operation": "update",
-        "base": {
-          "__rl": true,
-          "mode": "id",
-          "value": "={{ $env.AIRTABLE_BASE_VENTAS }}"
+        "method": "PATCH",
+        "url": "=https://api.airtable.com/v0/{{ $env.AIRTABLE_BASE_VENTAS }}/{{ $json._table }}/{{ $json.id }}",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $env.AIRTABLE_TOKEN }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
         },
-        "table": {
-          "__rl": true,
-          "mode": "name",
-          "value": "={{ $json._table }}"
-        },
-        "columns": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "sla_alert_sent": true
-          }
-        },
-        "options": {},
-        "id": "={{ $json.id }}"
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { fields: { sla_alert_sent: true } } }}",
+        "options": {}
       },
       "id": "d1b2c3d4-e5f6-7890-abcd-ef1234560307",
       "name": "Marcar sla_alert_sent",
-      "type": "n8n-nodes-base.airtable",
-      "typeVersion": 2.1,
-      "position": [1400, 220],
-      "credentials": {
-        "airtableTokenApi": {
-          "id": "CONFIGURE_AIRTABLE",
-          "name": "Airtable PAT ZENKAI"
-        }
-      }
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1400, 220]
     },
     {
       "parameters": {},

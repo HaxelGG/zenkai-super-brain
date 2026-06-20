@@ -57,8 +57,14 @@
       "parameters": {
         "method": "POST",
         "url": "https://api.resend.com/emails",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpHeaderAuth",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $env.RESEND_API_KEY }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={\n  \"from\": \"{{ $env.ZENKAI_FROM_EMAIL || 'ZENKAI <hola@zenkai.systems>' }}\",\n  \"to\": \"{{ $json.body?.email || $json.email || $json.body?.email_capturado || $json.email_capturado }}\",\n  \"reply_to\": \"hola@zenkai.systems\",\n  \"subject\": \"Recibimos tu demo · ZENKAI\",\n  \"html\": \"<p>Hola,</p><p>Recibimos tu solicitud de propuesta personalizada. Un fundador de ZENKAI te responderá en <strong>menos de 4 horas hábiles</strong>.</p><p>Sector detectado: <strong>{{ $json.body?.sector || $json.sector || $json.body?.sector_detectado || $json.sector_detectado || 'general' }}</strong></p><p>Si querés adelantar: <a href=\\\"https://cal.com/zenkai-growth-systems/strategy-call\\\">agendá 30 min gratis</a>.</p><p>— ZENKAI Growth Systems</p>\"\n}",
@@ -69,47 +75,30 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [720, 220],
-      "credentials": {
-        "httpHeaderAuth": {
-          "id": "CONFIGURE_RESEND",
-          "name": "Resend API Bearer"
-        }
-      },
-      "notes": "Credential: Header Auth · Name=Authorization · Value=Bearer <RESEND_API_KEY>"
+      "notes": "Auth via $env.RESEND_API_KEY (n8n Variables)"
     },
     {
       "parameters": {
-        "operation": "update",
-        "base": {
-          "__rl": true,
-          "mode": "id",
-          "value": "={{ $env.AIRTABLE_BASE_VENTAS }}"
+        "method": "PATCH",
+        "url": "=https://api.airtable.com/v0/{{ $env.AIRTABLE_BASE_VENTAS }}/demos/{{ $('Webhook Demo Creado').first().json.body?.record_id || $('Webhook Demo Creado').first().json.record_id }}",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $env.AIRTABLE_TOKEN }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
         },
-        "table": {
-          "__rl": true,
-          "mode": "name",
-          "value": "demos"
-        },
-        "columns": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "autoreply_sent": true
-          }
-        },
-        "options": {},
-        "id": "={{ $('Webhook Demo Creado').first().json.body?.record_id || $('Webhook Demo Creado').first().json.record_id }}"
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { fields: { autoreply_sent: true } } }}",
+        "options": {}
       },
       "id": "a1b2c3d4-e5f6-7890-abcd-ef1234560004",
       "name": "Marcar autoreply_sent",
-      "type": "n8n-nodes-base.airtable",
-      "typeVersion": 2.1,
-      "position": [960, 220],
-      "credentials": {
-        "airtableTokenApi": {
-          "id": "CONFIGURE_AIRTABLE",
-          "name": "Airtable PAT ZENKAI"
-        }
-      }
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [960, 220]
     },
     {
       "parameters": {

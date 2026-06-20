@@ -17,30 +17,20 @@
     },
     {
       "parameters": {
-        "operation": "get",
-        "base": {
-          "__rl": true,
-          "mode": "id",
-          "value": "={{ $env.AIRTABLE_BASE_VENTAS }}"
+        "method": "GET",
+        "url": "=https://api.airtable.com/v0/{{ $env.AIRTABLE_BASE_VENTAS }}/Leads/{{ $json.body?.record_id || $json.record_id }}",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [{ "name": "Authorization", "value": "=Bearer {{ $env.AIRTABLE_TOKEN }}" }]
         },
-        "table": {
-          "__rl": true,
-          "mode": "name",
-          "value": "Leads"
-        },
-        "id": "={{ $json.body?.record_id || $json.record_id }}"
+        "options": {}
       },
       "id": "b1b2c3d4-e5f6-7890-abcd-ef1234560102",
       "name": "Get Lead Airtable",
-      "type": "n8n-nodes-base.airtable",
-      "typeVersion": 2.1,
-      "position": [480, 300],
-      "credentials": {
-        "airtableTokenApi": {
-          "id": "CONFIGURE_AIRTABLE",
-          "name": "Airtable PAT ZENKAI"
-        }
-      }
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [480, 300]
     },
     {
       "parameters": {
@@ -56,11 +46,11 @@
       "parameters": {
         "method": "POST",
         "url": "https://api.anthropic.com/v1/messages",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpHeaderAuth",
+        "authentication": "none",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
+            { "name": "x-api-key", "value": "={{ $env.ANTHROPIC_API_KEY }}" },
             { "name": "anthropic-version", "value": "2023-06-01" },
             { "name": "content-type", "value": "application/json" }
           ]
@@ -74,14 +64,7 @@
       "name": "Anthropic Qualify",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [960, 300],
-      "credentials": {
-        "httpHeaderAuth": {
-          "id": "CONFIGURE_ANTHROPIC",
-          "name": "Anthropic API Key"
-        }
-      },
-      "notes": "Credential: Header Auth · x-api-key=<ANTHROPIC_API_KEY> (add header in node if needed)"
+      "position": [960, 300]
     },
     {
       "parameters": {
@@ -95,40 +78,26 @@
     },
     {
       "parameters": {
-        "operation": "update",
-        "base": {
-          "__rl": true,
-          "mode": "id",
-          "value": "={{ $env.AIRTABLE_BASE_VENTAS }}"
+        "method": "PATCH",
+        "url": "=https://api.airtable.com/v0/{{ $env.AIRTABLE_BASE_VENTAS }}/Leads/{{ $json.recordId }}",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $env.AIRTABLE_TOKEN }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
         },
-        "table": {
-          "__rl": true,
-          "mode": "name",
-          "value": "Leads"
-        },
-        "columns": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "score": "={{ $json.score }}",
-            "etapa": "={{ $json.etapa }}",
-            "cualificacion_razon": "={{ $json.razon }}",
-            "cualificacion_brief": "={{ $json.brief }}"
-          }
-        },
-        "options": {},
-        "id": "={{ $json.recordId }}"
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { fields: { score: $json.score, etapa: $json.etapa, cualificacion_razon: $json.razon, cualificacion_brief: $json.brief } } }}",
+        "options": {}
       },
       "id": "b1b2c3d4-e5f6-7890-abcd-ef1234560106",
       "name": "Update Lead Score",
-      "type": "n8n-nodes-base.airtable",
-      "typeVersion": 2.1,
-      "position": [1400, 300],
-      "credentials": {
-        "airtableTokenApi": {
-          "id": "CONFIGURE_AIRTABLE",
-          "name": "Airtable PAT ZENKAI"
-        }
-      }
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1400, 300]
     },
     {
       "parameters": {

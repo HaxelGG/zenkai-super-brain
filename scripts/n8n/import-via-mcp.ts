@@ -60,23 +60,17 @@ function loadExport(filename: string): WorkflowExport {
   return raw;
 }
 
-function triggerSdkCode(trigger: N8nNode, workflowId: string, workflowName: string): string {
-  const params = JSON.stringify(trigger.parameters ?? {});
-  const isSchedule = trigger.type.includes("scheduleTrigger");
-  const factory = isSchedule ? "trigger" : "node";
+function stubSdkCode(workflowId: string, workflowName: string): string {
   return `
-import { workflow, ${factory} } from '@n8n/workflow-sdk';
+import { workflow, trigger } from '@n8n/workflow-sdk';
 
-const root = ${factory}({
-  type: '${trigger.type}',
-  version: ${trigger.typeVersion},
-  config: {
-    name: ${JSON.stringify(trigger.name)},
-    parameters: ${params},
-  },
+const start = trigger({
+  type: 'n8n-nodes-base.manualTrigger',
+  version: 1,
+  config: { name: 'Manual Trigger (remove after import)' },
 });
 
-export default workflow(${JSON.stringify(workflowId)}, ${JSON.stringify(workflowName)}).add(root);
+export default workflow(${JSON.stringify(workflowId)}, ${JSON.stringify(workflowName)}).add(start);
 `.trim();
 }
 
@@ -103,20 +97,20 @@ function connectionOperations(
 }
 
 function nodeOperations(nodes: N8nNode[]): Record<string, unknown>[] {
-  return nodes.map((n) => ({
-    type: "addNode",
-    node: {
+  return nodes.map((n) => {
+    const node: Record<string, unknown> = {
       name: n.name,
       type: n.type,
       typeVersion: n.typeVersion,
-      ...(n.id ? { id: n.id } : {}),
-      ...(n.parameters ? { parameters: n.parameters } : {}),
-      ...(n.position ? { position: n.position } : {}),
-      ...(n.credentials ? { credentials: n.credentials } : {}),
-      ...(n.disabled ? { disabled: n.disabled } : {}),
-      ...(n.notes ? { notes: n.notes } : {}),
-    },
-  }));
+    };
+    if (n.id) node.id = n.id;
+    if (n.parameters) node.parameters = n.parameters;
+    if (n.position) node.position = n.position;
+    if (n.disabled) node.disabled = n.disabled;
+    if (n.notes) node.notes = n.notes;
+    // Credenciales se mapean manualmente en n8n UI (exports traen placeholders CONFIGURE_*).
+    return { type: "addNode", node };
+  });
 }
 
 function chunk<T>(arr: T[], size: number): T[][] {
@@ -240,11 +234,8 @@ async function importOne(
 
   let workflowId = force ? undefined : found?.id;
   if (!workflowId) {
-    const trigger =
-      exp.nodes.find((n) => n.type.includes("webhook") || n.type.includes("scheduleTrigger")) ??
-      exp.nodes[0];
     const slug = exp.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 40);
-    const code = triggerSdkCode(trigger, slug, exp.name);
+    const code = stubSdkCode(slug, exp.name);
 
     const validated = await mcpTool<{ valid?: boolean; errors?: unknown[] }>(token, "validate_workflow", {
       code,
@@ -271,20 +262,30 @@ async function importOne(
     console.log(`[CREATED] ${exp.name} → ${workflowId}`);
     if (created.url) console.log(`          ${created.url}`);
 
-    const rest = exp.nodes.filter((n) => n.name !== trigger.name);
+    const rest = exp.nodes;
     const ops = [...nodeOperations(rest), ...connectionOperations(exp.connections)];
     if (ops.length) {
       await applyOperations(token, workflowId, ops);
-      console.log(`[NODES] ${exp.name} +${rest.length} nodos, ${connectionOperations(exp.connections).length} conexiones`);
+      console.log(
+        `[NODES] ${exp.name} +${rest.length} nodos, ${connectionOperations(exp.connections).length} conexiones`,
+      );
+      await applyOperations(token, workflowId, [
+        { type: "removeNode", nodeName: "Manual Trigger (remove after import)" },
+      ]);
     }
   } else {
     console.log(`[SKIP CREATE] ${exp.name} (${workflowId})`);
   }
 
   const row = existing.find((w) => w.id === workflowId);
-  if (row?.active) {
+  if (!force && row?.active) {
     console.log(`[ACTIVE] ${exp.name} ya publicado`);
     return;
+  }
+
+  if (row?.active) {
+    await mcpTool(token, "unpublish_workflow", { workflowId });
+    console.log(`[UNPUBLISHED] ${exp.name} (re-register webhooks)`);
   }
 
   await mcpTool(token, "publish_workflow", { workflowId });
@@ -350,10 +351,9 @@ async function main(): Promise<void> {
     await importOne(token, file, existing, force);
   }
 
-  console.log("\nPost-import manual en n8n UI:");
-  console.log("  1. Mapear credenciales Airtable + Resend + Anthropic");
-  console.log("  2. Settings → Variables (AIRTABLE_BASE_VENTAS, ZENKAI_FROM_EMAIL, …)");
-  console.log("  3. Airtable automations → webhooks (CHECKLIST-SPRINT1.md §4)");
+  console.log("\nPost-import manual:");
+  console.log("  1. n8n Variables → docs/jarvis/n8n-variables-sprint1.md");
+  console.log("  2. Airtable automations → docs/jarvis/airtable-automations-sprint1.md");
 }
 
 main().catch((e) => {
