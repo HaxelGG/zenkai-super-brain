@@ -1,0 +1,20 @@
+{
+  "name": "JARVIS · ZENKAI Command Center",
+  "short_name": "JARVIS",
+  "description": "Command Center operativo · ZENKAI Growth Systems",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#030810",
+  "theme_color": "#030810",
+  "categories": ["business", "productivity"],
+  "icons": [
+    {
+      "src": "/jarvis-favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

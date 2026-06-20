@@ -121,15 +121,17 @@ Reiniciá el dev server después de editar `.env`.
 
 ---
 
-### C · Localhost (`npm run dev`) · voz o LIVE no actualiza
+### C · Localhost (`npm run dev`) · voz o LIVE
 
-**Causa:** `astro dev` del panel **no sirve** `/api/jarvis/*` (son funciones Vercel en la raíz del repo).
+| Host | Comportamiento API |
+|------|-------------------|
+| `jarvis.zenkai.systems` / `panel.zenkai.systems` | Same-origin `/api/jarvis/*` (mismo deploy Vercel) |
+| `localhost:4321` | Proxy a `https://panel.zenkai.systems` (astro dev no sirve APIs) |
+| Raíz + `vercel dev` | APIs locales en el mismo puerto |
 
-**Opciones:**
+**Opción recomendada para probar voz:** https://jarvis.zenkai.systems (producción).
 
-1. **Usar producción:** https://jarvis.zenkai.systems (recomendado para probar voz).
-2. **API remota desde local:** rama con proxy a `panel.zenkai.systems` (merge PR `cursor/jarvis-voice-pwa-branding`).
-3. **Full local:** desde la raíz del repo, `vercel dev` (sirve panel + APIs).
+**Full local:** desde la raíz del repo, `vercel dev` (sirve panel + APIs).
 
 ---
 
@@ -197,16 +199,15 @@ Requiere micrófono permitido en Windows.
 
 ---
 
-## 7 · Rama pendiente de merge
+## 7 · Cambios recientes (bugs corregidos)
 
-Mejoras de voz/PWA/local están en **`cursor/jarvis-voice-pwa-branding`** (aún no en `main`):
-
-- Proxy API desde localhost → producción
-- Toasts de error visibles
-- PWA «Instalar»
-- Normalización de rutas en `jarvis.zenkai.systems`
-
-Mergear ese PR a `main` para que producción y local tengan el mismo comportamiento.
+- **CORS/origen:** validación estricta (sin `startsWith` vulnerable)
+- **jarvis.zenkai.systems:** APIs same-origin (no cross-origin a panel)
+- **Nav activo:** rutas `/finanzas` y `/jarvis/finanzas` equivalentes
+- **Wake word:** toggle alineado con runtime (`=== "1"`)
+- **API key:** unificada `zenkai_api_key` ↔ `zenkai_jarvis_api_key`
+- **PWA:** manifest separado para subdominio (`start_url: /`)
+- **Pipeline live:** escape HTML en nombres de leads (XSS)
 
 ---
 

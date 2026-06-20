@@ -10,9 +10,11 @@
     if (
       h === "jarvis.zenkai.systems" ||
       h.endsWith(".jarvis.zenkai.systems") ||
-      h === "localhost" ||
-      h === "127.0.0.1"
+      h === "panel.zenkai.systems"
     ) {
+      return "";
+    }
+    if (h === "localhost" || h === "127.0.0.1") {
       return "https://panel.zenkai.systems";
     }
     return "";
@@ -77,6 +79,14 @@
     return `$${Math.round(n).toLocaleString("en-US")}`;
   }
 
+  function escapeHtml(text) {
+    return String(text ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
   function patchPipelineTable(leads) {
     const tbody = document.getElementById("jv-pipeline-leads");
     if (!tbody || !Array.isArray(leads) || leads.length === 0) return;
@@ -94,8 +104,10 @@
               ? "text-[var(--jv-warning)]"
               : "text-[var(--jv-text-dim)]";
         const val = lead.valueUsd ? `$${Number(lead.valueUsd).toLocaleString("en-US")}` : "—";
+        const name = escapeHtml(lead.name);
+        const company = escapeHtml(lead.company);
         return `<tr>
-          <td class="py-2.5"><div class="font-medium text-[var(--jv-text-sm)]">${lead.name}</div><div class="jv-mono text-[var(--jv-text-2xs)] text-[var(--jv-text-dim)]">${lead.company}</div></td>
+          <td class="py-2.5"><div class="font-medium text-[var(--jv-text-sm)]">${name}</div><div class="jv-mono text-[var(--jv-text-2xs)] text-[var(--jv-text-dim)]">${company}</div></td>
           <td class="py-2.5 text-[var(--jv-text-muted)] text-[var(--jv-text-sm)]">—</td>
           <td class="py-2.5"><span class="jv-mono text-[var(--jv-text-2xs)] px-1.5 py-0.5 rounded-sm border" style="border-color:${color};color:${color}">${stage}</span></td>
           <td class="py-2.5"><span class="jv-mono font-semibold text-[var(--jv-text-sm)] ${scoreClass}">${score}/10</span></td>
@@ -190,7 +202,7 @@
       if (data.source !== "live") return;
 
       if (data.instagram) {
-        patchText('[data-jv-social="ig-followers"]', formatCompact(data.instagram.followers));
+        patchText('[data-jv-social="ig-reach"]', formatCompact(data.instagram.followers ?? data.instagram.reach));
         patchText('[data-jv-social="ig-reach"]', formatCompact(data.instagram.reach7d));
         patchText('[data-jv-social="ig-engagement"]', `${data.instagram.engagementRate}%`);
         patchText('[data-jv-live="ig-engagement"]', `${data.instagram.engagementRate}%`);

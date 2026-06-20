@@ -100,6 +100,7 @@ export const prerender = false;
 
 <script>
   const KEY = 'zenkai_api_key';
+  const KEY_PANEL = 'zenkai_jarvis_api_key';
   const $ = <T extends HTMLElement>(id: string): T => document.getElementById(id) as T;
 
   const apiKey = $<HTMLInputElement>('api-key');
@@ -114,9 +115,12 @@ export const prerender = false;
   const pingN8n = $<HTMLButtonElement>('ping-n8n');
   const n8nOut = $<HTMLPreElement>('n8n-out');
 
-  const saved = localStorage.getItem(KEY);
+  const saved = localStorage.getItem(KEY) || localStorage.getItem(KEY_PANEL);
   if (saved) apiKey.value = saved;
-  apiKey.addEventListener('input', () => localStorage.setItem(KEY, apiKey.value));
+  apiKey.addEventListener('input', () => {
+    localStorage.setItem(KEY, apiKey.value);
+    localStorage.setItem(KEY_PANEL, apiKey.value);
+  });
 
   const esc = (s: string): string =>
     s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');

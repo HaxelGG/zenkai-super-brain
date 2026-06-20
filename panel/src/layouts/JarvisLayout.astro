@@ -41,7 +41,21 @@ const canonical = new URL(toJarvisCanonicalPath(Astro.url.pathname), JARVIS_URL)
     <link rel="canonical" href={canonical} />
     <link rel="icon" type="image/svg+xml" href="/jarvis-favicon.svg" />
     <link rel="apple-touch-icon" href="/jarvis-favicon.svg" />
-    <link rel="manifest" href="/jarvis-manifest.webmanifest" />
+    <link rel="manifest" href="/jarvis-manifest.webmanifest" id="jv-manifest" />
+    <script is:inline>
+      (function () {
+        var h = location.hostname.toLowerCase();
+        if (h === "jarvis.zenkai.systems" || h.endsWith(".jarvis.zenkai.systems")) {
+          var m = document.getElementById("jv-manifest");
+          if (m) m.href = "/jarvis-manifest-subdomain.webmanifest";
+          document.querySelectorAll('a[href^="/jarvis"]').forEach(function (a) {
+            var href = a.getAttribute("href") || "";
+            var clean = href.replace(/^\/jarvis(\/|$)/, "/") || "/";
+            a.setAttribute("href", clean);
+          });
+        }
+      })();
+    </script>
     <script src="/jarvis-live.js" defer></script>
     <script src="/jarvis-voice.js" defer></script>
     <script src="/jarvis-telegram.js" defer></script>
