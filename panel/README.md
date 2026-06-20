@@ -4,18 +4,37 @@ Panel interno de control · Capa 1 del Super Cerebro.
 
 ## URLs
 
-- **Producción (URL estable):** https://zenkaibrain-git-main-mrhaxel26-sketchs-projects.vercel.app/ (siempre apunta al último deploy de `main` · requiere login Vercel · solo miembros del team `mrhaxel26-sketchs-projects`)
-- **Custom domain:** https://zenkai.systems (mismo contenido · puede requerir verificar configuración de auth)
-- **Local dev:** http://localhost:4321 después de `npm run dev`
+| Servicio | URL | Notas |
+|----------|-----|-------|
+| **JARVIS** (ops center) | https://jarvis.zenkai.systems | Command center · finanzas · social · tareas · goals |
+| **Panel** (Super Cerebro) | https://panel.zenkai.systems | Agentes · sectores · workflows · finanzas markdown |
+| **Vercel fallback** | https://zenkaibrain-git-main-mrhaxel26-sketchs-projects.vercel.app/ | Requiere auth Vercel si Deployment Protection ON |
+| **Local dev** | http://localhost:4321 | `npm run dev` desde `panel/` |
+
+JARVIS vive en el mismo deploy que el panel (`zenkaibrain`). El subdominio `jarvis.zenkai.systems` redirige `/` → `/jarvis` vía `vercel.json` en la raíz del repo.
+
+Setup DNS: `sops/sop-jarvis-domain.md`
 
 ## Comandos
 
 ```bash
 npm install     # primera vez
-npm run dev     # desarrollo · hot reload
+npm run dev     # desarrollo · hot reload · JARVIS en /jarvis
 npm run build   # genera dist/ con HTML estático
 npm run preview # sirve dist/ localmente
 ```
+
+## JARVIS
+
+Rutas internas (local y producción):
+
+- `/jarvis` — Command Center
+- `/jarvis/finanzas` — Finanzas
+- `/jarvis/social` — Social & engagement
+- `/jarvis/tareas` — Task board
+- `/jarvis/goals` — Metas & OKRs 2026
+
+Datos: mock tipado en `src/lib/jarvis/mock-data.ts` · merge opcional con Airtable CRM si `AIRTABLE_TOKEN` está configurado en build.
 
 ## Estructura
 

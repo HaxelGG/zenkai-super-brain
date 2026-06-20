@@ -30,4 +30,5 @@ export async function getJarvisData(): Promise<JarvisData> {
 }
 
 export { AGENTS } from "./mock-data";
+export { JARVIS_URL, PANEL_URL, JARVIS_BASE, JARVIS_ROUTES } from "./config";
 export type * from "./types";

@@ -1,15 +1,17 @@
 ---
+import { JARVIS_BASE, JARVIS_ROUTES, PANEL_URL } from "../../lib/jarvis/config";
+
 const items = [
-  { href: "/jarvis", label: "Command Center", icon: "home" },
-  { href: "/jarvis/finanzas", label: "Finanzas", icon: "finance" },
-  { href: "/jarvis/social", label: "Social", icon: "social" },
-  { href: "/jarvis/tareas", label: "Tareas", icon: "tasks" },
-  { href: "/jarvis/goals", label: "Goals", icon: "goals" },
+  { href: JARVIS_ROUTES.home, label: "Command Center", icon: "home" },
+  { href: JARVIS_ROUTES.finanzas, label: "Finanzas", icon: "finance" },
+  { href: JARVIS_ROUTES.social, label: "Social", icon: "social" },
+  { href: JARVIS_ROUTES.tareas, label: "Tareas", icon: "tasks" },
+  { href: JARVIS_ROUTES.goals, label: "Goals", icon: "goals" },
 ];
 
 const path = Astro.url.pathname;
 const isActive = (href: string) =>
-  href === "/jarvis" ? path === "/jarvis" || path === "/jarvis/" : path.startsWith(href);
+  href === JARVIS_BASE ? path === JARVIS_BASE || path === `${JARVIS_BASE}/` : path.startsWith(href);
 
 const icons: Record<string, string> = {
   home: "M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1V9.5z",
@@ -22,7 +24,7 @@ const icons: Record<string, string> = {
 
 <aside class="jarvis-sidebar hidden lg:flex flex-col w-56 shrink-0 border-r border-border bg-bg-muted/50">
   <div class="p-5 border-b border-border">
-    <a href="/jarvis" class="flex items-center gap-2.5 no-underline group">
+    <a href={JARVIS_ROUTES.home} class="flex items-center gap-2.5 no-underline group">
       <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-accent to-[#1E6FFF] flex items-center justify-center text-white text-micro font-bold tracking-wider">
         J
       </div>
@@ -54,7 +56,7 @@ const icons: Record<string, string> = {
 
   <div class="p-3 border-t border-border">
     <a
-      href="/"
+      href={PANEL_URL}
       class="flex items-center gap-2 px-3 py-2 rounded-chip text-small text-text-muted hover:bg-bg hover:text-text no-underline transition-colors"
     >
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
