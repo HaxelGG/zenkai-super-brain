@@ -1,0 +1,225 @@
+---
+import WebLayout from '../layouts/WebLayout.astro';
+
+export const prerender = false;
+---
+
+<WebLayout
+  title="JARVIS · Consola del Super Cerebro ZENKAI"
+  description="Consola interna que une cerebro (propuesta), voz (ElevenLabs) y automatización (n8n)."
+  noindex={true}
+>
+  <section class="mx-auto max-w-3xl px-4 py-16 sm:py-24">
+    <header class="mb-10">
+      <p class="font-mono text-xs uppercase tracking-[0.2em] text-zk-accent3 mb-2">Capa 1 · Asistente operativo</p>
+      <h1 class="font-[Orbitron] text-3xl sm:text-4xl font-extrabold text-zk-text">JARVIS</h1>
+      <p class="mt-3 text-zk-text2 max-w-xl">
+        Una sola llamada: clasifica el negocio, genera la propuesta, la lee en voz alta (ElevenLabs)
+        y dispara la automatización (n8n). Tu <code class="font-mono text-zk-accent3">ZENKAI_API_KEY</code>
+        queda solo en este navegador (localStorage).
+      </p>
+    </header>
+
+    <!-- 1 · Credenciales -->
+    <div class="rounded-2xl border border-zk-border bg-zk-surface p-5 sm:p-6 mb-6">
+      <div class="font-mono text-xs uppercase tracking-widest text-zk-muted mb-2">1 · Credencial</div>
+      <label for="api-key" class="block text-sm text-zk-text2 mb-1">ZENKAI_API_KEY (Bearer)</label>
+      <input
+        id="api-key"
+        type="password"
+        autocomplete="off"
+        spellcheck="false"
+        placeholder="pegá tu key (queda en localStorage)"
+        class="w-full font-mono text-sm px-3 py-2 rounded-xl border border-zk-border2 bg-zk-bg2 text-zk-text focus:outline-none focus:border-zk-accent transition-colors"
+      />
+    </div>
+
+    <!-- 2 · Brief -->
+    <div class="rounded-2xl border border-zk-border bg-zk-surface p-5 sm:p-6 mb-6">
+      <div class="font-mono text-xs uppercase tracking-widest text-zk-muted mb-3">2 · Brief del negocio</div>
+      <textarea
+        id="brief"
+        rows="5"
+        placeholder="Tengo una clínica dental en Medellín, 4 odontólogos. Perdemos turnos por no contestar WhatsApp a tiempo. Queremos automatizar agenda y respuestas."
+        class="w-full font-mono text-sm px-3 py-2 rounded-xl border border-zk-border2 bg-zk-bg2 text-zk-text focus:outline-none focus:border-zk-accent transition-colors resize-y"
+      ></textarea>
+      <div class="mt-4 flex flex-wrap items-center gap-5">
+        <label class="flex items-center gap-2 cursor-pointer text-sm text-zk-text2">
+          <input type="checkbox" id="opt-voice" class="accent-zk-accent" checked />
+          <span>Leer en voz (ElevenLabs)</span>
+        </label>
+        <label class="flex items-center gap-2 cursor-pointer text-sm text-zk-text2">
+          <input type="checkbox" id="opt-notify" class="accent-zk-accent" checked />
+          <span>Notificar a n8n</span>
+        </label>
+        <button
+          id="run"
+          type="button"
+          class="ml-auto px-5 py-2.5 rounded-xl bg-zk-accent text-white text-sm font-semibold hover:bg-zk-accent2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
+          Activar JARVIS
+        </button>
+      </div>
+      <p id="status" class="mt-3 text-sm text-zk-text2"></p>
+    </div>
+
+    <!-- 3 · Resultado -->
+    <div class="rounded-2xl border border-zk-border bg-zk-surface p-5 sm:p-6 mb-6">
+      <div class="font-mono text-xs uppercase tracking-widest text-zk-muted mb-3">3 · Propuesta</div>
+      <div id="result" class="text-sm text-zk-muted italic">Esperando primer brief…</div>
+      <audio id="player" controls class="mt-4 w-full hidden"></audio>
+    </div>
+
+    <!-- 4 · Automatización -->
+    <div class="rounded-2xl border border-zk-border bg-zk-surface p-5 sm:p-6">
+      <div class="font-mono text-xs uppercase tracking-widest text-zk-muted mb-2">4 · Automatización (n8n)</div>
+      <p class="text-sm text-zk-text2 mb-3">
+        Dispara un evento de prueba al workflow de n8n vía <code class="font-mono text-zk-accent3">/api/n8n-dispatch</code>.
+      </p>
+      <button
+        id="ping-n8n"
+        type="button"
+        class="px-4 py-2 rounded-xl border border-zk-border2 bg-zk-surface2 text-zk-text text-sm font-medium hover:border-zk-accent disabled:opacity-50 transition-colors"
+      >
+        Disparar evento de prueba
+      </button>
+      <pre id="n8n-out" class="mt-3 text-xs font-mono text-zk-text2 whitespace-pre-wrap"></pre>
+    </div>
+  </section>
+</WebLayout>
+
+<script>
+  const KEY = 'zenkai_api_key';
+  const $ = <T extends HTMLElement>(id: string): T => document.getElementById(id) as T;
+
+  const apiKey = $<HTMLInputElement>('api-key');
+  const brief = $<HTMLTextAreaElement>('brief');
+  const optVoice = $<HTMLInputElement>('opt-voice');
+  const optNotify = $<HTMLInputElement>('opt-notify');
+  const run = $<HTMLButtonElement>('run');
+  const status = $<HTMLParagraphElement>('status');
+  const result = $<HTMLDivElement>('result');
+  const player = $<HTMLAudioElement>('player');
+  const pingN8n = $<HTMLButtonElement>('ping-n8n');
+  const n8nOut = $<HTMLPreElement>('n8n-out');
+
+  const saved = localStorage.getItem(KEY);
+  if (saved) apiKey.value = saved;
+  apiKey.addEventListener('input', () => localStorage.setItem(KEY, apiKey.value));
+
+  const esc = (s: string): string =>
+    s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+  interface Proposal {
+    sector_detectado: string;
+    tier_recomendado: string;
+    propuesta: {
+      headline: string;
+      dolor_identificado: string;
+      solucion: string;
+      agentes_activos: string[];
+      stack: string[];
+      timeline_dias: number;
+      inversion_mensual_usd: number;
+      proyeccion_90d: string;
+    };
+  }
+
+  const renderProposal = (p: Proposal, n8n?: { ok: boolean; status: number; error?: string }): string => {
+    const pr = p.propuesta;
+    const chips = (xs: string[]) =>
+      xs.map((x) => `<span class="inline-block rounded-full border border-zk-border2 px-2 py-0.5 text-xs text-zk-text2 mr-1 mb-1">${esc(x)}</span>`).join('');
+    const n8nLine = n8n
+      ? `<div class="mt-3 text-xs font-mono ${n8n.ok ? 'text-zk-success' : 'text-zk-warning'}">n8n: ${n8n.ok ? 'evento enviado ✓' : 'no enviado — ' + esc(n8n.error || '')}</div>`
+      : '';
+    return `
+      <div class="space-y-3 not-italic text-zk-text">
+        <div class="flex flex-wrap gap-2 text-xs font-mono">
+          <span class="rounded-full bg-zk-accent/15 text-zk-accent3 px-2 py-0.5">sector: ${esc(p.sector_detectado)}</span>
+          <span class="rounded-full bg-zk-accent4/15 text-zk-accent4 px-2 py-0.5">tier: ${esc(p.tier_recomendado)}</span>
+        </div>
+        <h3 class="text-lg font-bold text-zk-text">${esc(pr.headline)}</h3>
+        <p class="text-sm text-zk-text2"><strong class="text-zk-text">Dolor:</strong> ${esc(pr.dolor_identificado)}</p>
+        <p class="text-sm text-zk-text2"><strong class="text-zk-text">Solución:</strong> ${esc(pr.solucion)}</p>
+        <div class="text-sm text-zk-text2"><strong class="text-zk-text">Agentes:</strong><br/>${chips(pr.agentes_activos)}</div>
+        <div class="text-sm text-zk-text2"><strong class="text-zk-text">Stack:</strong><br/>${chips(pr.stack)}</div>
+        <div class="flex gap-6 text-sm text-zk-text2">
+          <span><strong class="text-zk-text">${pr.timeline_dias}</strong> días</span>
+          <span><strong class="text-zk-text">$${pr.inversion_mensual_usd}</strong> USD/mes</span>
+        </div>
+        <p class="text-sm text-zk-text2"><strong class="text-zk-text">Proyección 90d:</strong> ${esc(pr.proyeccion_90d)}</p>
+        ${n8nLine}
+      </div>`;
+  };
+
+  const setBusy = (b: boolean) => {
+    run.disabled = b;
+    run.textContent = b ? 'Procesando…' : 'Activar JARVIS';
+  };
+
+  run.addEventListener('click', async () => {
+    const key = apiKey.value.trim();
+    const texto = brief.value.trim();
+    if (!key) { status.textContent = 'Falta la API key.'; return; }
+    if (texto.length < 80) { status.textContent = 'El brief debe tener al menos 80 caracteres.'; return; }
+
+    setBusy(true);
+    status.textContent = 'JARVIS pensando…';
+    player.classList.add('hidden');
+    result.className = 'text-sm text-zk-muted italic';
+    result.textContent = 'Generando propuesta…';
+    const t0 = performance.now();
+
+    try {
+      const res = await fetch('/api/orquestar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
+        body: JSON.stringify({ texto, voice: optVoice.checked, notify: optNotify.checked }),
+      });
+      const secs = ((performance.now() - t0) / 1000).toFixed(1);
+      const data = await res.json();
+      if (!res.ok) {
+        status.textContent = `HTTP ${res.status} · ${secs}s`;
+        result.className = 'text-sm';
+        result.innerHTML = `<pre class="text-zk-danger whitespace-pre-wrap">${esc(data.error || JSON.stringify(data))}</pre>`;
+        return;
+      }
+      status.textContent = `Listo · ${secs}s`;
+      result.className = 'text-sm';
+      result.innerHTML = renderProposal(data.proposal, data.n8n);
+      if (data.audioBase64) {
+        player.src = `data:audio/mpeg;base64,${data.audioBase64}`;
+        player.classList.remove('hidden');
+        player.play().catch(() => {});
+      } else if (data.voiceError) {
+        status.textContent += ` · voz no disponible (${data.voiceError})`;
+      }
+    } catch (e) {
+      status.textContent = 'Error de red';
+      result.className = 'text-sm';
+      result.innerHTML = `<pre class="text-zk-danger whitespace-pre-wrap">${esc(e instanceof Error ? e.message : String(e))}</pre>`;
+    } finally {
+      setBusy(false);
+    }
+  });
+
+  pingN8n.addEventListener('click', async () => {
+    const key = apiKey.value.trim();
+    if (!key) { n8nOut.textContent = 'Falta la API key.'; return; }
+    pingN8n.disabled = true;
+    n8nOut.textContent = 'Enviando evento…';
+    try {
+      const res = await fetch('/api/n8n-dispatch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
+        body: JSON.stringify({ event: 'jarvis.test', payload: { from: 'jarvis-console' } }),
+      });
+      const data = await res.json();
+      n8nOut.textContent = `HTTP ${res.status}\n` + JSON.stringify(data, null, 2);
+    } catch (e) {
+      n8nOut.textContent = e instanceof Error ? e.message : String(e);
+    } finally {
+      pingN8n.disabled = false;
+    }
+  });
+</script>
