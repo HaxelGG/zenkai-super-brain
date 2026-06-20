@@ -56,8 +56,8 @@ const canonical = new URL(toJarvisCanonicalPath(Astro.url.pathname), JARVIS_URL)
         }
       })();
     </script>
-    <script src="/jarvis-live.js?v=20260620b" defer></script>
-    <script src="/jarvis-voice.js?v=20260620b" defer></script>
+    <script src="/jarvis-live.js?v=20260620c" defer></script>
+    <script src="/jarvis-voice.js?v=20260620c" defer></script>
     <script src="/jarvis-telegram.js" defer></script>
     <title>{title} · JARVIS · ZENKAI</title>
   </head>
@@ -91,6 +91,7 @@ const canonical = new URL(toJarvisCanonicalPath(Astro.url.pathname), JARVIS_URL)
             </div>
           </div>
           <div class="flex items-center gap-2 shrink-0">
+            <span id="jv-brain-badge" class="jv-brain-badge" data-state="unknown" title="Cerebro JARVIS · consultando…">···</span>
             <span id="jv-telegram-badge" class="jv-telegram-badge" data-state="offline" title="Telegram · ejecutá npm run jarvis:telegram">TG</span>
             <button type="button" id="jv-install-btn" class="jv-install-btn hidden" title="Instalar JARVIS en el escritorio">
               <span class="jv-install-btn-label">Instalar</span>

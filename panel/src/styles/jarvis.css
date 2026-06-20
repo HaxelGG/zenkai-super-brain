@@ -505,6 +505,36 @@
   text-transform: uppercase;
 }
 
+/* LLM brain badge */
+.jv-brain-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.5rem;
+  height: 1.25rem;
+  padding: 0 0.4rem;
+  border-radius: 4px;
+  border: 1px solid var(--jv-border);
+  font-family: Orbitron, sans-serif;
+  font-size: var(--jv-text-2xs);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: var(--jv-text-dim);
+  background: rgba(0, 212, 255, 0.03);
+  transition: color 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+
+.jv-brain-badge[data-state="online"] {
+  color: var(--jv-success);
+  border-color: rgba(0, 255, 170, 0.45);
+  box-shadow: 0 0 10px rgba(0, 255, 170, 0.18);
+}
+
+.jv-brain-badge[data-state="offline"],
+.jv-brain-badge[data-state="unknown"] {
+  opacity: 0.6;
+}
+
 /* Telegram bridge badge */
 .jv-telegram-badge {
   display: inline-flex;
