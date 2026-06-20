@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu, shell, nativeTheme } = require("electron");
+const { app, BrowserWindow, Menu, shell, nativeTheme, session } = require("electron");
 const path = require("path");
 
 const JARVIS_URL =
@@ -19,7 +19,7 @@ function createWindow() {
     backgroundColor: "#030810",
     show: false,
     autoHideMenuBar: true,
-    icon: path.join(__dirname, "assets", "jarvis-icon.png"),
+    icon: path.join(__dirname, "assets", "jarvis-icon.svg"),
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
@@ -75,7 +75,13 @@ function createWindow() {
   Menu.setApplicationMenu(menu);
 }
 
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+  session.defaultSession.setPermissionRequestHandler((_wc, permission, callback) => {
+    callback(permission === "media");
+  });
+  session.defaultSession.setPermissionCheckHandler((_wc, permission) => permission === "media");
+  createWindow();
+});
 
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") app.quit();

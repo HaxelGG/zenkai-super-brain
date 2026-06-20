@@ -22,7 +22,7 @@ npm run start:local # dev local → localhost:4321/jarvis/
 npm run dist:win
 ```
 
-Genera el instalador NSIS en `jarvis/desktop/dist/`.
+Genera el ejecutable portable en `jarvis/desktop/dist/`.
 
 ## Variables
 

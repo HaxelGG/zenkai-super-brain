@@ -99,7 +99,7 @@ const canonical = new URL(toJarvisCanonicalPath(Astro.url.pathname), JARVIS_URL)
         </footer>
       </div>
     </div>
-    <script>
+    <script is:inline>
       if (window.jarvisDesktop?.isDesktop) {
         document.documentElement.classList.add("jv-desktop");
       }
@@ -111,7 +111,7 @@ const canonical = new URL(toJarvisCanonicalPath(Astro.url.pathname), JARVIS_URL)
       tick();
       setInterval(tick, 1000);
 
-      let deferredInstall: Event | null = null;
+      let deferredInstall = null;
       const installBtn = document.getElementById("jv-install-btn");
       window.addEventListener("beforeinstallprompt", (e) => {
         e.preventDefault();
@@ -120,9 +120,8 @@ const canonical = new URL(toJarvisCanonicalPath(Astro.url.pathname), JARVIS_URL)
       });
       installBtn?.addEventListener("click", async () => {
         if (!deferredInstall || !("prompt" in deferredInstall)) return;
-        const promptEvent = deferredInstall as Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: string }> };
-        await promptEvent.prompt();
-        await promptEvent.userChoice;
+        await deferredInstall.prompt();
+        await deferredInstall.userChoice;
         deferredInstall = null;
         installBtn.classList.add("hidden");
       });
@@ -136,7 +135,7 @@ const canonical = new URL(toJarvisCanonicalPath(Astro.url.pathname), JARVIS_URL)
         const suffix = target.match(/[^\d.]*$/)?.[0] ?? "";
         const duration = 1200;
         const start = performance.now();
-        const step = (now: number) => {
+        const step = (now) => {
           const p = Math.min((now - start) / duration, 1);
           const eased = 1 - Math.pow(1 - p, 3);
           const val = num * eased;

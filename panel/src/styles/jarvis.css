@@ -207,6 +207,36 @@
   color: var(--jv-text);
 }
 
+.jv-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.55rem;
+  border: 1px solid rgba(0, 212, 255, 0.35);
+  border-radius: 4px;
+  background: rgba(0, 212, 255, 0.08);
+  font-family: Orbitron, sans-serif;
+  font-size: var(--jv-text-xs);
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: #f0fbff;
+  text-shadow: 0 0 12px rgba(0, 212, 255, 0.65);
+}
+
+.jv-command-hero {
+  position: relative;
+  padding-bottom: 0.25rem;
+}
+
+.jv-command-hero::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: min(280px, 60%);
+  height: 1px;
+  background: linear-gradient(90deg, rgba(0, 212, 255, 0.55), transparent);
+}
+
 @media (min-width: 640px) {
   .jv-greeting {
     font-size: var(--jv-text-xl);

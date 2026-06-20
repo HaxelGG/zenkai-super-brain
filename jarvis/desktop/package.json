@@ -28,21 +28,16 @@
       "assets/**"
     ],
     "win": {
-      "target": ["nsis"],
-      "icon": "assets/jarvis-icon.ico"
-    },
-    "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true,
-      "shortcutName": "JARVIS"
+      "target": ["portable"],
+      "signAndEditExecutable": false
     },
     "mac": {
       "category": "public.app-category.business",
-      "icon": "assets/jarvis-icon.icns"
+      "icon": "assets/jarvis-icon.svg"
     },
     "linux": {
       "target": ["AppImage"],
-      "icon": "assets/jarvis-icon.png"
+      "icon": "assets/jarvis-icon.svg"
     }
   }
 }

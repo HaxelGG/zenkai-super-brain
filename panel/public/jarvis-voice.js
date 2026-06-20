@@ -27,9 +27,13 @@
     return h === "jarvis.zenkai.systems" || h.endsWith(".jarvis.zenkai.systems");
   }
 
-  /** jarvis.zenkai.systems no sirve /api — usa panel.zenkai.systems */
+  /** jarvis subdomain y localhost dev no sirven /api — usa panel.zenkai.systems */
   function getApiBase() {
-    return isJarvisHost() ? PANEL_API : "";
+    const h = window.location.hostname.toLowerCase();
+    if (isJarvisHost() || h === "localhost" || h === "127.0.0.1") {
+      return PANEL_API;
+    }
+    return "";
   }
 
   function apiUrl(path) {
