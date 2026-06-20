@@ -42,17 +42,18 @@ npm install -g windmill-cli
 wmill init   # ya hecho en este repo
 ```
 
-Con **API token** (no MCP):
+Con **API token** (workspace-scoped · guardar en `.env` como `WINDMILL_API_TOKEN`):
 
 ```powershell
-$token = $env:WINDMILL_API_TOKEN   # o desde .env
-wmill workspace add zenkai zenkai https://app.windmill.dev --token $token
-wmill workspace switch zenkai
-wmill workspace bind
-wmill sync pull --token $token
+# Directo (sin workspace profile local)
+wmill sync pull --token $env:WINDMILL_API_TOKEN --base-url https://app.windmill.dev --workspace zenkai
+
+# O vía npm (lee .env)
+npm run wmill:pull
+npm run wmill:push
 ```
 
-Scripts npm: `npm run wmill:pull` · `npm run wmill:push`
+`wmill workspace add` puede fallar con **401** si el token es solo de workspace (no admin global). Eso es normal — el sync directo funciona igual.
 
 ## Repo layout
 
