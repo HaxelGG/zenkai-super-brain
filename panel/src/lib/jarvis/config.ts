@@ -82,13 +82,13 @@ export function toJarvisCanonicalPath(pathname: string): string {
   return pathname || "/";
 }
 
-/** Activo en sidebar — soporta /finanzas y /jarvis/finanzas */
+/** Activo en sidebar — soporta /finanzas y /jarvis/finanzas (misma ruta canónica) */
 export function isJarvisNavActive(pathname: string, href: string): boolean {
-  const path = pathname.replace(/\/$/, "") || "/";
-  const target = href.replace(/\/$/, "") || "/";
+  const path = toJarvisCanonicalPath(pathname.replace(/\/$/, "") || "/");
+  const target = toJarvisCanonicalPath(href.replace(/\/$/, "") || "/");
 
-  if (target === "/" || target === JARVIS_BASE) {
-    return path === "/" || path === JARVIS_BASE;
+  if (target === "/") {
+    return path === "/";
   }
 
   return path === target || path.startsWith(`${target}/`);

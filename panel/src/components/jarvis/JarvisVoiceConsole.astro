@@ -74,6 +74,7 @@
 <script is:inline>
   const CONSOLE_KEY = "zenkai_jarvis_console_open";
   const API_KEY_STORAGE = "zenkai_jarvis_api_key";
+  const API_KEY_LEGACY = "zenkai_api_key";
   const WAKE_KEY = "zenkai_jarvis_wake_enabled";
   const ELEVEN_KEY = "zenkai_jarvis_use_elevenlabs";
 
@@ -125,18 +126,27 @@
   });
 
   if (apiKeyInput instanceof HTMLInputElement) {
-    try { apiKeyInput.value = localStorage.getItem(API_KEY_STORAGE) || ""; } catch { /* ignore */ }
-    apiKeyInput.addEventListener("change", () => {
+    try {
+      apiKeyInput.value = localStorage.getItem(API_KEY_STORAGE) || localStorage.getItem(API_KEY_LEGACY) || "";
+    } catch { /* ignore */ }
+    const persistKey = () => {
       try {
         const v = apiKeyInput.value.trim();
-        if (v) localStorage.setItem(API_KEY_STORAGE, v);
-        else localStorage.removeItem(API_KEY_STORAGE);
+        if (v) {
+          localStorage.setItem(API_KEY_STORAGE, v);
+          localStorage.setItem(API_KEY_LEGACY, v);
+        } else {
+          localStorage.removeItem(API_KEY_STORAGE);
+          localStorage.removeItem(API_KEY_LEGACY);
+        }
       } catch { /* ignore */ }
-    });
+    };
+    apiKeyInput.addEventListener("input", persistKey);
+    apiKeyInput.addEventListener("change", persistKey);
   }
 
   if (wakeToggle instanceof HTMLInputElement) {
-    try { wakeToggle.checked = localStorage.getItem(WAKE_KEY) !== "0"; } catch { /* ignore */ }
+    try { wakeToggle.checked = localStorage.getItem(WAKE_KEY) === "1"; } catch { /* ignore */ }
     wakeToggle.addEventListener("change", () => {
       try { localStorage.setItem(WAKE_KEY, wakeToggle.checked ? "1" : "0"); } catch { /* ignore */ }
       if (window.JarvisVoice) {

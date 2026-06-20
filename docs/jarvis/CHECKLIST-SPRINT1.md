@@ -4,11 +4,13 @@ Marcar en orden. Tiempo estimado: **45–60 min**.
 
 ## Repo (local)
 
-- [ ] `npm run n8n:checklist` — 4 JSON válidos
-- [ ] `npm run jarvis:setup-sprint1 -- --apply` — crear campos faltantes
+- [x] `npm run n8n:checklist` — 4 JSON válidos (2026-06-19)
+- [x] `npm run jarvis:setup-sprint1` — campos `demos` + `Leads` OK en Airtable VENTAS
+- [ ] `npm run n8n:import -- --apply` — requiere `N8N_API_KEY` en `.env`
 
 ## n8n Cloud
 
+- [x] Workflows importados vía `npm run n8n:import:mcp -- --apply` (2026-06-19)
 - [ ] Variables: `AIRTABLE_BASE_VENTAS`, `ZENKAI_FROM_EMAIL`, `ZENKAI_ALERT_EMAIL`
 - [ ] Variable opcional: `SLACK_WEBHOOK_URL`
 - [ ] Credencial Airtable PAT
@@ -17,11 +19,12 @@ Marcar en orden. Tiempo estimado: **45–60 min**.
 
 ## Import + activar (orden)
 
-- [ ] M-04 `jarvis-callback`
-- [ ] M-03 `leads-qualify`
-- [ ] M-02 `demo-autoreply`
-- [ ] S-01 cron horario
-- [ ] Todos: **Available in MCP** + **Active**
+- [ ] M-04 `jarvis-callback` — publicado
+- [ ] M-03 `leads-qualify` — publicado
+- [ ] M-02 `demo-autoreply` — publicado
+- [ ] S-01 cron horario — publicado
+- [ ] Credenciales mapeadas en UI (Airtable · Resend · Anthropic)
+- [ ] Todos: **Available in MCP** (ya ON si creados vía MCP builder)
 
 ## Airtable VENTAS
 

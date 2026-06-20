@@ -39,4 +39,26 @@ Ver `docs/jarvis/CHECKLIST-SPRINT1.md` y `docs/plans/2026-06-19-sprint1-automati
 
 ```bash
 npm run n8n:checklist
+npm run jarvis:setup-sprint1
 ```
+
+## Importar a n8n Cloud
+
+### Opción A · MCP (recomendado si tienes Access Token válido)
+
+```bash
+npm run n8n:import:mcp          # dry-run + verifica MCP
+npm run n8n:import:mcp -- --apply
+```
+
+Token: n8n Cloud → **Settings → Instance-level MCP → Access Token** → `.env` como `N8N_MCP_ACCESS_TOKEN`.
+
+Si responde **401**: regenera el token (el anterior queda revocado) y reinicia Cursor.
+
+### Opción B · REST API
+
+1. n8n Cloud → **Settings → n8n API** → Create API Key  
+2. `.env`: `N8N_API_KEY=...`  
+3. `npm run n8n:import -- --apply`
+
+Orden: M-04 → M-03 → M-02 → S-01. Tras import: mapear credenciales + variables + **Available in MCP**.

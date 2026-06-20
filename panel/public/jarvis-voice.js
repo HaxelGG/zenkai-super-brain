@@ -9,6 +9,7 @@
 
   const WAKE_KEY = "zenkai_jarvis_wake_enabled";
   const API_KEY_STORAGE = "zenkai_jarvis_api_key";
+  const API_KEY_LEGACY = "zenkai_api_key";
   const RUNS_KEY = "zenkai_jarvis_runs";
   const ELEVEN_KEY = "zenkai_jarvis_use_elevenlabs";
 
@@ -27,12 +28,11 @@
     return h === "jarvis.zenkai.systems" || h.endsWith(".jarvis.zenkai.systems");
   }
 
-  /** jarvis subdomain y localhost dev no sirven /api — usa panel.zenkai.systems */
+  /** Mismo deploy Vercel sirve /api en panel y jarvis; localhost astro dev → panel prod */
   function getApiBase() {
     const h = window.location.hostname.toLowerCase();
-    if (isJarvisHost() || h === "localhost" || h === "127.0.0.1") {
-      return PANEL_API;
-    }
+    if (isJarvisHost() || h === "panel.zenkai.systems") return "";
+    if (h === "localhost" || h === "127.0.0.1") return PANEL_API;
     return "";
   }
 
@@ -73,6 +73,17 @@
     }
   }
 
+  /** Evita colgar en «Hablando…» si ElevenLabs o la función Vercel tarda demasiado */
+  async function fetchWithTimeout(url, options, ms) {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), ms);
+    try {
+      return await fetch(url, { ...options, signal: ctrl.signal });
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
   const WAKE_GREETINGS = [
     "Sí, señor. JARVIS en línea.",
     "Buenos días. Sistemas operativos.",
@@ -96,7 +107,7 @@
 
   function getApiKey() {
     try {
-      return localStorage.getItem(API_KEY_STORAGE) || "";
+      return localStorage.getItem(API_KEY_STORAGE) || localStorage.getItem(API_KEY_LEGACY) || "";
     } catch {
       return "";
     }
@@ -256,11 +267,15 @@
 
     if (useElevenLabs()) {
       try {
-        const res = await fetch(apiUrl("/api/jarvis/speak"), {
-          method: "POST",
-          headers: authHeaders(),
-          body: JSON.stringify({ text: text.slice(0, 500) }),
-        });
+        const res = await fetchWithTimeout(
+          apiUrl("/api/jarvis/speak"),
+          {
+            method: "POST",
+            headers: authHeaders(),
+            body: JSON.stringify({ text: text.slice(0, 500) }),
+          },
+          14000,
+        );
         if (res.status === 401 || res.status === 403) {
           showVoiceToast("Sin autorización · pegá ZENKAI_API_KEY en panel ⋯");
         } else if (res.status === 503) {
@@ -286,20 +301,27 @@
             currentAudio = null;
             showVoiceToast("Audio bloqueado · voz del navegador");
           }
+        } else if (!res.ok) {
+          showVoiceToast(`TTS error ${res.status} · voz del navegador`);
         }
-      } catch {
-        /* fallback to browser TTS */
+      } catch (err) {
+        const timedOut = err instanceof Error && err.name === "AbortError";
+        showVoiceToast(timedOut ? "ElevenLabs lento · voz del navegador" : "TTS falló · voz del navegador");
       }
     }
     speakBrowser(text, onDone);
   }
 
   async function runOrchestrator(instruction) {
-    const res = await fetch(apiUrl("/api/jarvis/run"), {
-      method: "POST",
-      headers: authHeaders(),
-      body: JSON.stringify({ instruction }),
-    });
+    const res = await fetchWithTimeout(
+      apiUrl("/api/jarvis/run"),
+      {
+        method: "POST",
+        headers: authHeaders(),
+        body: JSON.stringify({ instruction }),
+      },
+      25000,
+    );
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
       throw new Error(err.error || `HTTP ${res.status}`);
@@ -349,7 +371,8 @@
     stopRecognition();
     stopAudio();
     setState("processing");
-    logTranscript(`Telegram: ${result.instruction || ""}`, "in");
+    const label = result.sourceChannel === "telegram" ? "Telegram" : "Remoto";
+    logTranscript(`${label}: ${result.instruction || ""}`, "in");
     saveRun(result);
     if (result.action?.type === "navigate" && result.action.path) {
       const target = normalizeNavPath(result.action.path);
@@ -619,6 +642,34 @@
   setState("idle");
   renderRuns();
 
+  function initBrowserHints() {
+    if (!SpeechRecognition) {
+      statusEl.textContent = "Sin voz · Chrome/Edge";
+      showVoiceToast("Voz solo en Chrome o Edge");
+      return;
+    }
+    const ua = navigator.userAgent;
+    if (/firefox/i.test(ua)) {
+      statusEl.textContent = "Sin voz en Firefox";
+      showVoiceToast("Usá Chrome o Edge para hablar con JARVIS");
+      return;
+    }
+    if (/brave/i.test(ua)) {
+      showVoiceToast("Brave: permití micrófono y desactivá Shields en zenkai.systems");
+    }
+    if (window.matchMedia("(display-mode: standalone)").matches || window.jarvisDesktop?.isDesktop) {
+      showVoiceToast("App JARVIS · clic en orb y hablá");
+    }
+    try {
+      if (!localStorage.getItem("zenkai_jarvis_voice_hint_shown")) {
+        localStorage.setItem("zenkai_jarvis_voice_hint_shown", "1");
+        setTimeout(() => showVoiceToast("Clic en orb → hablá · Chrome/Edge recomendado"), 1500);
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+
   function armPendingWake() {
     if (!pendingWake || !SpeechRecognition) return;
     pendingWake = false;
@@ -640,6 +691,8 @@
     statusEl.textContent = "Sin voz";
     showVoiceToast("Usá Chrome o Edge para JARVIS por voz");
   }
+
+  initBrowserHints();
 
   window.JarvisVoice = {
     setState,
