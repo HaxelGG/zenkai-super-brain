@@ -505,6 +505,35 @@
   text-transform: uppercase;
 }
 
+/* Telegram bridge badge */
+.jv-telegram-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5rem;
+  height: 1.25rem;
+  padding: 0 0.35rem;
+  border-radius: 4px;
+  border: 1px solid var(--jv-border);
+  font-family: Orbitron, sans-serif;
+  font-size: var(--jv-text-2xs);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--jv-text-dim);
+  background: rgba(0, 212, 255, 0.03);
+  transition: color 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+
+.jv-telegram-badge[data-state="online"] {
+  color: #29b6f6;
+  border-color: rgba(41, 182, 246, 0.45);
+  box-shadow: 0 0 10px rgba(41, 182, 246, 0.2);
+}
+
+.jv-telegram-badge[data-state="offline"] {
+  opacity: 0.55;
+}
+
 /* Desktop app (Electron) */
 .jarvis-app.jv-desktop .jarvis-header {
   -webkit-app-region: drag;
@@ -1061,6 +1090,33 @@ body.jv-drawer-lock {
 .jv-sync-toast.jv-sync-visible {
   opacity: 1;
   transform: translateY(0);
+}
+
+/* Voice feedback toast */
+.jv-voice-toast {
+  position: fixed;
+  bottom: 4.5rem;
+  left: 50%;
+  z-index: 9997;
+  max-width: min(92vw, 22rem);
+  padding: 10px 14px;
+  border: 1px solid var(--jv-border-bright);
+  border-radius: 6px;
+  background: rgba(6, 18, 38, 0.96);
+  font-family: "JetBrains Mono Variable", monospace;
+  font-size: var(--jv-text-xs);
+  color: var(--jv-cyan);
+  text-align: center;
+  opacity: 0;
+  transform: translate(-50%, 8px);
+  transition: opacity 0.25s, transform 0.25s;
+  pointer-events: none;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+}
+
+.jv-voice-toast.jv-voice-toast-visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
 }
 
 #jv-data-badge.jv-badge-loading {

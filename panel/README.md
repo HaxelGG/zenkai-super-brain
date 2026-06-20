@@ -41,6 +41,8 @@ Rutas internas (local y producción):
 
 Datos: mock tipado en `src/lib/jarvis/mock-data.ts` · merge opcional con Airtable CRM si `AIRTABLE_TOKEN` está configurado en build.
 
+**Guía de uso y troubleshooting:** `docs/jarvis/GUIA-USO.md`
+
 ## Estructura
 
 Ver `docs/specs/2026-05-01-panel-zenkai-design.md` en la raíz del repo.

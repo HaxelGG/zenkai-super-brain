@@ -13,8 +13,8 @@
   const ELEVEN_KEY = "zenkai_jarvis_use_elevenlabs";
 
   const STATUS = {
-    idle: "En línea",
-    wake: "Escuchando wake…",
+    idle: "Clic en orb · hablá",
+    wake: "Decí «Jarvis despierta»…",
     listening: "Escuchando…",
     processing: "Procesando…",
     speaking: "Hablando…",
@@ -261,7 +261,11 @@
           headers: authHeaders(),
           body: JSON.stringify({ text: text.slice(0, 500) }),
         });
-        if (res.ok && res.headers.get("content-type")?.includes("audio")) {
+        if (res.status === 401 || res.status === 403) {
+          showVoiceToast("Sin autorización · pegá ZENKAI_API_KEY en panel ⋯");
+        } else if (res.status === 503) {
+          showVoiceToast("ElevenLabs no configurado · voz del navegador");
+        } else if (res.ok && res.headers.get("content-type")?.includes("audio")) {
           const blob = await res.blob();
           const url = URL.createObjectURL(blob);
           currentAudio = new Audio(url);
@@ -274,8 +278,14 @@
             URL.revokeObjectURL(url);
             speakBrowser(text, onDone);
           };
-          await currentAudio.play();
-          return;
+          try {
+            await currentAudio.play();
+            return;
+          } catch {
+            URL.revokeObjectURL(url);
+            currentAudio = null;
+            showVoiceToast("Audio bloqueado · voz del navegador");
+          }
         }
       } catch {
         /* fallback to browser TTS */
@@ -333,6 +343,23 @@
     };
   }
 
+  async function deliverRun(result) {
+    if (!result) return;
+    unlockAudio();
+    stopRecognition();
+    stopAudio();
+    setState("processing");
+    logTranscript(`Telegram: ${result.instruction || ""}`, "in");
+    saveRun(result);
+    if (result.action?.type === "navigate" && result.action.path) {
+      const target = normalizeNavPath(result.action.path);
+      setTimeout(() => {
+        window.location.href = target;
+      }, 900);
+    }
+    await speak(result.speech || result.reply, () => setState("idle"));
+  }
+
   async function handleTranscript(text, fromWake) {
     const cmd = text.trim();
     if (!cmd) {
@@ -346,8 +373,15 @@
     let result;
     try {
       result = await runOrchestrator(cmd);
-    } catch {
-      showVoiceToast("API offline · respuesta local");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "API offline";
+      if (/401|403|unauthorized/i.test(msg)) {
+        showVoiceToast("Sin autorización · abrí ⋯ y pegá ZENKAI_API_KEY");
+      } else if (/failed to fetch|network/i.test(msg)) {
+        showVoiceToast("Sin conexión a API · modo local");
+      } else {
+        showVoiceToast(`${msg} · modo local`);
+      }
       result = localFallback(cmd, fromWake);
     }
 
@@ -556,7 +590,8 @@
       resumeAfterCommand();
       return;
     }
-    enableWakeMode();
+    // Clic simple = escuchar comando directo (sin wake word)
+    startCommandMode();
   }
 
   btn.addEventListener("click", () => {
@@ -584,11 +619,19 @@
   setState("idle");
   renderRuns();
 
+  function armPendingWake() {
+    if (!pendingWake || !SpeechRecognition) return;
+    pendingWake = false;
+    unlockAudio();
+    enableWakeMode();
+  }
+
   if (SpeechRecognition) {
     try {
       if (localStorage.getItem(WAKE_KEY) === "1") {
         pendingWake = true;
-        statusEl.textContent = "Tocá orb · voz";
+        statusEl.textContent = "Tocá pantalla · wake word";
+        document.addEventListener("pointerdown", armPendingWake, { once: true, passive: true });
       }
     } catch {
       /* ignore */
@@ -601,6 +644,7 @@
   window.JarvisVoice = {
     setState,
     speak,
+    deliverRun,
     enableWakeMode,
     disableWakeMode,
     startCommandMode,
@@ -608,4 +652,5 @@
     getState: () => state,
     getMode: () => mode,
   };
+  window.dispatchEvent(new CustomEvent("jarvis-voice-ready"));
 })();
