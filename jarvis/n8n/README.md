@@ -39,4 +39,18 @@ Ver `docs/jarvis/CHECKLIST-SPRINT1.md` y `docs/plans/2026-06-19-sprint1-automati
 
 ```bash
 npm run n8n:checklist
+npm run jarvis:setup-sprint1
 ```
+
+## Importar a n8n Cloud (API)
+
+1. n8n Cloud → **Settings → n8n API** → Create API Key  
+2. Añadir a `.env`: `N8N_API_KEY=...`  
+3. Ejecutar:
+
+```bash
+npm run n8n:import          # dry-run
+npm run n8n:import -- --apply
+```
+
+Orden: M-04 → M-03 → M-02 → S-01. Tras import: mapear credenciales + variables + **Available in MCP**.

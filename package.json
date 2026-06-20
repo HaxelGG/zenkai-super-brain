@@ -10,6 +10,7 @@
     "protocolo": "tsx scripts/anthropic/protocolo.ts",
     "test:protocolo": "tsx scripts/anthropic/test-protocolo.ts",
     "n8n:checklist": "powershell -ExecutionPolicy Bypass -File scripts/n8n/import-checklist.ps1",
+    "n8n:import": "tsx scripts/n8n/import-to-cloud.ts",
     "jarvis:setup-sprint1": "tsx scripts/airtable/setup-sprint1-schema.ts",
     "jarvis:telegram": "tsx scripts/jarvis/telegram-bridge.ts",
     "jarvis:telegram:setup": "tsx scripts/jarvis/telegram-setup.ts"

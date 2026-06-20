@@ -619,6 +619,34 @@
   setState("idle");
   renderRuns();
 
+  function initBrowserHints() {
+    if (!SpeechRecognition) {
+      statusEl.textContent = "Sin voz · Chrome/Edge";
+      showVoiceToast("Voz solo en Chrome o Edge");
+      return;
+    }
+    const ua = navigator.userAgent;
+    if (/firefox/i.test(ua)) {
+      statusEl.textContent = "Sin voz en Firefox";
+      showVoiceToast("Usá Chrome o Edge para hablar con JARVIS");
+      return;
+    }
+    if (/brave/i.test(ua)) {
+      showVoiceToast("Brave: permití micrófono y desactivá Shields en zenkai.systems");
+    }
+    if (window.matchMedia("(display-mode: standalone)").matches || window.jarvisDesktop?.isDesktop) {
+      showVoiceToast("App JARVIS · clic en orb y hablá");
+    }
+    try {
+      if (!localStorage.getItem("zenkai_jarvis_voice_hint_shown")) {
+        localStorage.setItem("zenkai_jarvis_voice_hint_shown", "1");
+        setTimeout(() => showVoiceToast("Clic en orb → hablá · Chrome/Edge recomendado"), 1500);
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+
   function armPendingWake() {
     if (!pendingWake || !SpeechRecognition) return;
     pendingWake = false;
@@ -640,6 +668,8 @@
     statusEl.textContent = "Sin voz";
     showVoiceToast("Usá Chrome o Edge para JARVIS por voz");
   }
+
+  initBrowserHints();
 
   window.JarvisVoice = {
     setState,
