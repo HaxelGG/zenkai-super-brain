@@ -22,3 +22,12 @@ Standard commands live in each `package.json` and the per-folder `README.md` (`p
 - **The panel's `/sandbox` calls `/api/clasificar` and `/api/protocolo`, which are root-level Vercel functions — NOT served by `astro dev`.** Those endpoints only exist under `vercel dev` / a Vercel deploy, so the sandbox button 404s under a plain `panel` dev server. This is expected, not a bug.
 - **Root `tsconfig.json` excludes `panel/`.** Typecheck the root with `npx tsc --noEmit`; build the panel with its own `npm run build` (`astro check && astro build`).
 - **`web` build/cache quirk:** if a content-collection edit triggers a "Duplicate id" warning, run `rm -rf web/.astro web/dist` then rebuild (documented in `web/README.md`).
+
+### Integrations roadmap ("clone & improve" — Jarvis / ElevenLabs / n8n / Cursor)
+
+This is an N3–N4 program (per `CLAUDE.md` §3); built incrementally as self-contained, env-gated modules that degrade gracefully and are unit-tested with mocks (no live keys needed to run the test suite).
+
+- **Voice ("Jarvis") — DONE (increment 1):** `web/src/lib/voice.ts` + `web/src/pages/api/voz.ts` synthesize text → MP3 via ElevenLabs. Gated behind `ELEVENLABS_API_KEY` (+ optional `ELEVENLABS_VOICE_ID`, `ELEVENLABS_MODEL_ID`); same `ZENKAI_API_KEY` Bearer auth as `/api/protocolo`. Tests: `web/src/pages/api/voz.test.ts` (mock `fetch`).
+- **Pending (need design + provider keys):** n8n automation dispatch (`N8N_WEBHOOK_URL` / `N8N_API_KEY`), deeper agent orchestration, and any Cursor-style agentic features. Add each as its own `web/src/lib/*` module + `/api/*` route + mocked test, gated behind its own env var.
+
+**Provider keys cannot be created by the agent** — they come from each provider's dashboard (Anthropic, ElevenLabs, n8n). The only credential generated in-repo is the app's own `ZENKAI_API_KEY` (random bearer token; set it as a secret, never commit it).
