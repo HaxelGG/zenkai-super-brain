@@ -1,0 +1,26 @@
+---
+import type { AgentId } from "../../lib/jarvis/types";
+import { AGENTS } from "../../lib/jarvis/mock-data";
+
+interface Props {
+  agent: AgentId;
+  size?: "sm" | "md";
+  glow?: boolean;
+}
+
+const { agent, size = "sm", glow = false } = Astro.props;
+const info = AGENTS.find((a) => a.id === agent);
+const color = info?.color ?? "#6366F1";
+---
+
+<div
+  class:list={[
+    "rounded-full flex items-center justify-center font-semibold text-white shrink-0 jv-display",
+    size === "sm" ? "w-6 h-6 text-[9px]" : "w-9 h-9 text-[10px]",
+    glow && "jv-avatar-glow",
+  ]}
+  style={`background: ${color}; --avatar-color: ${color}`}
+  title={`${agent} · ${info?.department ?? ""}`}
+>
+  {agent.slice(0, 2)}
+</div>
