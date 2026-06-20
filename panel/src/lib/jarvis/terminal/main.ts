@@ -128,13 +128,13 @@ async function showStatus(): Promise<void> {
       append({ type: "error", text: `Status ${res.status}` });
       return;
     }
-    const s = (await res.json()) as { agents?: number; keys?: { ready?: boolean }; director?: { id?: string } };
+    const s = (await res.json()) as { agents?: unknown[]; keys?: { ready?: boolean }; director?: { id?: string } };
     append({
       type: "card-kpis",
       title: "Estado de la agencia",
       items: [
         { label: "director", value: s.director?.id ?? "JARVIS" },
-        { label: "agentes", value: String(s.agents ?? "—") },
+        { label: "agentes", value: String(s.agents?.length ?? "—") },
         { label: "keys", value: s.keys?.ready ? "ready" : "incompletas" },
       ],
     });
