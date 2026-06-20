@@ -549,4 +549,76 @@ export const MOCK_JARVIS_DATA: JarvisData = {
   ],
 
   agents: AGENTS,
+
+  agentStatuses: [
+    { id: "NEXUS", state: "active", currentTask: "WhatsApp automation GJS", load: 78, model: "Sonnet 4.6", opsToday: 142 },
+    { id: "FORGE", state: "active", currentTask: "JARVIS HUD deploy", load: 65, model: "Sonnet 4.6", opsToday: 89 },
+    { id: "HERMES", state: "active", currentTask: "Follow-up clínica dental", load: 55, model: "Sonnet 4.6", opsToday: 67 },
+    { id: "ORACLE", state: "idle", load: 20, model: "Sonnet 4.6", opsToday: 34 },
+    { id: "ARES", state: "active", currentTask: "Meta Ads creatives Q3", load: 45, model: "Sonnet 4.6", opsToday: 56 },
+    { id: "MUSE", state: "active", currentTask: "LinkedIn calendar", load: 40, model: "Sonnet 4.6", opsToday: 48 },
+    { id: "ATLAS", state: "idle", load: 15, model: "Sonnet 4.6", opsToday: 28 },
+    { id: "APOLLO", state: "idle", currentTask: "Landing salud v2", load: 30, model: "Sonnet 4.6", opsToday: 22 },
+    { id: "ECHO", state: "active", currentTask: "FAQ bot phase 1", load: 35, model: "Haiku 4.5", opsToday: 210 },
+    { id: "ZEUS", state: "idle", load: 10, model: "Opus 4.7", opsToday: 8 },
+    { id: "LEX", state: "offline", load: 0, model: "Sonnet 4.6", opsToday: 3 },
+    { id: "HIVE", state: "offline", load: 0, model: "Sonnet 4.6", opsToday: 1 },
+  ],
+
+  activityFeed: [
+    { id: "ev1", time: "09:42", agent: "FORGE", type: "deploy", message: "JARVIS v2 HUD pushed to staging" },
+    { id: "ev2", time: "09:15", agent: "HERMES", type: "lead", message: "Nuevo lead cualificado · Clínica dental Medellín · score 8" },
+    { id: "ev3", time: "08:50", agent: "NEXUS", type: "task", message: "Make flow leads web optimizado · -23% latency" },
+    { id: "ev4", time: "08:30", agent: "ORACLE", type: "alert", message: "Cuenta por cobrar E-commerce Cali · 34 días" },
+    { id: "ev5", time: "08:00", agent: "MUSE", type: "social", message: "Post LinkedIn publicado · 1.2K impresiones en 2h" },
+    { id: "ev6", time: "07:45", agent: "ECHO", type: "task", message: "47 mensajes WA procesados · 94% respuesta <10min" },
+    { id: "ev7", time: "07:00", agent: "ATLAS", type: "task", message: "Reporte semanal GJS generado automáticamente" },
+    { id: "ev8", time: "06:30", agent: "ARES", type: "task", message: "ROAS Meta Ads subió a 3.2x · sector e-commerce" },
+  ],
+
+  pipelineLeads: [
+    { id: "l1", name: "Dr. María López", company: "Clínica dental Medellín", sector: "Salud", stage: "negociación", score: 8, valueUsd: 8500, owner: "HERMES", lastContact: "2026-06-19" },
+    { id: "l2", name: "Carlos Ruiz", company: "E-commerce Cali", sector: "E-commerce", stage: "cerrado", score: 7, valueUsd: 3200, owner: "HERMES", lastContact: "2026-06-15" },
+    { id: "l3", name: "Ana Martínez", company: "Restaurante Madrid", sector: "Restaurantes", stage: "propuesta", score: 6, valueUsd: 12000, owner: "HERMES", lastContact: "2026-06-18" },
+    { id: "l4", name: "Pedro Gómez", company: "Startup fintech BOG", sector: "Startups", stage: "cualificado", score: 7, valueUsd: 15000, owner: "ZEUS", lastContact: "2026-06-17" },
+    { id: "l5", name: "Laura Vega", company: "Inmobiliaria Pereira", sector: "Inmobiliaria", stage: "nuevo", score: 5, valueUsd: 6000, owner: "HERMES", lastContact: "2026-06-20" },
+    { id: "l6", name: "Roberto Sánchez", company: "Manufactura Medellín", sector: "Manufactura", stage: "cualificado", score: 6, valueUsd: 18000, owner: "ATLAS", lastContact: "2026-06-16" },
+  ],
+
+  pipelineFunnel: [
+    { stage: "Nuevo", count: 12, valueUsd: 42000 },
+    { stage: "Cualificado", count: 8, valueUsd: 68000 },
+    { stage: "Propuesta", count: 3, valueUsd: 45000 },
+    { stage: "Negociación", count: 2, valueUsd: 22000 },
+    { stage: "Cerrado", count: 2, valueUsd: 11700 },
+  ],
+
+  systemConnections: [
+    { id: "anthropic", name: "Anthropic API", status: "online", latencyMs: 890, uptime: 99.9, phase: 1 },
+    { id: "airtable", name: "Airtable CRM", status: "online", latencyMs: 320, uptime: 99.5, phase: 2 },
+    { id: "vercel", name: "Vercel Deploy", status: "online", latencyMs: 45, uptime: 100, phase: 1 },
+    { id: "make", name: "Make.com", status: "degraded", latencyMs: 1200, uptime: 97.2, phase: 3 },
+    { id: "whatsapp", name: "WhatsApp Cloud", status: "pending", uptime: 0, phase: 4 },
+    { id: "resend", name: "Resend Email", status: "online", latencyMs: 180, uptime: 99.8, phase: 5 },
+    { id: "meta", name: "Meta Ads API", status: "pending", uptime: 0, phase: 6 },
+  ],
+
+  clients: [
+    { id: "c1", name: "Grupo Juana Sánchez", tier: "Pro", sector: "E-commerce", mrr: 2500, health: "green", agentLead: "ATLAS", since: "2026-04-01" },
+    { id: "c2", name: "E-commerce Cali", tier: "Eco", sector: "E-commerce", mrr: 900, health: "yellow", agentLead: "HERMES", since: "2026-06-01" },
+    { id: "c3", name: "Clínica dental Medellín", tier: "Pro", sector: "Salud", mrr: 0, health: "yellow", agentLead: "HERMES", since: "—" },
+  ],
+
+  aiUsage: {
+    tokensToday: 284000,
+    tokensMonth: 4200000,
+    costTodayUsd: 4.82,
+    costMonthUsd: 68.40,
+    callsToday: 156,
+    modelSplit: [
+      { model: "Sonnet 4.6", pct: 72, color: "#1E6FFF" },
+      { model: "Haiku 4.5", pct: 22, color: "#00D4FF" },
+      { model: "Opus 4.7", pct: 6, color: "#FFB800" },
+    ],
+  },
 };

@@ -1,0 +1,38 @@
+---
+import type { ActivityEvent } from "../../lib/jarvis/types";
+import AgentAvatar from "./AgentAvatar.astro";
+
+interface Props {
+  events: ActivityEvent[];
+  limit?: number;
+}
+
+const { events, limit = 8 } = Astro.props;
+const items = events.slice(0, limit);
+
+const typeIcon: Record<string, string> = {
+  task: "⚡",
+  lead: "◆",
+  alert: "⚠",
+  deploy: "▲",
+  social: "◎",
+};
+---
+
+<ul class="space-y-3">
+  {items.map((ev, i) => (
+    <li class="jv-feed-item" style={`animation-delay: ${i * 0.06}s`}>
+      <div class="flex items-start gap-3">
+        <span class="jv-mono text-[10px] text-[var(--jv-cyan)] shrink-0 w-10">{ev.time}</span>
+        <AgentAvatar agent={ev.agent} />
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-1.5 mb-0.5">
+            <span class="text-[10px]" aria-hidden="true">{typeIcon[ev.type]}</span>
+            <span class="jv-label text-[9px] opacity-70">{ev.type}</span>
+          </div>
+          <p class="text-[13px] text-[var(--jv-text-muted)] leading-snug">{ev.message}</p>
+        </div>
+      </div>
+    </li>
+  ))}
+</ul>

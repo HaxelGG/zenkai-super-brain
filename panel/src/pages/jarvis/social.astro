@@ -1,5 +1,6 @@
 ---
 import JarvisLayout from "../../layouts/JarvisLayout.astro";
+import JarvisMobileNav from "../../components/jarvis/JarvisMobileNav.astro";
 import MetricCard from "../../components/jarvis/MetricCard.astro";
 import SocialChannelCard from "../../components/jarvis/SocialChannelCard.astro";
 import BarChart from "../../components/jarvis/BarChart.astro";
@@ -21,25 +22,25 @@ const socialKpis = [
 ];
 
 const calendarStatusStyle = {
-  scheduled: "bg-accent-soft text-accent",
-  draft: "bg-bg-muted text-text-muted",
-  published: "bg-emerald-50 text-success",
+  scheduled: "border border-[var(--jv-cyan)] text-[var(--jv-cyan)]",
+  draft: "border border-[var(--jv-border)] text-[var(--jv-text-dim)]",
+  published: "border border-[var(--jv-success)] text-[var(--jv-success)]",
 };
 ---
 
 <JarvisLayout title="Social Media">
-  <header class="mb-8">
-    <div class="label-micro mb-2">JARVIS · Marketing</div>
-    <h1 class="text-h1">Social & Engagement</h1>
-    <p class="mt-2 text-body text-text-muted max-w-2xl">
+  <JarvisMobileNav />
+
+  <header class="mb-8" data-jv-animate="1">
+    <div class="jv-label mb-2">ARES · MUSE · Marketing</div>
+    <h1 class="jv-display text-2xl sm:text-3xl font-bold">Social & Engagement</h1>
+    <p class="mt-2 jv-mono text-[12px] text-[var(--jv-text-muted)] max-w-2xl">
       Métricas orgánicas, paid media y calendario de contenido · cadencia semanal ARES + MUSE.
     </p>
   </header>
 
   <section class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8">
-    {socialKpis.map((kpi) => (
-      <MetricCard metric={kpi} />
-    ))}
+    {socialKpis.map((kpi, i) => <MetricCard metric={kpi} index={i} />)}
   </section>
 
   <section class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">

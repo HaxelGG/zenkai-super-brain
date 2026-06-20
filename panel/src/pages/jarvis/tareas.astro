@@ -1,5 +1,7 @@
 ---
 import JarvisLayout from "../../layouts/JarvisLayout.astro";
+import JarvisMobileNav from "../../components/jarvis/JarvisMobileNav.astro";
+import HudPanel from "../../components/jarvis/HudPanel.astro";
 import KanbanColumn from "../../components/jarvis/KanbanColumn.astro";
 import TaskCard from "../../components/jarvis/TaskCard.astro";
 import AgentAvatar from "../../components/jarvis/AgentAvatar.astro";
@@ -31,15 +33,17 @@ const listTasks = [...data.tasks]
 ---
 
 <JarvisLayout title="Tareas">
-  <header class="mb-8">
-    <div class="label-micro mb-2">JARVIS · Operaciones</div>
-    <h1 class="text-h1">Task Board</h1>
-    <p class="mt-2 text-body text-text-muted max-w-2xl">
+  <JarvisMobileNav />
+
+  <header class="mb-8" data-jv-animate="1">
+    <div class="jv-label mb-2">ATLAS · Operaciones</div>
+    <h1 class="jv-display text-2xl sm:text-3xl font-bold">Task Board</h1>
+    <p class="mt-2 jv-mono text-[12px] text-[var(--jv-text-muted)] max-w-2xl">
       {data.tasks.filter((t) => t.status !== "done").length} tareas activas · {data.tasks.filter((t) => t.status === "working").length} en working · {data.tasks.filter((t) => t.status === "done").length} completadas
     </p>
   </header>
 
-  <section class="card-base p-5 mb-6">
+  <HudPanel class="mb-6" animate={2}>
     <h2 class="text-small font-semibold mb-3">Carga por agente</h2>
     <div class="flex flex-wrap gap-3">
       {agentCounts.map((a) => (
@@ -50,24 +54,24 @@ const listTasks = [...data.tasks]
         </div>
       ))}
     </div>
-  </section>
+  </HudPanel>
 
   <section class="mb-8 overflow-x-auto pb-2">
-    <div class="flex gap-4 min-w-[900px]">
+    <div class="flex gap-3 min-w-[900px]">
       {columns.map((col) => (
-        <div class="flex-1 min-w-[180px] card-base p-3 bg-bg-muted/30">
+        <HudPanel class="flex-1 min-w-[180px] !p-3" padding="sm">
           <KanbanColumn status={col.status} tasks={data.tasks} label={col.label} />
-        </div>
+        </HudPanel>
       ))}
     </div>
   </section>
 
-  <section class="card-base p-6">
+  <HudPanel animate={3}>
     <h2 class="text-h3 mb-4">Vista lista · por prioridad</h2>
     <div class="space-y-2">
       {listTasks.map((task) => (
         <TaskCard task={task} />
       ))}
     </div>
-  </section>
+  </HudPanel>
 </JarvisLayout>

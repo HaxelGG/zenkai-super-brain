@@ -8,10 +8,10 @@ interface Props {
 const { channel } = Astro.props;
 
 const platformIcons: Record<string, { bg: string; label: string }> = {
-  instagram: { bg: "from-pink-500 to-purple-600", label: "IG" },
-  linkedin: { bg: "from-blue-600 to-blue-700", label: "IN" },
-  tiktok: { bg: "from-gray-900 to-gray-800", label: "TT" },
-  meta_ads: { bg: "from-blue-500 to-indigo-600", label: "AD" },
+  instagram: { bg: "from-pink-500/80 to-purple-600/80", label: "IG" },
+  linkedin: { bg: "from-blue-600/80 to-blue-700/80", label: "IN" },
+  tiktok: { bg: "from-gray-700/80 to-gray-900/80", label: "TT" },
+  meta_ads: { bg: "from-blue-500/80 to-cyan-500/80", label: "AD" },
 };
 
 const icon = platformIcons[channel.platform];
@@ -21,13 +21,11 @@ function sparklinePath(values: number[], w: number, h: number): string {
   const max = Math.max(...values);
   const range = max - min || 1;
   const step = w / (values.length - 1);
-  return values
-    .map((v, i) => {
-      const x = i * step;
-      const y = h - ((v - min) / range) * (h - 4) - 2;
-      return `${i === 0 ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`;
-    })
-    .join(" ");
+  return values.map((v, i) => {
+    const x = i * step;
+    const y = h - ((v - min) / range) * (h - 4) - 2;
+    return `${i === 0 ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(" ");
 }
 
 function formatReach(n: number): string {
@@ -36,41 +34,29 @@ function formatReach(n: number): string {
 }
 ---
 
-<div class="jarvis-social-card card-base p-4 hover:shadow-sm transition-shadow">
-  <div class="flex items-center justify-between mb-3">
+<div class="p-3 border border-[var(--jv-border)] rounded-sm hover:border-[var(--jv-border-bright)] transition-all duration-300 hover:shadow-[0_0_16px_rgba(0,212,255,0.1)]">
+  <div class="flex items-center justify-between mb-2">
     <div class="flex items-center gap-2">
-      <div class:list={["w-8 h-8 rounded-lg bg-gradient-to-br flex items-center justify-center text-white text-micro font-bold", icon.bg]}>
+      <div class:list={["w-7 h-7 rounded-sm bg-gradient-to-br flex items-center justify-center text-white jv-display text-[9px] font-bold", icon.bg]}>
         {icon.label}
       </div>
-      <span class="text-small font-semibold">{channel.label}</span>
+      <span class="text-[13px] font-medium">{channel.label}</span>
     </div>
-    <span class="text-micro text-success font-medium">
-      ↑ {channel.delta.value}{channel.platform === "meta_ads" ? "x" : "%"}
-    </span>
+    <span class="jv-mono text-[10px] text-[var(--jv-success)]">▲ {channel.delta.value}{channel.platform === "meta_ads" ? "x" : "%"}</span>
   </div>
-  <div class="grid grid-cols-2 gap-3 mb-3">
+  <div class="grid grid-cols-2 gap-2 mb-2">
     <div>
-      <div class="label-micro">{channel.metricLabel}</div>
-      <div class="text-h3 font-mono mt-0.5">
+      <div class="jv-label text-[8px] opacity-60">{channel.metricLabel}</div>
+      <div class="jv-mono text-sm font-semibold text-[var(--jv-cyan)]">
         {channel.platform === "meta_ads" ? `${channel.engagement}x` : formatReach(channel.reach)}
       </div>
     </div>
     <div>
-      <div class="label-micro">{channel.secondaryLabel}</div>
-      <div class="text-h3 font-mono mt-0.5">{channel.secondaryValue}</div>
+      <div class="jv-label text-[8px] opacity-60">{channel.secondaryLabel}</div>
+      <div class="jv-mono text-sm font-semibold">{channel.secondaryValue}</div>
     </div>
   </div>
-  {channel.platform !== "meta_ads" && (
-    <div class="text-micro text-text-faint mb-2">Engagement {channel.engagement}%</div>
-  )}
-  <svg width="100%" height="32" viewBox="0 0 120 32" preserveAspectRatio="none" aria-hidden="true">
-    <path
-      d={sparklinePath(channel.trend, 120, 32)}
-      fill="none"
-      stroke="#1E6FFF"
-      stroke-width="1.5"
-      stroke-linecap="round"
-      opacity="0.7"
-    />
+  <svg width="100%" height="28" viewBox="0 0 120 28" preserveAspectRatio="none" aria-hidden="true">
+    <path d={sparklinePath(channel.trend, 120, 28)} fill="none" stroke="#00D4FF" stroke-width="1.5" stroke-linecap="round" opacity="0.8" />
   </svg>
 </div>

@@ -10,51 +10,32 @@ interface Props {
 const { task, compact = false } = Astro.props;
 
 const priorityDot = {
-  high: "bg-danger",
-  medium: "bg-warning",
-  low: "bg-text-faint",
+  high: "bg-[var(--jv-danger)] shadow-[0_0_6px_var(--jv-danger)]",
+  medium: "bg-[var(--jv-warning)]",
+  low: "bg-[var(--jv-text-dim)]",
 };
-
-const statusLabel = {
-  backlog: "Backlog",
-  pending: "Pendiente",
-  working: "Working",
-  review: "Review",
-  done: "Done",
-};
-
-function formatDeadline(iso: string): string {
-  const d = new Date(iso + "T12:00:00");
-  return d.toLocaleDateString("es-CO", { day: "numeric", month: "short" });
-}
 ---
 
-<div class:list={["jarvis-task-card card-base p-3", compact && "p-2.5"]}>
+<div class:list={["jv-task p-3", compact && "p-2.5"]}>
   <div class="flex items-start gap-2.5">
-    <span class:list={["w-1.5 h-1.5 rounded-full mt-2 shrink-0", priorityDot[task.priority]]} aria-label={`Prioridad ${task.priority}`} />
+    <span class:list={["w-1.5 h-1.5 rounded-full mt-2 shrink-0", priorityDot[task.priority]]} />
     <div class="flex-1 min-w-0">
       <div class="flex items-start justify-between gap-2">
-        <p class:list={["font-medium text-text leading-snug", compact ? "text-small" : "text-body"]}>
-          {task.title}
-        </p>
+        <p class:list={["font-medium text-[var(--jv-text)] leading-snug", compact ? "text-[13px]" : "text-sm"]}>{task.title}</p>
         <AgentAvatar agent={task.agent} />
       </div>
       {!compact && (
-        <div class="mt-1.5 flex flex-wrap items-center gap-2 text-micro text-text-faint">
-          <span class="px-1.5 py-0.5 rounded bg-bg-muted">{statusLabel[task.status]}</span>
+        <div class="mt-1.5 flex flex-wrap items-center gap-2 jv-mono text-[10px] text-[var(--jv-text-dim)]">
+          <span class="px-1.5 py-0.5 border border-[var(--jv-border)] rounded-sm text-[var(--jv-cyan)]">{task.status}</span>
           {task.client && <span>{task.client}</span>}
-          <span>· {formatDeadline(task.deadline)}</span>
         </div>
       )}
       {task.progress !== undefined && task.status === "working" && (
         <div class="mt-2">
-          <div class="h-1 bg-bg-muted rounded-full overflow-hidden">
-            <div
-              class="h-full bg-accent rounded-full transition-all"
-              style={`width: ${task.progress}%`}
-            />
+          <div class="jv-progress-bar">
+            <div class="jv-progress-fill" style={`width: ${task.progress}%`} />
           </div>
-          <span class="text-micro text-text-faint mt-0.5 block">{task.progress}%</span>
+          <span class="jv-mono text-[10px] text-[var(--jv-cyan)] mt-0.5 block">{task.progress}%</span>
         </div>
       )}
     </div>

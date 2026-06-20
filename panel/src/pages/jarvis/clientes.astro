@@ -1,0 +1,82 @@
+---
+import JarvisLayout from "../../layouts/JarvisLayout.astro";
+import JarvisMobileNav from "../../components/jarvis/JarvisMobileNav.astro";
+import HudPanel from "../../components/jarvis/HudPanel.astro";
+import MetricCard from "../../components/jarvis/MetricCard.astro";
+import SemaphoreBadge from "../../components/jarvis/SemaphoreBadge.astro";
+import AgentAvatar from "../../components/jarvis/AgentAvatar.astro";
+import { getJarvisData } from "../../lib/jarvis";
+import type { AgentId } from "../../lib/jarvis/types";
+
+const data = await getJarvisData();
+const totalMrr = data.clients.reduce((s, c) => s + c.mrr, 0);
+const activeClients = data.clients.filter((c) => c.mrr > 0).length;
+
+const kpis = [
+  { id: "c1", label: "Clientes activos", value: String(activeClients), caption: "con MRR" },
+  { id: "c2", label: "MRR total", value: `$${totalMrr.toLocaleString("en-US")}`, caption: "USD / mes" },
+  { id: "c3", label: "Pro+ tier", value: String(data.clients.filter((c) => c.tier !== "Eco").length), caption: "clientes" },
+  { id: "c4", label: "Health verde", value: String(data.clients.filter((c) => c.health === "green").length), caption: "sin riesgo" },
+];
+---
+
+<JarvisLayout title="Clientes">
+  <JarvisMobileNav />
+
+  <header class="mb-8" data-jv-animate="1">
+    <div class="jv-label mb-2">ATLAS · Delivery & Clientes</div>
+    <h1 class="jv-display text-2xl sm:text-3xl font-bold">Clientes</h1>
+    <p class="mt-2 jv-mono text-[12px] text-[var(--jv-text-muted)]">Portfolio activo · health score · agente lead</p>
+  </header>
+
+  <section class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+    {kpis.map((k, i) => <MetricCard metric={k} index={i} />)}
+  </section>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+    {data.clients.map((client, i) => (
+      <HudPanel animate={i + 2}>
+        <div class="flex items-start justify-between mb-4">
+          <div>
+            <h3 class="font-semibold text-[var(--jv-text)]">{client.name}</h3>
+            <p class="jv-mono text-[10px] text-[var(--jv-text-dim)] mt-0.5">{client.sector}</p>
+          </div>
+          <SemaphoreBadge status={client.health} size="sm" />
+        </div>
+        <div class="grid grid-cols-2 gap-3 mb-4">
+          <div>
+            <div class="jv-label text-[9px] opacity-60">Tier</div>
+            <div class="jv-display text-sm text-[var(--jv-cyan)]">{client.tier}</div>
+          </div>
+          <div>
+            <div class="jv-label text-[9px] opacity-60">MRR</div>
+            <div class="jv-mono text-sm">{client.mrr > 0 ? `$${client.mrr}` : "—"}</div>
+          </div>
+        </div>
+        <div class="flex items-center justify-between pt-3 border-t border-[var(--jv-border)]">
+          <div class="flex items-center gap-2">
+            <AgentAvatar agent={client.agentLead as AgentId} />
+            <span class="jv-mono text-[10px] text-[var(--jv-text-muted)]">{client.agentLead}</span>
+          </div>
+          <span class="jv-mono text-[10px] text-[var(--jv-text-dim)]">desde {client.since}</span>
+        </div>
+      </HudPanel>
+    ))}
+  </div>
+
+  <HudPanel class="mt-5" animate={5}>
+    <h2 class="jv-display text-sm font-semibold text-[var(--jv-cyan)] mb-4">Proyectos vinculados</h2>
+    <div class="space-y-3">
+      {data.projects.map((p) => (
+        <div class="flex items-center gap-4 p-3 border border-[var(--jv-border)] rounded-sm">
+          <div class="flex-1">
+            <div class="font-medium text-sm">{p.client}</div>
+            <div class="jv-mono text-[10px] text-[var(--jv-text-dim)]">{p.status} · {p.tier}</div>
+          </div>
+          <div class="w-24 jv-progress-bar"><div class="jv-progress-fill" style={`width:${p.progress}%`} /></div>
+          <span class="jv-mono text-[10px] w-8">{p.progress}%</span>
+        </div>
+      ))}
+    </div>
+  </HudPanel>
+</JarvisLayout>

@@ -1,5 +1,7 @@
 ---
 import JarvisLayout from "../../layouts/JarvisLayout.astro";
+import JarvisMobileNav from "../../components/jarvis/JarvisMobileNav.astro";
+import HudPanel from "../../components/jarvis/HudPanel.astro";
 import MetricCard from "../../components/jarvis/MetricCard.astro";
 import SemaphoreBadge from "../../components/jarvis/SemaphoreBadge.astro";
 import LineChart from "../../components/jarvis/LineChart.astro";
@@ -23,25 +25,27 @@ const financeKpis = [
 ---
 
 <JarvisLayout title="Finanzas">
-  <header class="mb-8">
-    <div class="label-micro mb-2">JARVIS · Finanzas</div>
+  <JarvisMobileNav />
+
+  <header class="mb-8" data-jv-animate="1">
+    <div class="jv-label mb-2">ORACLE · Finanzas</div>
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-      <h1 class="text-h1">Finanzas</h1>
+      <h1 class="jv-display text-2xl sm:text-3xl font-bold">Finanzas</h1>
       <SemaphoreBadge status={runRateStatus} label={`Run rate ${runRateStatus === "green" ? "en meta" : "bajo meta"}`} />
     </div>
-    <p class="mt-2 text-body text-text-muted max-w-2xl">
+    <p class="mt-2 jv-mono text-[12px] text-[var(--jv-text-muted)] max-w-2xl">
       Revenue, run rate hacia $100K USD 2026, cuentas por cobrar y margen por proyecto.
     </p>
   </header>
 
   <section class="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-8">
-    {financeKpis.map((kpi) => (
-      <MetricCard metric={kpi} />
+    {financeKpis.map((kpi, i) => (
+      <MetricCard metric={kpi} index={i} />
     ))}
   </section>
 
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-    <div class="card-base p-6">
+    <HudPanel animate={2}>
       <LineChart
         title="Revenue mensual · actual vs proyección (USD)"
         series={f.monthlyRevenue.map((m) => ({
@@ -50,104 +54,87 @@ const financeKpis = [
           projected: m.projected,
         }))}
       />
-      <div class="mt-4 p-4 rounded-card bg-bg-muted text-small">
-        <div class="flex justify-between">
-          <span class="text-text-muted">Acumulado YTD</span>
-          <span class="font-mono font-semibold">${f.revenueYtd.toLocaleString("en-US")}</span>
+      <div class="mt-4 p-4 rounded-sm border border-[var(--jv-border)] jv-mono text-[12px]">
+        <div class="flex justify-between text-[var(--jv-text-muted)]">
+          <span>Acumulado YTD</span>
+          <span class="text-[var(--jv-cyan)] font-semibold">${f.revenueYtd.toLocaleString("en-US")}</span>
         </div>
-        <div class="flex justify-between mt-2">
-          <span class="text-text-muted">Meta 2026</span>
-          <span class="font-mono font-semibold">${f.goal2026.toLocaleString("en-US")}</span>
+        <div class="flex justify-between mt-2 text-[var(--jv-text-muted)]">
+          <span>Meta 2026</span>
+          <span class="font-semibold">${f.goal2026.toLocaleString("en-US")}</span>
         </div>
-        <div class="mt-3 h-2 bg-border rounded-full overflow-hidden">
-          <div
-            class="h-full bg-gradient-to-r from-accent to-[#1E6FFF] rounded-full"
-            style={`width: ${Math.round((f.revenueYtd / f.goal2026) * 100)}%`}
-          />
+        <div class="mt-3 jv-progress-bar h-2">
+          <div class="jv-progress-fill" style={`width: ${Math.round((f.revenueYtd / f.goal2026) * 100)}%`} />
         </div>
       </div>
-    </div>
+    </HudPanel>
 
-    <div class="card-base p-6">
+    <HudPanel animate={3}>
       <DonutChart
         title="Ingresos por tier"
-        segments={f.revenueByTier.map((t) => ({
-          label: t.tier,
-          amount: t.amount,
-          color: t.color,
-        }))}
+        segments={f.revenueByTier.map((t) => ({ label: t.tier, amount: t.amount, color: t.color }))}
       />
-    </div>
+    </HudPanel>
   </div>
 
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-    <div class="card-base p-6">
-      <h2 class="text-h3 mb-4">Cuentas por cobrar</h2>
-      {f.accountsReceivable.length === 0 ? (
-        <p class="text-small text-text-muted">Sin cuentas pendientes.</p>
-      ) : (
-        <table class="w-full text-small">
-          <thead>
-            <tr class="text-left text-micro text-text-faint border-b border-border">
-              <th class="pb-2">Cliente</th>
-              <th class="pb-2">Monto</th>
-              <th class="pb-2">Días</th>
-            </tr>
-          </thead>
-          <tbody>
-            {f.accountsReceivable.map((ar) => (
-              <tr class="border-b border-border last:border-0">
-                <td class="py-3 font-medium">{ar.client}</td>
-                <td class="py-3 font-mono">${ar.amount.toLocaleString("en-US")}</td>
-                <td class="py-3">
-                  <span class:list={[ar.days > 30 ? "text-danger font-medium" : "text-text-muted"]}>
-                    {ar.days} días
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-    </div>
-
-    <div class="card-base p-6">
-      <h2 class="text-h3 mb-4">Margen por proyecto</h2>
-      <table class="w-full text-small">
+    <HudPanel animate={4}>
+      <h2 class="jv-display text-sm font-semibold text-[var(--jv-cyan)] mb-4">Cuentas por cobrar</h2>
+      <table class="jv-table w-full text-[13px]">
         <thead>
-          <tr class="text-left text-micro text-text-faint border-b border-border">
-            <th class="pb-2">Cliente</th>
-            <th class="pb-2">Revenue</th>
-            <th class="pb-2">Costo</th>
-            <th class="pb-2">Margen</th>
+          <tr class="border-b border-[var(--jv-border)]">
+            <th class="pb-2 text-left">Cliente</th>
+            <th class="pb-2 text-left">Monto</th>
+            <th class="pb-2 text-left">Días</th>
           </tr>
         </thead>
         <tbody>
-          {f.marginByProject.map((m) => (
-            <tr class="border-b border-border last:border-0">
-              <td class="py-3 font-medium">{m.client}</td>
-              <td class="py-3 font-mono">${m.revenue.toLocaleString("en-US")}</td>
-              <td class="py-3 font-mono text-text-muted">${m.cost.toLocaleString("en-US")}</td>
+          {f.accountsReceivable.map((ar) => (
+            <tr>
+              <td class="py-3 font-medium">{ar.client}</td>
+              <td class="py-3 jv-mono">${ar.amount.toLocaleString("en-US")}</td>
               <td class="py-3">
-                <span class:list={[m.margin >= 70 ? "text-success" : m.margin >= 60 ? "text-warning" : "text-danger", "font-mono font-semibold"]}>
-                  {m.margin}%
-                </span>
+                <span class:list={[ar.days > 30 ? "text-[var(--jv-danger)]" : "text-[var(--jv-text-muted)]", "jv-mono"]}>{ar.days} días</span>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
-    </div>
+    </HudPanel>
+
+    <HudPanel animate={5}>
+      <h2 class="jv-display text-sm font-semibold text-[var(--jv-cyan)] mb-4">Margen por proyecto</h2>
+      <table class="jv-table w-full text-[13px]">
+        <thead>
+          <tr class="border-b border-[var(--jv-border)]">
+            <th class="pb-2 text-left">Cliente</th>
+            <th class="pb-2 text-left">Revenue</th>
+            <th class="pb-2 text-left">Costo</th>
+            <th class="pb-2 text-left">Margen</th>
+          </tr>
+        </thead>
+        <tbody>
+          {f.marginByProject.map((m) => (
+            <tr>
+              <td class="py-3 font-medium">{m.client}</td>
+              <td class="py-3 jv-mono">${m.revenue.toLocaleString("en-US")}</td>
+              <td class="py-3 jv-mono text-[var(--jv-text-muted)]">${m.cost.toLocaleString("en-US")}</td>
+              <td class="py-3">
+                <span class:list={[m.margin >= 70 ? "text-[var(--jv-success)]" : m.margin >= 60 ? "text-[var(--jv-warning)]" : "text-[var(--jv-danger)]", "jv-mono font-semibold"]}>{m.margin}%</span>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </HudPanel>
   </div>
 
   {data.alerts.filter((a) => a.message.includes("cobrar")).length > 0 && (
-    <section class="mt-6">
-      <h2 class="text-h3 mb-3">Alertas financieras</h2>
+    <HudPanel class="mt-6">
+      <h2 class="jv-display text-sm font-semibold text-[var(--jv-cyan)] mb-3">Alertas financieras</h2>
       <div class="space-y-2">
-        {data.alerts.filter((a) => a.message.includes("cobrar")).map((a) => (
-          <AlertItem alert={a} />
-        ))}
+        {data.alerts.filter((a) => a.message.includes("cobrar")).map((a) => <AlertItem alert={a} />)}
       </div>
-    </section>
+    </HudPanel>
   )}
 </JarvisLayout>

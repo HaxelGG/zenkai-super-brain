@@ -1,0 +1,93 @@
+---
+import JarvisLayout from "../../layouts/JarvisLayout.astro";
+import JarvisMobileNav from "../../components/jarvis/JarvisMobileNav.astro";
+import HudPanel from "../../components/jarvis/HudPanel.astro";
+import MetricCard from "../../components/jarvis/MetricCard.astro";
+import AgentAvatar from "../../components/jarvis/AgentAvatar.astro";
+import { getJarvisData } from "../../lib/jarvis";
+import type { AgentId } from "../../lib/jarvis/types";
+
+const data = await getJarvisData();
+const totalPipeline = data.pipelineFunnel.reduce((s, f) => s + f.valueUsd, 0);
+
+const stageColors: Record<string, string> = {
+  nuevo: "#6B8CAE",
+  cualificado: "#1E6FFF",
+  propuesta: "#00D4FF",
+  negociación: "#FFB800",
+  cerrado: "#00FFAA",
+};
+
+const kpis = [
+  { id: "p1", label: "Pipeline total", value: `$${(totalPipeline / 1000).toFixed(0)}K`, caption: "USD ponderado" },
+  { id: "p2", label: "Leads activos", value: String(data.pipelineLeads.length), caption: "en CRM" },
+  { id: "p3", label: "En negociación", value: String(data.pipelineLeads.filter((l) => l.stage === "negociación").length), caption: "cierre próximo" },
+  { id: "p4", label: "Score promedio", value: "6.5", caption: "de 10", delta: { value: 0.8, label: "vs mes ant.", direction: "up" as const } },
+];
+---
+
+<JarvisLayout title="Pipeline CRM">
+  <JarvisMobileNav />
+
+  <header class="mb-8" data-jv-animate="1">
+    <div class="jv-label mb-2">HERMES · Ventas & CRM</div>
+    <h1 class="jv-display text-2xl sm:text-3xl font-bold">Pipeline</h1>
+    <p class="mt-2 jv-mono text-[12px] text-[var(--jv-text-muted)]">Leads · propuestas · negociaciones · cierres</p>
+  </header>
+
+  <section class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+    {kpis.map((k, i) => <MetricCard metric={k} index={i} />)}
+  </section>
+
+  <HudPanel class="mb-5" animate={2}>
+    <h2 class="jv-display text-sm font-semibold text-[var(--jv-cyan)] mb-5">Embudo de ventas</h2>
+    <div class="flex flex-col sm:flex-row gap-2 sm:gap-0 sm:items-stretch">
+      {data.pipelineFunnel.map((stage, i) => (
+        <div class="jv-funnel-stage flex-1 p-4 text-center" data-jv-animate={String(i + 3)}>
+          <div class="jv-label text-[9px] opacity-70 mb-1">{stage.stage}</div>
+          <div class="jv-display text-xl font-bold text-[var(--jv-cyan)]" data-count-up={String(stage.count)}>{stage.count}</div>
+          <div class="jv-mono text-[10px] text-[var(--jv-text-dim)] mt-1">${(stage.valueUsd / 1000).toFixed(0)}K</div>
+        </div>
+      ))}
+    </div>
+  </HudPanel>
+
+  <HudPanel animate={4}>
+    <h2 class="jv-display text-sm font-semibold text-[var(--jv-cyan)] mb-4">Leads activos</h2>
+    <div class="overflow-x-auto">
+      <table class="jv-table w-full text-[13px]">
+        <thead>
+          <tr class="border-b border-[var(--jv-border)]">
+            <th class="pb-2 text-left">Lead</th>
+            <th class="pb-2 text-left">Sector</th>
+            <th class="pb-2 text-left">Etapa</th>
+            <th class="pb-2 text-left">Score</th>
+            <th class="pb-2 text-left">Valor</th>
+            <th class="pb-2">Owner</th>
+          </tr>
+        </thead>
+        <tbody>
+          {data.pipelineLeads.map((lead) => (
+            <tr>
+              <td class="py-3">
+                <div class="font-medium">{lead.name}</div>
+                <div class="jv-mono text-[10px] text-[var(--jv-text-dim)]">{lead.company}</div>
+              </td>
+              <td class="py-3 text-[var(--jv-text-muted)]">{lead.sector}</td>
+              <td class="py-3">
+                <span class="jv-mono text-[10px] px-2 py-0.5 rounded-sm border" style={`border-color:${stageColors[lead.stage] ?? "#00D4FF"};color:${stageColors[lead.stage] ?? "#00D4FF"}`}>
+                  {lead.stage}
+                </span>
+              </td>
+              <td class="py-3">
+                <span class:list={[lead.score >= 7 ? "text-[var(--jv-success)]" : lead.score >= 5 ? "text-[var(--jv-warning)]" : "text-[var(--jv-text-dim)]", "jv-mono font-bold"]}>{lead.score}/10</span>
+              </td>
+              <td class="py-3 jv-mono">${lead.valueUsd.toLocaleString("en-US")}</td>
+              <td class="py-3"><AgentAvatar agent={lead.owner as AgentId} /></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </HudPanel>
+</JarvisLayout>

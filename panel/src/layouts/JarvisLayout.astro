@@ -1,5 +1,6 @@
 ---
 import "../styles/global.css";
+import "../styles/jarvis.css";
 import JarvisSidebar from "../components/jarvis/JarvisSidebar.astro";
 import { JARVIS_URL } from "../lib/jarvis/config";
 
@@ -13,41 +14,75 @@ const canonical = new URL(Astro.url.pathname, JARVIS_URL).href;
 ---
 
 <!doctype html>
-<html lang="es">
+<html lang="es" class="jarvis-app">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
     <meta name="robots" content="noindex, nofollow" />
+    <meta name="theme-color" content="#030810" />
     <link rel="canonical" href={canonical} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{title} · JARVIS · ZENKAI</title>
   </head>
-  <body class="bg-bg text-text">
-    <div class="flex min-h-screen">
+  <body>
+    <div class="jarvis-scanline" aria-hidden="true"></div>
+    <div class="jarvis-shell flex min-h-screen">
       <JarvisSidebar />
       <div class="flex-1 flex flex-col min-w-0">
-        <header class="sticky top-0 z-40 bg-bg/95 backdrop-blur border-b border-border px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
-          <div class="lg:hidden flex items-center gap-2">
-            <div class="w-7 h-7 rounded-md bg-gradient-to-br from-accent to-[#1E6FFF] flex items-center justify-center text-white text-[10px] font-bold">J</div>
-            <span class="text-small font-semibold">JARVIS</span>
+        <header class="jarvis-header sticky top-0 z-40 px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between border-b">
+          <div class="lg:hidden flex items-center gap-2.5">
+            <div class="arc-reactor" aria-hidden="true"></div>
+            <span class="jv-display text-sm font-semibold text-[var(--jv-cyan)]">JARVIS</span>
           </div>
-          <div class="hidden lg:block text-micro text-text-faint uppercase tracking-wider">
-            ZENKAI Growth Systems · Ops Center
+          <div class="hidden lg:flex items-center gap-3">
+            <span class="jarvis-status-dot" aria-hidden="true"></span>
+            <span class="jv-label">Sistemas operativos</span>
+            <span class="jv-mono text-[10px] text-[var(--jv-text-dim)]">·</span>
+            <span class="jv-mono text-[10px] text-[var(--jv-text-muted)]" id="jv-live-clock">--:--:--</span>
           </div>
           <div class="flex items-center gap-3">
-            <span class="hidden sm:inline text-micro text-text-faint font-mono">{new Date().toLocaleDateString("es-CO", { weekday: "short", day: "numeric", month: "short" })}</span>
-            <div class="w-8 h-8 rounded-full bg-accent-soft text-accent flex items-center justify-center text-micro font-semibold">JG</div>
+            <span class="hidden sm:inline jv-mono text-[10px] text-[var(--jv-text-muted)]">
+              {new Date().toLocaleDateString("es-CO", { weekday: "short", day: "numeric", month: "short", year: "numeric" })}
+            </span>
+            <div class="w-8 h-8 rounded-full border border-[var(--jv-border-bright)] bg-[rgba(0,212,255,0.1)] text-[var(--jv-cyan)] flex items-center justify-center text-[10px] font-bold jv-display">JG</div>
           </div>
         </header>
         <main class="flex-1 px-4 sm:px-6 lg:px-8 py-6 sm:py-8 overflow-x-hidden">
           <slot />
         </main>
-        <footer class="border-t border-border px-4 sm:px-6 lg:px-8 py-4 text-micro text-text-faint flex flex-col sm:flex-row justify-between gap-1">
-          <span>JARVIS · ZENKAI Growth Systems</span>
-          <a href={JARVIS_URL} class="font-mono text-text-faint hover:text-text no-underline">{JARVIS_URL.replace("https://", "")}</a>
+        <footer class="border-t border-[var(--jv-border)] px-4 sm:px-6 lg:px-8 py-3 flex flex-col sm:flex-row justify-between gap-1 text-[10px] text-[var(--jv-text-dim)] jv-mono">
+          <span class="jv-label opacity-60">JARVIS v2 · ZENKAI Growth Systems</span>
+          <a href={JARVIS_URL} class="hover:text-[var(--jv-cyan)] no-underline transition-colors">{JARVIS_URL.replace("https://", "")}</a>
         </footer>
       </div>
     </div>
+    <script>
+      function tick() {
+        const el = document.getElementById("jv-live-clock");
+        if (el) el.textContent = new Date().toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+      }
+      tick();
+      setInterval(tick, 1000);
+
+      document.querySelectorAll("[data-count-up]").forEach((el) => {
+        const target = el.getAttribute("data-count-up");
+        if (!target) return;
+        const num = parseFloat(target.replace(/[^0-9.]/g, ""));
+        if (isNaN(num)) return;
+        const prefix = target.match(/^[^\d]*/)?.[0] ?? "";
+        const suffix = target.match(/[^\d.]*$/)?.[0] ?? "";
+        const duration = 1200;
+        const start = performance.now();
+        const step = (now: number) => {
+          const p = Math.min((now - start) / duration, 1);
+          const eased = 1 - Math.pow(1 - p, 3);
+          const val = num * eased;
+          el.textContent = prefix + (Number.isInteger(num) ? Math.round(val).toLocaleString("es-CO") : val.toFixed(1)) + suffix;
+          if (p < 1) requestAnimationFrame(step);
+        };
+        requestAnimationFrame(step);
+      });
+    </script>
   </body>
 </html>

@@ -1,0 +1,64 @@
+---
+import JarvisLayout from "../../layouts/JarvisLayout.astro";
+import JarvisMobileNav from "../../components/jarvis/JarvisMobileNav.astro";
+import HudPanel from "../../components/jarvis/HudPanel.astro";
+import AgentStatusGrid from "../../components/jarvis/AgentStatusGrid.astro";
+import { getJarvisData } from "../../lib/jarvis";
+
+const data = await getJarvisData();
+const active = data.agentStatuses.filter((a) => a.state === "active").length;
+const totalOps = data.agentStatuses.reduce((s, a) => s + a.opsToday, 0);
+---
+
+<JarvisLayout title="Agentes IA">
+  <JarvisMobileNav />
+
+  <header class="mb-8" data-jv-animate="1">
+    <div class="jv-label mb-2">Neural Network · 12 Master Agents</div>
+    <h1 class="jv-display text-2xl sm:text-3xl font-bold">Agentes IA</h1>
+    <p class="mt-2 jv-mono text-[12px] text-[var(--jv-text-muted)]">
+      {active} activos · {totalOps.toLocaleString("es-CO")} operaciones hoy · Haiku volumen · Sonnet ejecución · Opus estrategia
+    </p>
+  </header>
+
+  <section class="grid grid-cols-3 gap-3 mb-6" data-jv-animate="2">
+    <HudPanel padding="sm" class="text-center">
+      <div class="jv-metric-value text-xl" data-count-up="12">12</div>
+      <div class="jv-label mt-1 opacity-70">Master</div>
+    </HudPanel>
+    <HudPanel padding="sm" class="text-center">
+      <div class="jv-metric-value text-xl text-[var(--jv-success)]" data-count-up={String(active)}>{active}</div>
+      <div class="jv-label mt-1 opacity-70">Activos</div>
+    </HudPanel>
+    <HudPanel padding="sm" class="text-center">
+      <div class="jv-metric-value text-xl" data-count-up={String(totalOps)}>{totalOps}</div>
+      <div class="jv-label mt-1 opacity-70">Ops hoy</div>
+    </HudPanel>
+  </section>
+
+  <HudPanel animate={3}>
+    <h2 class="jv-display text-sm font-semibold text-[var(--jv-cyan)] mb-5">Estado en tiempo real</h2>
+    <AgentStatusGrid statuses={data.agentStatuses} />
+  </HudPanel>
+
+  <HudPanel class="mt-5" animate={4}>
+    <h2 class="jv-display text-sm font-semibold text-[var(--jv-cyan)] mb-4">Stack de modelos</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div class="p-4 border border-[var(--jv-border)] rounded-sm">
+        <div class="jv-label text-[var(--jv-cyan)] mb-2">Haiku 4.5</div>
+        <p class="text-[13px] text-[var(--jv-text-muted)]">Volumen · clasificación · extracción · &gt;500 ops/día</p>
+        <div class="jv-mono text-[10px] text-[var(--jv-success)] mt-2">ECHO · activo</div>
+      </div>
+      <div class="p-4 border border-[var(--jv-border)] rounded-sm">
+        <div class="jv-label text-[var(--jv-blue)] mb-2">Sonnet 4.6</div>
+        <p class="text-[13px] text-[var(--jv-text-muted)]">Ejecución · 90% de tareas · todos los agentes Master</p>
+        <div class="jv-mono text-[10px] text-[var(--jv-success)] mt-2">10 agentes · activos</div>
+      </div>
+      <div class="p-4 border border-[var(--jv-gold)] rounded-sm border-opacity-50">
+        <div class="jv-label text-[var(--jv-gold)] mb-2">Opus 4.7</div>
+        <p class="text-[13px] text-[var(--jv-text-muted)]">Razonamiento · ZEUS · decisiones N3-N4</p>
+        <div class="jv-mono text-[10px] text-[var(--jv-warning)] mt-2">ZEUS · idle</div>
+      </div>
+    </div>
+  </HudPanel>
+</JarvisLayout>

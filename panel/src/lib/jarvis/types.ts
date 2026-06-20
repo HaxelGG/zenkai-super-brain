@@ -142,6 +142,70 @@ export type ContentCalendarItem = {
   status: "scheduled" | "draft" | "published";
 };
 
+export type AgentStatus = {
+  id: AgentId;
+  state: "active" | "idle" | "offline";
+  currentTask?: string;
+  load: number;
+  model: string;
+  opsToday: number;
+};
+
+export type ActivityEvent = {
+  id: string;
+  time: string;
+  agent: AgentId;
+  type: "task" | "lead" | "alert" | "deploy" | "social";
+  message: string;
+};
+
+export type PipelineLead = {
+  id: string;
+  name: string;
+  company: string;
+  sector: string;
+  stage: "nuevo" | "cualificado" | "propuesta" | "negociación" | "cerrado";
+  score: number;
+  valueUsd: number;
+  owner: AgentId;
+  lastContact: string;
+};
+
+export type PipelineFunnelStage = {
+  stage: string;
+  count: number;
+  valueUsd: number;
+};
+
+export type SystemConnection = {
+  id: string;
+  name: string;
+  status: "online" | "degraded" | "offline" | "pending";
+  latencyMs?: number;
+  uptime: number;
+  phase: number;
+};
+
+export type ClientOverview = {
+  id: string;
+  name: string;
+  tier: "Eco" | "Pro" | "Premium";
+  sector: string;
+  mrr: number;
+  health: Semaphore;
+  agentLead: AgentId;
+  since: string;
+};
+
+export type AiUsage = {
+  tokensToday: number;
+  tokensMonth: number;
+  costTodayUsd: number;
+  costMonthUsd: number;
+  callsToday: number;
+  modelSplit: { model: string; pct: number; color: string }[];
+};
+
 export type JarvisData = {
   agencySemaphore: Semaphore;
   greeting: string;
@@ -159,4 +223,11 @@ export type JarvisData = {
   okrs: Okr[];
   contentCalendar: ContentCalendarItem[];
   agents: Agent[];
+  agentStatuses: AgentStatus[];
+  activityFeed: ActivityEvent[];
+  pipelineLeads: PipelineLead[];
+  pipelineFunnel: PipelineFunnelStage[];
+  systemConnections: SystemConnection[];
+  clients: ClientOverview[];
+  aiUsage: AiUsage;
 };

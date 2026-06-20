@@ -28,10 +28,14 @@ npm run preview # sirve dist/ localmente
 
 Rutas internas (local y producción):
 
-- `/jarvis` — Command Center
-- `/jarvis/finanzas` — Finanzas
+- `/jarvis` — Command Center (HUD · estilo Iron Man)
+- `/jarvis/agentes` — 12 agentes IA · estado en tiempo real
+- `/jarvis/pipeline` — CRM · embudo de ventas
+- `/jarvis/clientes` — Portfolio · health score
+- `/jarvis/finanzas` — Revenue · run rate · márgenes
 - `/jarvis/social` — Social & engagement
-- `/jarvis/tareas` — Task board
+- `/jarvis/tareas` — Kanban task board
+- `/jarvis/sistemas` — Conexiones API · AI usage
 - `/jarvis/goals` — Metas & OKRs 2026
 
 Datos: mock tipado en `src/lib/jarvis/mock-data.ts` · merge opcional con Airtable CRM si `AIRTABLE_TOKEN` está configurado en build.
