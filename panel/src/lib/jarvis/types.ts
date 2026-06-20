@@ -213,6 +213,7 @@ export type JarvisMeta = {
   liveRecords?: {
     leads: number;
     clients: number;
+    deals?: number;
   };
   financeConnected?: boolean;
   socialConnected?: boolean;
