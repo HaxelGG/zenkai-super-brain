@@ -8,7 +8,9 @@
     "clasificar": "tsx scripts/anthropic/clasificar.ts",
     "test:clasificar": "tsx scripts/anthropic/test-clasificar.ts",
     "protocolo": "tsx scripts/anthropic/protocolo.ts",
-    "test:protocolo": "tsx scripts/anthropic/test-protocolo.ts"
+    "test:protocolo": "tsx scripts/anthropic/test-protocolo.ts",
+    "n8n:checklist": "powershell -ExecutionPolicy Bypass -File scripts/n8n/import-checklist.ps1",
+    "jarvis:setup-sprint1": "tsx scripts/airtable/setup-sprint1-schema.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.92.0",

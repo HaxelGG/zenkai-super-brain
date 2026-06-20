@@ -1,0 +1,212 @@
+{
+  "name": "ZENKAI-S-01-sla-form-3h",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "hours", "hoursInterval": 1 }]
+        }
+      },
+      "id": "d1b2c3d4-e5f6-7890-abcd-ef1234560301",
+      "name": "Cron Cada Hora",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $env.AIRTABLE_BASE_VENTAS }}"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "name",
+          "value": "demos"
+        },
+        "filterByFormula": "AND({respondido_at}=BLANK(), OR({sla_alert_sent}=FALSE(), {sla_alert_sent}=BLANK()), IS_BEFORE({created_at}, DATEADD(NOW(), -3, 'hours')))",
+        "options": {}
+      },
+      "id": "d1b2c3d4-e5f6-7890-abcd-ef1234560302",
+      "name": "Demos SLA vencido",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [480, 200],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "CONFIGURE_AIRTABLE",
+          "name": "Airtable PAT ZENKAI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $env.AIRTABLE_BASE_VENTAS }}"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "name",
+          "value": "leads"
+        },
+        "filterByFormula": "AND({respondido_at}=BLANK(), OR({sla_alert_sent}=FALSE(), {sla_alert_sent}=BLANK()), IS_BEFORE({created_at}, DATEADD(NOW(), -3, 'hours')))",
+        "options": {}
+      },
+      "id": "d1b2c3d4-e5f6-7890-abcd-ef1234560303",
+      "name": "Leads SLA vencido",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [480, 420],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "CONFIGURE_AIRTABLE",
+          "name": "Airtable PAT ZENKAI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const demos = $('Demos SLA vencido').all().map(i => ({ ...i.json, _table: 'demos' }));\nconst leads = $('Leads SLA vencido').all().map(i => ({ ...i.json, _table: 'leads' }));\nconst all = [...demos, ...leads];\nif (!all.length) return [{ json: { empty: true } }];\nreturn all.map(r => ({ json: r }));"
+      },
+      "id": "d1b2c3d4-e5f6-7890-abcd-ef1234560304",
+      "name": "Merge Records",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [720, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "has-records",
+              "leftValue": "={{ $json.empty }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "d1b2c3d4-e5f6-7890-abcd-ef1234560305",
+      "name": "Hay pendientes",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [940, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.SLACK_WEBHOOK_URL }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { text: `⚠️ SLA formulario >3h\\nTabla: ${$json._table}\\nRecord: ${$json.id}\\nRevisar y marcar respondido_at en Airtable.` } }}",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "d1b2c3d4-e5f6-7890-abcd-ef1234560306",
+      "name": "Slack SLA Alert",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1180, 220]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $env.AIRTABLE_BASE_VENTAS }}"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "name",
+          "value": "={{ $json._table }}"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "sla_alert_sent": true
+          }
+        },
+        "options": {},
+        "id": "={{ $json.id }}"
+      },
+      "id": "d1b2c3d4-e5f6-7890-abcd-ef1234560307",
+      "name": "Marcar sla_alert_sent",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [1400, 220],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "CONFIGURE_AIRTABLE",
+          "name": "Airtable PAT ZENKAI"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "d1b2c3d4-e5f6-7890-abcd-ef1234560308",
+      "name": "No-op OK",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [1180, 420]
+    }
+  ],
+  "connections": {
+    "Cron Cada Hora": {
+      "main": [
+        [
+          { "node": "Demos SLA vencido", "type": "main", "index": 0 },
+          { "node": "Leads SLA vencido", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Demos SLA vencido": {
+      "main": [[{ "node": "Merge Records", "type": "main", "index": 0 }]]
+    },
+    "Leads SLA vencido": {
+      "main": [[{ "node": "Merge Records", "type": "main", "index": 0 }]]
+    },
+    "Merge Records": {
+      "main": [[{ "node": "Hay pendientes", "type": "main", "index": 0 }]]
+    },
+    "Hay pendientes": {
+      "main": [
+        [{ "node": "Slack SLA Alert", "type": "main", "index": 0 }],
+        [{ "node": "No-op OK", "type": "main", "index": 0 }]
+      ]
+    },
+    "Slack SLA Alert": {
+      "main": [[{ "node": "Marcar sla_alert_sent", "type": "main", "index": 0 }]]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [{ "name": "zenkai-sprint1" }, { "name": "S-01" }],
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}
