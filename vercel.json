@@ -12,8 +12,23 @@
     },
     "api/jarvis/speak.ts": {
       "maxDuration": 30
+    },
+    "api/agency/cron/tick.ts": {
+      "maxDuration": 120
+    },
+    "api/agency/director.ts": {
+      "maxDuration": 90
+    },
+    "api/agency/marketing/content.ts": {
+      "maxDuration": 90
     }
   },
+  "crons": [
+    {
+      "path": "/api/agency/cron/tick",
+      "schedule": "0 13,19,1 * * *"
+    }
+  ],
   "redirects": [
     {
       "source": "/jarvis",

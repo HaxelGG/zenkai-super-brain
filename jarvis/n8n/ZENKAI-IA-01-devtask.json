@@ -1,0 +1,32 @@
+{
+  "name": "ZENKAI-IA-01-devtask",
+  "nodes": [
+    {
+      "parameters": { "httpMethod": "POST", "path": "agency-devtask", "responseMode": "responseNode" },
+      "id": "wh-dev",
+      "name": "Webhook agency.ia.devtask",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "webhookId": "agency-devtask"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { ok: true, queued: true, agent: 'FORGE' } }}"
+      },
+      "id": "respond",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [460, 300]
+    }
+  ],
+  "connections": {
+    "Webhook agency.ia.devtask": {
+      "main": [[{ "node": "Respond", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": { "executionOrder": "v1" },
+  "tags": [{ "name": "jarvis" }, { "name": "ia" }, { "name": "sprint2" }]
+}

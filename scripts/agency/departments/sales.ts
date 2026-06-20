@@ -1,7 +1,7 @@
 /**
  * HERMES · ventas · cualificación y follow-up
  */
-import { dispatchJarvisEvent } from "../../jarvis/n8n-dispatch.js";
+import { dispatchAgencyEvent, dispatchToN8nResult } from "../dispatch.js";
 import { fetchJarvisOps, formatJarvisOpsContext } from "../../jarvis/ops-context.js";
 import { callAgencyLlm } from "../llm.js";
 import { getAgent } from "../registry.js";
@@ -25,7 +25,7 @@ Usá números del contexto cuando existan. Si hay lead hot, recomendá follow-up
 
   if (!llm.ok) throw new Error(llm.error);
 
-  const d = await dispatchJarvisEvent("agency.sales.followup", { instruction, reply: llm.text });
+  const d = await dispatchAgencyEvent("agency.sales.followup", { instruction, reply: llm.text });
   const task = await createOpsTask({
     title: `Follow-up ventas: ${instruction.slice(0, 60)}`,
     agent: "HERMES",
@@ -44,7 +44,7 @@ Usá números del contexto cuando existan. Si hay lead hot, recomendá follow-up
     model: llm.model,
     timestamp: new Date().toISOString(),
     tasks: [task],
-    dispatch: { event: "agency.sales.followup", ok: d.ok, error: d.ok ? undefined : d.error },
+    dispatch: dispatchToN8nResult(d),
     meta: { contextLive: ops.live },
   };
 }
