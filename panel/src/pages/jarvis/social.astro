@@ -16,10 +16,10 @@ const platformLabels = {
 };
 
 const socialKpis = [
-  { id: "reach-total", label: "Alcance total 7d", value: "22.4K", caption: "3 canales orgánicos", delta: { value: 11, label: "vs sem. ant.", direction: "up" as const } },
-  { id: "eng-avg", label: "Engagement promedio", value: "4.4%", caption: "orgánico ponderado", delta: { value: 0.4, label: "pp", direction: "up" as const } },
-  { id: "roas", label: "ROAS Meta Ads", value: "3.2x", caption: "últimos 30 días", delta: { value: 0.4, label: "vs mes ant.", direction: "up" as const } },
-  { id: "cac", label: "CAC estimado", value: "$98", caption: "Meta + orgánico", delta: { value: 8, label: "vs mes ant.", direction: "down" as const } },
+  { id: "reach-total", label: "Alcance total 7d", value: "22.4K", caption: "3 canales orgánicos", delta: { value: 11, label: "vs sem. ant.", direction: "up" as const }, liveAttr: "ig-reach" },
+  { id: "eng-avg", label: "Engagement promedio", value: "4.4%", caption: "orgánico ponderado", delta: { value: 0.4, label: "pp", direction: "up" as const }, liveAttr: "ig-engagement" },
+  { id: "roas", label: "ROAS Meta Ads", value: "3.2x", caption: "últimos 30 días", delta: { value: 0.4, label: "vs mes ant.", direction: "up" as const }, liveAttr: "roas" },
+  { id: "cac", label: "Spend Meta 7d", value: "$98", caption: "Meta Ads", delta: { value: 8, label: "vs mes ant.", direction: "down" as const }, liveAttr: "spend" },
 ];
 
 const calendarStatusStyle = {
@@ -30,6 +30,7 @@ const calendarStatusStyle = {
 ---
 
 <JarvisLayout title="Social Media" dataSource={data.meta?.dataSource ?? "mock"} liveRecords={data.meta?.liveRecords}>
+  <div data-jv-social-root hidden aria-hidden="true"></div>
   <JarvisMobileNav />
 
   <header class="mb-8" data-jv-animate="1">
@@ -41,7 +42,7 @@ const calendarStatusStyle = {
   </header>
 
   <section class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8">
-    {socialKpis.map((kpi, i) => <MetricCard metric={kpi} index={i} />)}
+    {socialKpis.map((kpi, i) => <MetricCard metric={kpi} index={i} socialData={kpi.liveAttr} />)}
   </section>
 
   <section class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 mb-8">
