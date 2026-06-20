@@ -30,13 +30,25 @@
 
       <div class="flex flex-wrap gap-2 mb-4">
         <label class="jv-voice-toggle">
-          <input type="checkbox" id="jv-wake-toggle" checked />
+          <input type="checkbox" id="jv-wake-toggle" />
           <span>Wake word activo</span>
         </label>
         <label class="jv-voice-toggle">
           <input type="checkbox" id="jv-tts-eleven" checked />
           <span>Voz ElevenLabs</span>
         </label>
+      </div>
+
+      <div class="mb-4 flex gap-2">
+        <input
+          id="jv-text-cmd"
+          type="text"
+          class="jv-voice-input flex-1 min-w-0"
+          placeholder="Escribí un comando…"
+          autocomplete="off"
+          enterkeyhint="send"
+        />
+        <button type="button" id="jv-text-send" class="jv-voice-send-btn shrink-0">Enviar</button>
       </div>
 
       <div class="flex-1 min-h-0 flex flex-col gap-3">
@@ -52,7 +64,7 @@
 
       <footer class="mt-4 pt-3 border-t border-[var(--jv-border)]">
         <p class="jv-mono text-[10px] text-[var(--jv-text-dim)]">
-          Di «Jarvis despierta» · «Jarvis wake up» · o doble clic en el orb para hablar directo.
+          Di «Jarvis despierta» · doble clic en el orb para hablar · botón ⋯ para este panel.
         </p>
       </footer>
     </div>
@@ -89,6 +101,24 @@
   closeBtn?.addEventListener("click", closeConsole);
   backdrop?.addEventListener("click", closeConsole);
 
+  function bindLongPressOpen(el) {
+    if (!el) return;
+    let pressTimer;
+    el.addEventListener("touchstart", () => {
+      pressTimer = setTimeout(() => openConsole(), 650);
+    }, { passive: true });
+    el.addEventListener("touchend", () => clearTimeout(pressTimer));
+    el.addEventListener("touchmove", () => clearTimeout(pressTimer));
+  }
+
+  document.getElementById("jv-voice-settings")?.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    openConsole();
+  });
+
+  bindLongPressOpen(document.getElementById("jv-voice-btn"));
+
   document.getElementById("jv-voice-btn")?.addEventListener("contextmenu", (e) => {
     e.preventDefault();
     openConsole();
@@ -115,6 +145,23 @@
       }
     });
   }
+
+  const textCmd = document.getElementById("jv-text-cmd");
+  const textSend = document.getElementById("jv-text-send");
+  function sendTextCommand() {
+    if (!(textCmd instanceof HTMLInputElement)) return;
+    const text = textCmd.value.trim();
+    if (!text) return;
+    textCmd.value = "";
+    window.JarvisVoice?.submitTextCommand?.(text);
+  }
+  textSend?.addEventListener("click", sendTextCommand);
+  textCmd?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      sendTextCommand();
+    }
+  });
 
   if (elevenToggle instanceof HTMLInputElement) {
     try { elevenToggle.checked = localStorage.getItem(ELEVEN_KEY) !== "0"; } catch { /* ignore */ }

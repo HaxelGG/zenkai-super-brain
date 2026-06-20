@@ -1,0 +1,48 @@
+{
+  "name": "zenkai-jarvis-desktop",
+  "version": "1.0.0",
+  "private": true,
+  "description": "JARVIS Command Center · app de escritorio ZENKAI",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "start:local": "cross-env JARVIS_URL=http://localhost:4321/jarvis/ electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder",
+    "dist:win": "electron-builder --win"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "electron": "^34.0.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "systems.zenkai.jarvis",
+    "productName": "JARVIS",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "assets/**"
+    ],
+    "win": {
+      "target": ["nsis"],
+      "icon": "assets/jarvis-icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "shortcutName": "JARVIS"
+    },
+    "mac": {
+      "category": "public.app-category.business",
+      "icon": "assets/jarvis-icon.icns"
+    },
+    "linux": {
+      "target": ["AppImage"],
+      "icon": "assets/jarvis-icon.png"
+    }
+  }
+}

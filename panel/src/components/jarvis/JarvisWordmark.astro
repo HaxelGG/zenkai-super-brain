@@ -1,0 +1,39 @@
+---
+interface Props {
+  size?: "sm" | "md" | "lg";
+  showSubtitle?: boolean;
+  href?: string;
+  subtitle?: string;
+}
+
+const {
+  size = "md",
+  showSubtitle = true,
+  href,
+  subtitle = "ZENKAI · Intelligent System",
+} = Astro.props;
+
+const Tag = href ? "a" : "div";
+---
+
+<Tag
+  href={href}
+  class:list={[
+    "jv-wordmark",
+    `jv-wordmark--${size}`,
+    href && "jv-wordmark--link no-underline",
+  ]}
+>
+  <div
+    class:list={[
+      "arc-reactor shrink-0",
+      size === "lg" && "arc-reactor-lg",
+      size === "sm" && "arc-reactor-sm",
+    ]}
+    aria-hidden="true"
+  ></div>
+  <div class="jv-wordmark-copy min-w-0">
+    <span class="jv-wordmark-title">JARVIS</span>
+    {showSubtitle && <span class="jv-wordmark-sub">{subtitle}</span>}
+  </div>
+</Tag>

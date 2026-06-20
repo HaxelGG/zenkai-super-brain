@@ -35,8 +35,13 @@ const canonical = new URL(toJarvisCanonicalPath(Astro.url.pathname), JARVIS_URL)
     <meta name="description" content={description} />
     <meta name="robots" content="noindex, nofollow" />
     <meta name="theme-color" content="#030810" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="JARVIS" />
+    <meta name="application-name" content="JARVIS" />
     <link rel="canonical" href={canonical} />
     <link rel="icon" type="image/svg+xml" href="/jarvis-favicon.svg" />
+    <link rel="apple-touch-icon" href="/jarvis-favicon.svg" />
+    <link rel="manifest" href="/jarvis-manifest.webmanifest" />
     <script src="/jarvis-live.js" defer></script>
     <script src="/jarvis-voice.js" defer></script>
     <title>{title} · JARVIS · ZENKAI</title>
@@ -46,32 +51,40 @@ const canonical = new URL(toJarvisCanonicalPath(Astro.url.pathname), JARVIS_URL)
     <JarvisCommandPalette />
     <JarvisVoiceConsole />
     <div id="jv-sync-toast" class="jv-sync-toast" aria-live="polite"></div>
+    <div id="jv-voice-toast" class="jv-voice-toast" aria-live="polite" aria-atomic="true"></div>
     <div class="jarvis-scanline" aria-hidden="true"></div>
     <div class="jarvis-shell flex min-h-screen">
       <JarvisSidebar />
       <div class="flex-1 flex flex-col min-w-0">
-        <header class="jarvis-header sticky top-0 z-40 px-4 sm:px-6 lg:px-8 h-12 flex items-center justify-between border-b">
-          <div class="flex items-center gap-2.5 min-w-0">
+        <header class="jarvis-header sticky top-0 z-40 px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between border-b">
+          <div class="flex items-center gap-3 min-w-0">
             <JarvisMobileDrawer />
-            <div class="lg:hidden flex items-center gap-2 min-w-0">
-              <span class="jv-heading-section truncate">{title}</span>
+            <div class="lg:hidden flex items-center gap-2.5 min-w-0">
+              <span class="jv-header-mark" aria-hidden="true">J</span>
+              <div class="min-w-0">
+                <div class="jv-header-title-mobile">JARVIS</div>
+                <div class="jv-mono text-[10px] text-[var(--jv-text-dim)] truncate">{title}</div>
+              </div>
             </div>
-            <div class="hidden lg:flex items-center gap-2 min-w-0">
+            <div class="hidden lg:flex items-center gap-3 min-w-0">
               <span class="jarvis-status-dot shrink-0" aria-hidden="true"></span>
-              <span class="jv-label shrink-0 opacity-60">JARVIS</span>
-              <span class="jv-mono text-[var(--jv-text-dim)]">/</span>
+              <span class="jv-header-wordmark">JARVIS</span>
+              <span class="jv-header-sep" aria-hidden="true"></span>
               <span class="jv-mono text-[var(--jv-text-muted)] truncate">{title}</span>
               <span class="jv-mono text-[var(--jv-text-dim)]">·</span>
-              <span class="jv-mono text-[var(--jv-text-dim)]" id="jv-live-clock">--:--:--</span>
+              <span class="jv-mono text-[var(--jv-cyan)]" id="jv-live-clock">--:--:--</span>
             </div>
           </div>
           <div class="flex items-center gap-2 shrink-0">
+            <button type="button" id="jv-install-btn" class="jv-install-btn hidden" title="Instalar JARVIS en el escritorio">
+              <span class="jv-install-btn-label">Instalar</span>
+            </button>
             <JarvisVoiceOrb />
             <button type="button" id="jv-cmd-trigger" class="jv-cmd-trigger hidden sm:flex" title="Navegación rápida (⌘K)">
               <span class="jv-mono text-[var(--jv-text-dim)]">⌘K</span>
             </button>
             <DataSourceBadge source={dataSource} liveRecords={liveRecords} />
-            <span class="hidden sm:inline jv-mono text-[var(--jv-text-dim)]">
+            <span class="hidden md:inline jv-mono text-[var(--jv-text-dim)]">
               {new Date().toLocaleDateString("es-CO", { weekday: "short", day: "numeric", month: "short", year: "numeric" })}
             </span>
             <div class="w-7 h-7 rounded-full border border-[var(--jv-border)] bg-[rgba(0,212,255,0.06)] text-[var(--jv-cyan)] flex items-center justify-center text-[var(--jv-text-2xs)] font-semibold jv-display">JG</div>
@@ -87,12 +100,32 @@ const canonical = new URL(toJarvisCanonicalPath(Astro.url.pathname), JARVIS_URL)
       </div>
     </div>
     <script>
+      if (window.jarvisDesktop?.isDesktop) {
+        document.documentElement.classList.add("jv-desktop");
+      }
+
       function tick() {
         const el = document.getElementById("jv-live-clock");
         if (el) el.textContent = new Date().toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
       }
       tick();
       setInterval(tick, 1000);
+
+      let deferredInstall: Event | null = null;
+      const installBtn = document.getElementById("jv-install-btn");
+      window.addEventListener("beforeinstallprompt", (e) => {
+        e.preventDefault();
+        deferredInstall = e;
+        installBtn?.classList.remove("hidden");
+      });
+      installBtn?.addEventListener("click", async () => {
+        if (!deferredInstall || !("prompt" in deferredInstall)) return;
+        const promptEvent = deferredInstall as Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: string }> };
+        await promptEvent.prompt();
+        await promptEvent.userChoice;
+        deferredInstall = null;
+        installBtn.classList.add("hidden");
+      });
 
       document.querySelectorAll("[data-count-up]").forEach((el) => {
         const target = el.getAttribute("data-count-up");

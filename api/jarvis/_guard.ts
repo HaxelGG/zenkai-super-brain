@@ -11,7 +11,23 @@ const ALLOWED_ORIGINS = [
   "http://127.0.0.1:4321",
 ];
 
+function setDashboardCors(req: VercelRequest, res: VercelResponse): void {
+  const origin = typeof req.headers.origin === "string" ? req.headers.origin : "";
+  if (ALLOWED_ORIGINS.some((o) => origin.startsWith(o))) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Accept");
+  }
+}
+
 export function allowDashboardRequest(req: VercelRequest, res: VercelResponse): boolean {
+  setDashboardCors(req, res);
+
+  if (req.method === "OPTIONS") {
+    res.status(204).end();
+    return false;
+  }
+
   if (req.method !== "GET") {
     res.status(405).json({ error: "method not allowed · use GET" });
     return false;
