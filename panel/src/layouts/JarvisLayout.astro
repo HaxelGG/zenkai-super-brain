@@ -2,6 +2,8 @@
 import "../styles/global.css";
 import "../styles/jarvis.css";
 import JarvisSidebar from "../components/jarvis/JarvisSidebar.astro";
+import JarvisMobileDrawer from "../components/jarvis/JarvisMobileDrawer.astro";
+import JarvisCommandPalette from "../components/jarvis/JarvisCommandPalette.astro";
 import JarvisBoot from "../components/jarvis/JarvisBoot.astro";
 import DataSourceBadge from "../components/jarvis/DataSourceBadge.astro";
 import { JARVIS_URL, toJarvisCanonicalPath } from "../lib/jarvis/config";
@@ -38,22 +40,31 @@ const canonical = new URL(toJarvisCanonicalPath(Astro.url.pathname), JARVIS_URL)
   </head>
   <body>
     <JarvisBoot />
+    <JarvisCommandPalette />
+    <div id="jv-sync-toast" class="jv-sync-toast" aria-live="polite"></div>
     <div class="jarvis-scanline" aria-hidden="true"></div>
     <div class="jarvis-shell flex min-h-screen">
       <JarvisSidebar />
       <div class="flex-1 flex flex-col min-w-0">
         <header class="jarvis-header sticky top-0 z-40 px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between border-b">
-          <div class="lg:hidden flex items-center gap-2.5">
-            <div class="arc-reactor" aria-hidden="true"></div>
-            <span class="jv-display text-sm font-semibold text-[var(--jv-cyan)]">JARVIS</span>
+          <div class="flex items-center gap-3 min-w-0">
+            <JarvisMobileDrawer />
+            <div class="lg:hidden flex items-center gap-2 min-w-0">
+              <span class="jv-display text-sm font-semibold text-[var(--jv-cyan)] truncate">{title}</span>
+            </div>
+            <div class="hidden lg:flex items-center gap-3 min-w-0">
+              <span class="jarvis-status-dot shrink-0" aria-hidden="true"></span>
+              <span class="jv-label shrink-0">JARVIS</span>
+              <span class="jv-mono text-[10px] text-[var(--jv-text-dim)]">/</span>
+              <span class="jv-mono text-[10px] text-[var(--jv-text-muted)] truncate">{title}</span>
+              <span class="jv-mono text-[10px] text-[var(--jv-text-dim)]">·</span>
+              <span class="jv-mono text-[10px] text-[var(--jv-text-muted)]" id="jv-live-clock">--:--:--</span>
+            </div>
           </div>
-          <div class="hidden lg:flex items-center gap-3">
-            <span class="jarvis-status-dot" aria-hidden="true"></span>
-            <span class="jv-label">Sistemas operativos</span>
-            <span class="jv-mono text-[10px] text-[var(--jv-text-dim)]">·</span>
-            <span class="jv-mono text-[10px] text-[var(--jv-text-muted)]" id="jv-live-clock">--:--:--</span>
-          </div>
-          <div class="flex items-center gap-3">
+          <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+            <button type="button" id="jv-cmd-trigger" class="jv-cmd-trigger hidden sm:flex" title="Navegación rápida (⌘K)">
+              <span class="jv-mono text-[10px] text-[var(--jv-text-dim)]">⌘K</span>
+            </button>
             <DataSourceBadge source={dataSource} liveRecords={liveRecords} />
             <span class="hidden sm:inline jv-mono text-[10px] text-[var(--jv-text-muted)]">
               {new Date().toLocaleDateString("es-CO", { weekday: "short", day: "numeric", month: "short", year: "numeric" })}
@@ -65,7 +76,7 @@ const canonical = new URL(toJarvisCanonicalPath(Astro.url.pathname), JARVIS_URL)
           <slot />
         </main>
         <footer class="border-t border-[var(--jv-border)] px-4 sm:px-6 lg:px-8 py-3 flex flex-col sm:flex-row justify-between gap-1 text-[10px] text-[var(--jv-text-dim)] jv-mono">
-          <span class="jv-label opacity-60">JARVIS v2 · ZENKAI Growth Systems</span>
+          <span class="jv-label opacity-60">JARVIS v3 · ZENKAI Growth Systems</span>
           <a href={JARVIS_URL} class="hover:text-[var(--jv-cyan)] no-underline transition-colors">{JARVIS_URL.replace("https://", "")}</a>
         </footer>
       </div>
@@ -95,6 +106,10 @@ const canonical = new URL(toJarvisCanonicalPath(Astro.url.pathname), JARVIS_URL)
           if (p < 1) requestAnimationFrame(step);
         };
         requestAnimationFrame(step);
+      });
+
+      document.getElementById("jv-cmd-trigger")?.addEventListener("click", () => {
+        document.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true, bubbles: true }));
       });
     </script>
   </body>

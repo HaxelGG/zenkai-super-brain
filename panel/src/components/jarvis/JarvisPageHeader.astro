@@ -1,0 +1,19 @@
+---
+interface Props {
+  dept: string;
+  title: string;
+  description?: string;
+  class?: string;
+}
+
+const { dept, title, description, class: className } = Astro.props;
+---
+
+<header class:list={["mb-8", className]} data-jv-animate="1">
+  <div class="jv-label mb-2">{dept}</div>
+  <h1 class="jv-display text-2xl sm:text-3xl font-bold">{title}</h1>
+  {description && (
+    <p class="mt-2 jv-mono text-[12px] text-[var(--jv-text-muted)] max-w-2xl leading-relaxed">{description}</p>
+  )}
+  <slot />
+</header>

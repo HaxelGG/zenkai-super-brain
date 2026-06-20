@@ -23,6 +23,14 @@
     return "nuevo";
   }
 
+  function showToast(msg) {
+    const toast = document.getElementById("jv-sync-toast");
+    if (!toast) return;
+    toast.textContent = msg;
+    toast.classList.add("jv-sync-visible");
+    setTimeout(() => toast.classList.remove("jv-sync-visible"), 3200);
+  }
+
   function setBadgeLive(leads, clients) {
     badge.dataset.source = "live";
     badge.className =
@@ -85,6 +93,7 @@
 
   async function refreshCrm() {
     try {
+      badge?.classList.add("jv-badge-loading");
       const res = await fetch("/api/jarvis/crm", {
         headers: { Accept: "application/json" },
         credentials: "same-origin",
@@ -105,8 +114,11 @@
       patchFunnel(data.pipelineFunnel);
 
       window.dispatchEvent(new CustomEvent("jarvis:crm", { detail: data }));
+      showToast(`CRM sincronizado · ${leads} leads · ${clients} clientes`);
     } catch {
       /* silent · static mock remains */
+    } finally {
+      badge?.classList.remove("jv-badge-loading");
     }
   }
 
