@@ -1,6 +1,7 @@
 import { parseInput } from "./parse-input";
 import { SLASH_COMMANDS, resolveCommand, filterCommands, type SlashCommand } from "./slash-commands";
 import { renderBlock, type OutputBlock } from "./render";
+import { apiBase, authHeaders, fetchWithTimeout, readApiKey, isJarvisHost } from "../api";
 
 // Subconjunto estructural del JarvisRunResult del orquestador
 // (fuente de verdad: scripts/jarvis/orchestrator.ts). Mantener en sync si
@@ -13,10 +14,7 @@ type JarvisRunResult = {
   meta?: { tier?: string; model?: string; fallbackReason?: string };
 };
 
-const PANEL_API = "https://panel.zenkai.systems";
 const HISTORY_KEY = "zenkai_jarvis_terminal_history";
-const API_KEY_STORAGE = "zenkai_jarvis_api_key";
-const API_KEY_LEGACY = "zenkai_api_key";
 
 const routes: Record<string, string> = (window as unknown as { __JV_ROUTES?: Record<string, string> }).__JV_ROUTES ?? {};
 
@@ -54,43 +52,12 @@ function append(block: OutputBlock): void {
   output!.scrollTop = output!.scrollHeight;
 }
 
-function isJarvisHost(): boolean {
-  const h = location.hostname.toLowerCase();
-  return h === "jarvis.zenkai.systems" || h.endsWith(".jarvis.zenkai.systems");
-}
-function apiBase(): string {
-  const h = location.hostname.toLowerCase();
-  return isJarvisHost() || h === "localhost" || h === "127.0.0.1" ? PANEL_API : "";
-}
-function apiKey(): string {
-  try {
-    return localStorage.getItem(API_KEY_STORAGE) || localStorage.getItem(API_KEY_LEGACY) || "";
-  } catch {
-    return "";
-  }
-}
-async function fetchWithTimeout(url: string, opts: RequestInit, ms: number): Promise<Response> {
-  const ctrl = new AbortController();
-  const t = setTimeout(() => ctrl.abort(), ms);
-  try {
-    return await fetch(url, { ...opts, credentials: "same-origin", signal: ctrl.signal });
-  } finally {
-    clearTimeout(t);
-  }
-}
-function authHeaders(): Record<string, string> {
-  const h: Record<string, string> = { "Content-Type": "application/json" };
-  const k = apiKey();
-  if (k) h.Authorization = `Bearer ${k}`;
-  return h;
-}
-
 async function runInstruction(instruction: string): Promise<void> {
   let res: Response;
   try {
     res = await fetchWithTimeout(
-      `${apiBase()}/api/jarvis/run`,
-      { method: "POST", headers: authHeaders(), body: JSON.stringify({ instruction }) },
+      `${apiBase(location.hostname)}/api/jarvis/run`,
+      { method: "POST", headers: authHeaders(readApiKey()), body: JSON.stringify({ instruction }) },
       45000,
     );
   } catch {
@@ -120,13 +87,13 @@ async function runInstruction(instruction: string): Promise<void> {
 
 function normalizeNavPath(path: string): string {
   if (!path) return path;
-  if (isJarvisHost()) return path.replace(/^\/jarvis(\/|$)/, "/") || "/";
+  if (isJarvisHost(location.hostname)) return path.replace(/^\/jarvis(\/|$)/, "/") || "/";
   return path;
 }
 
 async function showStatus(): Promise<void> {
   try {
-    const res = await fetchWithTimeout(`${apiBase()}/api/agency/status`, { headers: authHeaders() }, 15000);
+    const res = await fetchWithTimeout(`${apiBase(location.hostname)}/api/agency/status`, { headers: authHeaders(readApiKey()) }, 15000);
     if (!res.ok) {
       append({ type: "error", text: `Status ${res.status}` });
       return;
