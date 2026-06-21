@@ -6,7 +6,7 @@ import { runAgent } from "../../agency/agent-runner.js";
 import { listCalendarAll, saveCalendarItem } from "../../agency/calendar.js";
 import { getMcpManifest, getProviderCapabilities, type ProviderStatus } from "../../agency/capabilities.js";
 import { runMarketingContentPipeline } from "../../agency/departments/marketing.js";
-import { listAgencyActivity } from "../../agency/activity.js";
+import { listAgencyActivity, logRun } from "../../agency/activity.js";
 import {
   executeApprovedJob,
   rejectJob,
@@ -363,6 +363,7 @@ async function handleMarketingContent(req: VercelRequest, res: VercelResponse): 
       videoProvider: body.videoProvider as "heygen" | "higgsfield" | undefined,
       schedule: typeof body.schedule === "string" ? body.schedule : undefined,
     });
+    await logRun(result, "content");
     res.setHeader("Cache-Control", "no-store");
     res.status(200).json(result);
   } catch (e) {

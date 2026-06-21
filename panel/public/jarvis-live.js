@@ -441,10 +441,151 @@
     }
   }
 
+  // ── Agentes (panel cableado a /api/agency/status · registry detallado) ──
+  const AGENT_COLORS = {
+    ARES: "#EF4444",
+    HERMES: "#F59E0B",
+    ATLAS: "#10B981",
+    NEXUS: "#8B5CF6",
+    APOLLO: "#EC4899",
+    MUSE: "#06B6D4",
+    FORGE: "#6366F1",
+    ORACLE: "#14B8A6",
+    HIVE: "#A855F7",
+    ECHO: "#3B82F6",
+    LEX: "#64748B",
+    ZEUS: "#1E6FFF",
+  };
+  const DEPT_LABELS = {
+    marketing: "Marketing",
+    sales: "Ventas",
+    operations: "Operaciones",
+    ia: "IA & Auto",
+    design: "Diseño",
+    finance: "Finanzas",
+    hr: "RRHH",
+    support: "Atención",
+    legal: "Legal",
+    strategy: "Estrategia",
+  };
+  const TIER_LABELS = { opus: "Opus", sonnet: "Sonnet", haiku: "Haiku", deepseek: "DeepSeek" };
+  const AGENT_STATE_COLORS = {
+    active: "var(--jv-success)",
+    idle: "var(--jv-warning)",
+    offline: "var(--jv-text-dim)",
+  };
+  const AGENT_STATE_LABELS = { active: "activo", idle: "en espera", offline: "offline" };
+
+  function agentCardHtml(a, compact) {
+    const id = String(a.id || "?");
+    const color = AGENT_COLORS[id] || agentColor(id);
+    const state =
+      a.state === "active" || a.state === "idle" || a.state === "offline" ? a.state : "idle";
+    const stateColor = AGENT_STATE_COLORS[state];
+    const stateLabel = AGENT_STATE_LABELS[state];
+    const active = state === "active";
+    const head =
+      '<div class="flex items-center justify-between mb-2">' +
+      `<span class="jv-display text-[11px] font-bold" style="color: ${color}">${escG(id)}</span>` +
+      `<span class="jv-agent-pulse w-1.5 h-1.5 rounded-full" style="background: ${stateColor}"></span></div>`;
+
+    if (compact) {
+      const dept = DEPT_LABELS[a.department] || a.department || "";
+      return (
+        `<div class="jv-agent-card p-3${active ? " jv-agent-active" : ""}" style="--agent-color: ${color}" title="${escG(dept)} · ${escG(stateLabel)}">` +
+        head +
+        `<div class="jv-mono text-[9px] text-[var(--jv-text-dim)]">${escG(stateLabel)}</div></div>`
+      );
+    }
+
+    const dept = DEPT_LABELS[a.department] || a.department || "";
+    const tier = TIER_LABELS[a.modelo] || a.model || "";
+    const subs = Array.isArray(a.subagentes) ? a.subagentes.length : 0;
+    const evts = Array.isArray(a.n8nEvents) ? a.n8nEvents.length : 0;
+    const missing =
+      Array.isArray(a.missing) && a.missing.length ? ` · falta ${a.missing.join(", ")}` : "";
+    return (
+      `<div class="jv-agent-card p-3${active ? " jv-agent-active" : ""}" style="--agent-color: ${color}" title="${escG(stateLabel)}${escG(missing)}">` +
+      head +
+      `<p class="text-[10px] text-[var(--jv-text-dim)] mb-2 truncate">${escG(dept)}${tier ? ` · ${escG(tier)}` : ""}</p>` +
+      `<p class="text-[11px] text-[var(--jv-text-muted)] leading-snug line-clamp-2 mb-2">${escG(a.purpose || "")}</p>` +
+      '<div class="flex justify-between jv-mono text-[9px] text-[var(--jv-text-dim)]">' +
+      `<span>${subs} sub · ${evts} evt</span>` +
+      `<span style="color: ${stateColor}">${escG(stateLabel)}</span></div></div>`
+    );
+  }
+
+  function renderAgentGrid(container, agents, compact) {
+    const gridClass = compact
+      ? "grid gap-2 grid-cols-3 sm:grid-cols-4"
+      : "grid gap-2 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4";
+    container.innerHTML = `<div class="${gridClass}">${agents.map((a) => agentCardHtml(a, compact)).join("")}</div>`;
+  }
+
+  async function refreshAgents() {
+    const full = document.getElementById("jv-agents-grid");
+    const compact = document.getElementById("jv-agents-grid-compact");
+    if (!full && !compact) return;
+    try {
+      const res = await fetch(apiUrl("/api/agency/status"), fetchOpts);
+      if (!res.ok) return;
+      const data = await res.json();
+      const agents = Array.isArray(data.agents) ? data.agents : [];
+      if (!agents.length) return;
+      if (full) renderAgentGrid(full, agents, false);
+      if (compact) renderAgentGrid(compact, agents, true);
+      const active =
+        typeof data.agentsActive === "number"
+          ? data.agentsActive
+          : agents.filter((a) => a.state === "active").length;
+      document.querySelectorAll('[data-jv-agents="active"]').forEach((el) => {
+        el.textContent = String(active);
+      });
+    } catch {
+      /* silent */
+    }
+  }
+
+  // ── Activity feed (runs persistidos · /api/agency/activity) ──
+  const ACTIVITY_ICONS = { task: "⚡", lead: "◆", alert: "⚠", deploy: "▲", social: "◎" };
+
+  function activityItemHtml(ev) {
+    const icon = ACTIVITY_ICONS[ev.type] || "⚡";
+    return (
+      '<li class="jv-feed-item">' +
+      '<div class="flex items-start gap-3">' +
+      `<span class="jv-mono text-[10px] text-[var(--jv-cyan)] shrink-0 w-10">${escG(ev.time || "")}</span>` +
+      avatarHtml(ev.agent) +
+      '<div class="flex-1 min-w-0">' +
+      '<div class="flex items-center gap-1.5 mb-0.5">' +
+      `<span class="text-[10px]" aria-hidden="true">${icon}</span>` +
+      `<span class="jv-label text-[9px] opacity-70">${escG(ev.type || "")}</span></div>` +
+      `<p class="text-[13px] text-[var(--jv-text-muted)] leading-snug">${escG(ev.message || "")}</p>` +
+      "</div></div></li>"
+    );
+  }
+
+  async function refreshActivity() {
+    const feed = document.getElementById("jv-activity-feed");
+    if (!feed) return;
+    try {
+      const res = await fetch(apiUrl("/api/agency/activity?limit=8"), fetchOpts);
+      if (!res.ok) return;
+      const data = await res.json();
+      const events = Array.isArray(data.events) ? data.events : [];
+      if (!events.length) return;
+      feed.innerHTML = `<ul class="space-y-3">${events.map(activityItemHtml).join("")}</ul>`;
+    } catch {
+      /* silent */
+    }
+  }
+
   async function refreshAll() {
     await Promise.all([
       refreshBrainStatus(),
       refreshAgencyStatus(),
+      refreshAgents(),
+      refreshActivity(),
       refreshGoals(),
       refreshTasks(),
       refreshCrm(),
@@ -458,6 +599,8 @@
   setInterval(refreshFinance, 8 * 60 * 1000);
   setInterval(refreshSocial, 10 * 60 * 1000);
   setInterval(refreshAgencyStatus, 12 * 60 * 1000);
+  setInterval(refreshAgents, 11 * 60 * 1000);
+  setInterval(refreshActivity, 6 * 60 * 1000);
   setInterval(refreshGoals, 9 * 60 * 1000);
   setInterval(refreshTasks, 7 * 60 * 1000);
 })();

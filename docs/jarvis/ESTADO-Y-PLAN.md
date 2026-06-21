@@ -55,7 +55,8 @@ componentes, estética cyan/oscura (`panel/src/styles/jarvis.css`).
 - **Live cuando hay datos en Airtable** (`panel/src/lib/jarvis/index.ts`): CRM/pipeline, finanzas, KPIs, intel
   brief (ZEUS), alertas, estado de conexiones. Hoy se ve mock porque hay 0 clientes; se vuelve live solo al cargar
   datos.
-- **Mock sin fuente real:** panel de Agentes, Tareas/Kanban, Activity feed, Social (sin token Meta).
+- **Mock sin fuente real:** Social (sin token Meta). **Agentes** y **Activity feed** ya cableados a la agency
+  (ver §3.1); Tareas/Kanban y Goals leen `/api/agency/tasks`.
 
 ### 2.3 · Voz — `panel/public/jarvis-voice.js` ✅ COMPLETA (no decorativa)
 910 líneas reales: STT (Web Speech API), wake word con parsing de frases, silence-commit, llamada a
@@ -95,14 +96,29 @@ Todo verificado: `tsc` en verde + smokes en runtime.
 
 ---
 
+### 3.1 · Construido en esta sesión (2026-06-20 · cont.) — HUD live
+Verificado: `npx tsc --noEmit -p tsconfig.json` + `astro check` en verde + smoke runtime.
+- **Panel Agentes → live** — `/api/agency/status` extendido con el **registry detallado** por agente (name,
+  tier `modelo`, subagentes, voiceProvider, purpose, n8nEvents, mcpServers) + **`state` real** (active/idle/offline)
+  derivado de qué proveedores/keys están configurados, + `agentsActive`. `panel/public/jarvis-live.js`
+  `refreshAgents()` parchea la grilla (`#jv-agents-grid` y `#jv-agents-grid-compact`) y el contador de activos.
+- **Activity feed → persistencia durable** — nueva tabla Airtable `Activity` + `scripts/agency/activity.ts`
+  (`logActivity`/`logRun`, best-effort: nunca rompen un run). Se loguea cada run en `runAgent` (suprimido cuando
+  viene del director, que loguea todos sus resultados una sola vez), el **tick del scheduler**, y el endpoint
+  directo de contenido. `/api/agency/activity` lee la tabla (fallback a Jobs si aún no hay runs) y `refreshActivity()`
+  parchea el Live Feed (`#jv-activity-feed`). Crear la tabla: `npm run agency:setup-schema -- --apply`
+  (env `AIRTABLE_TABLE_ACTIVITY`).
+
+---
+
 ## 4 · Gaps reales — qué falta o es stub
 
 | # | Gap | Archivo | Para qué sirve cerrarlo |
 |---|-----|---------|-------------------------|
 | 1 | `event_handler` de Windmill solo loggea | `f/agency/event_handler.ts` | Autonomía durable que sobrevive reinicios; recoger videos HeyGen pendientes (`pollHeyGenVideo` ya existe) |
-| 2 | Panel **Agentes** es mock | `panel/src/pages/jarvis/agentes.astro` | Cablear a `/api/agency/status` (ya devuelve agentes+proveedores) |
-| 3 | Panel **Tareas/Goals** es mock | `panel/src/pages/jarvis/{tareas,goals}.astro` | Cablear a `/api/agency/tasks` (ya devuelve tasks+goals reales) |
-| 4 | **Activity feed** vive en localStorage | panel + orquestador | Persistir runs/ticks y exponerlos para auditoría |
+| 2 | ✅ **Hecho** · Panel Agentes live | `panel/src/pages/jarvis/agentes.astro` · `jarvis-live.js` | `/api/agency/status` con registry+`state`; `refreshAgents()` (ver §3.1) |
+| 3 | Panel **Tareas/Goals** cableado | `panel/src/pages/jarvis/{tareas,goals}.astro` | `refreshTasks`/`refreshGoals` leen `/api/agency/tasks` (live al haber datos) |
+| 4 | ✅ **Hecho** · Activity feed persistido | `scripts/agency/activity.ts` · tabla Airtable `Activity` | runs (`runAgent`/director) + ticks logueados; `/api/agency/activity` los lee (ver §3.1) |
 | 5 | `runForgeDevTask` solo encola | `departments/ia.ts` | Ejecutar tareas dev (HITL por seguridad) |
 | 6 | Sin feedback loop de métricas ni memoria entre ticks | scheduler | Que la creatividad mejore según engagement |
 | 7 | Social en "—" | Vercel env | Configurar `META_ACCESS_TOKEN` + IDs |
@@ -127,9 +143,10 @@ Todo verificado: `tsc` en verde + smokes en runtime.
 Orden sugerido (bloques verticales, cada uno verificado con `tsc` + smoke):
 1. **Windmill `event_handler` durable** — router de eventos que ejecuta/encola trabajo real y recoge videos
    HeyGen pendientes vía `pollHeyGenVideo`. Endurecer `scripts/windmill/sync.ts`.
-2. **Conectar HUD a datos reales** — Agentes → `/api/agency/status`; Tareas/Goals → `/api/agency/tasks`; volver
-   verdes las cajas mock del panel.
-3. **Activity feed real** — persistir runs del orquestador + ticks del scheduler (Airtable o Vercel KV) y leerlos.
+2. ✅ **Hecho** — Conectar HUD a datos reales: Agentes → `/api/agency/status` (registry + `state`) vía
+   `refreshAgents`; Tareas/Goals → `/api/agency/tasks`. (ver §3.1)
+3. ✅ **Hecho** — Activity feed real: runs del orquestador + ticks del scheduler persistidos en Airtable
+   (tabla `Activity`) y leídos por `/api/agency/activity` + `refreshActivity`. (ver §3.1)
 4. **Activar IAs de contenido** — cargar en Vercel: `HEYGEN_API_KEY`/`HEYGEN_AVATAR_ID`/`HEYGEN_VOICE_ID`,
    `HIGGSFIELD_API_KEY`(+SECRET), `GEMINI_API_KEY`, `META_ACCESS_TOKEN`+IDs. Smoke por proveedor.
 5. **Higiene de secretos** (§5) — antes de cualquier difusión del repo.

@@ -1,214 +1,52 @@
 ---
 import JarvisLayout from "../../layouts/JarvisLayout.astro";
-import JarvisMobileNav from "../../components/jarvis/JarvisMobileNav.astro";
-import HudPanel from "../../components/jarvis/HudPanel.astro";
-import MetricCard from "../../components/jarvis/MetricCard.astro";
-import SemaphoreBadge from "../../components/jarvis/SemaphoreBadge.astro";
-import TaskCard from "../../components/jarvis/TaskCard.astro";
-import AlertItem from "../../components/jarvis/AlertItem.astro";
-import SocialChannelCard from "../../components/jarvis/SocialChannelCard.astro";
-import ProgressRing from "../../components/jarvis/ProgressRing.astro";
-import LineChart from "../../components/jarvis/LineChart.astro";
-import ActivityFeed from "../../components/jarvis/ActivityFeed.astro";
-import AgentStatusGrid from "../../components/jarvis/AgentStatusGrid.astro";
-import IntelligenceBrief from "../../components/jarvis/IntelligenceBrief.astro";
-import JarvisDepartmentGrid from "../../components/jarvis/JarvisDepartmentGrid.astro";
-import SectorChart from "../../components/jarvis/SectorChart.astro";
-import DualBarChart from "../../components/jarvis/DualBarChart.astro";
-import { getJarvisData } from "../../lib/jarvis";
-import { resolveJarvisRoutes } from "../../lib/jarvis/config";
-
-const data = await getJarvisData();
-const routes = resolveJarvisRoutes(Astro.url.hostname);
-const pendingTasks = data.tasks.filter((t) => t.status === "pending");
-const workingTasks = data.tasks.filter((t) => t.status === "working");
-const doneThisWeek = data.tasks.filter((t) => t.status === "done");
-const onlineSystems = data.systemConnections.filter((s) => s.status === "online").length;
 ---
 
-<JarvisLayout title="Command Center" dataSource={data.meta?.dataSource ?? "mock"} liveRecords={data.meta?.liveRecords}>
-  <JarvisMobileNav />
-
-  <header class="mb-6 jv-command-hero" data-jv-animate="1">
-    <div class="flex flex-col xl:flex-row xl:items-end xl:justify-between gap-5">
-      <div>
-        <div class="flex flex-wrap items-center gap-2 mb-3">
-          <span class="jv-hero-badge">JARVIS</span>
-          <span class="jv-label">ZENKAI · Intelligence Systems Online</span>
-        </div>
-        <h1 class="jv-greeting">{data.greeting}</h1>
-        <p class="mt-1.5 jv-mono text-[var(--jv-text-muted)]">{data.dateLabel}</p>
-        <div class="mt-3 flex flex-wrap gap-2">
-          <SemaphoreBadge status={data.agencySemaphore} label="Estado agencia" />
-          <span class="jv-mono text-[10px] text-[var(--jv-text-dim)] px-2 py-1 border border-[var(--jv-border)] rounded-sm">
-            {onlineSystems}/{data.systemConnections.length} sistemas online
-          </span>
-        </div>
-      </div>
-      <ProgressRing current={data.finance.revenueYtd} target={data.finance.goal2026} label="Meta $100K 2026" format="usd" />
+<JarvisLayout title="Cockpit" description="JARVIS Cockpit · clasifica, propone, aprobás, ejecuta">
+  <section class="jvc-shell">
+    <div class="jvc-input-row">
+      <textarea id="jvc-input" class="jvc-input" rows="2" placeholder="Hablá o escribí a JARVIS… (⌘/Ctrl + Enter)"></textarea>
+      <button id="jvc-go" class="jvc-btn" type="button">Procesar</button>
+      <button id="jvc-reset" class="jvc-btn jvc-btn-ghost" type="button">Reiniciar</button>
     </div>
-  </header>
 
-  <HudPanel class="mb-6" padding="lg" animate={2}>
-    <IntelligenceBrief brief={data.intelligence} compact />
-  </HudPanel>
-
-  <JarvisDepartmentGrid />
-
-  <section class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-2.5 mb-6" data-jv-social-root>
-    {data.kpis.map((kpi, i) => (
-      <MetricCard
-        metric={kpi}
-        index={i}
-        socialData={
-          kpi.id === "roas" ? "roas" : kpi.id === "engagement-ig" ? "ig-engagement" : undefined
-        }
-      />
-    ))}
-  </section>
-
-  <div class="grid grid-cols-1 xl:grid-cols-12 gap-4 sm:gap-5">
-    <section class="xl:col-span-3 space-y-4">
-      <HudPanel animate={2}>
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="jv-heading-section">Tareas</h2>
-          <a href={routes.tareas} class="jv-mono text-[10px] text-[var(--jv-cyan)] no-underline hover:underline">ver todo →</a>
-        </div>
-        <div class="mb-4">
-          <div class="jv-label mb-2 opacity-70">Pendientes · {pendingTasks.length}</div>
-          <div class="space-y-2">{pendingTasks.slice(0, 2).map((t) => <TaskCard task={t} compact />)}</div>
-        </div>
-        <div class="mb-3">
-          <div class="jv-label mb-2 opacity-70">Working · {workingTasks.length}</div>
-          <div class="space-y-2">{workingTasks.slice(0, 2).map((t) => <TaskCard task={t} compact />)}</div>
-        </div>
-        <div class="pt-3 border-t border-[var(--jv-border)] jv-mono text-[10px] text-[var(--jv-success)]">
-          ✓ {doneThisWeek.length} completadas esta semana
-        </div>
-      </HudPanel>
-
-      <HudPanel animate={3}>
-        <div class="flex items-center justify-between mb-3">
-          <h2 class="jv-heading-section">Live Feed</h2>
-          <span class="jarvis-status-dot" aria-hidden="true"></span>
-        </div>
-        <ActivityFeed events={data.activityFeed} limit={5} />
-      </HudPanel>
-    </section>
-
-    <section class="xl:col-span-5 space-y-4">
-      <HudPanel animate={4}>
-        <h2 class="jv-heading-section mb-3">Rendimiento</h2>
-        <LineChart
-          title="Revenue mensual 2026"
-          series={data.finance.monthlyRevenue.map((m) => ({ label: m.month, actual: m.actual, projected: m.projected }))}
-        />
-      </HudPanel>
-
-      <HudPanel animate={5}>
-        <DualBarChart title="Leads vs Cierres · 8 semanas" data={data.weeklyLeads} />
-      </HudPanel>
-
-      <HudPanel animate={6} padding="sm">
-        <div class="flex items-center justify-between mb-3">
-          <h3 class="jv-label">Proyectos activos</h3>
-          <a href={routes.clientes} class="jv-mono text-[10px] text-[var(--jv-cyan)] no-underline">clientes →</a>
-        </div>
-        <div class="overflow-x-auto">
-          <table class="jv-table w-full text-[13px]">
-            <thead>
-              <tr class="border-b border-[var(--jv-border)]">
-                <th class="pb-2 text-left">Cliente</th>
-                <th class="pb-2 text-left">Estado</th>
-                <th class="pb-2 text-left">Avance</th>
-                <th class="pb-2">Riesgo</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.projects.map((p) => (
-                <tr>
-                  <td class="py-2.5 font-medium">{p.client}</td>
-                  <td class="py-2.5 text-[var(--jv-text-muted)]">{p.status}</td>
-                  <td class="py-2.5">
-                    <div class="flex items-center gap-2">
-                      <div class="w-16 jv-progress-bar"><div class="jv-progress-fill" style={`width:${p.progress}%`} /></div>
-                      <span class="jv-mono text-[10px]">{p.progress}%</span>
-                    </div>
-                  </td>
-                  <td class="py-2.5 text-center">
-                    <span class:list={[p.risk === "green" && "text-[var(--jv-success)]", p.risk === "yellow" && "text-[var(--jv-warning)]", p.risk === "red" && "text-[var(--jv-danger)]"]}>●</span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </HudPanel>
-    </section>
-
-    <section class="xl:col-span-4 space-y-4">
-      <HudPanel animate={7}>
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="jv-heading-section">Agentes IA</h2>
-          <a href={routes.agentes} class="jv-mono text-[10px] text-[var(--jv-cyan)] no-underline">detalle →</a>
-        </div>
-        <AgentStatusGrid statuses={data.agentStatuses} compact />
-      </HudPanel>
-
-      <HudPanel animate={8}>
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="jv-heading-section">Social</h2>
-          <a href={routes.social} class="jv-mono text-[10px] text-[var(--jv-cyan)] no-underline">detalle →</a>
-        </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-2">
-          {data.socialChannels.slice(0, 2).map((ch) => <SocialChannelCard channel={ch} />)}
-        </div>
-      </HudPanel>
-
-      <HudPanel>
-        <div class="flex items-center justify-between mb-3">
-          <h3 class="jv-label">Sectores</h3>
-          <a href={routes.intel} class="jv-mono text-[10px] text-[var(--jv-cyan)] no-underline">intel →</a>
-        </div>
-        <SectorChart sectors={data.sectorPerformance.slice(0, 4)} />
-      </HudPanel>
-    </section>
-  </div>
-
-  <section class="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-4">
-    <HudPanel>
-      <h2 class="jv-heading-section mb-3">Alertas</h2>
-      <div class="space-y-2">{data.alerts.map((a) => <AlertItem alert={a} />)}</div>
-    </HudPanel>
-    <HudPanel>
-      <h2 class="jv-heading-section mb-3">Prioridades semana</h2>
-      <ol class="space-y-3">
-        {data.priorities.map((p, i) => (
-          <li class="flex gap-2.5 text-[var(--jv-text-sm)]">
-            <span class="jv-display text-[var(--jv-text-2xs)] w-5 h-5 shrink-0 flex items-center justify-center border border-[var(--jv-border-bright)] text-[var(--jv-cyan)]">{i + 1}</span>
-            <span class="text-[var(--jv-text-muted)] leading-snug pt-0.5">{p}</span>
-          </li>
-        ))}
-      </ol>
-    </HudPanel>
-    <HudPanel>
-      <h3 class="jv-label mb-3">AI Usage hoy</h3>
-      <div class="grid grid-cols-2 gap-3 mb-3">
-        <div>
-          <div class="jv-metric-value" data-count-up={String(data.aiUsage.callsToday)}>{data.aiUsage.callsToday}</div>
-          <div class="jv-mono text-[10px] text-[var(--jv-text-dim)]">llamadas API</div>
-        </div>
-        <div>
-          <div class="jv-metric-value" data-count-up={`$${data.aiUsage.costTodayUsd}`}>${data.aiUsage.costTodayUsd}</div>
-          <div class="jv-mono text-[10px] text-[var(--jv-text-dim)]">costo hoy</div>
-        </div>
+    <div class="jvc-stage" id="jvc-s1">
+      <div class="jvc-stage-head">
+        <span class="jvc-dot"></span><span class="jvc-stage-title">1 · Input</span>
+        <span class="jvc-stage-note" id="jvc-s1-note">listo</span>
       </div>
-      <div class="flex gap-1 h-2 rounded-sm overflow-hidden mb-2">
-        {data.aiUsage.modelSplit.map((m) => (
-          <div style={`width:${m.pct}%;background:${m.color}`} title={`${m.model} ${m.pct}%`} />
-        ))}
+    </div>
+    <div class="jvc-stage" id="jvc-s2">
+      <div class="jvc-stage-head">
+        <span class="jvc-dot"></span><span class="jvc-stage-title">2 · Clasificación + ruteo</span>
+        <span class="jvc-stage-note" id="jvc-s2-note">—</span>
       </div>
-      <a href={routes.sistemas} class="jv-mono text-[10px] text-[var(--jv-cyan)] no-underline">ver sistemas →</a>
-    </HudPanel>
+      <div class="jvc-detail" id="jvc-s2-detail"></div>
+    </div>
+    <div class="jvc-stage" id="jvc-s3">
+      <div class="jvc-stage-head">
+        <span class="jvc-dot"></span><span class="jvc-stage-title">3 · Propuesta</span>
+        <span class="jvc-stage-note" id="jvc-s3-note">—</span>
+      </div>
+      <div class="jvc-detail" id="jvc-s3-detail"></div>
+    </div>
+    <div class="jvc-stage" id="jvc-s4">
+      <div class="jvc-stage-head">
+        <span class="jvc-dot"></span><span class="jvc-stage-title">4 · Compuerta HITL — vos decidís</span>
+        <span class="jvc-stage-note" id="jvc-s4-note">—</span>
+      </div>
+      <div class="jvc-detail" id="jvc-s4-detail"></div>
+    </div>
+    <div class="jvc-stage" id="jvc-s5">
+      <div class="jvc-stage-head">
+        <span class="jvc-dot"></span><span class="jvc-stage-title">5 · Ejecución</span>
+        <span class="jvc-stage-note" id="jvc-s5-note">—</span>
+      </div>
+      <div class="jvc-detail" id="jvc-s5-detail"></div>
+    </div>
   </section>
 </JarvisLayout>
+
+<script>
+  import "../../lib/jarvis/cockpit/main";
+</script>
