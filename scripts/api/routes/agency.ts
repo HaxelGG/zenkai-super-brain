@@ -4,8 +4,9 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { runAgent } from "../../agency/agent-runner.js";
 import { listCalendarAll, saveCalendarItem } from "../../agency/calendar.js";
-import { getMcpManifest, getProviderCapabilities } from "../../agency/capabilities.js";
+import { getMcpManifest, getProviderCapabilities, type ProviderStatus } from "../../agency/capabilities.js";
 import { runMarketingContentPipeline } from "../../agency/departments/marketing.js";
+import { listAgencyActivity } from "../../agency/activity.js";
 import {
   executeApprovedJob,
   rejectJob,
@@ -17,6 +18,7 @@ import {
 import { getOpsGoals, listOpsTasks } from "../../agency/departments/operations.js";
 import { directorRoute, getDirectorStatus } from "../../agency/director.js";
 import { getJob, listJobs } from "../../agency/jobs.js";
+import { planProject } from "../../agency/plan.js";
 import { auditRequiredKeys } from "../../agency/keys-audit.js";
 import { AGENT_REGISTRY, JARVIS_DIRECTOR, resolveAgentId, resolveDepartment } from "../../agency/registry.js";
 import { runAgencySchedulerTick } from "../../agency/scheduler.js";
@@ -44,12 +46,16 @@ export async function handleAgencyRoute(req: VercelRequest, res: VercelResponse)
       return handleKeys(req, res);
     case "tasks":
       return handleTasks(req, res);
+    case "activity":
+      return handleActivity(req, res);
     case "calendar":
       return handleCalendar(req, res);
     case "run":
       return handleRun(req, res);
     case "director":
       return handleDirector(req, res);
+    case "plan":
+      return handlePlan(req, res);
     case "jobs":
       return handleJobs(req, res);
     case "marketing/content":
@@ -61,12 +67,64 @@ export async function handleAgencyRoute(req: VercelRequest, res: VercelResponse)
   }
 }
 
+type AgentState = "active" | "idle" | "offline";
+
+/** mcpServers del registry → id de proveedor con gate de env en capabilities. */
+const MCP_TO_PROVIDER: Record<string, string> = {
+  "n8n-mcp": "n8n",
+  "meta-ads": "meta",
+  heygen: "heygen",
+  elevenlabs: "elevenlabs",
+  "cursor-ide": "cursor",
+  airtable: "airtable",
+  windmill: "windmill",
+};
+
+/**
+ * Estado real por agente: derivado de qué proveedores están configurados.
+ * - `offline` si no hay cerebro LLM (Anthropic ni DeepSeek) → no puede ejecutar.
+ * - `active` si su cerebro + todos los proveedores que necesita están listos.
+ * - `idle`   si el cerebro está listo pero le falta algún proveedor de su stack.
+ */
+function buildAgentsStatus(providers: ProviderStatus[]) {
+  const configured = new Map(providers.map((p) => [p.id, p.configured]));
+  const brainReady = Boolean(configured.get("anthropic") || configured.get("deepseek"));
+
+  return Object.values(AGENT_REGISTRY).map((a) => {
+    const required = new Set<string>();
+    for (const m of a.mcpServers) {
+      const pid = MCP_TO_PROVIDER[m];
+      if (pid && configured.has(pid)) required.add(pid);
+    }
+    if (a.voiceProvider && configured.has(a.voiceProvider)) required.add(a.voiceProvider);
+
+    const missing = [...required].filter((pid) => !configured.get(pid));
+    const state: AgentState = !brainReady ? "offline" : missing.length === 0 ? "active" : "idle";
+
+    return {
+      id: a.id,
+      name: a.name,
+      department: a.department,
+      modelo: a.modelo,
+      model: a.modeloLabel,
+      subagentes: a.subagentes,
+      voiceProvider: a.voiceProvider ?? null,
+      n8nEvents: a.n8nEvents,
+      mcpServers: a.mcpServers,
+      purpose: a.purpose,
+      state,
+      missing,
+    };
+  });
+}
+
 async function handleStatus(req: VercelRequest, res: VercelResponse): Promise<void> {
   if (!allowDashboardRequest(req, res)) return;
   setDashboardCacheHeaders(res, 30);
   const providers = getProviderCapabilities();
   const configured = providers.filter((p) => p.configured).length;
   const keys = auditRequiredKeys();
+  const agents = buildAgentsStatus(providers);
   res.status(200).json({
     ok: keys.ready,
     director: JARVIS_DIRECTOR,
@@ -75,13 +133,8 @@ async function handleStatus(req: VercelRequest, res: VercelResponse): Promise<vo
       criticalMissing: keys.criticalMissing,
       missing: keys.requirements.filter((r) => !r.configured).map((r) => r.env),
     },
-    agents: Object.values(AGENT_REGISTRY).map((a) => ({
-      id: a.id,
-      department: a.department,
-      model: a.modeloLabel,
-      n8nEvents: a.n8nEvents,
-      mcpServers: a.mcpServers,
-    })),
+    agents,
+    agentsActive: agents.filter((a) => a.state === "active").length,
     providers,
     mcp: getMcpManifest(),
     departments: getDirectorStatus().departments,
@@ -114,6 +167,15 @@ async function handleTasks(req: VercelRequest, res: VercelResponse): Promise<voi
   setDashboardCacheHeaders(res, 20);
   const [tasks, goals] = await Promise.all([listOpsTasks(), getOpsGoals()]);
   res.status(200).json({ tasks, goals, orchestratedBy: "JARVIS" });
+}
+
+async function handleActivity(req: VercelRequest, res: VercelResponse): Promise<void> {
+  if (!allowDashboardRequest(req, res)) return;
+  setDashboardCacheHeaders(res, 20);
+  const raw = Array.isArray(req.query.limit) ? req.query.limit[0] : req.query.limit;
+  const limit = raw ? Number(raw) : 12;
+  const data = await listAgencyActivity(Number.isFinite(limit) ? limit : 12);
+  res.status(200).json(data);
 }
 
 async function handleCalendar(req: VercelRequest, res: VercelResponse): Promise<void> {
@@ -189,6 +251,22 @@ async function handleDirector(req: VercelRequest, res: VercelResponse): Promise<
     res.status(200).json(result);
   } catch (e) {
     res.status(500).json({ error: e instanceof Error ? e.message : String(e) });
+  }
+}
+
+async function handlePlan(req: VercelRequest, res: VercelResponse): Promise<void> {
+  if (!allowOrchestratorRequest(req, res)) return;
+  const body = (req.body ?? {}) as { instruction?: unknown };
+  if (typeof body.instruction !== "string" || !body.instruction.trim()) {
+    res.status(400).json({ error: "instruction required" });
+    return;
+  }
+  try {
+    const result = await planProject(body.instruction.trim());
+    res.setHeader("Cache-Control", "no-store");
+    res.status(200).json(result);
+  } catch (e) {
+    res.status(502).json({ ok: false, error: e instanceof Error ? e.message : String(e) });
   }
 }
 
