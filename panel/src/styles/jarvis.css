@@ -667,6 +667,44 @@
   background: rgba(0, 212, 255, 0.04);
 }
 
+/* ─── JARVIS Terminal REPL — .jvt-* ─────────────────────────────────────── */
+.jvt-shell { display: flex; flex-direction: column; height: 100vh; height: 100dvh; background: var(--jv-bg); color: var(--jv-text); font-family: var(--jv-mono, ui-monospace, monospace); }
+.jvt-bar { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; border-bottom: 1px solid var(--jv-border); background: rgba(10,15,24,.6); }
+.jvt-brand { color: var(--jv-cyan); font-size: 12px; letter-spacing: 1px; display: flex; align-items: center; gap: 8px; }
+.jvt-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--jv-success, #5dcaa5); }
+.jvt-bar-right { display: flex; align-items: center; gap: 12px; }
+.jvt-back { color: var(--jv-text-muted); font-size: 12px; text-decoration: none; }
+.jvt-back:hover { color: var(--jv-cyan); }
+.jvt-output { flex: 1; min-height: 0; overflow-y: auto; padding: 16px; font-size: 13px; line-height: 1.7; }
+.jvt-line { margin-bottom: 10px; }
+.jvt-prompt { color: var(--jv-cyan); margin-right: 8px; }
+.jvt-user-text { color: var(--jv-text-muted); }
+.jvt-reply-text { color: var(--jv-text); white-space: pre-wrap; }
+.jvt-meta { margin-top: 4px; display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.jvt-badge { font-size: 10px; padding: 1px 7px; border-radius: 3px; border: 1px solid var(--jv-border); color: var(--jv-text-muted); }
+.jvt-badge-cyan { background: var(--jv-cyan); color: #06121c; border-color: transparent; }
+.jvt-badge-amber { background: #efb04a; color: #2a1c02; border-color: transparent; }
+.jvt-note { font-size: 11px; color: var(--jv-text-muted); }
+.jvt-card-title { color: var(--jv-text-muted); font-size: 11px; margin-bottom: 6px; }
+.jvt-kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; }
+.jvt-kpi { border: 1px solid var(--jv-border); border-radius: 6px; padding: 8px 10px; }
+.jvt-kpi-label { color: var(--jv-text-muted); font-size: 10px; }
+.jvt-kpi-value { color: var(--jv-cyan); font-size: 16px; }
+.jvt-nav-link { color: var(--jv-cyan); text-decoration: none; }
+.jvt-nav-link:hover { text-decoration: underline; }
+.jvt-error-text { color: var(--jv-danger, #e24b4a); }
+.jvt-suggest-wrap { position: relative; border-top: 1px solid var(--jv-border); background: rgba(10,15,24,.6); padding: 10px 16px; }
+.jvt-suggest { position: absolute; bottom: 100%; left: 16px; right: 16px; background: var(--jv-bg); border: 1px solid var(--jv-border); border-radius: 6px; overflow: hidden; max-height: 220px; overflow-y: auto; }
+.jvt-suggest-item { padding: 6px 10px; color: var(--jv-text); cursor: pointer; }
+.jvt-suggest-active { background: rgba(77,226,255,.12); color: var(--jv-cyan); }
+.jvt-suggest-desc { color: var(--jv-text-muted); }
+.jvt-input-row { display: flex; align-items: center; gap: 8px; }
+.jvt-input { flex: 1; background: transparent; border: 0; outline: 0; color: var(--jv-text); font-family: inherit; font-size: 14px; }
+.jvt-input::placeholder { color: var(--jv-text-dim, #5a6b7d); }
+.jvt-mic { width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--jv-border); background: transparent; color: var(--jv-cyan); cursor: pointer; }
+.jvt-hint { margin-top: 6px; font-size: 10px; color: var(--jv-text-dim, #3a4757); }
+
+
 .jv-dept-nav-head-active {
   border-left-color: var(--jv-dept-accent, var(--jv-cyan));
   background: rgba(0, 212, 255, 0.06);

@@ -83,6 +83,10 @@ async function main() {
   console.log("Diseñando voz paisa JARVIS…");
   const previews = await designVoice(apiKey);
   const pick = previews[0];
+  if (!pick) {
+    console.error("ElevenLabs no devolvió previews de voz");
+    process.exit(1);
+  }
   console.log(`Preview elegido: ${pick.generated_voice_id} (${previews.length} opciones)`);
 
   await mkdir(SAMPLES_DIR, { recursive: true });

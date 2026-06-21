@@ -76,7 +76,7 @@ async function main() {
       console.error("Agente no encontrado");
       process.exit(1);
     }
-    const r = await runAgent({ agentId: id, instruction: agentMatch[2] });
+    const r = await runAgent({ agentId: id, instruction: agentMatch[2] ?? "" });
     console.log(JSON.stringify(r, null, 2));
     return;
   }

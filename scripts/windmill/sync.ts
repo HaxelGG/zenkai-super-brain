@@ -9,7 +9,7 @@
  *   npm run wmill:push
  */
 import "dotenv/config";
-import { execSync } from "node:child_process";
+import { spawnSync } from "node:child_process";
 
 const cmd = process.argv[2];
 if (cmd !== "pull" && cmd !== "push") {
@@ -26,6 +26,20 @@ if (!token) {
   process.exit(1);
 }
 
+// Defensa en profundidad: los valores van como argv (no string de shell),
+// y además se validan contra un allowlist por si alguna config trae basura.
+const SAFE = /^[A-Za-z0-9_\-:/.]+$/;
+for (const [label, val] of [
+  ["token", token],
+  ["base-url", base],
+  ["workspace", workspace],
+] as const) {
+  if (!SAFE.test(val)) {
+    console.error(`Valor Windmill inválido (${label}): caracteres no permitidos`);
+    process.exit(1);
+  }
+}
+
 const args = [
   "sync",
   cmd,
@@ -37,7 +51,13 @@ const args = [
   workspace,
 ];
 
-execSync(`wmill ${args.map((a) => (a.includes(" ") ? `"${a}"` : a)).join(" ")}`, {
-  stdio: "inherit",
-  shell: true,
-});
+// Windows instala el CLI como wmill.cmd → requiere shell para resolverlo;
+// los argumentos van en array (no interpolados) y validados arriba.
+const bin = process.platform === "win32" ? "wmill.cmd" : "wmill";
+const result = spawnSync(bin, args, { stdio: "inherit", shell: process.platform === "win32" });
+if (result.error) {
+  console.error(`wmill no disponible: ${result.error.message}`);
+  console.error("Instalá el CLI: npm install -g windmill-cli");
+  process.exit(1);
+}
+process.exit(result.status ?? 0);

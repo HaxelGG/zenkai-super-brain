@@ -269,8 +269,188 @@
     }
   }
 
+  function escG(s) {
+    const d = document.createElement("div");
+    d.textContent = String(s == null ? "" : s);
+    return d.innerHTML;
+  }
+
+  function goalSemaphore(status) {
+    const color =
+      status === "green" ? "var(--jv-success)" : status === "red" ? "var(--jv-danger)" : "var(--jv-warning)";
+    const text = status === "green" ? "Operativo" : status === "red" ? "Crítico" : "Atención";
+    return (
+      '<span class="inline-flex items-center gap-2 rounded-sm border font-medium jv-mono px-2 py-0.5 text-[10px]" ' +
+      `style="border-color: ${color}; color: ${color}; background: color-mix(in srgb, ${color} 10%, transparent)">` +
+      `<span class="w-1.5 h-1.5 rounded-full animate-pulse" style="background: ${color}; box-shadow: 0 0 6px ${color}"></span>${text}</span>`
+    );
+  }
+
+  function goalValueText(current, target, unit) {
+    const c = Number(current) || 0;
+    const t = Number(target) || 0;
+    const u = String(unit || "").toLowerCase();
+    if (u === "usd") return `$${c.toLocaleString("en-US")} / $${t.toLocaleString("en-US")}`;
+    if (u === "percent") return `${c}% / ${t}%`;
+    return `${c} / ${t}`;
+  }
+
+  function goalCard(goal, i) {
+    const target = Number(goal.target) || 0;
+    const pct = target > 0 ? Math.min(100, Math.round((Number(goal.current) / target) * 100)) : 0;
+    return (
+      `<div class="hud-panel p-4" data-jv-animate="${i + 3}"><div class="hud-panel-inner">` +
+      '<div class="flex items-start justify-between gap-2 mb-3">' +
+      `<h3 class="font-semibold text-sm leading-snug">${escG(goal.title)}</h3>${goalSemaphore(goal.status)}</div>` +
+      `<p class="jv-mono text-[11px] text-[var(--jv-text-muted)] mb-3">${goalValueText(goal.current, goal.target, goal.unit)}</p>` +
+      `<div class="jv-progress-bar h-2"><div class="jv-progress-fill" style="width: ${pct}%"></div></div>` +
+      `<p class="jv-mono text-[10px] text-[var(--jv-text-dim)] mt-2">${escG(goal.caption || "")}</p>` +
+      "</div></div>"
+    );
+  }
+
+  async function refreshGoals() {
+    const grid = document.getElementById("jv-goals-grid");
+    if (!grid) return;
+    try {
+      const res = await fetch(apiUrl("/api/agency/tasks"), fetchOpts);
+      if (!res.ok) return;
+      const data = await res.json();
+      const goals = Array.isArray(data.goals) ? data.goals : [];
+      if (!goals.length) return;
+      grid.innerHTML = goals.map((g, i) => goalCard(g, i)).join("");
+    } catch {
+      /* silent */
+    }
+  }
+
+  function agentColor(id) {
+    let h = 0;
+    const s = String(id || "");
+    for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) % 360;
+    return `hsl(${h}, 65%, 55%)`;
+  }
+
+  function avatarHtml(agent) {
+    const initials = escG(String(agent || "?").slice(0, 2));
+    return (
+      '<div class="rounded-full flex items-center justify-center font-semibold text-white shrink-0 jv-display w-6 h-6 text-[9px]" ' +
+      `style="background: ${agentColor(agent)}" title="${escG(agent)}">${initials}</div>`
+    );
+  }
+
+  function priorityDotClass(p) {
+    if (p === "high") return "bg-[var(--jv-danger)] shadow-[0_0_6px_var(--jv-danger)]";
+    if (p === "low") return "bg-[var(--jv-text-dim)]";
+    return "bg-[var(--jv-warning)]";
+  }
+
+  function taskCardHtml(task, compact) {
+    const pad = compact ? "p-2.5" : "p-3";
+    const titleSize = compact ? "text-[13px]" : "text-sm";
+    let inner =
+      '<div class="flex items-start gap-2.5">' +
+      `<span class="w-1.5 h-1.5 rounded-full mt-2 shrink-0 ${priorityDotClass(task.priority)}"></span>` +
+      '<div class="flex-1 min-w-0"><div class="flex items-start justify-between gap-2">' +
+      `<p class="font-medium text-[var(--jv-text)] leading-snug ${titleSize}">${escG(task.title)}</p>` +
+      avatarHtml(task.agent) +
+      "</div>";
+    if (!compact) {
+      inner +=
+        '<div class="mt-1.5 flex flex-wrap items-center gap-2 jv-mono text-[10px] text-[var(--jv-text-dim)]">' +
+        `<span class="px-1.5 py-0.5 border border-[var(--jv-border)] rounded-sm text-[var(--jv-cyan)]">${escG(task.status)}</span></div>`;
+    }
+    inner += "</div></div>";
+    return `<div class="jv-task ${pad}">${inner}</div>`;
+  }
+
+  function kanbanColHtml(status, label, tasks) {
+    const filtered = tasks.filter((t) => t.status === status);
+    const body =
+      filtered.length === 0
+        ? '<div class="jv-mono text-[10px] text-[var(--jv-text-dim)] text-center py-6 border border-dashed border-[var(--jv-border)] rounded-sm">Sin tareas</div>'
+        : filtered.map((t) => taskCardHtml(t, true)).join("");
+    return (
+      '<div class="hud-panel p-3 flex-1 min-w-[180px]"><div class="hud-panel-inner">' +
+      '<div class="jarvis-kanban-col flex flex-col min-h-[200px]">' +
+      `<div class="flex items-center justify-between mb-3 px-1"><h3 class="jv-label text-[10px]">${escG(label)}</h3>` +
+      `<span class="jv-mono text-[10px] text-[var(--jv-cyan)] px-2 py-0.5 border border-[var(--jv-border)] rounded-sm">${filtered.length}</span></div>` +
+      `<div class="space-y-2 flex-1">${body}</div></div></div></div>`
+    );
+  }
+
+  async function refreshTasks() {
+    const kanban = document.getElementById("jv-tasks-kanban");
+    if (!kanban) return;
+    try {
+      const res = await fetch(apiUrl("/api/agency/tasks"), fetchOpts);
+      if (!res.ok) return;
+      const data = await res.json();
+      const tasks = data.tasks && Array.isArray(data.tasks.tasks) ? data.tasks.tasks : [];
+      const cols = [
+        ["backlog", "Backlog"],
+        ["pending", "Pendiente"],
+        ["working", "Working"],
+        ["review", "Review"],
+        ["done", "Done"],
+      ];
+      kanban.innerHTML = cols.map((c) => kanbanColHtml(c[0], c[1], tasks)).join("");
+
+      const stats = document.getElementById("jv-tasks-stats");
+      if (stats) {
+        const active = tasks.filter((t) => t.status !== "done").length;
+        const working = tasks.filter((t) => t.status === "working").length;
+        const done = tasks.filter((t) => t.status === "done").length;
+        stats.textContent = `${active} tareas activas · ${working} en working · ${done} completadas`;
+      }
+
+      const order = { high: 0, medium: 1, low: 2 };
+      const list = document.getElementById("jv-tasks-list");
+      if (list) {
+        const lt = tasks
+          .filter((t) => t.status !== "done")
+          .sort((a, b) => (order[a.priority] ?? 1) - (order[b.priority] ?? 1));
+        list.innerHTML = lt.length
+          ? lt.map((t) => taskCardHtml(t, false)).join("")
+          : '<div class="jv-mono text-[10px] text-[var(--jv-text-dim)]">Sin tareas activas</div>';
+      }
+
+      const load = document.getElementById("jv-tasks-agentload");
+      if (load) {
+        const counts = {};
+        tasks
+          .filter((t) => t.status !== "done")
+          .forEach((t) => {
+            counts[t.agent] = (counts[t.agent] || 0) + 1;
+          });
+        const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+        load.innerHTML = entries.length
+          ? entries
+              .map(
+                (e) =>
+                  '<div class="flex items-center gap-2 px-3 py-2 rounded-sm border border-[var(--jv-border)] text-[13px]">' +
+                  avatarHtml(e[0]) +
+                  `<span class="font-medium text-[var(--jv-text)]">${escG(e[0])}</span>` +
+                  `<span class="jv-mono text-[10px] text-[var(--jv-cyan)] ml-auto px-2 py-0.5 border border-[var(--jv-border)] rounded-sm">${e[1]}</span></div>`,
+              )
+              .join("")
+          : '<div class="jv-mono text-[10px] text-[var(--jv-text-dim)]">Sin carga asignada</div>';
+      }
+    } catch {
+      /* silent */
+    }
+  }
+
   async function refreshAll() {
-    await Promise.all([refreshBrainStatus(), refreshAgencyStatus(), refreshCrm(), refreshFinance(), refreshSocial()]);
+    await Promise.all([
+      refreshBrainStatus(),
+      refreshAgencyStatus(),
+      refreshGoals(),
+      refreshTasks(),
+      refreshCrm(),
+      refreshFinance(),
+      refreshSocial(),
+    ]);
   }
 
   refreshAll();
@@ -278,4 +458,6 @@
   setInterval(refreshFinance, 8 * 60 * 1000);
   setInterval(refreshSocial, 10 * 60 * 1000);
   setInterval(refreshAgencyStatus, 12 * 60 * 1000);
+  setInterval(refreshGoals, 9 * 60 * 1000);
+  setInterval(refreshTasks, 7 * 60 * 1000);
 })();

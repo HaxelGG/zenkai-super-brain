@@ -1,6 +1,8 @@
 /**
  * APOLLO · generación de imágenes · Gemini Imagen + Higgsfield Platform
  */
+import { fetchWithTimeout } from "./http.js";
+
 export type ImageGenProvider = "gemini" | "higgsfield" | "auto";
 
 export type ImageGenResult = {
@@ -56,7 +58,7 @@ async function pollHiggsfieldRequest(
   const started = Date.now();
 
   while (Date.now() - started < maxMs) {
-    const res = await fetch(`${base}/requests/${requestId}/status`, {
+    const res = await fetchWithTimeout(`${base}/requests/${requestId}/status`, {
       headers: {
         Authorization: `Key ${creds}`,
         Accept: "application/json",
@@ -101,7 +103,7 @@ export async function generateHiggsfieldImage(
     process.env.HIGGSFIELD_IMAGE_MODEL?.trim() || "bytedance/seedream/v4/text-to-image";
 
   try {
-    const res = await fetch(`${base}/${model}`, {
+    const res = await fetchWithTimeout(`${base}/${model}`, {
       method: "POST",
       headers: {
         Authorization: `Key ${creds}`,
@@ -168,7 +170,7 @@ export async function generateGeminiImage(
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:predict?key=${apiKey}`;
 
   try {
-    const res = await fetch(url, {
+    const res = await fetchWithTimeout(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -229,7 +231,7 @@ async function hostImageViaHiggsfield(data: Buffer, mime: string): Promise<strin
   const base = process.env.HIGGSFIELD_PLATFORM_URL?.trim() || "https://platform.higgsfield.ai";
 
   try {
-    const init = await fetch(`${base}/v1/uploads`, {
+    const init = await fetchWithTimeout(`${base}/v1/uploads`, {
       method: "POST",
       headers: {
         Authorization: `Key ${creds}`,
@@ -241,7 +243,7 @@ async function hostImageViaHiggsfield(data: Buffer, mime: string): Promise<strin
 
     const meta = (await init.json()) as { upload_url?: string; url?: string; public_url?: string };
     if (meta.upload_url) {
-      await fetch(meta.upload_url, {
+      await fetchWithTimeout(meta.upload_url, {
         method: "PUT",
         headers: { "Content-Type": mime },
         body: new Uint8Array(data),

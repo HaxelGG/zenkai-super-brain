@@ -1,0 +1,59 @@
+---
+import "../../styles/global.css";
+import "../../styles/jarvis.css";
+import JarvisVoiceOrb from "../../components/jarvis/JarvisVoiceOrb.astro";
+import { resolveJarvisRoutes } from "../../lib/jarvis/config";
+
+const routes = resolveJarvisRoutes(Astro.url.hostname);
+const routesJson = JSON.stringify(routes);
+---
+
+<!doctype html>
+<html lang="es" class="jarvis-app">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="theme-color" content="#030810" />
+    <link rel="icon" type="image/svg+xml" href="/jarvis-favicon.svg" />
+    <title>Terminal · JARVIS · ZENKAI</title>
+    <script is:inline set:html={`window.__JV_ROUTES = ${routesJson};`} />
+    <script src="/jarvis-sounds.js?v=20260620f" defer></script>
+    <script src="/jarvis-voice.js?v=20260620f" defer></script>
+  </head>
+  <body>
+    <div id="jv-voice-toast" class="jv-voice-toast" aria-live="polite" aria-atomic="true"></div>
+    <div class="jarvis-scanline" aria-hidden="true"></div>
+    <main class="jvt-shell">
+      <header class="jvt-bar">
+        <div class="jvt-brand"><span class="jvt-dot"></span> jarvis // terminal</div>
+        <div class="jvt-bar-right">
+          <JarvisVoiceOrb />
+          <a class="jvt-back" href={routes.home}>← HUD</a>
+        </div>
+      </header>
+      <section id="jvt-output" class="jvt-output" role="log" aria-live="polite"></section>
+      <div class="jvt-suggest-wrap">
+        <div id="jvt-suggest" class="jvt-suggest" hidden></div>
+        <div class="jvt-input-row">
+          <span class="jvt-prompt">jarvis ❯</span>
+          <input
+            id="jvt-input"
+            class="jvt-input"
+            type="text"
+            autocomplete="off"
+            spellcheck="false"
+            placeholder="comando o lenguaje natural · /help"
+            enterkeyhint="send"
+            aria-label="Comando o lenguaje natural"
+          />
+          <button id="jvt-mic" class="jvt-mic" type="button" aria-label="Dictar por voz">●</button>
+        </div>
+        <div class="jvt-hint">↑↓ historial · enter envía · / autocompleta · orb = voz</div>
+      </div>
+    </main>
+    <script>
+      import "../../lib/jarvis/terminal/main";
+    </script>
+  </body>
+</html>
