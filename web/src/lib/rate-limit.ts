@@ -34,19 +34,30 @@ const getLimiter = (): Ratelimit | null => {
   return cachedLimiter;
 };
 
-/** Sliding window: 5 requests por IP por hora. Si Upstash no está, bypassed:true. */
+/**
+ * Sliding window: 5 requests por IP por hora.
+ * Si Upstash no está configurado → bypassed:true (no-op).
+ * Si Upstash está configurado pero falla (caído, credenciales inválidas, DB pausada)
+ * → fail-open con warn: degradamos igual que "no configurado" en vez de tumbar el
+ *   endpoint. El rate-limit es una capa best-effort; nunca debe romper la feature core.
+ */
 export const checkRateLimit = async (ipHash: string): Promise<RateLimitResult> => {
   const limiter = getLimiter();
   if (!limiter) {
     return { success: true, limit: 5, remaining: 5, reset: 0, bypassed: true };
   }
-  const result = await limiter.limit(ipHash);
-  return {
-    success: result.success,
-    limit: result.limit,
-    remaining: result.remaining,
-    reset: result.reset,
-  };
+  try {
+    const result = await limiter.limit(ipHash);
+    return {
+      success: result.success,
+      limit: result.limit,
+      remaining: result.remaining,
+      reset: result.reset,
+    };
+  } catch (err) {
+    console.error('[rate-limit] limiter.limit() failed · failing open (bypassed):', err);
+    return { success: true, limit: 5, remaining: 5, reset: 0, bypassed: true };
+  }
 };
 
 export const _resetCache = () => {
