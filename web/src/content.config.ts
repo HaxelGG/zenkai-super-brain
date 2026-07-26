@@ -78,4 +78,59 @@ const sectores = defineCollection({
   }),
 });
 
-export const collections = { tiers, sectores };
+// ────────────────────────────────────────────────────────────────────────────
+// Collection · modulos · las 14 líneas de producto
+//
+// Fuente única de verdad del catálogo. De aquí se derivan: el megamenú, las
+// páginas de pilar, las páginas de módulo, las tarjetas del selector de
+// diagnóstico y el sitemap. Ningún componente hardcodea el nombre, el color ni
+// el copy de un módulo: si algo aparece dos veces, es un bug.
+//
+// Añadir el módulo 15 = un .md nuevo y cero código.
+// Retirar uno = `status: hidden` y desaparece de nav, grids y sitemap.
+// ────────────────────────────────────────────────────────────────────────────
+const PILAR = z.enum(["vender", "atender", "operar", "medida"]);
+const DOMINIO = z.enum(["growth", "people", "ops", "data"]);
+
+const modulos = defineCollection({
+  loader: glob({ pattern: "*.md", base: "./src/content/modulos" }),
+  schema: z.object({
+    nombre: z.string(),
+    pilar: PILAR,
+    /** core = se vende solo, aparece en la home · extended = se descubre navegando */
+    tier: z.enum(["core", "extended"]),
+    status: z.enum(["live", "hidden"]).default("live"),
+    orden: z.number().int(),
+    /** Define el color heredado · ver tokens.css §11 */
+    dominio: DOMINIO,
+    titular: z.string(),
+    promesa: z.string().max(200),
+    /** El dolor en palabras del cliente, no en las nuestras. */
+    problema: z.string(),
+    capacidades: z
+      .array(
+        z.object({
+          titulo: z.string(),
+          descripcion: z.string(),
+        }),
+      )
+      .min(3)
+      .max(7),
+    canales: z.array(z.string()).default([]),
+    /** Se muestran SOLO en la página del módulo, en gris, bajo "Nos integramos con".
+        Nunca como "Partners" ni como "Clientes": no lo son. */
+    integraciones: z.array(z.string()).default([]),
+    beneficios: z
+      .array(z.object({ titulo: z.string(), descripcion: z.string() }))
+      .max(6)
+      .default([]),
+    /** QUÉ se mide, nunca cuánto se promete. Sin porcentajes: no hay casos
+        publicados que los respalden y una cifra sin fuente es una mentira. */
+    kpis: z.array(z.string()).default([]),
+    /** Mensaje prellenado del CTA de WhatsApp de esta página. */
+    ctaWhatsapp: z.string(),
+    seo: z.object({ title: z.string(), description: z.string() }),
+  }),
+});
+
+export const collections = { tiers, sectores, modulos };

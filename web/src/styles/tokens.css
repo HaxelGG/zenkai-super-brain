@@ -26,8 +26,12 @@
   --color-error-subtle: rgba(239, 68, 68, 0.08);
 
   /* === 4. Typography === */
-  --font-sans: 'Inter Variable', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono Variable', monospace;
+  /* Geist para cuerpo y titulares · Geist Mono para eyebrows, etiquetas y datos.
+     Orbitron queda EXCLUSIVAMENTE para el wordmark (ver Brand.astro): es una
+     display face geométrica que a tamaño de lectura destroza la legibilidad. */
+  --font-sans: 'Geist Variable', system-ui, sans-serif;
+  --font-mono: 'Geist Mono Variable', ui-monospace, monospace;
+  --font-wordmark: 'Orbitron', var(--font-sans);
   --text-xs: 0.75rem;     /* 12px · line-height 1rem */
   --text-sm: 0.875rem;    /* 14px · line-height 1.25rem */
   --text-base: 1rem;      /* 16px · line-height 1.5rem */
@@ -92,7 +96,55 @@
      Si modificas valores acá, sincroniza tailwind.config.mjs y viceversa.
 
      sm: 640px · md: 768px · lg: 1024px · xl: 1280px · 2xl: 1536px */
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     11 · SISTEMA ZK · tokens del rediseño
+     ══════════════════════════════════════════════════════════════════════════ */
+
+  /* Base · superficies */
+  --zk-bg:        #08080C;
+  --zk-bg-2:      #0C0C12;
+  --zk-surface:   #12121A;
+  --zk-surface-2: #181822;
+  --zk-border:    rgba(255, 255, 255, 0.08);
+  --zk-border-hi: rgba(255, 255, 255, 0.16);
+
+  /* Texto */
+  --zk-text:   #F5F5FA;
+  --zk-text-2: #A0A0B4;
+  /* --zk-muted subido de #6B6B7B a #8A8A9E: el original daba 3,9:1 sobre --zk-bg
+     y fallaba el 4,5:1 de WCAG AA para texto de cuerpo. #8A8A9E da 6,1:1. */
+  --zk-muted:  #8A8A9E;
+
+  /* Acentos por dominio · cada módulo hereda el suyo del campo `dominio`.
+     Extraídos de las 14 piezas gráficas del catálogo. */
+  --zk-growth: #4A9EFF;   /* Sales · Marketing · Commerce · Customer · Enterprise */
+  --zk-people: #8B5CF6;   /* HR · Creative · Legal · Specialized */
+  --zk-ops:    #22C55E;   /* Operations · Finance · Security */
+  --zk-data:   #06B6D4;   /* Knowledge · Intelligence */
+
+  /* Verde WhatsApp · RESERVADO. No usar para ningún otro elemento.
+     Si el ojo aprende que verde = hablar con un humano, el CTA gana contraste
+     sin necesidad de crecer. Ojo: --zk-ops es un verde distinto y a propósito
+     más frío, para que no se confunda con un CTA. */
+  --zk-whatsapp:       #25D366;
+  --zk-whatsapp-hover: #1FBA59;
+  --zk-whatsapp-ink:   #05270F;
+
+  /* Radios */
+  --zk-r-sm: 8px;
+  --zk-r-md: 12px;
+  --zk-r-lg: 16px;
+  --zk-r-xl: 24px;
 }
+
+/* Acento por dominio · se aplica poniendo data-dominio en cualquier contenedor.
+   Todo lo de dentro usa var(--zk-accent) sin saber de qué módulo se trata. */
+[data-dominio='growth'] { --zk-accent: var(--zk-growth); }
+[data-dominio='people'] { --zk-accent: var(--zk-people); }
+[data-dominio='ops']    { --zk-accent: var(--zk-ops); }
+[data-dominio='data']   { --zk-accent: var(--zk-data); }
+:root                   { --zk-accent: var(--zk-growth); }
 
 /* Aplicar tokens base al body para que cualquier página herede el dark theme sin clases */
 html, body {

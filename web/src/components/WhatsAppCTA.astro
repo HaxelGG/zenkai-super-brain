@@ -1,0 +1,126 @@
+---
+/**
+ * El ÚNICO sitio del código que construye un enlace wa.me.
+ *
+ * Dos razones para centralizarlo:
+ *
+ * 1. Atribución. Cada CTA lleva su propio `?text=` prellenado que identifica de
+ *    dónde salió la conversación (`location`) y sobre qué (`context`). Como no
+ *    ponemos cookies ni píxeles, ese texto ES el sistema de atribución: cuando
+ *    llega el mensaje, ya sabes qué página lo generó.
+ * 2. Consistencia. El verde #25D366 está reservado en exclusiva a estos CTA.
+ *    Si alguien pudiera escribir un wa.me suelto, tarde o temprano habría un
+ *    botón verde que no lleva a WhatsApp y el código de color deja de significar.
+ *
+ * Un `wa.me` fuera de este componente es un bug.
+ */
+interface Props {
+  /** Dónde vive este CTA · viaja en el mensaje. Ej: "hero", "cierre", "modulo-sales-ai". */
+  location: string;
+  /** Qué está mirando el usuario · se antepone al mensaje si se pasa. */
+  context?: string;
+  /** Texto del mensaje. Si no se pasa, uno genérico honesto. */
+  message?: string;
+  label?: string;
+  variant?: 'primary' | 'inline' | 'block';
+  size?: 'md' | 'lg';
+  class?: string;
+}
+
+const {
+  location,
+  context,
+  message,
+  label = 'Hablar por WhatsApp',
+  variant = 'primary',
+  size = 'md',
+  class: className = '',
+} = Astro.props;
+
+const numero = import.meta.env.PUBLIC_WA_NUMBER ?? '573226272302';
+
+const base = message ?? 'Hola ZENKAI. Vengo de la web y quiero contaros mi caso.';
+const marca = context ? `\n\n(origen: ${location} · ${context})` : `\n\n(origen: ${location})`;
+const href = `https://wa.me/${numero}?text=${encodeURIComponent(base + marca)}`;
+---
+<a
+  href={href}
+  target="_blank"
+  rel="noopener"
+  data-wa-location={location}
+  class:list={['wa', `wa--${variant}`, `wa--${size}`, className]}
+>
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class="wa__icon">
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.174.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884a9.82 9.82 0 016.988 2.898 9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.464 3.488"/>
+  </svg>
+  <span>{label}</span>
+</a>
+
+<style>
+  .wa {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 48px;
+    border-radius: var(--zk-r-md);
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.2s, border-color 0.2s;
+  }
+  .wa__icon { width: 20px; height: 20px; flex-shrink: 0; }
+
+  .wa--primary {
+    padding: 12px 22px;
+    background: var(--zk-whatsapp);
+    color: var(--zk-whatsapp-ink);
+  }
+  .wa--primary:hover { background: var(--zk-whatsapp-hover); transform: translateY(-1px); }
+
+  .wa--inline {
+    padding: 10px 16px;
+    background: transparent;
+    border: 1px solid var(--zk-whatsapp);
+    color: var(--zk-whatsapp);
+  }
+  .wa--inline:hover { background: rgba(37, 211, 102, 0.1); }
+
+  .wa--block {
+    display: flex;
+    width: 100%;
+    padding: 14px 22px;
+    background: var(--zk-whatsapp);
+    color: var(--zk-whatsapp-ink);
+  }
+  .wa--block:hover { background: var(--zk-whatsapp-hover); }
+
+  .wa--lg { min-height: 56px; font-size: 17px; padding-inline: 28px; }
+
+  .wa:focus-visible { outline: 2px solid var(--zk-whatsapp); outline-offset: 3px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wa:hover { transform: none; }
+  }
+</style>
+
+<script>
+  // Tracking sin cookies · first-party. Un clic dispara un POST a nuestro propio
+  // endpoint. Nada de GA4 ni Pixel: sin campañas pagas activas no justifican ni
+  // el peso ni el banner de consentimiento que arrastran.
+  document.querySelectorAll<HTMLAnchorElement>('a[data-wa-location]').forEach((el) => {
+    el.addEventListener('click', () => {
+      const payload = JSON.stringify({
+        event: 'whatsapp_click',
+        cta_location: el.dataset.waLocation,
+        path: location.pathname,
+        device: matchMedia('(pointer: coarse)').matches ? 'touch' : 'pointer',
+      });
+      // sendBeacon sobrevive a que la pestaña se vaya a WhatsApp · fetch no siempre.
+      try {
+        navigator.sendBeacon('/api/track', new Blob([payload], { type: 'application/json' }));
+      } catch {
+        /* el tracking nunca puede impedir que el CTA funcione */
+      }
+    });
+  });
+</script>

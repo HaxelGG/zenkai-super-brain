@@ -1,0 +1,95 @@
+---
+/**
+ * Arte generativo por dominio · SVG puro, ~2 KB, sin peticiones.
+ *
+ * Sustituye a los renders 3D genéricos (dianas brillantes, robots sonrientes,
+ * escudos) de las piezas gráficas. Esos renders son exactamente lo que usa
+ * cualquier agencia de IA: no diferencian, no se indexan, no se traducen, pesan
+ * cientos de KB y hay que rehacerlos cada vez que cambia el copy.
+ *
+ * Esto es geometría de sistema — nodos y aristas — coloreada por el dominio del
+ * módulo. Escala a cualquier tamaño, hereda el acento sin saber de qué módulo se
+ * trata, y la animación respeta prefers-reduced-motion.
+ *
+ * La variante decide la topología, así que dos módulos del mismo dominio no
+ * dibujan lo mismo.
+ */
+interface Props {
+  /** 0-13 · normalmente el `orden` del módulo. Determina la topología. */
+  variant?: number;
+  class?: string;
+}
+const { variant = 0, class: className = '' } = Astro.props;
+
+// Generador determinista: mismo variant, mismo dibujo en cada build.
+const rand = (seed: number) => {
+  const x = Math.sin(seed) * 10000;
+  return x - Math.floor(x);
+};
+
+const NODOS = 7;
+const puntos = Array.from({ length: NODOS }, (_, i) => {
+  const s = variant * 31 + i * 7;
+  // Anillo con jitter · evita la simetría perfecta, que se lee como plantilla.
+  const angulo = (i / NODOS) * Math.PI * 2 + rand(s) * 0.7;
+  const radio = 26 + rand(s + 1) * 16;
+  return {
+    x: 50 + Math.cos(angulo) * radio,
+    y: 50 + Math.sin(angulo) * radio * 0.78,
+    r: 1.6 + rand(s + 2) * 2.2,
+    delay: (rand(s + 3) * 3).toFixed(2),
+  };
+});
+
+// Aristas: cada nodo con el siguiente y con uno "salto" · malla, no polígono.
+const aristas = puntos.flatMap((p, i) => [
+  { a: p, b: puntos[(i + 1) % NODOS] },
+  ...(i % 2 === 0 ? [{ a: p, b: puntos[(i + 3) % NODOS] }] : []),
+]);
+---
+<svg
+  viewBox="0 0 100 100"
+  class:list={['domain-art', className]}
+  role="presentation"
+  aria-hidden="true"
+  preserveAspectRatio="xMidYMid meet"
+>
+  <g class="aristas">
+    {aristas.map((e) => (
+      <line x1={e.a.x} y1={e.a.y} x2={e.b.x} y2={e.b.y} />
+    ))}
+  </g>
+  <g class="nodos">
+    {puntos.map((p) => (
+      <circle cx={p.x} cy={p.y} r={p.r} style={`--d:${p.delay}s`} />
+    ))}
+  </g>
+</svg>
+
+<style>
+  .domain-art {
+    width: 100%;
+    height: 100%;
+    display: block;
+    color: var(--zk-accent, #4A9EFF);
+    overflow: visible;
+  }
+  .aristas line {
+    stroke: currentColor;
+    stroke-width: 0.35;
+    opacity: 0.28;
+  }
+  .nodos circle {
+    fill: currentColor;
+    opacity: 0.55;
+    animation: pulso 4.5s ease-in-out infinite;
+    animation-delay: var(--d, 0s);
+  }
+  @keyframes pulso {
+    0%, 100% { opacity: 0.35; }
+    50%      { opacity: 0.9; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .nodos circle { animation: none; opacity: 0.6; }
+  }
+</style>

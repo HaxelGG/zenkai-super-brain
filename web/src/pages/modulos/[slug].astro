@@ -1,0 +1,318 @@
+---
+export const prerender = true;
+
+import WebLayout from '../../layouts/WebLayout.astro';
+import WhatsAppCTA from '../../components/WhatsAppCTA.astro';
+import DomainArt from '../../components/DomainArt.astro';
+import { getModulos, getPilar } from '../../lib/catalogo';
+
+// Las 14 rutas salen de la colección. Añadir un módulo es un .md; retirarlo es
+// `status: hidden`. Cero código por módulo.
+export async function getStaticPaths() {
+  const modulos = await getModulos();
+  return modulos.map((m) => ({ params: { slug: m.id }, props: { modulo: m } }));
+}
+
+const { modulo } = Astro.props;
+const d = modulo.data;
+const pilar = getPilar(d.pilar);
+const site = Astro.site ?? new URL('https://zenkai.systems');
+const url = new URL(`/modulos/${modulo.id}/`, site).href;
+
+const serviceJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  name: `ZENKAI ${d.nombre}`,
+  serviceType: d.nombre,
+  description: d.promesa,
+  url,
+  provider: { '@type': 'Organization', name: 'ZENKAI Growth Systems', url: site.href },
+  areaServed: ['ES', 'CO', 'MX', 'AR', 'CL', 'PE', 'US'],
+};
+
+const breadcrumbJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Inicio', item: site.href },
+    ...(pilar
+      ? [{
+          '@type': 'ListItem',
+          position: 2,
+          name: pilar.nombre,
+          item: new URL(`/soluciones/${pilar.id}/`, site).href,
+        }]
+      : []),
+    { '@type': 'ListItem', position: pilar ? 3 : 2, name: d.nombre, item: url },
+  ],
+};
+---
+<WebLayout title={d.seo.title} description={d.seo.description} canonical={url}>
+  <div data-dominio={d.dominio}>
+
+    {/* ── Cabecera ───────────────────────────────────────────────── */}
+    <header class="mod-hero">
+      <div class="wrap">
+        <nav class="crumbs" aria-label="Migas de pan">
+          <a href="/">Inicio</a>
+          <span aria-hidden="true">/</span>
+          {pilar && <><a href={`/soluciones/${pilar.id}/`}>{pilar.nombre}</a><span aria-hidden="true">/</span></>}
+          <span class="crumbs__actual">{d.nombre}</span>
+        </nav>
+
+        <div class="mod-hero__grid">
+          <div>
+            <p class="eyebrow">{d.nombre}</p>
+            <h1>{d.titular}</h1>
+            <p class="lede">{d.promesa}</p>
+            <div class="mod-hero__cta">
+              <WhatsAppCTA
+                location={`modulo-${modulo.id}`}
+                context={d.nombre}
+                message={d.ctaWhatsapp}
+                label="Hablar por WhatsApp"
+                size="lg"
+              />
+              <a href="/#hero-demo" class="btn-ghost">Ver mi propuesta gratis</a>
+            </div>
+          </div>
+          <div class="mod-hero__art"><DomainArt variant={d.orden} /></div>
+        </div>
+      </div>
+    </header>
+
+    {/* ── El problema, en palabras del cliente ───────────────────── */}
+    <section class="wrap band">
+      <div class="problema">
+        <p class="eyebrow">El problema</p>
+        <p class="problema__texto">{d.problema}</p>
+      </div>
+    </section>
+
+    {/* ── Capacidades ────────────────────────────────────────────── */}
+    <section class="wrap band">
+      <h2 class="h2">Qué hace</h2>
+      <ul class="grid-cap">
+        {d.capacidades.map((c) => (
+          <li class="cap">
+            <h3>{c.titulo}</h3>
+            <p>{c.descripcion}</p>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    {/* ── Canales ────────────────────────────────────────────────── */}
+    {d.canales.length > 0 && (
+      <section class="wrap band">
+        <h2 class="h2">Dónde trabaja</h2>
+        <ul class="pills">
+          {d.canales.map((c) => <li class="pill">{c}</li>)}
+        </ul>
+      </section>
+    )}
+
+    {/* ── Beneficios ─────────────────────────────────────────────── */}
+    {d.beneficios.length > 0 && (
+      <section class="wrap band">
+        <h2 class="h2">Qué cambia</h2>
+        <ul class="grid-ben">
+          {d.beneficios.map((b) => (
+            <li class="ben">
+              <h3>{b.titulo}</h3>
+              <p>{b.descripcion}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+
+    {/* ── KPIs · qué se mide, nunca cuánto se promete ────────────── */}
+    {d.kpis.length > 0 && (
+      <section class="wrap band">
+        <h2 class="h2">Qué medimos</h2>
+        <p class="nota">
+          Métricas, no promesas. No publicamos porcentajes de mejora porque
+          todavía no tenemos casos publicados que los respalden, y una cifra sin
+          fuente enlazable no vale nada.
+        </p>
+        <ul class="pills">
+          {d.kpis.map((k) => <li class="pill pill--kpi">{k}</li>)}
+        </ul>
+      </section>
+    )}
+
+    {/* ── Integraciones · nunca "partners", nunca "clientes" ─────── */}
+    {d.integraciones.length > 0 && (
+      <section class="wrap band">
+        <h2 class="h2">Nos integramos con</h2>
+        <ul class="pills pills--gris">
+          {d.integraciones.map((i) => <li class="pill">{i}</li>)}
+        </ul>
+      </section>
+    )}
+
+    {/* ── Cierre ─────────────────────────────────────────────────── */}
+    <section class="wrap band">
+      <div class="cierre">
+        <h2>¿Encaja con lo que necesitas?</h2>
+        <p>Cuéntanoslo por WhatsApp. Contesta una persona, no un formulario.</p>
+        <WhatsAppCTA
+          location={`modulo-${modulo.id}-cierre`}
+          context={d.nombre}
+          message={d.ctaWhatsapp}
+          size="lg"
+        />
+      </div>
+    </section>
+
+    {pilar && (
+      <section class="wrap band">
+        <p class="volver">
+          <a href={`/soluciones/${pilar.id}/`}>← Ver todo lo de {pilar.nombre.toLowerCase()}</a>
+        </p>
+      </section>
+    )}
+  </div>
+
+  <script is:inline type="application/ld+json" set:html={JSON.stringify(serviceJsonLd)} />
+  <script is:inline type="application/ld+json" set:html={JSON.stringify(breadcrumbJsonLd)} />
+</WebLayout>
+
+<style>
+  .wrap { max-width: 68rem; margin: 0 auto; padding-inline: 1.25rem; }
+  @media (min-width: 1024px) { .wrap { padding-inline: 2rem; } }
+
+  .band { padding-block: 3.5rem; }
+  .band + .band { border-top: 1px solid var(--zk-border); }
+
+  .mod-hero { padding-block: 5rem 1rem; }
+  .mod-hero__grid {
+    display: grid;
+    gap: 2.5rem;
+    align-items: center;
+  }
+  @media (min-width: 900px) {
+    .mod-hero__grid { grid-template-columns: 1.35fr 1fr; gap: 3.5rem; }
+  }
+  .mod-hero__art { aspect-ratio: 1; max-width: 320px; margin-inline: auto; }
+  .mod-hero__cta { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 2rem; }
+
+  .crumbs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--zk-muted);
+    margin-bottom: 2rem;
+  }
+  .crumbs a { color: var(--zk-text-2); text-decoration: none; }
+  .crumbs a:hover { color: var(--zk-text); }
+  .crumbs__actual { color: var(--zk-accent); }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--zk-accent);
+    margin: 0 0 1rem;
+  }
+
+  h1 {
+    font-size: clamp(2rem, 5vw, 3.25rem);
+    line-height: 1.06;
+    letter-spacing: -0.02em;
+    font-weight: 700;
+    margin: 0 0 1.25rem;
+    text-wrap: balance;
+  }
+  .lede { font-size: 1.125rem; color: var(--zk-text-2); margin: 0; max-width: 40ch; }
+
+  .h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin: 0 0 1.75rem;
+  }
+
+  .problema {
+    border-left: 2px solid var(--zk-accent);
+    padding-left: 1.5rem;
+  }
+  .problema__texto {
+    font-size: 1.25rem;
+    line-height: 1.55;
+    color: var(--zk-text);
+    margin: 0;
+    max-width: 58ch;
+    text-wrap: pretty;
+  }
+
+  .grid-cap, .grid-ben {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 1rem;
+  }
+  @media (min-width: 640px)  { .grid-cap { grid-template-columns: repeat(2, 1fr); } .grid-ben { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 1024px) { .grid-cap { grid-template-columns: repeat(3, 1fr); } }
+
+  .cap, .ben {
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 60%),
+      var(--zk-surface);
+    border: 1px solid var(--zk-border);
+    border-radius: var(--zk-r-lg);
+    padding: 1.25rem;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .cap:hover, .ben:hover {
+    border-color: color-mix(in srgb, var(--zk-accent) 40%, transparent);
+    transform: translateY(-2px);
+  }
+  .cap h3, .ben h3 { font-size: 0.9375rem; font-weight: 600; margin: 0 0 0.5rem; }
+  .cap p, .ben p { font-size: 0.875rem; line-height: 1.55; color: var(--zk-text-2); margin: 0; }
+
+  .pills { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .pill {
+    padding: 0.4rem 0.8rem;
+    border: 1px solid var(--zk-border);
+    border-radius: 999px;
+    font-size: 0.8125rem;
+    color: var(--zk-text-2);
+    background: var(--zk-surface);
+  }
+  .pill--kpi { font-family: var(--font-mono); font-size: 0.75rem; }
+  .pills--gris .pill { color: var(--zk-muted); }
+
+  .nota { font-size: 0.875rem; color: var(--zk-muted); max-width: 60ch; margin: -0.75rem 0 1.5rem; }
+
+  .cierre { text-align: center; display: grid; justify-items: center; gap: 0.75rem; }
+  .cierre h2 { font-size: 1.75rem; font-weight: 700; margin: 0; }
+  .cierre p { color: var(--zk-text-2); margin: 0 0 0.75rem; }
+
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    min-height: 48px;
+    padding: 0 20px;
+    border: 1px solid var(--zk-border-hi);
+    border-radius: var(--zk-r-md);
+    color: var(--zk-text);
+    font-weight: 600;
+    font-size: 0.9375rem;
+    text-decoration: none;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .btn-ghost:hover { background: rgba(255, 255, 255, 0.05); border-color: var(--zk-accent); }
+
+  .volver a { color: var(--zk-text-2); text-decoration: none; font-size: 0.9375rem; }
+  .volver a:hover { color: var(--zk-accent); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cap:hover, .ben:hover { transform: none; }
+  }
+</style>
