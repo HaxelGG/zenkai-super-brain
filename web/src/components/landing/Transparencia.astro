@@ -1,0 +1,104 @@
+---
+/**
+ * Transparencia · RGPD y AI Act.
+ *
+ * Para un comprador europeo esto no es relleno legal: es la objeción que mata
+ * la venta si no está resuelta antes de la llamada. Y hay una fecha real
+ * encima — las obligaciones de transparencia del art. 50 del AI Act aplican
+ * desde el 2 de agosto de 2026 a cualquiera que ponga un sistema de IA en el
+ * mercado de la UE, esté establecido donde esté.
+ *
+ * Todo lo que se afirma aquí es verificable o está formulado como lo que
+ * hacemos, nunca como una certificación que no tenemos.
+ */
+import WhatsAppCTA from '../WhatsAppCTA.astro';
+
+const puntos = [
+  {
+    titulo: 'Tus clientes saben que hablan con una IA',
+    texto:
+      'Cada agente que desplegamos se presenta como lo que es, al inicio de la conversación y sin letra pequeña. Es lo que exige el artículo 50 del AI Act desde el 2 de agosto de 2026, y lo entregamos activado por defecto, no como extra.',
+  },
+  {
+    titulo: 'Escalado a una persona, siempre disponible',
+    texto:
+      'Ninguna conversación queda atrapada con el agente. El cliente puede pedir hablar con alguien en cualquier momento y el traspaso lleva el contexto ya cargado.',
+  },
+  {
+    titulo: 'RGPD con alcance extraterritorial asumido',
+    texto:
+      'ZENKAI está registrada fuera de la UE, pero el RGPD se aplica igual cuando se ofrecen servicios a personas que están en la Unión. Tratamos los datos bajo ese estándar en vez de escudarnos en dónde está la entidad.',
+  },
+  {
+    titulo: 'El mínimo de datos que hace falta',
+    texto:
+      'La demo de la web no pide email para enseñarte el resultado. Las IP se guardan hasheadas, nunca en claro. No hay Google Analytics ni píxel de Meta en este sitio.',
+  },
+];
+---
+<section id="transparencia" class="tr">
+  <div class="tr__wrap">
+    <header class="tr__head">
+      <p class="eyebrow">Transparencia</p>
+      <h2>Lo que preguntan los compradores europeos, respondido antes de preguntarlo</h2>
+    </header>
+
+    <ul class="tr__grid">
+      {puntos.map((p) => (
+        <li class="tr__item">
+          <h3>{p.titulo}</h3>
+          <p>{p.texto}</p>
+        </li>
+      ))}
+    </ul>
+
+    <div class="tr__pie">
+      <p class="tr__nota">
+        Esto describe cómo construimos, no un certificado de cumplimiento. Si tu
+        sector exige una evaluación formal, dínoslo desde el principio y lo
+        planteamos con tu asesoría legal, no por nuestra cuenta.
+      </p>
+      <WhatsAppCTA
+        location="home-transparencia"
+        context="rgpd-ai-act"
+        message="Hola ZENKAI. Tengo preguntas sobre RGPD y AI Act antes de avanzar."
+        label="Preguntar por WhatsApp"
+        variant="inline"
+      />
+    </div>
+  </div>
+</section>
+
+<style>
+  .tr { padding-block: 5rem; border-top: 1px solid var(--zk-border); }
+  .tr__wrap { max-width: 68rem; margin: 0 auto; padding-inline: 1.25rem; }
+  @media (min-width: 1024px) { .tr__wrap { padding-inline: 2rem; } }
+
+  .eyebrow {
+    font-family: var(--font-mono); font-size: 0.6875rem;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--zk-data); margin: 0 0 1rem;
+  }
+  .tr__head { max-width: 46rem; margin-bottom: 2.5rem; }
+  .tr__head h2 {
+    font-size: clamp(1.625rem, 3.6vw, 2.375rem);
+    line-height: 1.15; letter-spacing: -0.02em; font-weight: 700;
+    margin: 0; text-wrap: balance;
+  }
+
+  .tr__grid { list-style: none; margin: 0 0 2rem; padding: 0; display: grid; gap: 1rem; }
+  @media (min-width: 760px) { .tr__grid { grid-template-columns: repeat(2, 1fr); } }
+
+  .tr__item {
+    padding: 1.5rem;
+    border: 1px solid var(--zk-border);
+    border-left: 2px solid var(--zk-data);
+    border-radius: var(--zk-r-md);
+    background: var(--zk-surface);
+  }
+  .tr__item h3 { font-size: 0.9375rem; font-weight: 700; margin: 0 0 0.625rem; }
+  .tr__item p { font-size: 0.875rem; line-height: 1.6; color: var(--zk-text-2); margin: 0; text-wrap: pretty; }
+
+  .tr__pie { display: flex; flex-wrap: wrap; align-items: center; gap: 1.25rem; justify-content: space-between; }
+  .tr__nota { font-size: 0.8125rem; color: var(--zk-muted); margin: 0; max-width: 58ch; }
+</style>

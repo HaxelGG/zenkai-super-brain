@@ -2,40 +2,56 @@
 export const prerender = true;
 import WebLayout from '../layouts/WebLayout.astro';
 import HeroNuevo from '../components/landing/HeroNuevo.astro';
-import ElProblema from '../components/landing/ElProblema.astro';
-import DiagramaNeural from '../components/landing/DiagramaNeural.astro';
-import StatsReales from '../components/landing/StatsReales.astro';
-import DemoSection from '../components/landing/DemoSection.astro';
-import Proyeccion90Dias from '../components/landing/Proyeccion90Dias.astro';
+import DiagnosticoSelector from '../components/landing/DiagnosticoSelector.astro';
+import TresPilares from '../components/landing/TresPilares.astro';
 import ComoFunciona from '../components/landing/ComoFunciona.astro';
-import Comparativa from '../components/landing/Comparativa.astro';
-import Sectores from '../components/landing/Sectores.astro';
+import DemoSection from '../components/landing/DemoSection.astro';
 import Planes from '../components/landing/Planes.astro';
-import VentajasTecnicas from '../components/landing/VentajasTecnicas.astro';
+import Comparativa from '../components/landing/Comparativa.astro';
+import Transparencia from '../components/landing/Transparencia.astro';
 import FAQ from '../components/landing/FAQ.astro';
 import CTAFinal from '../components/landing/CTAFinal.astro';
 import StickyBar from '../components/landing/StickyBar.astro';
 ---
 <WebLayout
-  title="ZENKAI · Vendé más sin contratar a nadie. Sin trabajar más horas."
-  description="Construimos sistemas de IA que aumentan tus ventas, reducen tus costos y automatizan tu operación. Tu propuesta personalizada en 30 segundos. Gratis."
+  title="ZENKAI · Sistemas de IA que devuelven dinero a tu empresa"
+  description="Construimos sistemas de IA para vender más, atender a todos y operar con menos fricción. Cuéntanos qué te está costando dinero por WhatsApp."
 >
-  {/* Sprint 2.5 v3.3 · nuevo orden visual del fold superior */}
-  {/* NavBar y Footer vienen del WebLayout */}
+  {/*
+    Orden de bloques, cada uno con un objetivo. Antes eran trece secciones sin
+    jerarquía; ahora cada una hace un trabajo distinto y en secuencia:
 
-  <HeroNuevo />              {/* 1 · Hero rediseñado (reemplaza HeroDemo) */}
-  <ElProblema />             {/* 2 · NUEVO · contraste positivo */}
-  <DiagramaNeural />         {/* 3 · SUBIDO · era sección 5 (v4 cinematic bloom + Bezier) */}
-  <StatsReales />            {/* 4 */}
-  <DemoSection />            {/* 5 · MOVIDO · era sección 1 (demo box extraído del hero) */}
-  <Proyeccion90Dias />       {/* 6 */}
-  <ComoFunciona />           {/* 7 */}
-  <Comparativa />            {/* 8 */}
-  <Sectores />               {/* 9 */}
-  <Planes />                 {/* 10 */}
-  <VentajasTecnicas />       {/* 11 */}
-  <FAQ />                    {/* 12 */}
-  <CTAFinal />               {/* 13 */}
+     1 Hero               comprensión en 5 segundos + primer clic
+     2 Diagnóstico        autoidentificación y cualificación   ← la clave
+     3 Tres pilares       navegación al catálogo sin saturar
+     4 Cómo trabajamos    reducir incertidumbre
+     5 Demo               prueba de producto (ya no es el CTA principal)
+     6 Precios            cualificación por presupuesto
+     7 Comparativa        diferenciación
+     8 Transparencia      eliminar el riesgo europeo (RGPD + AI Act)
+     9 FAQ                últimas objeciones
+    10 Cierre             última conversión
 
-  <StickyBar />              {/* fixed bottom · NO es sección */}
+    Fuera de la home a propósito:
+    · StatsReales y Proyeccion90Dias — estadísticas de terceros y proyecciones
+      sin caso publicado detrás. Una cifra que no se puede enlazar resta.
+    · DiagramaNeural — los 12 agentes son cómo trabajamos, no qué compras.
+      Su sitio es /como-trabajamos.
+    · ElProblema — lo sustituye el selector de diagnóstico, que hace el mismo
+      trabajo pero cualifica.
+    · Sectores y VentajasTecnicas — pasan a sus propias rutas.
+  */}
+
+  <HeroNuevo />
+  <DiagnosticoSelector />
+  <TresPilares />
+  <ComoFunciona />
+  <DemoSection />
+  <Planes />
+  <Comparativa />
+  <Transparencia />
+  <FAQ />
+  <CTAFinal />
+
+  <StickyBar />
 </WebLayout>

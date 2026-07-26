@@ -10,7 +10,8 @@ import '../styles/global.css';
 import SeoHead from '../components/SeoHead.astro';
 import NavBar from '../components/landing/NavBar.astro';
 import Footer from '../components/landing/Footer.astro';
-import WhatsAppFloat from '../components/WhatsAppFloat.astro';
+// WhatsAppFloat (botón circular flotante sin etiqueta) queda sustituido por la
+// barra fija inferior de StickyBar.astro, que sí dice a dónde lleva.
 
 interface Props {
   title: string;
@@ -30,7 +31,6 @@ const { title, description, canonical, ogImage, noindex } = Astro.props;
     <NavBar />
     <main><slot /></main>
     <Footer />
-    <WhatsAppFloat />
 
     <script>
       // Reveal · marca todos los .reveal como visibles al cargar (sin observer).

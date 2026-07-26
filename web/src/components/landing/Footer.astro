@@ -1,5 +1,6 @@
 ---
 import Brand from './Brand.astro';
+import WhatsAppCTA from '../WhatsAppCTA.astro';
 ---
 <footer class="border-t border-zk-border bg-zk-bg2 relative overflow-hidden">
 
@@ -19,10 +20,16 @@ import Brand from './Brand.astro';
             <svg class="w-4 h-4 group-hover:text-zk-accent transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
             <span class="font-mono">hola@zenkai.systems</span>
           </a>
-          <a href="https://wa.me/573226272302" class="flex items-center gap-2 text-zk-text2 hover:text-zk-text transition group">
-            <svg class="w-4 h-4 group-hover:text-[#25D366] transition" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448L.057 24z"/></svg>
-            <span class="font-mono">+57 322 627 2302</span>
-          </a>
+        </div>
+        {/* El enlace de WhatsApp sale del componente único, también aquí: así
+            el clic desde el pie se atribuye igual que cualquier otro. */}
+        <div class="mt-5">
+          <WhatsAppCTA
+            location="footer"
+            message="Hola ZENKAI. Vengo del pie de la web y quiero contaros mi caso."
+            label="+57 322 627 2302"
+            variant="inline"
+          />
         </div>
       </div>
 
@@ -52,7 +59,7 @@ import Brand from './Brand.astro';
         <ul class="space-y-2 text-sm">
           <li><a href="#como-funciona" class="text-zk-text2 hover:text-zk-text transition">Cómo funciona</a></li>
           <li><a href="#faq" class="text-zk-text2 hover:text-zk-text transition">FAQ</a></li>
-          <li><a href="https://wa.me/573226272302" class="text-zk-text2 hover:text-zk-text transition">WhatsApp directo</a></li>
+          <li><a href="#diagnostico" class="text-zk-text2 hover:text-zk-text transition">Diagnóstico</a></li>
           <li><a href="/privacy" class="text-zk-text2 hover:text-zk-text transition">Política de privacidad</a></li>
         </ul>
       </div>

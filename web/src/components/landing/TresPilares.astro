@@ -1,0 +1,140 @@
+---
+/**
+ * Capa 2 · tres pilares por resultado de negocio.
+ *
+ * Es la navegación que sustituye a la cuadrícula de 14 tarjetas. Tres opciones
+ * se eligen; catorce se abandonan. Cada pilar dice cuántos módulos contiene
+ * para que el visitante sepa que hay profundidad detrás sin tener que verla
+ * toda de golpe.
+ */
+import { getMenu, getModuloMedida } from '../../lib/catalogo';
+
+const pilares = await getMenu();
+const medida = await getModuloMedida();
+---
+<section id="soluciones" class="pil">
+  <div class="pil__wrap">
+    <header class="pil__head">
+      <p class="eyebrow">Soluciones</p>
+      <h2>Tres formas de que la IA te devuelva dinero</h2>
+      <p class="pil__lede">
+        No vendemos catorce productos sueltos. Vendemos tres resultados, y detrás
+        de cada uno están los módulos que hagan falta.
+      </p>
+    </header>
+
+    <ul class="pil__grid">
+      {pilares.map((p) => (
+        <li>
+          <a href={`/soluciones/${p.id}/`} class="pil__card" data-dominio={p.dominio}>
+            <div class="pil__cardhead">
+              <h3>{p.nombre}</h3>
+              <span class="pil__count">{p.modulos.length} módulos</span>
+            </div>
+            <p class="pil__titular">{p.titular}</p>
+            <p class="pil__promesa">{p.promesa}</p>
+            <ul class="pil__modulos">
+              {p.modulos.slice(0, 4).map((m) => <li>{m.data.nombre}</li>)}
+              {p.modulos.length > 4 && <li class="pil__resto">y {p.modulos.length - 4} más</li>}
+            </ul>
+            <span class="pil__mas">Ver el pilar →</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+
+    {medida && (
+      <a href={`/modulos/${medida.id}/`} class="pil__medida" data-dominio={medida.data.dominio}>
+        <div>
+          <span class="pil__medidaTag">A medida</span>
+          <strong>{medida.data.nombre}</strong>
+          <span class="pil__medidaTxt">{medida.data.titular}</span>
+        </div>
+        <span class="pil__mas">Ver módulo →</span>
+      </a>
+    )}
+  </div>
+</section>
+
+<style>
+  .pil { padding-block: 5rem; border-top: 1px solid var(--zk-border); }
+  .pil__wrap { max-width: 68rem; margin: 0 auto; padding-inline: 1.25rem; }
+  @media (min-width: 1024px) { .pil__wrap { padding-inline: 2rem; } }
+
+  .pil__head { max-width: 44rem; margin-bottom: 2.5rem; }
+  .eyebrow {
+    font-family: var(--font-mono); font-size: 0.6875rem;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--zk-growth); margin: 0 0 1rem;
+  }
+  .pil__head h2 {
+    font-size: clamp(1.75rem, 4vw, 2.75rem);
+    line-height: 1.1; letter-spacing: -0.02em; font-weight: 700;
+    margin: 0 0 1rem; text-wrap: balance;
+  }
+  .pil__lede { color: var(--zk-text-2); margin: 0; max-width: 52ch; }
+
+  .pil__grid { list-style: none; margin: 0 0 1rem; padding: 0; display: grid; gap: 1rem; }
+  @media (min-width: 860px) { .pil__grid { grid-template-columns: repeat(3, 1fr); } }
+
+  .pil__card {
+    display: flex; flex-direction: column; height: 100%;
+    padding: 1.75rem;
+    border: 1px solid var(--zk-border);
+    border-radius: var(--zk-r-lg);
+    background:
+      linear-gradient(180deg, color-mix(in srgb, var(--zk-accent) 7%, transparent), transparent 55%),
+      var(--zk-surface);
+    text-decoration: none; color: inherit;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .pil__card:hover {
+    border-color: color-mix(in srgb, var(--zk-accent) 55%, transparent);
+    transform: translateY(-3px);
+  }
+  .pil__card:focus-visible { outline: 2px solid var(--zk-accent); outline-offset: 3px; }
+
+  .pil__cardhead { display: flex; align-items: baseline; justify-content: space-between; gap: 0.75rem; margin-bottom: 0.75rem; }
+  .pil__card h3 { font-size: 1.5rem; font-weight: 700; margin: 0; color: var(--zk-accent); letter-spacing: -0.01em; }
+  .pil__count { font-family: var(--font-mono); font-size: 0.6875rem; color: var(--zk-muted); white-space: nowrap; }
+
+  .pil__titular { font-size: 1rem; font-weight: 600; color: var(--zk-text); margin: 0 0 0.5rem; text-wrap: balance; }
+  .pil__promesa { font-size: 0.875rem; line-height: 1.55; color: var(--zk-text-2); margin: 0 0 1.25rem; }
+
+  .pil__modulos {
+    list-style: none; margin: 0 0 1.5rem; padding: 0;
+    display: flex; flex-wrap: wrap; gap: 0.375rem; flex: 1; align-content: start;
+  }
+  .pil__modulos li {
+    font-family: var(--font-mono); font-size: 0.6875rem;
+    padding: 0.25rem 0.5rem;
+    border: 1px solid var(--zk-border); border-radius: 999px;
+    color: var(--zk-text-2);
+  }
+  .pil__resto { color: var(--zk-muted) !important; border-style: dashed !important; }
+
+  .pil__mas { font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.08em; color: var(--zk-accent); }
+
+  .pil__medida {
+    display: flex; flex-wrap: wrap; gap: 1rem;
+    align-items: center; justify-content: space-between;
+    padding: 1.25rem 1.75rem;
+    border: 1px dashed color-mix(in srgb, var(--zk-accent) 40%, transparent);
+    border-radius: var(--zk-r-lg);
+    text-decoration: none; color: inherit;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .pil__medida:hover {
+    border-color: var(--zk-accent);
+    background: color-mix(in srgb, var(--zk-accent) 6%, transparent);
+  }
+  .pil__medida > div { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.75rem; }
+  .pil__medidaTag {
+    font-family: var(--font-mono); font-size: 0.625rem;
+    letter-spacing: 0.15em; text-transform: uppercase; color: var(--zk-muted);
+  }
+  .pil__medida strong { font-size: 1.0625rem; color: var(--zk-accent); }
+  .pil__medidaTxt { font-size: 0.875rem; color: var(--zk-text-2); }
+
+  @media (prefers-reduced-motion: reduce) { .pil__card:hover { transform: none; } }
+</style>

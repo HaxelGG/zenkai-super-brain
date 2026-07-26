@@ -1,6 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import logoSquare from '../../assets/brand/zenkai-logo-square.png';
+import WhatsAppCTA from '../WhatsAppCTA.astro';
 ---
 <section class="py-28 lg:py-36 border-t border-zk-border/50 relative overflow-hidden">
 
@@ -25,10 +26,18 @@ import logoSquare from '../../assets/brand/zenkai-logo-square.png';
       Prueba la propuesta gratis. Si te sirve, hablamos. Si no, te quedas con un plan de acción concreto. <strong class="text-zk-text">No hay forma de perder.</strong>
     </p>
 
-    <div class="flex flex-col sm:flex-row gap-3 justify-center mb-7">
-      <a href="#hero-demo" class="btn-primary text-white font-semibold text-base px-8 py-4 rounded-xl inline-flex items-center justify-center gap-2">
-        <span>Generar mi propuesta en 30 segundos</span>
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+    {/* WhatsApp primero también en el cierre · es el tercero de la página
+        (hero, diagnóstico, cierre) y el que recoge al que llegó hasta abajo. */}
+    <div class="flex flex-col sm:flex-row gap-3 justify-center items-center mb-7">
+      <WhatsAppCTA
+        location="cierre"
+        message="Hola ZENKAI. He leído la web entera y quiero contaros mi caso."
+        label="Hablar por WhatsApp"
+        size="lg"
+      />
+      <a href="#hero-demo" class="text-sm font-medium text-zk-text2 hover:text-zk-text transition inline-flex items-center gap-2 min-h-[48px] px-2">
+        <span>O generar mi propuesta primero</span>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
       </a>
     </div>
 
