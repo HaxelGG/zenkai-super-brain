@@ -15,12 +15,18 @@ const {
   noindex = false,
 } = Astro.props;
 
+// og:image y twitter:image DEBEN ser absolutas: los scrapers (WhatsApp, Slack,
+// Twitter, LinkedIn) no resuelven rutas relativas y descartan la preview entera.
+const site = Astro.site ?? new URL('https://zenkai.systems');
+const absolute = (path: string) => new URL(path, site).href;
+const ogImageUrl = absolute(ogImage);
+
 const organizationJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
   name: 'ZENKAI Growth Systems',
   url: 'https://zenkai.systems',
-  logo: 'https://zenkai.systems/brand/zenkai-logo-square.png',
+  logo: absolute('/brand/zenkai-logo-horizontal.png'),
   email: 'hola@zenkai.systems',
   areaServed: ['CO', 'ES', 'MX', 'AR', 'CL', 'PE'],
   description:
@@ -44,7 +50,10 @@ const organizationJsonLd = {
 <!-- Open Graph -->
 <meta property="og:title" content={title} />
 <meta property="og:description" content={description} />
-<meta property="og:image" content={ogImage} />
+<meta property="og:image" content={ogImageUrl} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="ZENKAI · AI Growth Systems" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content={canonical} />
 <meta property="og:locale" content="es_ES" />
@@ -54,7 +63,7 @@ const organizationJsonLd = {
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content={title} />
 <meta name="twitter:description" content={description} />
-<meta name="twitter:image" content={ogImage} />
+<meta name="twitter:image" content={ogImageUrl} />
+<meta name="twitter:image:alt" content="ZENKAI · AI Growth Systems" />
 
-{/* TODO: replace zenkai-logo-square.png with actual square version (currently using horizontal as fallback) */}
 <script is:inline type="application/ld+json" set:html={JSON.stringify(organizationJsonLd)} />
