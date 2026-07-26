@@ -131,6 +131,35 @@ describe('POST /api/lead-demo', () => {
     expect(res.headers.get('x-airtable-record-id')).toBeNull();
   });
 
+  // Regresión del bug real: el rate-limiter contra un Upstash caído tiraba, el throw
+  // escapaba de la ruta y Vercel devolvía 500 con cuerpo VACÍO. El cliente hacía r.json()
+  // sobre ese cuerpo y reventaba. El guard debe convertir cualquier throw en JSON parseable.
+  it('500 con JSON parseable (no cuerpo vacío) cuando algo tira inesperadamente', async () => {
+    mockCheckRateLimit.mockRejectedValueOnce(new Error('upstash unreachable'));
+    const res = await POST({ request: buildRequest({ texto: TEXTO }) } as any);
+    expect(res.status).toBe(500);
+    const body = await res.json();
+    expect(body.code).toBe('unexpected');
+    expect(typeof body.requestId).toBe('string');
+    expect(body.requestId.length).toBeGreaterThan(0);
+    expect(mockGenerate).not.toHaveBeenCalled();
+  });
+
+  it('todas las respuestas de error llevan code + requestId y el header x-request-id', async () => {
+    const res = await POST({ request: buildRequest({ texto: 'corto' }) } as any);
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.code).toBe('invalid_input');
+    expect(body.requestId).toBe(res.headers.get('x-request-id'));
+  });
+
+  it('200 también expone x-request-id para correlacionar con los logs', async () => {
+    mockGenerate.mockResolvedValueOnce({ ok: true, data: validProposal });
+    const res = await POST({ request: buildRequest({ texto: TEXTO }) } as any);
+    expect(res.status).toBe(200);
+    expect(res.headers.get('x-request-id')).toMatch(/^\S+$/);
+  });
+
   it('extrae IP de x-forwarded-for y la hashea para rate limit', async () => {
     mockGenerate.mockResolvedValueOnce({ ok: true, data: validProposal });
     await POST({
