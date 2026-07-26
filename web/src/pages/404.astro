@@ -7,11 +7,12 @@ import WebLayout from '../layouts/WebLayout.astro';
   description="La página que buscás no existe. Volvé al inicio."
   noindex={true}
 >
-  <main class="not-found">
+  {/* El <main> lo pone WebLayout alrededor del slot · acá sólo va el contenido. */}
+  <div class="not-found">
     <h1>Página no encontrada</h1>
     <p>La URL que ingresaste no corresponde a ninguna página de zenkai.systems.</p>
     <a href="/">← Volver al inicio</a>
-  </main>
+  </div>
 </WebLayout>
 
 <style>
