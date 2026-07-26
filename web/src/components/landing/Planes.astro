@@ -1,23 +1,23 @@
 ---
 // 5 tiers · 2 featured (Lite + Starter) en grid 2-col + 3 compact (Growth + Pro + Enterprise) en grid 3-col + banner oferta 50% off
+// Los importes NO viven acá: salen de data/pricing.ts, fijados a mano en cada moneda.
+import { PRICING, priceAttrs } from '../../data/pricing';
+import { DEFAULT_CURRENCY, formatPrice } from '../../lib/currency';
+
 interface FeaturedTier {
-  name: string;
+  name: keyof typeof PRICING;
   badge: string;
   badgeStyle?: string;
   days: string;
   tagline: string;
-  setupUsd: number;
-  monthlyUsd: number;
   description: string;
   features: string[];
   ctaSubtext: string;
 }
 interface CompactTier {
-  name: string;
+  name: keyof typeof PRICING;
   days: string;
   tagline: string;
-  setupUsd: number;
-  monthlyUsd: number;
   features: string[];
   ctaLabel: string;
   /** Si es true, el CTA va a Cal.com en nueva pestaña (Pro/Enterprise). Default: scroll a #hero-demo. */
@@ -30,8 +30,6 @@ const featured: FeaturedTier[] = [
     badge: 'Más vendido · Lite',
     days: '5 días · listo',
     tagline: 'Tu primera presencia digital seria. Sin compromiso de ads.',
-    setupUsd: 300,
-    monthlyUsd: 90,
     description: 'Para dueños de negocio tradicional que necesitan estar online <strong class="text-zk-text">ya</strong>. Sin pagar agencia mensual cara, sin invertir en publicidad todavía.',
     features: [
       'Sitio web 1 página optimizado',
@@ -49,8 +47,6 @@ const featured: FeaturedTier[] = [
     badgeStyle: 'background: linear-gradient(135deg, #10B981, #1E6FFF);',
     days: '6 días · listo',
     tagline: 'Vender más sin contratar a nadie más.',
-    setupUsd: 2000,
-    monthlyUsd: 700,
     description: 'Para dueños que ya facturan <strong class="text-zk-text">$2-8K USD/mes</strong> y quieren multiplicar adquisición + automatizar operación.',
     features: [
       'Todo del plan <strong class="text-zk-text">Lite</strong>',
@@ -69,8 +65,6 @@ const compact: CompactTier[] = [
     name: 'Growth',
     days: '12 días',
     tagline: 'Cuando ya tienes tracción y la IA escala por ti.',
-    setupUsd: 4000,
-    monthlyUsd: 1200,
     features: [
       'Agente IA voz + texto entrenado',
       'Cal.com Pro · reservas reales',
@@ -83,8 +77,6 @@ const compact: CompactTier[] = [
     name: 'Pro',
     days: '30 días',
     tagline: 'Tu empresa entera operando con IA. No solo marketing.',
-    setupUsd: 9500,
-    monthlyUsd: 3000,
     features: [
       '8 departamentos automatizados',
       '12 agentes IA conectados',
@@ -98,8 +90,6 @@ const compact: CompactTier[] = [
     name: 'Enterprise',
     days: '100 días',
     tagline: 'Para empresas que ya no caben en SaaS.',
-    setupUsd: 30000,
-    monthlyUsd: 5500,
     features: [
       'Plataforma custom (Next.js + Supabase)',
       'Branding propio · auth · dashboards',
@@ -111,7 +101,10 @@ const compact: CompactTier[] = [
   },
 ];
 
-const fmtUsd = (n: number) => `$${n.toLocaleString('en-US')}`;
+// Render inicial en la moneda por defecto · el conmutador del NavBar reescribe
+// .price / .price-monthly / .currency-code leyendo los data-price-* de cada elemento.
+const initial = (money: import('../../data/pricing').Money) =>
+  formatPrice(money[DEFAULT_CURRENCY], DEFAULT_CURRENCY);
 const calcomLink = 'https://cal.com/zenkai-growth-systems/strategy-call';
 ---
 <section id="planes" class="py-24 lg:py-32 border-t border-zk-border/50 relative overflow-hidden">
@@ -146,10 +139,11 @@ const calcomLink = 'https://cal.com/zenkai-growth-systems/strategy-call';
 
           <div class="mb-6 pb-6 border-b border-zk-border">
             <div class="flex items-baseline gap-2">
-              <span class="text-4xl font-bold price" data-usd={t.setupUsd}>{fmtUsd(t.setupUsd)}</span>
-              <span class="text-sm font-mono text-zk-muted">USD setup</span>
+              <span class="text-4xl font-bold price" {...priceAttrs(PRICING[t.name].setup)}>{initial(PRICING[t.name].setup)}</span>
+              <span class="text-sm font-mono text-zk-muted"><span class="currency-code">{DEFAULT_CURRENCY}</span> setup</span>
             </div>
-            <div class="text-sm text-zk-text2 mt-2">+ <span class="price-monthly font-mono font-semibold text-zk-text" data-usd={t.monthlyUsd}>{fmtUsd(t.monthlyUsd)}/mes</span> {t.name === 'Lite' ? 'mantenimiento' : 'operación'}</div>
+            <div class="text-sm text-zk-text2 mt-2">+ <span class="price-monthly font-mono font-semibold text-zk-text" {...priceAttrs(PRICING[t.name].monthly)}>{initial(PRICING[t.name].monthly)}/mes</span> {t.name === 'Lite' ? 'mantenimiento' : 'operación'}</div>
+            <div class="currency-note hidden text-xs text-zk-muted mt-2"></div>
           </div>
 
           <p class="text-sm text-zk-text2 mb-5 leading-relaxed" set:html={t.description}></p>
@@ -179,8 +173,9 @@ const calcomLink = 'https://cal.com/zenkai-growth-systems/strategy-call';
           </div>
           <p class="text-xs text-zk-text2 mb-4">{t.tagline}</p>
           <div class="mb-4 pb-4 border-b border-zk-border">
-            <div class="text-2xl font-bold price" data-usd={t.setupUsd}>{fmtUsd(t.setupUsd)} <span class="text-xs font-normal text-zk-muted">USD</span></div>
-            <div class="text-xs text-zk-text2 mt-1">+ <span class="price-monthly font-mono" data-usd={t.monthlyUsd}>{fmtUsd(t.monthlyUsd)}/mes</span></div>
+            <div class="text-2xl font-bold"><span class="price" {...priceAttrs(PRICING[t.name].setup)}>{initial(PRICING[t.name].setup)}</span> <span class="text-xs font-normal text-zk-muted currency-code">{DEFAULT_CURRENCY}</span></div>
+            <div class="text-xs text-zk-text2 mt-1">+ <span class="price-monthly font-mono" {...priceAttrs(PRICING[t.name].monthly)}>{initial(PRICING[t.name].monthly)}/mes</span></div>
+            <div class="currency-note hidden text-xs text-zk-muted mt-1.5"></div>
           </div>
           <ul class="space-y-2 mb-6 text-xs text-zk-text2">
             {t.features.map((f) => (

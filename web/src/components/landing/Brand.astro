@@ -75,4 +75,11 @@ const { variant = 'default', showTagline = true } = Astro.props;
     .brand-default .brand-wordmark { font-size: 20px; }
     .brand-default .brand-tagline { font-size: 8px; }
   }
+
+  /* En pantallas muy estrechas el tagline compite por el ancho con el conmutador
+     de moneda, que ahora es visible en móvil y no puede bajar de 48px. El wordmark
+     solo identifica la marca igual de bien; el tagline es lo prescindible. */
+  @media (max-width: 340px) {
+    .brand-default .brand-tagline { display: none; }
+  }
 </style>

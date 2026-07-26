@@ -1,5 +1,6 @@
 ---
 import Brand from './Brand.astro';
+import { CURRENCY_CODES, DEFAULT_CURRENCY } from '../../lib/currency';
 ---
 <header class="fixed top-0 left-0 right-0 z-50 nav-blur border-b border-zk-border/50">
   <div class="max-w-7xl mx-auto px-5 lg:px-8 h-16 flex items-center justify-between">
@@ -17,11 +18,21 @@ import Brand from './Brand.astro';
     </nav>
 
     <div class="flex items-center gap-3">
-      <div class="hidden md:flex items-center text-xs font-mono bg-zk-surface border border-zk-border rounded-lg overflow-hidden">
-        <button class="currency-btn px-2.5 py-1.5 text-zk-text bg-zk-accent" data-currency="USD">USD</button>
-        <button class="currency-btn px-2.5 py-1.5 text-zk-text2 hover:text-zk-text" data-currency="COP">COP</button>
-        <button class="currency-btn px-2.5 py-1.5 text-zk-text2 hover:text-zk-text" data-currency="EUR">EUR</button>
-        <button class="currency-btn px-2.5 py-1.5 text-zk-text2 hover:text-zk-text" data-currency="MXN">MXN</button>
+      {/* Visible también en móvil: quien compara precios lo hace sobre todo desde el
+          teléfono, y ocultarlo con `hidden md:flex` dejaba a ese usuario sin la
+          única pista de en qué moneda va a pagar. */}
+      <div
+        class="currency-switch flex items-center text-xs font-mono bg-zk-surface border border-zk-border rounded-lg overflow-hidden"
+        role="group"
+        aria-label="Moneda de los precios"
+      >
+        {CURRENCY_CODES.map((code) => (
+          <button
+            class:list={['currency-btn', code === DEFAULT_CURRENCY ? 'is-active' : '']}
+            data-currency={code}
+            aria-pressed={code === DEFAULT_CURRENCY ? 'true' : 'false'}
+          >{code}</button>
+        ))}
       </div>
       <a href="#hero-demo" class="hidden sm:inline-flex text-sm font-semibold bg-white text-zk-bg px-4 py-2 rounded-lg hover:bg-zk-text2 transition">
         Probar gratis
@@ -70,42 +81,58 @@ import Brand from './Brand.astro';
 </div>
 
 <script>
-  // Currency toggle · verbatim del HTML v3.2
-  // Actualiza estilos de botones + recalcula elementos .price y .price-monthly via data-usd
-  const rates: Record<string, number> = { USD: 1, COP: 4000, EUR: 0.92, MXN: 17 };
-  const symbols: Record<string, string> = { USD: '$', COP: '$', EUR: '€', MXN: '$' };
-  const suffixes: Record<string, string> = { USD: 'USD', COP: 'COP', EUR: 'EUR', MXN: 'MXN' };
+  // === Conmutador de moneda ===
+  // No hay conversión: cada elemento de precio trae su importe ya fijado en cada
+  // moneda (data-price-usd, data-price-eur, ...) desde data/pricing.ts. Este script
+  // sólo elige cuál de esos importes mostrar y cómo formatearlo.
+  import { CURRENCIES, DEFAULT_CURRENCY, formatPrice, isCurrencyCode } from '../../lib/currency';
+  import type { CurrencyCode } from '../../lib/currency';
 
-  const applyCurrency = (cur: string) => {
+  const applyCurrency = (cur: CurrencyCode) => {
     document.querySelectorAll<HTMLButtonElement>('.currency-btn').forEach((b) => {
       const isActive = b.dataset.currency === cur;
-      b.classList.toggle('text-zk-text', isActive);
-      b.classList.toggle('bg-zk-accent', isActive);
-      b.classList.toggle('text-zk-text2', !isActive);
+      b.classList.toggle('is-active', isActive);
+      b.setAttribute('aria-pressed', String(isActive));
     });
+
     document.querySelectorAll<HTMLElement>('.price, .price-monthly').forEach((el) => {
-      const usd = parseFloat(el.dataset.usd ?? '0');
-      if (Number.isNaN(usd)) return;
-      const converted = Math.round(usd * rates[cur]);
-      const formatted = converted.toLocaleString('en-US');
-      const isMonthly = el.classList.contains('price-monthly');
-      el.innerHTML = isMonthly
-        ? `${symbols[cur]}${formatted}/mes`
-        : `${symbols[cur]}${formatted} <span class="text-sm font-normal text-zk-muted">${suffixes[cur]}</span>`;
+      const raw = el.dataset[`price${cur.charAt(0)}${cur.slice(1).toLowerCase()}`];
+      const amount = Number(raw);
+      if (!raw || Number.isNaN(amount)) return;
+      const formatted = formatPrice(amount, cur);
+      el.textContent = el.classList.contains('price-monthly') ? `${formatted}/mes` : formatted;
     });
+
+    document.querySelectorAll<HTMLElement>('.currency-code').forEach((el) => {
+      el.textContent = cur;
+    });
+
+    // Aviso fiscal (p. ej. "IVA no incluido" en EUR).
+    const note = CURRENCIES[cur].note;
+    document.querySelectorAll<HTMLElement>('.currency-note').forEach((el) => {
+      el.textContent = note ?? '';
+      el.classList.toggle('hidden', !note);
+    });
+
     try { localStorage.setItem('zk-currency', cur); } catch {}
   };
 
   document.querySelectorAll<HTMLButtonElement>('.currency-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
       const cur = btn.dataset.currency;
-      if (cur) applyCurrency(cur);
+      if (isCurrencyCode(cur)) applyCurrency(cur);
     });
   });
 
   try {
     const saved = localStorage.getItem('zk-currency');
-    if (saved && ['USD', 'COP', 'EUR', 'MXN'].includes(saved)) applyCurrency(saved);
+    // Sólo preferencia de UI · si la guardada ya no existe (COP/MXN de la versión
+    // anterior) se limpia y volvemos al default en vez de dejar el estado colgado.
+    if (saved && isCurrencyCode(saved)) applyCurrency(saved);
+    else if (saved) {
+      localStorage.removeItem('zk-currency');
+      applyCurrency(DEFAULT_CURRENCY);
+    }
   } catch {}
 
   // === Mobile hamburger menu ===
@@ -140,6 +167,33 @@ import Brand from './Brand.astro';
     transition: opacity 0.2s;
   }
   .brand-link:hover { opacity: 0.85; }
+
+  /* Conmutador de moneda · 48x48 mínimo por botón (WCAG 2.1 AA, objetivo táctil).
+     Los 34px de alto anteriores fallaban el criterio y en móvil ni se renderizaba. */
+  .currency-switch { flex-shrink: 0; }
+  .currency-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 48px;
+    min-height: 48px;
+    padding: 0 10px;
+    background: transparent;
+    border: 0;
+    color: #9999AE;
+    font: inherit;
+    cursor: pointer;
+    transition: color 0.2s, background 0.2s;
+  }
+  .currency-btn:hover { color: #F5F5FA; }
+  .currency-btn.is-active {
+    color: #FFFFFF;
+    background: #1E6FFF;
+  }
+  .currency-btn:focus-visible {
+    outline: 2px solid #4A9EFF;
+    outline-offset: -2px;
+  }
 
   .mobile-burger {
     display: inline-flex;
