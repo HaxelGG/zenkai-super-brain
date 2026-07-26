@@ -10,14 +10,18 @@
  * un precio que no era el que iba a pagar, y aparecían cifras como "1.104 EUR" que
  * ningún humano habría puesto en una lista de precios.
  *
- * COP y MXN salen del conmutador. No es que no vendamos en LATAM: es que ahí
- * facturamos en USD, así que enseñar una conversión aproximada solo introduce un
- * número que después no coincide con la factura.
+ * Las tres monedas son las tres regiones comerciales reales (USA/Canadá, Europa,
+ * LATAM), cada una con su propia lista de precios y su propia política de
+ * implantación. MXN salió: no hay lista de precios fijada para México.
  */
 
-export type CurrencyCode = 'USD' | 'EUR';
+export type CurrencyCode = 'USD' | 'EUR' | 'COP';
 
 export interface CurrencyConfig {
+  /** Etiqueta del botón del conmutador. */
+  label: string;
+  /** Región comercial que representa · se muestra como ayuda bajo el conmutador. */
+  region: string;
   symbol: string;
   /** Locale de agrupación de miles: 1,900 (en-US) vs 1.900 (es-ES). */
   locale: string;
@@ -28,17 +32,39 @@ export interface CurrencyConfig {
 }
 
 export const CURRENCIES: Record<CurrencyCode, CurrencyConfig> = {
-  USD: { symbol: '$', locale: 'en-US', position: 'before', note: null },
-  EUR: { symbol: '€', locale: 'es-ES', position: 'after', note: 'IVA no incluido' },
+  USD: {
+    label: 'USD',
+    region: 'EE. UU. y Canadá',
+    symbol: '$',
+    locale: 'en-US',
+    position: 'before',
+    note: null,
+  },
+  EUR: {
+    label: 'EUR',
+    region: 'Europa',
+    symbol: '€',
+    locale: 'es-ES',
+    position: 'after',
+    note: 'IVA no incluido',
+  },
+  COP: {
+    label: 'COP',
+    region: 'Colombia y LATAM',
+    symbol: '$',
+    locale: 'es-CO',
+    position: 'before',
+    note: 'IVA no incluido',
+  },
 };
 
 export const CURRENCY_CODES = Object.keys(CURRENCIES) as CurrencyCode[];
-export const DEFAULT_CURRENCY: CurrencyCode = 'USD';
+export const DEFAULT_CURRENCY: CurrencyCode = 'EUR';
 
 export const isCurrencyCode = (value: unknown): value is CurrencyCode =>
   typeof value === 'string' && (CURRENCY_CODES as string[]).includes(value);
 
-/** "$2,000" · "1.900 €" */
+/** "$2,000" · "1.900 €" · "$805.000" */
 export const formatPrice = (amount: number, code: CurrencyCode): string => {
   const { symbol, locale, position } = CURRENCIES[code];
   const n = amount.toLocaleString(locale);

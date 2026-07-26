@@ -95,16 +95,24 @@ import { CURRENCY_CODES, DEFAULT_CURRENCY } from '../../lib/currency';
       b.setAttribute('aria-pressed', String(isActive));
     });
 
-    document.querySelectorAll<HTMLElement>('.price, .price-monthly').forEach((el) => {
+    // Cualquier elemento que traiga sus importes fijados por moneda. El sufijo
+    // ("/mes", "único"…) viaja con el elemento, así el script no necesita saber
+    // qué significa cada precio.
+    document.querySelectorAll<HTMLElement>('[data-price-eur]').forEach((el) => {
       const raw = el.dataset[`price${cur.charAt(0)}${cur.slice(1).toLowerCase()}`];
       const amount = Number(raw);
-      if (!raw || Number.isNaN(amount)) return;
-      const formatted = formatPrice(amount, cur);
-      el.textContent = el.classList.contains('price-monthly') ? `${formatted}/mes` : formatted;
+      if (raw === undefined || Number.isNaN(amount)) return;
+      const suffix = el.dataset.priceSuffix ?? '';
+      el.textContent = amount === 0 && el.dataset.priceZero
+        ? el.dataset.priceZero
+        : `${formatPrice(amount, cur)}${suffix}`;
     });
 
     document.querySelectorAll<HTMLElement>('.currency-code').forEach((el) => {
       el.textContent = cur;
+    });
+    document.querySelectorAll<HTMLElement>('.currency-region').forEach((el) => {
+      el.textContent = CURRENCIES[cur].region;
     });
 
     // Aviso fiscal (p. ej. "IVA no incluido" en EUR).

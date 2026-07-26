@@ -1,114 +1,16 @@
 ---
-// 5 tiers · 2 featured (Lite + Starter) en grid 2-col + 3 compact (Growth + Pro + Enterprise) en grid 3-col + banner oferta 50% off
-// Los importes NO viven acá: salen de data/pricing.ts, fijados a mano en cada moneda.
-import { PRICING, priceAttrs } from '../../data/pricing';
-import { DEFAULT_CURRENCY, formatPrice } from '../../lib/currency';
+// Planes · 4 tiers desde data/pricing.ts, 3 regiones, compromiso opcional.
+// Ni un importe vive en este archivo: todos salen del modelo de precios.
+import { TIERS, COMPROMISOS, priceAttrs } from '../../data/pricing';
+import { CURRENCIES, DEFAULT_CURRENCY, formatPrice } from '../../lib/currency';
 
-interface FeaturedTier {
-  name: keyof typeof PRICING;
-  badge: string;
-  badgeStyle?: string;
-  days: string;
-  tagline: string;
-  description: string;
-  features: string[];
-  ctaSubtext: string;
-}
-interface CompactTier {
-  name: keyof typeof PRICING;
-  days: string;
-  tagline: string;
-  features: string[];
-  ctaLabel: string;
-  /** Si es true, el CTA va a Cal.com en nueva pestaña (Pro/Enterprise). Default: scroll a #hero-demo. */
-  ctaToCalcom?: boolean;
-}
-
-const featured: FeaturedTier[] = [
-  {
-    name: 'Lite',
-    badge: 'Más vendido · Lite',
-    days: '5 días · listo',
-    tagline: 'Tu primera presencia digital seria. Sin compromiso de ads.',
-    description: 'Para dueños de negocio tradicional que necesitan estar online <strong class="text-zk-text">ya</strong>. Sin pagar agencia mensual cara, sin invertir en publicidad todavía.',
-    features: [
-      'Sitio web 1 página optimizado',
-      'Dominio propio conectado',
-      'WhatsApp Business + 5 templates',
-      'Formulario → inbox + Airtable',
-      'Cal.com para agendar',
-      'Garantía 30 días',
-    ],
-    ctaSubtext: 'Sin tarjeta · sin contrato anual',
-  },
-  {
-    name: 'Starter',
-    badge: '★ Mejor relación valor/precio',
-    badgeStyle: 'background: linear-gradient(135deg, #10B981, #1E6FFF);',
-    days: '6 días · listo',
-    tagline: 'Vender más sin contratar a nadie más.',
-    description: 'Para dueños que ya facturan <strong class="text-zk-text">$2-8K USD/mes</strong> y quieren multiplicar adquisición + automatizar operación.',
-    features: [
-      'Todo del plan <strong class="text-zk-text">Lite</strong>',
-      'WhatsApp Cloud API + templates HSM',
-      'Recuperación carrito automática',
-      'Agente conversacional 24/7',
-      'Dashboard de leads en Airtable',
-      'Setup retargeting Meta/Google',
-    ],
-    ctaSubtext: '+40% ventas promedio · referencia mercado',
-  },
-];
-
-const compact: CompactTier[] = [
-  {
-    name: 'Growth',
-    days: '12 días',
-    tagline: 'Cuando ya tienes tracción y la IA escala por ti.',
-    features: [
-      'Agente IA voz + texto entrenado',
-      'Cal.com Pro · reservas reales',
-      'Scoring 1-10 + enrutamiento',
-      'Reportes semanales al WhatsApp',
-    ],
-    ctaLabel: 'Probar gratis',
-  },
-  {
-    name: 'Pro',
-    days: '30 días',
-    tagline: 'Tu empresa entera operando con IA. No solo marketing.',
-    features: [
-      '8 departamentos automatizados',
-      '12 agentes IA conectados',
-      'Workflows multi-paso + memoria',
-      'Soporte prioritario · Slack',
-    ],
-    ctaLabel: 'Agendar consulta',
-    ctaToCalcom: true,
-  },
-  {
-    name: 'Enterprise',
-    days: '100 días',
-    tagline: 'Para empresas que ya no caben en SaaS.',
-    features: [
-      'Plataforma custom (Next.js + Supabase)',
-      'Branding propio · auth · dashboards',
-      'Integraciones legacy',
-      'SLAs · roadmap trimestral',
-    ],
-    ctaLabel: 'Agendar consulta',
-    ctaToCalcom: true,
-  },
-];
-
-// Render inicial en la moneda por defecto · el conmutador del NavBar reescribe
-// .price / .price-monthly / .currency-code leyendo los data-price-* de cada elemento.
-const initial = (money: import('../../data/pricing').Money) =>
+const fmt = (money: Record<string, number>) =>
   formatPrice(money[DEFAULT_CURRENCY], DEFAULT_CURRENCY);
+
 const calcomLink = 'https://cal.com/zenkai-growth-systems/strategy-call';
+const pct = (n: number) => `${Math.round(n * 100)}%`;
 ---
 <section id="planes" class="py-24 lg:py-32 border-t border-zk-border/50 relative overflow-hidden">
-
   <div class="max-w-6xl mx-auto px-5 lg:px-8 relative z-10">
 
     <div class="text-center mb-14 reveal">
@@ -122,101 +24,161 @@ const calcomLink = 'https://cal.com/zenkai-growth-systems/strategy-call';
         <span class="text-zk-text2">Escalas cuando los números lo justifiquen.</span>
       </h2>
       <p class="text-lg text-zk-text2 max-w-2xl mx-auto">
-        Tu propuesta gratis te recomienda uno de estos cinco caminos. Sin compromiso anual. Sin letra chica.
+        Cada plan incluye todo lo del anterior. Sin permanencia obligatoria: si te comprometes es porque quieres, y entonces pagas menos.
+      </p>
+      <p class="text-sm text-zk-muted mt-3">
+        Mostrando precios para <span class="currency-region font-medium text-zk-text2">{CURRENCIES[DEFAULT_CURRENCY].region}</span>. Cambia la región arriba.
       </p>
     </div>
 
-    {/* 2 destacados arriba */}
-    <div class="grid md:grid-cols-2 gap-6 mb-6 reveal">
-      {featured.map((t) => (
-        <div class="tier-featured card-3d rounded-2xl p-8 transition">
-          <div class="tier-badge" style={t.badgeStyle ?? ''}>{t.badge}</div>
-          <div class="flex items-baseline justify-between mb-2 mt-2">
-            <h3 class="text-2xl font-bold">{t.name}</h3>
-            <span class="text-xs font-mono text-zk-muted px-2 py-1 bg-zk-bg2 rounded">{t.days}</span>
-          </div>
-          <p class="text-sm text-zk-text2 mb-6">{t.tagline}</p>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 reveal">
+      {TIERS.map((t) => (
+        <div class:list={['tier-card', t.destacado && 'tier-card--destacado']}>
+          {t.destacado && <div class="tier-flag">Más elegido</div>}
 
-          <div class="mb-6 pb-6 border-b border-zk-border">
-            <div class="flex items-baseline gap-2">
-              <span class="text-4xl font-bold price" {...priceAttrs(PRICING[t.name].setup)}>{initial(PRICING[t.name].setup)}</span>
-              <span class="text-sm font-mono text-zk-muted"><span class="currency-code">{DEFAULT_CURRENCY}</span> setup</span>
+          <h3 class="text-xl font-bold">{t.nombre}</h3>
+          <p class="text-sm text-zk-text2 mt-1.5 mb-5 min-h-[2.5rem]">{t.promesa}</p>
+
+          <div class="pb-5 mb-5 border-b border-zk-border">
+            <div class="flex items-baseline gap-1.5">
+              <span
+                class="text-3xl font-bold tracking-tight"
+                {...priceAttrs(t.mensual)}
+                data-price-suffix=""
+              >{fmt(t.mensual)}</span>
+              <span class="text-sm font-mono text-zk-muted">
+                <span class="currency-code">{DEFAULT_CURRENCY}</span>/mes
+              </span>
             </div>
-            <div class="text-sm text-zk-text2 mt-2">+ <span class="price-monthly font-mono font-semibold text-zk-text" {...priceAttrs(PRICING[t.name].monthly)}>{initial(PRICING[t.name].monthly)}/mes</span> {t.name === 'Lite' ? 'mantenimiento' : 'operación'}</div>
-            <div class="currency-note hidden text-xs text-zk-muted mt-2"></div>
+            <div class="text-xs text-zk-text2 mt-2">
+              Implantación
+              <span
+                class="font-mono text-zk-text"
+                {...priceAttrs(t.implantacion)}
+                data-price-zero="sin coste"
+              >{t.implantacion[DEFAULT_CURRENCY] === 0 ? 'sin coste' : fmt(t.implantacion)}</span>
+              <span class="text-zk-muted">· una vez, gratis desde 6 meses</span>
+            </div>
+            <div class="currency-note hidden text-xs text-zk-muted mt-1.5"></div>
           </div>
 
-          <p class="text-sm text-zk-text2 mb-5 leading-relaxed" set:html={t.description}></p>
-
-          <ul class="space-y-3 mb-8 text-sm">
-            {t.features.map((f) => (
-              <li class="flex gap-3">
-                <svg class="w-5 h-5 text-zk-accent shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                <span set:html={f}></span>
+          <ul class="space-y-2.5 mb-7 text-sm text-zk-text2 flex-1">
+            {t.incluye.map((f) => (
+              <li class="flex gap-2.5">
+                <span class="text-zk-accent font-bold leading-5" aria-hidden="true">+</span>
+                <span>{f}</span>
               </li>
             ))}
           </ul>
 
-          <a href="#hero-demo" class="btn-primary block text-center text-white font-semibold py-3.5 rounded-xl">Probar mi propuesta gratis</a>
-          <p class="text-xs text-zk-muted text-center mt-3">{t.ctaSubtext}</p>
+          <a
+            href={t.costeUsd >= 205 ? calcomLink : '#hero-demo'}
+            {...(t.costeUsd >= 205 ? { target: '_blank', rel: 'noopener' } : {})}
+            class:list={['tier-cta', t.destacado && 'tier-cta--primary']}
+          >{t.costeUsd >= 205 ? 'Agendar consulta' : 'Ver mi propuesta gratis'}</a>
         </div>
       ))}
     </div>
 
-    {/* 3 tiers compactos */}
-    <div class="grid md:grid-cols-3 gap-5 reveal">
-      {compact.map((t) => (
-        <div class="card-3d bg-gradient-to-br from-zk-surface to-zk-surface2 border border-zk-border2 rounded-2xl p-6 transition">
-          <div class="flex items-baseline justify-between mb-2">
-            <h3 class="text-xl font-bold">{t.name}</h3>
-            <span class="text-xs font-mono text-zk-muted">{t.days}</span>
-          </div>
-          <p class="text-xs text-zk-text2 mb-4">{t.tagline}</p>
-          <div class="mb-4 pb-4 border-b border-zk-border">
-            <div class="text-2xl font-bold"><span class="price" {...priceAttrs(PRICING[t.name].setup)}>{initial(PRICING[t.name].setup)}</span> <span class="text-xs font-normal text-zk-muted currency-code">{DEFAULT_CURRENCY}</span></div>
-            <div class="text-xs text-zk-text2 mt-1">+ <span class="price-monthly font-mono" {...priceAttrs(PRICING[t.name].monthly)}>{initial(PRICING[t.name].monthly)}/mes</span></div>
-            <div class="currency-note hidden text-xs text-zk-muted mt-1.5"></div>
-          </div>
-          <ul class="space-y-2 mb-6 text-xs text-zk-text2">
-            {t.features.map((f) => (
-              <li class="flex gap-1.5"><span class="text-zk-accent font-bold">+</span> {f}</li>
-            ))}
-          </ul>
-          {t.ctaToCalcom ? (
-            <a href={calcomLink} target="_blank" rel="noopener" class="btn-ghost block text-center text-sm font-medium text-zk-text py-2.5 rounded-lg">{t.ctaLabel}</a>
-          ) : (
-            <a href="#hero-demo" class="btn-ghost block text-center text-sm font-medium text-zk-text py-2.5 rounded-lg">{t.ctaLabel}</a>
-          )}
-        </div>
-      ))}
-    </div>
-
-    {/* Banner oferta 50% off · CTA va a Cal.com (humano cierra la venta) */}
+    {/* Compromiso · opcional, siempre */}
     <div class="mt-12 reveal">
-      <div class="relative bg-gradient-to-br from-zk-accent/15 to-zk-accent2/5 border border-zk-accent/40 rounded-2xl p-8 lg:p-10 overflow-hidden">
-        <div class="absolute -top-20 -right-20 w-64 h-64 bg-zk-accent/20 rounded-full blur-3xl"></div>
+      <div class="rounded-2xl border border-zk-border bg-zk-surface/40 p-7 lg:p-9">
+        <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1 mb-2">
+          <h3 class="text-xl font-bold">Cuanto más tiempo, menos pagas</h3>
+          <span class="text-xs font-mono text-zk-muted uppercase tracking-[0.15em]">opcional</span>
+        </div>
+        <p class="text-sm text-zk-text2 mb-7 max-w-2xl">
+          Puedes quedarte mes a mes y marcharte cuando quieras. Comprometerte es una elección, no un candado — y se premia.
+        </p>
 
-        <div class="relative grid lg:grid-cols-[1fr_auto] gap-6 items-center">
-          <div>
-            <div class="inline-flex items-center gap-2 px-3 py-1 bg-zk-accent/20 border border-zk-accent/40 rounded-full text-xs font-mono text-zk-accent3 mb-4">
-              <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z"/></svg>
-              Oferta limitada
+        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {COMPROMISOS.map((c) => (
+            <div class:list={['plazo', c.destacado && 'plazo--destacado']}>
+              <div class="flex items-baseline justify-between gap-2">
+                <span class="font-semibold text-sm">{c.etiqueta}</span>
+                {c.descuento > 0 && (
+                  <span class="text-xs font-mono text-zk-accent">−{pct(c.descuento)}</span>
+                )}
+              </div>
+              <p class="text-xs text-zk-text2 mt-2 leading-relaxed">{c.nota}</p>
             </div>
-            <h3 class="text-2xl sm:text-3xl font-bold mb-3 leading-tight">
-              Agenda una llamada de 30 min →<br>
-              <span class="gradient-text">50% off en tu primer mes</span>
-            </h3>
-            <p class="text-zk-text2 leading-relaxed max-w-xl">
-              Si tu negocio califica para implementación, aplicamos <strong class="text-zk-text">50% de descuento en el primer mes</strong> del plan que elijas. Sin trucos. La llamada es gratis. No hay presión de venta. Si no calificas, te decimos exactamente qué construir por tu cuenta primero.
-            </p>
-          </div>
-          <a href={calcomLink} target="_blank" rel="noopener" class="btn-primary text-white font-semibold px-7 py-4 rounded-xl inline-flex items-center justify-center gap-2 whitespace-nowrap">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-            Agendar 30 min gratis
-          </a>
+          ))}
         </div>
       </div>
     </div>
-
   </div>
 </section>
+
+<style>
+  .tier-card {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    padding: 26px 22px;
+    border-radius: 16px;
+    border: 1px solid var(--zk-border, rgba(255, 255, 255, 0.08));
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 60%),
+      #12121A;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .tier-card:hover {
+    border-color: rgba(74, 158, 255, 0.4);
+    transform: translateY(-2px);
+  }
+  .tier-card--destacado {
+    border-color: rgba(74, 158, 255, 0.45);
+    box-shadow: 0 0 0 1px rgba(74, 158, 255, 0.15);
+  }
+  .tier-flag {
+    position: absolute;
+    top: -10px;
+    left: 22px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: #1E6FFF;
+    color: #fff;
+    font-family: 'Geist Mono', 'JetBrains Mono Variable', ui-monospace, monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .tier-cta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    padding: 0 16px;
+    border-radius: 10px;
+    border: 1px solid var(--zk-border-hi, rgba(255, 255, 255, 0.16));
+    color: #F5F5FA;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .tier-cta:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(74, 158, 255, 0.5);
+  }
+  .tier-cta--primary {
+    background: #1E6FFF;
+    border-color: #1E6FFF;
+  }
+  .tier-cta--primary:hover { background: #3B82FF; border-color: #3B82FF; }
+  .tier-cta:focus-visible { outline: 2px solid #4A9EFF; outline-offset: 2px; }
+
+  .plazo {
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px solid var(--zk-border, rgba(255, 255, 255, 0.08));
+    background: rgba(8, 8, 12, 0.5);
+  }
+  .plazo--destacado { border-color: rgba(74, 158, 255, 0.4); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tier-card:hover { transform: none; }
+  }
+</style>
