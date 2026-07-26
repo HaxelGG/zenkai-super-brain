@@ -5,15 +5,21 @@ interface Props {
 }
 const { sector } = Astro.props;
 const { nombre, icon, dolor_principal, modulo_disponible } = sector.data;
+
+// El badge "Próximamente" queda fuera. En un sitio sin casos publicados, un
+// "próximamente" no genera expectativa: dice "esto no lo hemos construido".
+// Un sector sin módulo simplemente no se muestra — filtrar por
+// `modulo_disponible` es responsabilidad de quien renderiza la lista.
 ---
-<article class="sector-card">
-  <div class="header">
-    <span class="icon" aria-hidden="true">{icon}</span>
-    <h3>{nombre}</h3>
-    {!modulo_disponible && <span class="badge-pendiente">Próximamente</span>}
-  </div>
-  <p class="dolor">{dolor_principal}</p>
-</article>
+{modulo_disponible && (
+  <article class="sector-card">
+    <div class="header">
+      <span class="icon" aria-hidden="true">{icon}</span>
+      <h3>{nombre}</h3>
+    </div>
+    <p class="dolor">{dolor_principal}</p>
+  </article>
+)}
 
 <style>
   .sector-card {

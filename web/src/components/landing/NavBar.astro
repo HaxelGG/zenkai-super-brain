@@ -1,31 +1,73 @@
 ---
 import Brand from './Brand.astro';
+import WhatsAppCTA from '../WhatsAppCTA.astro';
 import { CURRENCY_CODES, DEFAULT_CURRENCY } from '../../lib/currency';
+import { getMenu } from '../../lib/catalogo';
+
+/**
+ * Navegación · máximo 5 elementos.
+ *
+ * El megamenú se genera desde la colección de módulos: tres columnas, una por
+ * pilar. No hay una lista de enlaces que mantener sincronizada con el catálogo,
+ * así que `status: hidden` en un .md también lo saca de aquí.
+ *
+ * "Sectores" todavía no está: sus rutas no existen y un enlace de menú que
+ * lleva a un 404 es peor que un menú de cuatro elementos.
+ */
+const pilares = await getMenu();
 ---
-<header class="fixed top-0 left-0 right-0 z-50 nav-blur border-b border-zk-border/50">
-  <div class="max-w-7xl mx-auto px-5 lg:px-8 h-16 flex items-center justify-between">
+<header class="nav">
+  <div class="nav__bar">
+    <a href="/" class="nav__brand"><Brand variant="default" showTagline={true} /></a>
 
-    <a href="/" class="brand-link">
-      <Brand variant="default" showTagline={true} />
-    </a>
+    <nav class="nav__links" aria-label="Principal">
+      <div class="nav__mega">
+        <button
+          type="button"
+          id="mega-btn"
+          class="nav__link nav__link--btn"
+          aria-expanded="false"
+          aria-controls="mega-panel"
+        >
+          Soluciones
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </button>
 
-    <nav class="hidden lg:flex items-center gap-7 text-sm text-zk-text2">
-      <a href="#proyeccion" class="hover:text-zk-text transition">Resultados</a>
-      <a href="#como-funciona" class="hover:text-zk-text transition">Cómo funciona</a>
-      <a href="#diferente" class="hover:text-zk-text transition">Comparativa</a>
-      <a href="#planes" class="hover:text-zk-text transition">Planes</a>
-      <a href="#faq" class="hover:text-zk-text transition">FAQ</a>
+        <div id="mega-panel" class="mega" hidden>
+          <div class="mega__grid">
+            {pilares.map((p) => (
+              <div class="mega__col" data-dominio={p.dominio}>
+                <a href={`/soluciones/${p.id}/`} class="mega__pilar">
+                  <span class="mega__pilarNombre">{p.nombre}</span>
+                  <span class="mega__pilarTxt">{p.titular}</span>
+                </a>
+                <ul class="mega__lista">
+                  {p.modulos.map((m) => (
+                    <li>
+                      <a href={`/modulos/${m.id}/`}>
+                        <span class="mega__punto" aria-hidden="true"></span>
+                        {m.data.nombre}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+          <div class="mega__pie">
+            <a href="/#diagnostico">¿No sabes cuál te toca? Empieza por tu problema →</a>
+          </div>
+        </div>
+      </div>
+
+      <a href="/#planes" class="nav__link">Precios</a>
+      <a href="/como-trabajamos/" class="nav__link">Cómo trabajamos</a>
     </nav>
 
-    <div class="flex items-center gap-3">
-      {/* Visible también en móvil: quien compara precios lo hace sobre todo desde el
-          teléfono, y ocultarlo con `hidden md:flex` dejaba a ese usuario sin la
-          única pista de en qué moneda va a pagar. */}
-      <div
-        class="currency-switch flex items-center text-xs font-mono bg-zk-surface border border-zk-border rounded-lg overflow-hidden"
-        role="group"
-        aria-label="Moneda de los precios"
-      >
+    <div class="nav__acciones">
+      <div class="currency-switch" role="group" aria-label="Moneda de los precios">
         {CURRENCY_CODES.map((code) => (
           <button
             class:list={['currency-btn', code === DEFAULT_CURRENCY ? 'is-active' : '']}
@@ -34,17 +76,23 @@ import { CURRENCY_CODES, DEFAULT_CURRENCY } from '../../lib/currency';
           >{code}</button>
         ))}
       </div>
-      <a href="#hero-demo" class="hidden sm:inline-flex text-sm font-semibold bg-white text-zk-bg px-4 py-2 rounded-lg hover:bg-zk-text2 transition">
-        Probar gratis
-      </a>
+
+      <div class="nav__wa">
+        <WhatsAppCTA
+          location="navbar"
+          message="Hola ZENKAI. Vengo de la web y quiero contaros mi caso."
+          label="WhatsApp"
+        />
+      </div>
+
       <button
         id="mobile-menu-toggle"
-        class="lg:hidden mobile-burger"
+        class="mobile-burger"
         aria-label="Abrir menú"
         aria-expanded="false"
         aria-controls="mobile-menu"
       >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
           <line x1="3" y1="6" x2="21" y2="6"></line>
           <line x1="3" y1="12" x2="21" y2="12"></line>
           <line x1="3" y1="18" x2="21" y2="18"></line>
@@ -54,74 +102,261 @@ import { CURRENCY_CODES, DEFAULT_CURRENCY } from '../../lib/currency';
   </div>
 </header>
 
-{/* Mobile overlay menu · solo visible <lg cuando #mobile-menu-toggle dispara */}
+{/* Menú móvil · el mismo catálogo, en vertical */}
 <div id="mobile-menu" class="mobile-menu" aria-hidden="true">
   <div class="mobile-menu-backdrop" data-mobile-close></div>
-  <nav class="mobile-menu-panel" role="dialog" aria-label="Navegación móvil">
+  <nav class="mobile-menu-panel" role="dialog" aria-modal="true" aria-label="Navegación">
     <div class="mobile-menu-header">
-      <Brand variant="default" showTagline={true} />
+      <Brand variant="default" showTagline={false} />
       <button class="mobile-close" aria-label="Cerrar menú" data-mobile-close>
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
           <line x1="18" y1="6" x2="6" y2="18"></line>
           <line x1="6" y1="6" x2="18" y2="18"></line>
         </svg>
       </button>
     </div>
-    <ul class="mobile-menu-links">
-      <li><a href="#proyeccion" data-mobile-close>Resultados</a></li>
-      <li><a href="#como-funciona" data-mobile-close>Cómo funciona</a></li>
-      <li><a href="#diferente" data-mobile-close>Comparativa</a></li>
-      <li><a href="#planes" data-mobile-close>Planes</a></li>
-      <li><a href="#sectores" data-mobile-close>Sectores</a></li>
-      <li><a href="#faq" data-mobile-close>FAQ</a></li>
-      <li><a href="/privacy" data-mobile-close>Privacidad</a></li>
-    </ul>
-    <a href="#hero-demo" class="mobile-cta" data-mobile-close>Probar gratis</a>
+
+    <div class="mobile-menu-scroll">
+      <a href="/#diagnostico" class="mobile-destacado" data-mobile-close>Empieza por tu problema →</a>
+
+      {pilares.map((p) => (
+        <section class="mobile-grupo" data-dominio={p.dominio}>
+          <a href={`/soluciones/${p.id}/`} class="mobile-grupo__tit" data-mobile-close>{p.nombre}</a>
+          <ul>
+            {p.modulos.map((m) => (
+              <li><a href={`/modulos/${m.id}/`} data-mobile-close>{m.data.nombre}</a></li>
+            ))}
+          </ul>
+        </section>
+      ))}
+
+      <ul class="mobile-sueltos">
+        <li><a href="/#planes" data-mobile-close>Precios</a></li>
+        <li><a href="/como-trabajamos/" data-mobile-close>Cómo trabajamos</a></li>
+        <li><a href="/privacy" data-mobile-close>Privacidad</a></li>
+      </ul>
+    </div>
+
+    <div class="mobile-menu-cta">
+      <WhatsAppCTA
+        location="menu-movil"
+        message="Hola ZENKAI. Vengo de la web y quiero contaros mi caso."
+        variant="block"
+      />
+    </div>
   </nav>
 </div>
 
+<style>
+  .nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+    background: rgba(8, 8, 12, 0.82);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    border-bottom: 1px solid var(--zk-border);
+  }
+  .nav__bar {
+    max-width: 80rem; margin: 0 auto;
+    padding-inline: 1.25rem;
+    height: 68px;
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  }
+  @media (min-width: 1024px) { .nav__bar { padding-inline: 2rem; } }
+
+  .nav__brand { text-decoration: none; transition: opacity 0.2s; flex-shrink: 0; }
+  .nav__brand:hover { opacity: 0.85; }
+
+  .nav__links { display: none; align-items: center; gap: 0.25rem; }
+  @media (min-width: 1024px) { .nav__links { display: flex; } }
+
+  .nav__link {
+    display: inline-flex; align-items: center; gap: 0.35rem;
+    min-height: 44px; padding: 0 0.875rem;
+    border: 0; background: transparent;
+    color: var(--zk-text-2);
+    font: inherit; font-size: 0.9375rem; font-weight: 500;
+    text-decoration: none; cursor: pointer; border-radius: var(--zk-r-sm);
+    transition: color 0.2s, background 0.2s;
+  }
+  .nav__link:hover { color: var(--zk-text); background: rgba(255, 255, 255, 0.04); }
+  .nav__link:focus-visible { outline: 2px solid var(--zk-growth); outline-offset: -2px; }
+  .nav__link--btn[aria-expanded='true'] { color: var(--zk-text); background: rgba(255, 255, 255, 0.06); }
+  .nav__link--btn[aria-expanded='true'] svg { transform: rotate(180deg); }
+  .nav__link svg { transition: transform 0.2s; }
+
+  .nav__mega { position: static; }
+
+  .mega {
+    position: absolute; left: 0; right: 0; top: 100%;
+    background: var(--zk-bg-2);
+    border-bottom: 1px solid var(--zk-border);
+    box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.7);
+    animation: megaIn 0.16s ease-out;
+  }
+  @keyframes megaIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .mega { animation: none; } }
+
+  .mega__grid {
+    max-width: 80rem; margin: 0 auto;
+    padding: 2rem;
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 2.5rem;
+  }
+  .mega__col { border-left: 2px solid var(--zk-accent); padding-left: 1.25rem; }
+
+  .mega__pilar { display: block; text-decoration: none; margin-bottom: 1rem; }
+  .mega__pilarNombre {
+    display: block; font-size: 1.0625rem; font-weight: 700;
+    color: var(--zk-accent); margin-bottom: 0.25rem;
+  }
+  .mega__pilarTxt { display: block; font-size: 0.8125rem; color: var(--zk-text-2); line-height: 1.45; }
+  .mega__pilar:hover .mega__pilarNombre { text-decoration: underline; }
+
+  .mega__lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.125rem; }
+  .mega__lista a {
+    display: flex; align-items: center; gap: 0.5rem;
+    padding: 0.4rem 0.5rem; margin-left: -0.5rem;
+    border-radius: var(--zk-r-sm);
+    font-size: 0.875rem; color: var(--zk-text-2); text-decoration: none;
+    transition: color 0.15s, background 0.15s;
+  }
+  .mega__lista a:hover { color: var(--zk-text); background: rgba(255, 255, 255, 0.04); }
+  .mega__punto {
+    width: 4px; height: 4px; border-radius: 50%;
+    background: var(--zk-accent); opacity: 0.55; flex-shrink: 0;
+  }
+
+  .mega__pie {
+    border-top: 1px solid var(--zk-border);
+    background: rgba(255, 255, 255, 0.015);
+  }
+  .mega__pie a {
+    display: block; max-width: 80rem; margin: 0 auto;
+    padding: 1rem 2rem;
+    font-size: 0.875rem; color: var(--zk-growth); text-decoration: none;
+  }
+  .mega__pie a:hover { text-decoration: underline; }
+
+  .nav__acciones { display: flex; align-items: center; gap: 0.625rem; }
+  .nav__wa { display: none; }
+  @media (min-width: 640px) { .nav__wa { display: block; } }
+
+  .currency-switch {
+    display: flex; align-items: center; flex-shrink: 0;
+    font-family: var(--font-mono); font-size: 0.6875rem;
+    background: var(--zk-surface);
+    border: 1px solid var(--zk-border);
+    border-radius: var(--zk-r-sm);
+    overflow: hidden;
+  }
+  .currency-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 48px; min-height: 48px; padding: 0 6px;
+    background: transparent; border: 0; color: var(--zk-muted);
+    font: inherit; cursor: pointer;
+    transition: color 0.2s, background 0.2s;
+  }
+  .currency-btn:hover { color: var(--zk-text); }
+  .currency-btn.is-active { color: #fff; background: var(--zk-accent, #1E6FFF); }
+  .currency-btn:focus-visible { outline: 2px solid var(--zk-growth); outline-offset: -2px; }
+
+  .mobile-burger {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 48px; height: 48px;
+    color: var(--zk-text); background: transparent;
+    border: 1px solid var(--zk-border); border-radius: var(--zk-r-sm);
+    cursor: pointer; transition: background 0.2s, border-color 0.2s;
+  }
+  @media (min-width: 1024px) { .mobile-burger { display: none; } }
+  .mobile-burger:hover { background: rgba(255, 255, 255, 0.04); border-color: var(--zk-border-hi); }
+
+  .mobile-menu { position: fixed; inset: 0; z-index: 60; display: none; }
+  .mobile-menu.open { display: block; }
+  .mobile-menu-backdrop {
+    position: absolute; inset: 0;
+    background: rgba(3, 3, 5, 0.72);
+    backdrop-filter: blur(8px);
+  }
+  .mobile-menu-panel {
+    position: absolute; top: 0; right: 0; bottom: 0;
+    width: 100%; max-width: 360px;
+    background: var(--zk-bg-2);
+    border-left: 1px solid var(--zk-border);
+    display: flex; flex-direction: column;
+    animation: slideIn 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @keyframes slideIn { from { transform: translateX(100%); } to { transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .mobile-menu-panel { animation: none; } }
+
+  .mobile-menu-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--zk-border);
+  }
+  .mobile-close {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 48px; height: 48px;
+    background: transparent; border: 0; color: var(--zk-text-2);
+    cursor: pointer; border-radius: var(--zk-r-sm);
+  }
+  .mobile-close:hover { color: var(--zk-text); }
+
+  .mobile-menu-scroll { flex: 1; overflow-y: auto; padding: 1.25rem; }
+
+  .mobile-destacado {
+    display: block; padding: 0.875rem 1rem; margin-bottom: 1.5rem;
+    border: 1px solid color-mix(in srgb, var(--zk-growth) 40%, transparent);
+    border-radius: var(--zk-r-md);
+    color: var(--zk-growth); font-size: 0.9375rem; font-weight: 600;
+    text-decoration: none;
+  }
+
+  .mobile-grupo { margin-bottom: 1.5rem; }
+  .mobile-grupo__tit {
+    display: block; margin-bottom: 0.5rem;
+    font-size: 0.75rem; font-family: var(--font-mono);
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--zk-accent); text-decoration: none;
+  }
+  .mobile-grupo ul, .mobile-sueltos { list-style: none; margin: 0; padding: 0; }
+  .mobile-grupo a:not(.mobile-grupo__tit), .mobile-sueltos a {
+    display: block; padding: 0.6rem 0;
+    color: var(--zk-text-2); font-size: 0.9375rem; text-decoration: none;
+  }
+  .mobile-grupo a:hover, .mobile-sueltos a:hover { color: var(--zk-text); }
+  .mobile-sueltos { border-top: 1px solid var(--zk-border); padding-top: 1rem; }
+
+  .mobile-menu-cta { padding: 1.25rem; border-top: 1px solid var(--zk-border); }
+</style>
+
 <script>
-  // === Conmutador de moneda ===
-  // No hay conversión: cada elemento de precio trae su importe ya fijado en cada
-  // moneda (data-price-usd, data-price-eur, ...) desde data/pricing.ts. Este script
-  // sólo elige cuál de esos importes mostrar y cómo formatearlo.
   import { CURRENCIES, DEFAULT_CURRENCY, formatPrice, isCurrencyCode } from '../../lib/currency';
   import type { CurrencyCode } from '../../lib/currency';
 
+  // ── Conmutador de moneda ──────────────────────────────────────────────────
+  // Sin conversión: cada elemento trae su importe fijado en cada moneda.
   const applyCurrency = (cur: CurrencyCode) => {
     document.querySelectorAll<HTMLButtonElement>('.currency-btn').forEach((b) => {
-      const isActive = b.dataset.currency === cur;
-      b.classList.toggle('is-active', isActive);
-      b.setAttribute('aria-pressed', String(isActive));
+      const activo = b.dataset.currency === cur;
+      b.classList.toggle('is-active', activo);
+      b.setAttribute('aria-pressed', String(activo));
     });
-
-    // Cualquier elemento que traiga sus importes fijados por moneda. El sufijo
-    // ("/mes", "único"…) viaja con el elemento, así el script no necesita saber
-    // qué significa cada precio.
     document.querySelectorAll<HTMLElement>('[data-price-eur]').forEach((el) => {
       const raw = el.dataset[`price${cur.charAt(0)}${cur.slice(1).toLowerCase()}`];
       const amount = Number(raw);
       if (raw === undefined || Number.isNaN(amount)) return;
-      const suffix = el.dataset.priceSuffix ?? '';
       el.textContent = amount === 0 && el.dataset.priceZero
         ? el.dataset.priceZero
-        : `${formatPrice(amount, cur)}${suffix}`;
+        : `${formatPrice(amount, cur)}${el.dataset.priceSuffix ?? ''}`;
     });
-
-    document.querySelectorAll<HTMLElement>('.currency-code').forEach((el) => {
-      el.textContent = cur;
-    });
+    document.querySelectorAll<HTMLElement>('.currency-code').forEach((el) => { el.textContent = cur; });
     document.querySelectorAll<HTMLElement>('.currency-region').forEach((el) => {
       el.textContent = CURRENCIES[cur].region;
     });
-
-    // Aviso fiscal (p. ej. "IVA no incluido" en EUR).
     const note = CURRENCIES[cur].note;
     document.querySelectorAll<HTMLElement>('.currency-note').forEach((el) => {
       el.textContent = note ?? '';
       el.classList.toggle('hidden', !note);
     });
-
     try { localStorage.setItem('zk-currency', cur); } catch {}
   };
 
@@ -131,180 +366,58 @@ import { CURRENCY_CODES, DEFAULT_CURRENCY } from '../../lib/currency';
       if (isCurrencyCode(cur)) applyCurrency(cur);
     });
   });
-
   try {
     const saved = localStorage.getItem('zk-currency');
-    // Sólo preferencia de UI · si la guardada ya no existe (COP/MXN de la versión
-    // anterior) se limpia y volvemos al default en vez de dejar el estado colgado.
     if (saved && isCurrencyCode(saved)) applyCurrency(saved);
-    else if (saved) {
-      localStorage.removeItem('zk-currency');
-      applyCurrency(DEFAULT_CURRENCY);
-    }
+    else if (saved) { localStorage.removeItem('zk-currency'); applyCurrency(DEFAULT_CURRENCY); }
   } catch {}
 
-  // === Mobile hamburger menu ===
+  // ── Megamenú ──────────────────────────────────────────────────────────────
+  const megaBtn = document.getElementById('mega-btn');
+  const megaPanel = document.getElementById('mega-panel');
+  if (megaBtn && megaPanel) {
+    const setMega = (abierto: boolean) => {
+      megaPanel.hidden = !abierto;
+      megaBtn.setAttribute('aria-expanded', String(abierto));
+    };
+    megaBtn.addEventListener('click', () => setMega(megaPanel.hidden));
+
+    // Escape cierra y devuelve el foco al disparador · requisito de teclado.
+    document.addEventListener('keydown', (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !megaPanel.hidden) { setMega(false); megaBtn.focus(); }
+    });
+    // Clic fuera y foco fuera cierran: si no, el panel se queda abierto al tabular.
+    document.addEventListener('click', (e) => {
+      const t = e.target as Node;
+      if (!megaPanel.hidden && !megaPanel.contains(t) && !megaBtn.contains(t)) setMega(false);
+    });
+    document.addEventListener('focusin', (e) => {
+      const t = e.target as Node;
+      if (!megaPanel.hidden && !megaPanel.contains(t) && !megaBtn.contains(t)) setMega(false);
+    });
+  }
+
+  // ── Menú móvil ────────────────────────────────────────────────────────────
   const burger = document.getElementById('mobile-menu-toggle');
   const menu = document.getElementById('mobile-menu');
-  const open = () => {
-    if (!menu || !burger) return;
-    menu.classList.add('open');
-    menu.setAttribute('aria-hidden', 'false');
-    burger.setAttribute('aria-expanded', 'true');
-    document.body.style.overflow = 'hidden';
-  };
-  const close = () => {
+  const cerrar = () => {
     if (!menu || !burger) return;
     menu.classList.remove('open');
     menu.setAttribute('aria-hidden', 'true');
     burger.setAttribute('aria-expanded', 'false');
     document.body.style.overflow = '';
+    burger.focus();
   };
-  burger?.addEventListener('click', open);
-  document.querySelectorAll('[data-mobile-close]').forEach((el) => {
-    el.addEventListener('click', close);
+  burger?.addEventListener('click', () => {
+    if (!menu) return;
+    menu.classList.add('open');
+    menu.setAttribute('aria-hidden', 'false');
+    burger.setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden';
+    menu.querySelector<HTMLElement>('a, button')?.focus();
   });
+  document.querySelectorAll('[data-mobile-close]').forEach((el) => el.addEventListener('click', cerrar));
   document.addEventListener('keydown', (e: KeyboardEvent) => {
-    if (e.key === 'Escape' && menu?.classList.contains('open')) close();
+    if (e.key === 'Escape' && menu?.classList.contains('open')) cerrar();
   });
 </script>
-
-<style>
-  .brand-link {
-    text-decoration: none;
-    transition: opacity 0.2s;
-  }
-  .brand-link:hover { opacity: 0.85; }
-
-  /* Conmutador de moneda · 48x48 mínimo por botón (WCAG 2.1 AA, objetivo táctil).
-     Los 34px de alto anteriores fallaban el criterio y en móvil ni se renderizaba. */
-  .currency-switch { flex-shrink: 0; }
-  .currency-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 48px;
-    min-height: 48px;
-    padding: 0 10px;
-    background: transparent;
-    border: 0;
-    color: #9999AE;
-    font: inherit;
-    cursor: pointer;
-    transition: color 0.2s, background 0.2s;
-  }
-  .currency-btn:hover { color: #F5F5FA; }
-  .currency-btn.is-active {
-    color: #FFFFFF;
-    background: #1E6FFF;
-  }
-  .currency-btn:focus-visible {
-    outline: 2px solid #4A9EFF;
-    outline-offset: -2px;
-  }
-
-  .mobile-burger {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    color: #F5F5FA;
-    background: transparent;
-    border: 1px solid #2A2A3A;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background 0.2s, border-color 0.2s;
-  }
-  .mobile-burger:hover {
-    background: rgba(255, 255, 255, 0.04);
-    border-color: rgba(74, 158, 255, 0.4);
-  }
-
-  .mobile-menu {
-    position: fixed;
-    inset: 0;
-    z-index: 60;
-    display: none;
-  }
-  .mobile-menu.open { display: block; }
-  .mobile-menu-backdrop {
-    position: absolute;
-    inset: 0;
-    background: rgba(3, 3, 5, 0.7);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    animation: fadeIn 0.2s ease;
-  }
-  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-  .mobile-menu-panel {
-    position: absolute;
-    top: 0; right: 0; bottom: 0;
-    width: 100%;
-    max-width: 320px;
-    background: linear-gradient(180deg, #0D0D17, #080810);
-    border-left: 1px solid #1F1F2C;
-    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.6);
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    animation: slideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-  @keyframes slideIn {
-    from { transform: translateX(100%); }
-    to { transform: translateX(0); }
-  }
-  .mobile-menu-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding-bottom: 20px;
-    border-bottom: 1px solid #1F1F2C;
-    margin-bottom: 20px;
-  }
-  .mobile-close {
-    background: transparent;
-    border: none;
-    color: #9999AE;
-    cursor: pointer;
-    padding: 6px;
-    border-radius: 6px;
-    transition: color 0.2s;
-  }
-  .mobile-close:hover { color: #F5F5FA; }
-  .mobile-menu-links {
-    list-style: none;
-    padding: 0;
-    margin: 0 0 24px 0;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-  .mobile-menu-links a {
-    display: block;
-    padding: 12px 14px;
-    color: #C5C5D6;
-    text-decoration: none;
-    font-size: 15px;
-    font-weight: 500;
-    border-radius: 8px;
-    transition: background 0.2s, color 0.2s;
-  }
-  .mobile-menu-links a:hover {
-    background: rgba(74, 158, 255, 0.08);
-    color: #F5F5FA;
-  }
-  .mobile-cta {
-    display: block;
-    text-align: center;
-    background: white;
-    color: #030305;
-    font-weight: 600;
-    padding: 14px 20px;
-    border-radius: 10px;
-    text-decoration: none;
-    transition: transform 0.2s;
-  }
-  .mobile-cta:hover { transform: translateY(-1px); }
-</style>

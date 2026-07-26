@@ -1,0 +1,213 @@
+---
+export const prerender = true;
+
+import WebLayout from '../layouts/WebLayout.astro';
+import WhatsAppCTA from '../components/WhatsAppCTA.astro';
+import DiagramaNeural from '../components/landing/DiagramaNeural.astro';
+
+/**
+ * /como-trabajamos
+ *
+ * Aquí vive el sistema multi-agente. Estaba en la home ocupando el tercer
+ * bloque, y ahí hacía daño: explica NUESTRA arquitectura a alguien que todavía
+ * no sabe qué le vendemos. Es material de confianza para quien ya está
+ * evaluando, no de comprensión para quien acaba de llegar.
+ */
+const site = Astro.site ?? new URL('https://zenkai.systems');
+const url = new URL('/como-trabajamos/', site).href;
+
+const pasos = [
+  {
+    n: '01',
+    titulo: 'Nos cuentas qué te cuesta dinero',
+    texto:
+      'Por WhatsApp, en tus palabras. Sin formulario de quince campos y sin llamada de descubrimiento de una hora. Con dos o tres frases ya sabemos si podemos ayudarte y te lo decimos.',
+    duracion: 'El mismo día',
+  },
+  {
+    n: '02',
+    titulo: 'Te enseñamos qué construiríamos',
+    texto:
+      'Arquitectura concreta: qué agentes, sobre qué herramientas, en qué orden y qué se mide. Si al verlo decides hacerlo por tu cuenta o con otro, el plan es tuyo igual.',
+    duracion: 'En días, no semanas',
+  },
+  {
+    n: '03',
+    titulo: 'Lo montamos y lo mantenemos',
+    texto:
+      'Clonamos la plantilla del módulo sobre tu operación y la ajustamos a tu caso. La mensualidad no es acceso: es que el sistema siga funcionando, se optimice y alguien conteste cuando algo falla.',
+    duracion: 'Puesta en marcha objetivo: 5 días',
+  },
+];
+
+const principios = [
+  {
+    titulo: 'Construimos sobre lo que ya usas',
+    texto:
+      'Shopify, HubSpot, Microsoft 365, tu ERP. Migrar de herramienta es un proyecto en sí mismo y casi nunca es lo que necesitas.',
+  },
+  {
+    titulo: 'Infraestructura propia, no reventa de licencias',
+    texto:
+      'El motor de automatización, la bandeja omnicanal y la base de datos corren en nuestra infraestructura y se amortizan entre todos los clientes. Por eso el precio mensual es el que es.',
+  },
+  {
+    titulo: 'Siempre hay una persona detrás',
+    texto:
+      'El agente atiende el volumen; las decisiones y lo delicado llegan a un humano con el contexto ya cargado. Vender lo contrario sería vender otra cosa.',
+  },
+  {
+    titulo: 'Sin permanencia obligatoria',
+    texto:
+      'Puedes irte cuando quieras. Comprometerte más tiempo baja el precio, pero es una elección tuya y no una condición para empezar.',
+  },
+];
+---
+<WebLayout
+  title="Cómo trabajamos · ZENKAI"
+  description="Tres pasos, sin llamadas comerciales. Sistema multi-agente sobre las herramientas que ya usas, con infraestructura propia y una persona siempre detrás."
+  canonical={url}
+>
+  <header class="wrap hero">
+    <nav class="crumbs" aria-label="Migas de pan">
+      <a href="/">Inicio</a>
+      <span aria-hidden="true">/</span>
+      <span class="crumbs__actual">Cómo trabajamos</span>
+    </nav>
+    <p class="eyebrow">Cómo trabajamos</p>
+    <h1>Sin llamadas comerciales, sin propuestas de cuarenta páginas</h1>
+    <p class="lede">
+      Tres pasos. Empiezas escribiendo, no agendando. Y si en el segundo paso
+      decides no seguir, te quedas con el plan igual.
+    </p>
+    <div class="hero__cta">
+      <WhatsAppCTA
+        location="como-trabajamos-hero"
+        message="Hola ZENKAI. He visto cómo trabajáis y quiero contaros mi caso."
+        size="lg"
+      />
+    </div>
+  </header>
+
+  <section class="wrap band">
+    <h2 class="h2">El proceso</h2>
+    <ol class="pasos">
+      {pasos.map((p) => (
+        <li class="paso">
+          <span class="paso__n">{p.n}</span>
+          <div>
+            <h3>{p.titulo}</h3>
+            <p>{p.texto}</p>
+            <span class="paso__dur">{p.duracion}</span>
+          </div>
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <section class="wrap band">
+    <h2 class="h2">Cómo lo construimos por dentro</h2>
+    <p class="nota">
+      Esto es nuestra arquitectura, no un producto que compras. Lo publicamos
+      porque a quien está evaluando le importa saber que hay un sistema detrás
+      y no una carpeta de automatizaciones sueltas.
+    </p>
+  </section>
+
+  <DiagramaNeural />
+
+  <section class="wrap band">
+    <h2 class="h2">Cuatro cosas que no negociamos</h2>
+    <ul class="princ">
+      {principios.map((p) => (
+        <li>
+          <h3>{p.titulo}</h3>
+          <p>{p.texto}</p>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <section class="wrap band">
+    <div class="cierre">
+      <h2>¿Lo probamos con tu caso?</h2>
+      <p>Escríbenos qué te está costando dinero. Contesta una persona.</p>
+      <WhatsAppCTA
+        location="como-trabajamos-cierre"
+        message="Hola ZENKAI. Quiero que veamos mi caso concreto."
+        size="lg"
+      />
+    </div>
+  </section>
+</WebLayout>
+
+<style>
+  .wrap { max-width: 68rem; margin: 0 auto; padding-inline: 1.25rem; }
+  @media (min-width: 1024px) { .wrap { padding-inline: 2rem; } }
+  .band { padding-block: 3.5rem; }
+  .band + .band { border-top: 1px solid var(--zk-border); }
+  .hero { padding-block: 6rem 2rem; }
+
+  .crumbs {
+    display: flex; flex-wrap: wrap; gap: 0.5rem;
+    font-family: var(--font-mono); font-size: 0.75rem;
+    color: var(--zk-muted); margin-bottom: 2rem;
+  }
+  .crumbs a { color: var(--zk-text-2); text-decoration: none; }
+  .crumbs a:hover { color: var(--zk-text); }
+  .crumbs__actual { color: var(--zk-growth); }
+
+  .eyebrow {
+    font-family: var(--font-mono); font-size: 0.6875rem;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--zk-growth); margin: 0 0 1rem;
+  }
+  h1 {
+    font-size: clamp(2rem, 5vw, 3.25rem);
+    line-height: 1.06; letter-spacing: -0.025em; font-weight: 700;
+    margin: 0 0 1.25rem; max-width: 20ch; text-wrap: balance;
+  }
+  .lede { font-size: 1.125rem; color: var(--zk-text-2); margin: 0; max-width: 52ch; }
+  .hero__cta { margin-top: 2rem; }
+
+  .h2 { font-size: 1.5rem; font-weight: 700; margin: 0 0 1.5rem; }
+  .nota { font-size: 0.9375rem; color: var(--zk-text-2); margin: 0; max-width: 60ch; }
+
+  .pasos { list-style: none; margin: 0; padding: 0; display: grid; gap: 1rem; }
+  @media (min-width: 900px) { .pasos { grid-template-columns: repeat(3, 1fr); } }
+  .paso {
+    display: flex; gap: 1rem;
+    padding: 1.5rem;
+    border: 1px solid var(--zk-border);
+    border-radius: var(--zk-r-lg);
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 60%),
+      var(--zk-surface);
+  }
+  .paso__n {
+    font-family: var(--font-mono); font-size: 0.75rem;
+    color: var(--zk-growth); flex-shrink: 0; padding-top: 0.2rem;
+  }
+  .paso h3 { font-size: 1rem; font-weight: 700; margin: 0 0 0.5rem; }
+  .paso p { font-size: 0.875rem; line-height: 1.6; color: var(--zk-text-2); margin: 0 0 0.875rem; }
+  .paso__dur {
+    font-family: var(--font-mono); font-size: 0.6875rem;
+    letter-spacing: 0.08em; color: var(--zk-muted);
+  }
+
+  .princ { list-style: none; margin: 0; padding: 0; display: grid; gap: 1rem; }
+  @media (min-width: 760px) { .princ { grid-template-columns: repeat(2, 1fr); } }
+  .princ li {
+    padding: 1.5rem;
+    border: 1px solid var(--zk-border);
+    border-left: 2px solid var(--zk-growth);
+    border-radius: var(--zk-r-md);
+    background: var(--zk-surface);
+  }
+  .princ h3 { font-size: 0.9375rem; font-weight: 700; margin: 0 0 0.5rem; }
+  .princ p { font-size: 0.875rem; line-height: 1.6; color: var(--zk-text-2); margin: 0; text-wrap: pretty; }
+
+  .cierre { text-align: center; display: grid; justify-items: center; gap: 0.75rem; }
+  .cierre h2 { font-size: 1.75rem; font-weight: 700; margin: 0; }
+  .cierre p { color: var(--zk-text-2); margin: 0 0 0.75rem; }
+</style>
