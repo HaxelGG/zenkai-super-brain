@@ -42,7 +42,7 @@ beforeEach(() => {
   mockSendEmail.mockResolvedValue({ id: 'email123' });
 });
 
-const { POST } = await import('./lead-demo');
+const { POST, MIN_TEXTO, MAX_TEXTO } = await import('./lead-demo');
 
 const buildRequest = (body: unknown, headers: Record<string, string> = {}) =>
   new Request('http://localhost/api/lead-demo', {
@@ -75,8 +75,24 @@ describe('POST /api/lead-demo', () => {
     expect(call.sector).toBe('salud');
   });
 
-  it('400 con texto inválido (menos de 80 chars)', async () => {
+  it(`400 con texto por debajo del mínimo (${MIN_TEXTO} chars)`, async () => {
     const res = await POST({ request: buildRequest({ texto: 'corto' }) } as any);
+    expect(res.status).toBe(400);
+    expect(mockGenerate).not.toHaveBeenCalled();
+  });
+
+  it('200 con un brief corto pero cualificable (antes el mínimo de 80 lo rechazaba)', async () => {
+    const breve = 'Clínica dental, 3 sedes, perdemos turnos'; // 40 chars
+    expect(breve.length).toBeGreaterThanOrEqual(MIN_TEXTO);
+    expect(breve.length).toBeLessThan(80);
+    mockGenerate.mockResolvedValueOnce({ ok: true, data: validProposal });
+    const res = await POST({ request: buildRequest({ texto: breve }) } as any);
+    expect(res.status).toBe(200);
+    expect(mockGenerate).toHaveBeenCalledWith(breve);
+  });
+
+  it(`400 con texto por encima del máximo (${MAX_TEXTO} chars)`, async () => {
+    const res = await POST({ request: buildRequest({ texto: 'a'.repeat(MAX_TEXTO + 1) }) } as any);
     expect(res.status).toBe(400);
     expect(mockGenerate).not.toHaveBeenCalled();
   });

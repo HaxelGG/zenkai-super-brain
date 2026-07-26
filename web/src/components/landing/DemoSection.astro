@@ -3,6 +3,7 @@
 // v3.3 Sprint 2.5 + Sprint 3 · Demo cableado al endpoint real /api/lead-demo
 // Tres estados: input → loading (mín 8s) → propuesta real renderizada del JSON
 // Turnstile widget render condicional · solo si PUBLIC_TURNSTILE_SITE_KEY está definida
+import { MIN_TEXTO, MAX_TEXTO } from '../../lib/limits';
 const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? '';
 const waNumber = import.meta.env.PUBLIC_WA_NUMBER ?? '573226272302';
 ---
@@ -45,7 +46,9 @@ const waNumber = import.meta.env.PUBLIC_WA_NUMBER ?? '573226272302';
         <textarea
           id="demo-textarea"
           rows="5"
-          maxlength="600"
+          maxlength={MAX_TEXTO}
+          data-min={MIN_TEXTO}
+          data-max={MAX_TEXTO}
           placeholder="Tengo una clínica dental en Medellín, 3 doctores. Queremos agendar citas por WhatsApp y reducir el 25% de no-shows que tenemos…"
           class="w-full bg-transparent text-zk-text placeholder:text-zk-muted text-base px-5 py-3 resize-none focus:outline-none font-sans leading-relaxed"
         ></textarea>
@@ -65,7 +68,7 @@ const waNumber = import.meta.env.PUBLIC_WA_NUMBER ?? '573226272302';
         <div class="flex items-center justify-between gap-3 px-4 pb-3 pt-1">
           <div class="text-xs font-mono text-zk-muted flex items-center gap-2">
             <span id="char-count" class="counter-num">0</span>
-            <span>/ 80 mínimos</span>
+            <span>/ {MIN_TEXTO} mínimos</span>
             <span class="hidden sm:inline text-zk-muted">·</span>
             <span class="hidden sm:inline text-zk-muted">ESP · EN · PT</span>
           </div>
@@ -372,6 +375,12 @@ const waNumber = import.meta.env.PUBLIC_WA_NUMBER ?? '573226272302';
 
   if (textarea && charCount && generateBtn && demoInput && demoLoading && demoProposal && demoError && demoErrorMsg && progressBar && retryBtn) {
 
+    // Umbrales servidos desde lib/limits.ts vía data-attrs · el cliente nunca
+    // define su propio mínimo, así el gate del botón no puede divergir del 400
+    // que devolvería el endpoint.
+    const MIN = Number(textarea.dataset.min) || 25;
+    const MAX = Number(textarea.dataset.max) || 600;
+
     // Placeholder rotativo
     let phIndex = 0;
     setInterval(() => {
@@ -387,7 +396,7 @@ const waNumber = import.meta.env.PUBLIC_WA_NUMBER ?? '573226272302';
       if (!target) return;
       const len = target.value.length;
       charCount.textContent = String(len);
-      if (len >= 80) {
+      if (len >= MIN) {
         generateBtn.disabled = false;
         demoInput.classList.add('glow');
       } else {
@@ -557,7 +566,7 @@ const waNumber = import.meta.env.PUBLIC_WA_NUMBER ?? '573226272302';
 
     generateBtn.addEventListener('click', async () => {
       const texto = textarea.value.trim();
-      if (texto.length < 80) return;
+      if (texto.length < MIN) return;
 
       const turnstileToken = readTurnstileToken();
       if (turnstileEnabled && !turnstileToken) {
@@ -596,7 +605,7 @@ const waNumber = import.meta.env.PUBLIC_WA_NUMBER ?? '573226272302';
         } else if (status === 403) {
           showError('Validación de seguridad falló. Recargá la página y probá de nuevo.');
         } else if (status === 400) {
-          showError('El texto debe tener entre 80 y 600 caracteres.');
+          showError(`El texto debe tener entre ${MIN} y ${MAX} caracteres.`);
         } else {
           showError('No pudimos generar tu propuesta ahora mismo. El problema es nuestro, no tuyo.', 'error-5xx', texto);
           console.error('[demo] unexpected status', status, body);

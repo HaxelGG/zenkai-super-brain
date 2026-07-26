@@ -1,11 +1,21 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { z } from 'zod';
+import { MIN_TEXTO, MAX_TEXTO } from './limits';
 
 export const SECTORES = ['salud', 'restaurante', 'ecommerce', 'servicios', 'inmobiliaria', 'educacion', 'manufactura', 'generico'] as const;
 export const TIERS = ['Lite', 'Starter', 'Growth', 'Pro', 'Enterprise'] as const;
 
+export { MIN_TEXTO, MAX_TEXTO };
+
+/**
+ * Longitud del brief. /api/lead-demo, /api/protocolo y /api/orquestar validan
+ * todos contra este schema, así que el umbral es único para todo el sistema.
+ */
 export const InputSchema = z.object({
-  texto: z.string().min(80, 'texto debe tener al menos 80 caracteres').max(600, 'texto debe tener máximo 600 caracteres'),
+  texto: z
+    .string()
+    .min(MIN_TEXTO, `texto debe tener al menos ${MIN_TEXTO} caracteres`)
+    .max(MAX_TEXTO, `texto debe tener máximo ${MAX_TEXTO} caracteres`),
 });
 export type ProposalInput = z.infer<typeof InputSchema>;
 
@@ -33,7 +43,7 @@ CAPA DE PRODUCTO:
 - 8 sectores: salud, restaurante, ecommerce, servicios, inmobiliaria, educacion, manufactura, generico.
 
 TU TAREA:
-Recibís una descripción de empresa de 80-600 caracteres y devolvés EXCLUSIVAMENTE un JSON válido con esta estructura exacta:
+Recibís una descripción de empresa de 25-600 caracteres y devolvés EXCLUSIVAMENTE un JSON válido con esta estructura exacta:
 
 {
   "sector_detectado": "<uno de: salud|restaurante|ecommerce|servicios|inmobiliaria|educacion|manufactura|generico>",
@@ -57,6 +67,9 @@ REGLAS DURAS:
 - Agentes activos: 2-4 nombres en MAYÚSCULAS de la lista de 12.
 - Stack: 2-4 herramientas reales (WhatsApp Cloud API, Airtable, Make, Cal.com, Resend, n8n, Shopify, etc.).
 - Si no podés inferir sector con >70% certeza, usá "generico".
+- El brief puede llegar muy corto (25 caracteres). Si falta información NO la inventes:
+  elegí el tier más conservador que encaje y describí el dolor en los términos que el
+  usuario usó, sin añadir detalles de empresa que él no mencionó.
 - NUNCA incluyas texto fuera del JSON. Solo el JSON parseable.`;
 
 export type GenerateResult =

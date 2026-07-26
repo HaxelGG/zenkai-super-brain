@@ -93,7 +93,7 @@ describe('POST /api/protocolo', () => {
     expect(res.status).toBe(401);
   });
 
-  it('400 con texto menor a 80 chars', async () => {
+  it('400 con texto por debajo del mínimo (25 chars)', async () => {
     const res = await POST({
       request: buildRequest({
         json: { texto: 'corto' },

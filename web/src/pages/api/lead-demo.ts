@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import { z } from 'zod';
 import { generateProposal } from '../../lib/proposal';
+import { MIN_TEXTO, MAX_TEXTO } from '../../lib/limits';
 import { createDemo } from '../../lib/airtable';
 import { checkRateLimit } from '../../lib/rate-limit';
 import { verifyTurnstile } from '../../lib/turnstile';
@@ -10,8 +11,10 @@ import { log, newRequestId, serializeError } from '../../lib/log';
 
 export const prerender = false;
 
-export const MIN_TEXTO = 80;
-export const MAX_TEXTO = 600;
+// Reexportadas desde lib/limits para que exista un solo umbral en todo el sistema:
+// si el gate del cliente y el del servidor divergen, el botón se habilita y el
+// endpoint devuelve 400.
+export { MIN_TEXTO, MAX_TEXTO };
 
 const InputSchema = z.object({
   texto: z.string().min(MIN_TEXTO).max(MAX_TEXTO),
