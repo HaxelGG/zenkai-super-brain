@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+
+# Endpoints, no páginas. Nada que indexar y rastrearlos gasta presupuesto de crawl.
+Disallow: /api/
+
+# Consola interna (ya va con noindex, esto evita que se gaste el crawl en ella).
+Disallow: /jarvis
+
+Sitemap: https://zenkai.systems/sitemap-index.xml
