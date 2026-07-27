@@ -4,7 +4,8 @@ Allow: /
 # Endpoints, no páginas. Nada que indexar y rastrearlos gasta presupuesto de crawl.
 Disallow: /api/
 
-# Consola interna (ya va con noindex, esto evita que se gaste el crawl en ella).
+# Páginas internas (ya van con noindex, esto evita gastar crawl en ellas).
 Disallow: /jarvis
+Disallow: /styleguide
 
 Sitemap: https://zenkai.systems/sitemap-index.xml

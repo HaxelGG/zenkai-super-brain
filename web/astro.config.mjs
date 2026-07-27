@@ -4,7 +4,7 @@ import sitemap from '@astrojs/sitemap';
 import vercel from '@astrojs/vercel';
 
 /** Rutas que existen pero no deben indexarse ni aparecer en el sitemap. */
-const EXCLUDED_FROM_SITEMAP = ['/404', '/jarvis'];
+const EXCLUDED_FROM_SITEMAP = ['/404', '/jarvis', '/styleguide'];
 
 export default defineConfig({
   site: 'https://zenkai.systems',

@@ -1,0 +1,301 @@
+---
+export const prerender = true;
+
+import WebLayout from '../layouts/WebLayout.astro';
+import WhatsAppCTA from '../components/WhatsAppCTA.astro';
+import DomainArt from '../components/DomainArt.astro';
+import { getModulos, PILARES } from '../lib/catalogo';
+import { CURRENCIES, CURRENCY_CODES, formatPrice } from '../lib/currency';
+import { TIERS } from '../data/pricing';
+
+/**
+ * /styleguide · noindex
+ *
+ * Página interna. Existe para poder mirar el sistema entero de una vez en
+ * lugar de descubrir en producción que dos componentes usan azules distintos.
+ *
+ * Se alimenta de las mismas fuentes que el sitio real (tokens, colección de
+ * módulos, modelo de precios), así que no puede quedarse desactualizada
+ * respecto a lo que se publica: si cambia un token, cambia aquí.
+ */
+const modulos = await getModulos();
+
+const superficies = [
+  ['--zk-bg', 'Fondo de página'],
+  ['--zk-bg-2', 'Fondo alterno'],
+  ['--zk-surface', 'Tarjetas'],
+  ['--zk-surface-2', 'Tarjetas elevadas'],
+];
+const textos = [
+  ['--zk-text', 'Titulares y cuerpo'],
+  ['--zk-text-2', 'Texto secundario'],
+  ['--zk-muted', 'Apoyo · 6,1:1 sobre el fondo'],
+];
+const dominios = [
+  ['growth', '--zk-growth', 'Sales · Marketing · Commerce · Customer · Enterprise'],
+  ['people', '--zk-people', 'HR · Creative · Legal · Specialized'],
+  ['ops', '--zk-ops', 'Operations · Finance · Security'],
+  ['data', '--zk-data', 'Knowledge · Intelligence'],
+];
+---
+<WebLayout
+  title="Styleguide · ZENKAI"
+  description="Referencia interna del sistema de diseño."
+  noindex={true}
+>
+  <div class="sg">
+    <header class="sg__head">
+      <p class="sg__eyebrow">Interno · noindex</p>
+      <h1>Sistema de diseño</h1>
+      <p class="sg__lede">
+        Todo lo de esta página sale de las mismas fuentes que el sitio real:
+        <code>tokens.css</code>, la colección <code>modulos</code> y
+        <code>data/pricing.ts</code>. No puede desincronizarse de lo que se
+        publica.
+      </p>
+    </header>
+
+    {/* ── Color ─────────────────────────────────────────────── */}
+    <section class="sg__sec">
+      <h2>Color</h2>
+
+      <h3>Superficies</h3>
+      <div class="sg__swatches">
+        {superficies.map(([token, uso]) => (
+          <div class="sw">
+            <div class="sw__box" style={`background: var(${token})`}></div>
+            <code>{token}</code>
+            <span>{uso}</span>
+          </div>
+        ))}
+      </div>
+
+      <h3>Texto</h3>
+      <div class="sg__swatches">
+        {textos.map(([token, uso]) => (
+          <div class="sw">
+            <div class="sw__box sw__box--txt" style={`color: var(${token})`}>Aa</div>
+            <code>{token}</code>
+            <span>{uso}</span>
+          </div>
+        ))}
+      </div>
+
+      <h3>Acentos por dominio</h3>
+      <p class="sg__nota">
+        Cada módulo hereda el suyo de su campo <code>dominio</code>. Se aplica
+        poniendo <code>data-dominio</code> en cualquier contenedor; lo de dentro
+        usa <code>var(--zk-accent)</code> sin saber de qué módulo se trata.
+      </p>
+      <div class="sg__swatches">
+        {dominios.map(([, token, quien]) => (
+          <div class="sw">
+            <div class="sw__box" style={`background: var(${token})`}></div>
+            <code>{token}</code>
+            <span>{quien}</span>
+          </div>
+        ))}
+      </div>
+
+      <h3>Reservados</h3>
+      <div class="sg__swatches">
+        <div class="sw">
+          <div class="sw__box" style="background: var(--zk-whatsapp)"></div>
+          <code>--zk-whatsapp</code>
+          <span>Sólo CTAs de WhatsApp. Ningún otro uso.</span>
+        </div>
+        <div class="sw">
+          <div class="sw__box" style="background: var(--zk-accent-solid)"></div>
+          <code>--zk-accent-solid</code>
+          <span>Relleno azul cuando encima va texto blanco (5,4:1)</span>
+        </div>
+      </div>
+    </section>
+
+    {/* ── Tipografía ────────────────────────────────────────── */}
+    <section class="sg__sec">
+      <h2>Tipografía</h2>
+      <p class="sg__nota">
+        Geist para todo el texto, Geist Mono para eyebrows, etiquetas y datos.
+        Orbitron queda <strong>exclusivamente</strong> para el wordmark: es una
+        display geométrica que a tamaño de lectura destroza la legibilidad.
+      </p>
+      <div class="sg__tipo">
+        <p style="font-size: clamp(2rem, 5vw, 3.25rem); font-weight: 700; letter-spacing: -0.025em; line-height: 1.06; margin: 0;">Titular · Geist 700</p>
+        <p style="font-size: 1.0625rem; color: var(--zk-text-2); margin: 0;">Cuerpo · Geist 400. El zorro marrón salta sobre el perro perezoso mientras la agenda se llena sola.</p>
+        <p style="font-family: var(--font-mono); font-size: 0.6875rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--zk-growth); margin: 0;">Eyebrow · Geist Mono</p>
+        <p style="font-family: var(--font-mono); font-size: 0.875rem; color: var(--zk-text-2); margin: 0;">Dato · 269 € · 1.234.567 · 2026-08-02</p>
+      </div>
+    </section>
+
+    {/* ── WhatsAppCTA ───────────────────────────────────────── */}
+    <section class="sg__sec">
+      <h2>WhatsAppCTA</h2>
+      <p class="sg__nota">
+        El único componente que construye un enlace <code>wa.me</code>. Cada
+        instancia lleva su <code>?text=</code> con origen y contexto: sin
+        cookies, ese texto es el sistema de atribución.
+      </p>
+      <div class="sg__row">
+        <WhatsAppCTA location="styleguide" context="primary-lg" label="Primario grande" size="lg" />
+        <WhatsAppCTA location="styleguide" context="primary" label="Primario" />
+        <WhatsAppCTA location="styleguide" context="inline" label="Inline" variant="inline" />
+      </div>
+      <div class="sg__row sg__row--block">
+        <WhatsAppCTA location="styleguide" context="block" label="Bloque · ancho completo" variant="block" />
+      </div>
+    </section>
+
+    {/* ── Botones ───────────────────────────────────────────── */}
+    <section class="sg__sec">
+      <h2>Botones y enlaces</h2>
+      <div class="sg__row">
+        <a href="#" class="btn-primary text-white font-semibold text-sm px-6 py-3 rounded-xl inline-flex items-center">Primario</a>
+        <a href="#" class="btn-ghost text-sm font-medium text-zk-text px-5 py-3 rounded-xl inline-flex items-center">Fantasma</a>
+      </div>
+    </section>
+
+    {/* ── DomainArt ─────────────────────────────────────────── */}
+    <section class="sg__sec">
+      <h2>DomainArt</h2>
+      <p class="sg__nota">
+        Geometría generada por código, ~2 KB, sin peticiones. La variante decide
+        la topología, así que dos módulos del mismo dominio no dibujan lo mismo.
+        Sustituye a los renders 3D genéricos del catálogo original.
+      </p>
+      <div class="sg__art">
+        {dominios.map(([id], i) => (
+          <div class="art" data-dominio={id}>
+            <DomainArt variant={i * 3 + 1} />
+            <code>{id}</code>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    {/* ── Tarjeta de módulo ─────────────────────────────────── */}
+    <section class="sg__sec">
+      <h2>Tarjeta de módulo · un ejemplo por dominio</h2>
+      <div class="sg__cards">
+        {dominios.map(([dom]) => {
+          const m = modulos.find((x) => x.data.dominio === dom);
+          return m ? (
+            <a href={`/modulos/${m.id}/`} class="mcard" data-dominio={dom}>
+              <div class="mcard__art"><DomainArt variant={m.data.orden} /></div>
+              <h3>{m.data.nombre}</h3>
+              <p>{m.data.titular}</p>
+              <span class="mcard__mas">Ver módulo →</span>
+            </a>
+          ) : null;
+        })}
+      </div>
+    </section>
+
+    {/* ── Datos vivos ───────────────────────────────────────── */}
+    <section class="sg__sec">
+      <h2>Estado del catálogo</h2>
+      <div class="sg__stats">
+        <div><strong>{modulos.length}</strong><span>módulos publicados</span></div>
+        <div><strong>{PILARES.length}</strong><span>pilares</span></div>
+        <div><strong>{TIERS.length}</strong><span>planes</span></div>
+        <div><strong>{CURRENCY_CODES.length}</strong><span>monedas</span></div>
+      </div>
+      <div class="sg__precios">
+        {TIERS.map((t) => (
+          <div class="pc">
+            <strong>{t.nombre}</strong>
+            {CURRENCY_CODES.map((c) => (
+              <span>{formatPrice(t.mensual[c], c)} <em>{CURRENCIES[c].region}</em></span>
+            ))}
+          </div>
+        ))}
+      </div>
+    </section>
+  </div>
+</WebLayout>
+
+<style>
+  .sg { max-width: 68rem; margin: 0 auto; padding: 6rem 1.25rem 4rem; }
+  @media (min-width: 1024px) { .sg { padding-inline: 2rem; } }
+
+  .sg__eyebrow {
+    font-family: var(--font-mono); font-size: 0.6875rem;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--zk-warning, #F59E0B); margin: 0 0 1rem;
+  }
+  .sg h1 { font-size: 2.5rem; font-weight: 700; letter-spacing: -0.025em; margin: 0 0 1rem; }
+  .sg__lede { color: var(--zk-text-2); max-width: 60ch; margin: 0; }
+  .sg code {
+    font-family: var(--font-mono); font-size: 0.8125em;
+    background: var(--zk-surface); padding: 0.1em 0.35em;
+    border-radius: 4px; color: var(--zk-text-2);
+  }
+
+  .sg__sec { margin-top: 4rem; padding-top: 2.5rem; border-top: 1px solid var(--zk-border); }
+  .sg__sec h2 { font-size: 1.375rem; font-weight: 700; margin: 0 0 1.5rem; }
+  .sg__sec h3 {
+    font-family: var(--font-mono); font-size: 0.6875rem;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--zk-muted); margin: 2rem 0 0.875rem;
+  }
+  .sg__nota { font-size: 0.875rem; line-height: 1.6; color: var(--zk-text-2); max-width: 64ch; margin: 0 0 1.5rem; }
+
+  .sg__swatches { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+  .sw { display: grid; gap: 0.375rem; }
+  .sw__box {
+    height: 64px; border-radius: var(--zk-r-md);
+    border: 1px solid var(--zk-border);
+  }
+  .sw__box--txt {
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; font-weight: 700; background: var(--zk-bg-2);
+  }
+  .sw span { font-size: 0.75rem; color: var(--zk-muted); line-height: 1.4; }
+
+  .sg__tipo { display: grid; gap: 1.25rem; }
+
+  .sg__row { display: flex; flex-wrap: wrap; gap: 0.875rem; align-items: center; }
+  .sg__row--block { margin-top: 1rem; max-width: 22rem; }
+
+  .sg__art { display: grid; gap: 1.25rem; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+  .art { display: grid; gap: 0.5rem; justify-items: center; }
+  .art > :first-child { width: 100%; aspect-ratio: 1; }
+
+  .sg__cards { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+  .mcard {
+    display: flex; flex-direction: column;
+    padding: 1.25rem;
+    border: 1px solid var(--zk-border);
+    border-radius: var(--zk-r-lg);
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 60%),
+      var(--zk-surface);
+    text-decoration: none; color: inherit;
+    transition: border-color 0.2s;
+  }
+  .mcard:hover { border-color: color-mix(in srgb, var(--zk-accent) 45%, transparent); }
+  .mcard__art { width: 44px; height: 44px; margin-bottom: 0.875rem; }
+  .mcard h3 { font-size: 0.9375rem; font-weight: 700; margin: 0 0 0.375rem; color: var(--zk-accent); font-family: inherit; letter-spacing: 0; text-transform: none; }
+  .mcard p { font-size: 0.8125rem; color: var(--zk-text-2); margin: 0 0 1rem; flex: 1; }
+  .mcard__mas { font-family: var(--font-mono); font-size: 0.6875rem; color: var(--zk-muted); }
+
+  .sg__stats { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); margin-bottom: 2rem; }
+  .sg__stats div {
+    padding: 1.25rem; border: 1px solid var(--zk-border);
+    border-radius: var(--zk-r-md); background: var(--zk-surface);
+    display: grid; gap: 0.25rem;
+  }
+  .sg__stats strong { font-size: 1.75rem; font-weight: 700; color: var(--zk-growth); }
+  .sg__stats span { font-size: 0.75rem; color: var(--zk-muted); }
+
+  .sg__precios { display: grid; gap: 0.5rem; }
+  .pc {
+    display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; align-items: baseline;
+    padding: 0.875rem 1rem;
+    border: 1px solid var(--zk-border); border-radius: var(--zk-r-sm);
+    font-family: var(--font-mono); font-size: 0.8125rem;
+  }
+  .pc strong { min-width: 6rem; color: var(--zk-text); }
+  .pc span { color: var(--zk-text-2); }
+  .pc em { font-style: normal; color: var(--zk-muted); font-size: 0.9em; }
+</style>

@@ -1,0 +1,259 @@
+---
+export const prerender = true;
+
+import WebLayout from '../layouts/WebLayout.astro';
+import Planes from '../components/landing/Planes.astro';
+import WhatsAppCTA from '../components/WhatsAppCTA.astro';
+import { TIERS } from '../data/pricing';
+import { CURRENCIES, CURRENCY_CODES } from '../lib/currency';
+
+const site = Astro.site ?? new URL('https://zenkai.systems');
+const url = new URL('/precios/', site).href;
+
+/**
+ * /precios
+ *
+ * La sección de la home vende; esta página responde. Quien llega aquí ya
+ * decidió que le interesa y ahora quiere saber cómo se calcula, qué pasa si
+ * se quiere ir y por qué el precio cambia según dónde esté.
+ *
+ * Todo lo que se afirma sale de data/pricing.ts. No hay ni un importe escrito
+ * en este archivo.
+ */
+const comoSeCalcula = [
+  {
+    titulo: 'Partimos del coste real, no de lo que creemos que puedes pagar',
+    texto:
+      'Cada plan tiene un coste de mantenimiento mensual concreto: infraestructura, modelos, herramientas. Ese número es la referencia de la que sale el precio, y por eso lo publicamos en la tabla de abajo.',
+  },
+  {
+    titulo: 'El multiplicador depende de tu región, no de tu empresa',
+    texto:
+      'El poder adquisitivo de Bogotá y el de Múnich no son el mismo, y cobrar igual en los dos sitios significa ser inaccesible en uno o regalar margen en el otro. El multiplicador es público y es el mismo para todos los clientes de una región.',
+  },
+  {
+    titulo: 'Cada precio está fijado en su moneda',
+    texto:
+      'No convertimos con un tipo de cambio del día. El importe en euros es el que vas a pagar en euros, y no cambia porque el dólar se mueva. Los precios se revisan cada trimestre, no cada mañana.',
+  },
+  {
+    titulo: 'La implantación equivale a una mensualidad',
+    texto:
+      'Cubre la puesta en marcha, y se perdona si te comprometes a seis meses o más. En LATAM no se cobra: allí la barrera de entrada pesa más que el margen del primer mes.',
+  },
+];
+
+const preguntas = [
+  {
+    q: '¿Puedo irme cuando quiera?',
+    a: 'Sí. El plan mes a mes no tiene permanencia. Comprometerte a más tiempo baja el precio y quita la implantación, pero es una elección tuya y no una condición para empezar.',
+  },
+  {
+    q: '¿Qué pasa si me quedo corto o me sobra plan?',
+    a: 'Se cambia de plan de un mes al siguiente, arriba o abajo. Preferimos que empieces por debajo y subas cuando los números lo justifiquen que venderte de más y que lo descubras a los tres meses.',
+  },
+  {
+    q: '¿El precio incluye el consumo de los modelos de IA?',
+    a: 'Sí, dentro de los límites de uso de cada plan. Si tu volumen los supera de forma sostenida te lo decimos y hablamos de subir de plan, no te llega una factura sorpresa a final de mes.',
+  },
+  {
+    q: '¿La publicidad va aparte?',
+    a: 'Sí. En los planes que incluyen campañas, la gestión está incluida pero la inversión publicitaria la pagas tú directamente a la plataforma. Nunca pasamos tu presupuesto de anuncios por nuestra factura.',
+  },
+  {
+    q: '¿Por qué publicáis los precios?',
+    a: 'Porque quien no los publica cobra lo que puede, no lo que cuesta. Verlos antes de hablar con nosotros te ahorra la llamada si no encajan, y a nosotros nos ahorra la conversación de descubrir tu presupuesto para ajustar la propuesta a él.',
+  },
+];
+---
+<WebLayout
+  title="Precios · Cuatro planes, tres regiones, sin permanencia · ZENKAI"
+  description="Precios públicos de ZENKAI: cuatro planes con importe fijado en USD, EUR y COP, implantación equivalente a una mensualidad y descuento por compromiso. Sin permanencia obligatoria."
+  canonical={url}
+>
+  <div data-dominio="growth">
+    <header class="wrap hero">
+      <nav class="crumbs" aria-label="Migas de pan">
+        <a href="/">Inicio</a>
+        <span aria-hidden="true">/</span>
+        <span class="crumbs__actual">Precios</span>
+      </nav>
+      <p class="eyebrow">Precios</p>
+      <h1>Los precios están aquí porque no tenemos nada que esconder</h1>
+      <p class="lede">
+        Cuatro planes. Cada uno incluye todo lo del anterior. Sin permanencia
+        obligatoria y sin llamada previa para saber cuánto cuesta.
+      </p>
+    </header>
+
+    <Planes />
+
+    <section class="wrap band">
+      <h2 class="h2">Cómo se calcula lo que pagas</h2>
+      <ul class="calc">
+        {comoSeCalcula.map((c, i) => (
+          <li>
+            <span class="calc__n">{String(i + 1).padStart(2, '0')}</span>
+            <div>
+              <h3>{c.titulo}</h3>
+              <p>{c.texto}</p>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <section class="wrap band">
+      <h2 class="h2">El coste de referencia de cada plan</h2>
+      <p class="nota">
+        Es lo que cuesta mantener cada plan al mes en infraestructura,
+        herramientas y modelos. No es lo que pagas — es el número del que sale
+        lo que pagas. Lo enseñamos porque un precio que no se puede explicar
+        acaba siendo un precio que se negocia.
+      </p>
+      <div class="tabla-wrap">
+        <table class="tabla">
+          <thead>
+            <tr>
+              <th scope="col">Plan</th>
+              <th scope="col">Coste de mantenimiento</th>
+              {CURRENCY_CODES.map((c) => (
+                <th scope="col">{CURRENCIES[c].region}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {TIERS.map((t) => (
+              <tr>
+                <th scope="row">{t.nombre}</th>
+                <td class="num">${t.costeUsd} USD</td>
+                {CURRENCY_CODES.map((c) => (
+                  <td class="num">
+                    {t.mensual[c].toLocaleString(CURRENCIES[c].locale)} {c}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p class="nota nota--pie">
+        Los importes en EUR y COP van sin IVA. ZENKAI está registrada fuera de
+        la Unión Europea; el tratamiento fiscal depende de tu propio régimen.
+      </p>
+    </section>
+
+    <section class="wrap band">
+      <h2 class="h2">Lo que preguntan antes de decidir</h2>
+      <div class="qa">
+        {preguntas.map((p) => (
+          <details>
+            <summary>{p.q}</summary>
+            <p>{p.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+
+    <section class="wrap band">
+      <div class="cierre">
+        <h2>¿No sabes cuál te toca?</h2>
+        <p>
+          Dinos en dos frases qué te está costando dinero y te decimos por dónde
+          se empieza. Si el plan que necesitas es el más barato, te lo diremos
+          igual.
+        </p>
+        <WhatsAppCTA
+          location="precios-cierre"
+          message="Hola ZENKAI. He visto los precios y quiero saber qué plan me encaja."
+          size="lg"
+        />
+      </div>
+    </section>
+  </div>
+</WebLayout>
+
+<style>
+  .wrap { max-width: 68rem; margin: 0 auto; padding-inline: 1.25rem; }
+  @media (min-width: 1024px) { .wrap { padding-inline: 2rem; } }
+  .band { padding-block: 3.5rem; border-top: 1px solid var(--zk-border); }
+  .hero { padding-block: 6rem 0.5rem; }
+
+  .crumbs {
+    display: flex; flex-wrap: wrap; gap: 0.5rem;
+    font-family: var(--font-mono); font-size: 0.75rem;
+    color: var(--zk-muted); margin-bottom: 2rem;
+  }
+  .crumbs a { color: var(--zk-text-2); text-decoration: none; }
+  .crumbs a:hover { color: var(--zk-text); }
+  .crumbs__actual { color: var(--zk-growth); }
+
+  .eyebrow {
+    font-family: var(--font-mono); font-size: 0.6875rem;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--zk-growth); margin: 0 0 1rem;
+  }
+  h1 {
+    font-size: clamp(2rem, 5vw, 3.25rem);
+    line-height: 1.06; letter-spacing: -0.025em; font-weight: 700;
+    margin: 0 0 1.25rem; max-width: 22ch; text-wrap: balance;
+  }
+  .lede { font-size: 1.0625rem; line-height: 1.6; color: var(--zk-text-2); margin: 0; max-width: 52ch; }
+
+  .h2 { font-size: 1.5rem; font-weight: 700; margin: 0 0 1.25rem; }
+  .nota { font-size: 0.9375rem; line-height: 1.6; color: var(--zk-text-2); margin: 0 0 1.75rem; max-width: 62ch; }
+  .nota--pie { font-size: 0.8125rem; color: var(--zk-muted); margin: 1.25rem 0 0; }
+
+  .calc { list-style: none; margin: 0; padding: 0; display: grid; gap: 1rem; }
+  @media (min-width: 760px) { .calc { grid-template-columns: repeat(2, 1fr); } }
+  .calc li {
+    display: flex; gap: 1rem;
+    padding: 1.5rem;
+    border: 1px solid var(--zk-border);
+    border-radius: var(--zk-r-lg);
+    background: var(--zk-surface);
+  }
+  .calc__n {
+    font-family: var(--font-mono); font-size: 0.75rem;
+    color: var(--zk-growth); flex-shrink: 0; padding-top: 0.2rem;
+  }
+  .calc h3 { font-size: 0.9375rem; font-weight: 700; margin: 0 0 0.5rem; }
+  .calc p { font-size: 0.875rem; line-height: 1.6; color: var(--zk-text-2); margin: 0; text-wrap: pretty; }
+
+  .tabla-wrap { overflow-x: auto; border: 1px solid var(--zk-border); border-radius: var(--zk-r-lg); }
+  .tabla { width: 100%; border-collapse: collapse; font-size: 0.875rem; min-width: 34rem; }
+  .tabla th, .tabla td { padding: 0.875rem 1rem; text-align: left; }
+  .tabla thead th {
+    font-family: var(--font-mono); font-size: 0.6875rem;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--zk-muted); font-weight: 500;
+    background: var(--zk-bg-2);
+    border-bottom: 1px solid var(--zk-border);
+  }
+  .tabla tbody tr + tr { border-top: 1px solid var(--zk-border); }
+  .tabla tbody th { font-weight: 700; color: var(--zk-text); }
+  .tabla .num { font-family: var(--font-mono); color: var(--zk-text-2); white-space: nowrap; }
+
+  .qa { display: grid; gap: 0.625rem; max-width: 52rem; }
+  .qa details {
+    border: 1px solid var(--zk-border);
+    border-radius: var(--zk-r-md);
+    background: var(--zk-surface);
+  }
+  .qa summary {
+    padding: 1rem 1.25rem;
+    cursor: pointer; font-weight: 600; font-size: 0.9375rem;
+    list-style: none;
+  }
+  .qa summary::-webkit-details-marker { display: none; }
+  .qa summary:focus-visible { outline: 2px solid var(--zk-growth); outline-offset: -2px; }
+  .qa p {
+    margin: 0; padding: 0 1.25rem 1.125rem;
+    font-size: 0.875rem; line-height: 1.65; color: var(--zk-text-2);
+    max-width: 64ch;
+  }
+
+  .cierre { text-align: center; display: grid; justify-items: center; gap: 0.75rem; }
+  .cierre h2 { font-size: 1.75rem; font-weight: 700; margin: 0; }
+  .cierre p { color: var(--zk-text-2); margin: 0 0 0.75rem; max-width: 50ch; }
+</style>
