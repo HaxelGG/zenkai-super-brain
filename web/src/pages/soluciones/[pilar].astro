@@ -59,7 +59,7 @@ const breadcrumbJsonLd = {
 
     <section class="wrap band">
       <h2 class="h2">{modulos.length} {modulos.length === 1 ? 'módulo' : 'módulos'} en este pilar</h2>
-      <ul class="grid">
+      <ul class="grid reveal reveal-stagger">
         {modulos.map((m) => (
           <li>
             <a href={`/modulos/${m.id}/`} class="card" data-dominio={m.data.dominio}>

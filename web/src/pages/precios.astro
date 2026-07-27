@@ -24,7 +24,7 @@ const comoSeCalcula = [
   {
     titulo: 'Partimos del coste real, no de lo que creemos que puedes pagar',
     texto:
-      'Cada plan tiene un coste de mantenimiento mensual concreto: infraestructura, modelos, herramientas. Ese número es la referencia de la que sale el precio, y por eso lo publicamos en la tabla de abajo.',
+      'El precio de cada plan sale de lo que cuesta sostenerlo — infraestructura, modelos, herramientas — y no de una estimación de tu presupuesto. Por eso el mismo plan cuesta lo mismo para todos los clientes de una región.',
   },
   {
     titulo: 'El multiplicador depende de tu región, no de tu empresa',
@@ -90,7 +90,7 @@ const preguntas = [
 
     <section class="wrap band">
       <h2 class="h2">Cómo se calcula lo que pagas</h2>
-      <ul class="calc">
+      <ul class="calc reveal reveal-stagger">
         {comoSeCalcula.map((c, i) => (
           <li>
             <span class="calc__n">{String(i + 1).padStart(2, '0')}</span>
@@ -103,20 +103,24 @@ const preguntas = [
       </ul>
     </section>
 
+    {/* Esta tabla enseña el precio mensual en las tres regiones y NADA MÁS.
+        Antes incluía una columna con el coste de mantenimiento interno de cada
+        plan. Publicar tu propio coste no es transparencia: es enseñar el margen,
+        y una cifra así solo sirve para que te negocien el precio hacia abajo.
+        El coste sigue en data/pricing.ts como referencia de cálculo — pero es
+        un dato interno y no se renderiza. */}
     <section class="wrap band">
-      <h2 class="h2">El coste de referencia de cada plan</h2>
+      <h2 class="h2">El mismo plan en las tres regiones</h2>
       <p class="nota">
-        Es lo que cuesta mantener cada plan al mes en infraestructura,
-        herramientas y modelos. No es lo que pagas — es el número del que sale
-        lo que pagas. Lo enseñamos porque un precio que no se puede explicar
-        acaba siendo un precio que se negocia.
+        Cada importe está fijado en su moneda, no convertido con el cambio del
+        día. El precio en euros es el que pagas en euros, y no se mueve porque
+        se mueva el dólar.
       </p>
       <div class="tabla-wrap">
         <table class="tabla">
           <thead>
             <tr>
               <th scope="col">Plan</th>
-              <th scope="col">Coste de mantenimiento</th>
               {CURRENCY_CODES.map((c) => (
                 <th scope="col">{CURRENCIES[c].region}</th>
               ))}
@@ -126,10 +130,10 @@ const preguntas = [
             {TIERS.map((t) => (
               <tr>
                 <th scope="row">{t.nombre}</th>
-                <td class="num">${t.costeUsd} USD</td>
                 {CURRENCY_CODES.map((c) => (
                   <td class="num">
                     {t.mensual[c].toLocaleString(CURRENCIES[c].locale)} {c}
+                    <span class="mes">/mes</span>
                   </td>
                 ))}
               </tr>
@@ -233,6 +237,7 @@ const preguntas = [
   .tabla tbody tr + tr { border-top: 1px solid var(--zk-border); }
   .tabla tbody th { font-weight: 700; color: var(--zk-text); }
   .tabla .num { font-family: var(--font-mono); color: var(--zk-text-2); white-space: nowrap; }
+  .tabla .mes { color: var(--zk-muted); font-size: 0.9em; }
 
   .qa { display: grid; gap: 0.625rem; max-width: 52rem; }
   .qa details {

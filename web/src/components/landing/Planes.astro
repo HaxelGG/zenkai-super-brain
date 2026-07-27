@@ -31,7 +31,7 @@ const pct = (n: number) => `${Math.round(n * 100)}%`;
       </p>
     </div>
 
-    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 reveal">
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 reveal reveal-stagger">
       {TIERS.map((t) => (
         <div class:list={['tier-card', t.destacado && 'tier-card--destacado']}>
           {t.destacado && <div class="tier-flag">Más elegido</div>}
@@ -71,11 +71,14 @@ const pct = (n: number) => `${Math.round(n * 100)}%`;
             ))}
           </ul>
 
+          {/* El destino del CTA sale de un campo explícito, no de comparar el
+              coste interno. Antes era `t.costeUsd >= 205`, que metía un dato de
+              margen en la capa de vista. */}
           <a
-            href={t.costeUsd >= 205 ? calcomLink : '#hero-demo'}
-            {...(t.costeUsd >= 205 ? { target: '_blank', rel: 'noopener' } : {})}
+            href={t.contactoDirecto ? calcomLink : '/#hero-demo'}
+            {...(t.contactoDirecto ? { target: '_blank', rel: 'noopener' } : {})}
             class:list={['tier-cta', t.destacado && 'tier-cta--primary']}
-          >{t.costeUsd >= 205 ? 'Agendar consulta' : 'Ver mi propuesta gratis'}</a>
+          >{t.contactoDirecto ? 'Agendar consulta' : 'Ver mi propuesta gratis'}</a>
         </div>
       ))}
     </div>

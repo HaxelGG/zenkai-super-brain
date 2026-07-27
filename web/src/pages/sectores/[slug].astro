@@ -65,7 +65,7 @@ const breadcrumbJsonLd = {
 
     <section class="wrap band">
       <h2 class="h2">Si esto te suena, es esto</h2>
-      <ul class="sintomas">
+      <ul class="sintomas reveal reveal-stagger">
         {d.sintomas.map((s) => <li>{s}</li>)}
       </ul>
     </section>
@@ -79,7 +79,7 @@ const breadcrumbJsonLd = {
 
     <section class="wrap band">
       <h2 class="h2">Los módulos que más se usan aquí</h2>
-      <ul class="grid">
+      <ul class="grid reveal reveal-stagger">
         {modulos.map((m) => (
           <li>
             <a href={`/modulos/${m.id}/`} class="card" data-dominio={m.data.dominio}>

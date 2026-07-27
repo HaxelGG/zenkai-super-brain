@@ -33,12 +33,96 @@ const { title, description, canonical, ogImage, noindex } = Astro.props;
     <Footer />
 
     <script>
-      // Reveal · marca todos los .reveal como visibles al cargar (sin observer).
-      // Garantiza que screenshots, SEO crawlers y prefers-reduced-motion siempre
-      // muestren el contenido. La animación fade-up sigue ocurriendo (la transición
-      // CSS se aplica al cambio de class) pero todas las secciones revelan al inicio.
+      /**
+       * Revelado al hacer scroll.
+       *
+       * Antes esto marcaba TODOS los .reveal como visibles nada más cargar, así
+       * que la animación no llegaba a verse nunca: las secciones ya estaban
+       * puestas antes de que el usuario bajara. Ahora entra cada una cuando le
+       * toca, con escalonado en las rejillas.
+       *
+       * El estado oculto lo activa este script poniendo .js-reveal en <html>.
+       * Si no hay JS, si el observer no existe o si algo falla antes de llegar
+       * aquí, el CSS oculto nunca se aplica y la página se ve entera. La
+       * animación no puede ser el motivo de que alguien vea una web en blanco.
+       */
       const init = () => {
-        document.querySelectorAll('.reveal').forEach((el) => el.classList.add('visible'));
+        const objetivos = [
+          ...document.querySelectorAll<HTMLElement>('.reveal, .reveal-stagger'),
+        ];
+
+        if (objetivos.length > 0) {
+          document.documentElement.classList.add('js-reveal');
+
+          // Índice para el escalonado · lo lee el CSS como var(--i).
+          document.querySelectorAll<HTMLElement>('.reveal-stagger').forEach((grupo) => {
+            [...grupo.children].forEach((hijo, i) => {
+              (hijo as HTMLElement).style.setProperty('--i', String(i));
+            });
+          });
+
+          /**
+           * Comprobación por posición en vez de IntersectionObserver.
+           *
+           * El observer es la herramienta canónica, pero sólo dispara si el
+           * navegador está componiendo frames de verdad. En pestañas de fondo,
+           * paneles embebidos y algunos entornos headless no llega a hacerlo, y
+           * el resultado sería una página cuyo contenido no aparece nunca. Aquí
+           * el coste de equivocarse es demasiado alto: preferimos leer la
+           * posición a mano.
+           *
+           * El bucle sólo corre en el frame posterior a un scroll o un resize,
+           * y cada elemento sale de la lista en cuanto se revela, así que se
+           * vacía sola y deja de costar nada.
+           */
+          let pendiente = false;
+          let revelados = 0;
+          const revisar = () => {
+            pendiente = false;
+            const limite = window.innerHeight * 0.88;
+            for (let i = objetivos.length - 1; i >= 0; i--) {
+              if (objetivos[i].getBoundingClientRect().top < limite) {
+                objetivos[i].classList.add('visible');
+                objetivos.splice(i, 1);
+                revelados++;
+              }
+            }
+            if (objetivos.length === 0) {
+              window.removeEventListener('scroll', encolar);
+              window.removeEventListener('resize', encolar);
+            }
+          };
+          const encolar = () => {
+            if (pendiente) return;
+            pendiente = true;
+            requestAnimationFrame(revisar);
+          };
+
+          window.addEventListener('scroll', encolar, { passive: true });
+          window.addEventListener('resize', encolar, { passive: true });
+          // Primera pasada inmediata: lo que ya está en pantalla se marca antes
+          // del primer scroll, así nadie ve un hueco donde debería haber texto.
+          revisar();
+
+          /**
+           * Red de seguridad.
+           *
+           * Si dos segundos después de cargar no se ha revelado NADA, es que el
+           * mecanismo no funciona en este navegador — y entonces no basta con
+           * añadir .visible, porque si las transiciones tampoco corren el
+           * elemento se queda en opacidad 0 igualmente. Lo que se hace es
+           * quitar .js-reveal del <html>: eso elimina de raíz las reglas que
+           * ocultan, sin depender de ninguna transición.
+           *
+           * Que se pierda la animación es un problema estético. Que no se vea
+           * el contenido no es un problema estético.
+           */
+          setTimeout(() => {
+            if (revelados === 0) {
+              document.documentElement.classList.remove('js-reveal');
+            }
+          }, 2000);
+        }
 
         // Seguimiento del puntero para .card-3d · alimenta el gradiente radial
         // ::before vía --mouse-x/y.

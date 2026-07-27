@@ -92,7 +92,7 @@ const breadcrumbJsonLd = {
     {/* ── Capacidades ────────────────────────────────────────────── */}
     <section class="wrap band">
       <h2 class="h2">Qué hace</h2>
-      <ul class="grid-cap">
+      <ul class="grid-cap reveal reveal-stagger">
         {d.capacidades.map((c) => (
           <li class="cap">
             <h3>{c.titulo}</h3>
@@ -116,7 +116,7 @@ const breadcrumbJsonLd = {
     {d.beneficios.length > 0 && (
       <section class="wrap band">
         <h2 class="h2">Qué cambia</h2>
-        <ul class="grid-ben">
+        <ul class="grid-ben reveal reveal-stagger">
           {d.beneficios.map((b) => (
             <li class="ben">
               <h3>{b.titulo}</h3>

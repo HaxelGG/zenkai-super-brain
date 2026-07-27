@@ -33,9 +33,18 @@ export type Money = Record<CurrencyCode, number>;
 export interface Tier {
   id: string;
   nombre: string;
-  /** Coste real de mantenimiento en USD · la referencia de la que sale el precio. */
+  /**
+   * INTERNO · NO RENDERIZAR.
+   *
+   * Coste real de mantenimiento en USD. Es la referencia de la que sale el
+   * precio, pero es un dato de margen: publicarlo no es transparencia, es
+   * enseñar cuánto ganas, y sólo sirve para que te negocien a la baja.
+   * Estuvo un rato visible en /precios y se retiró.
+   */
   costeUsd: number;
   mensual: Money;
+  /** true = el CTA lleva a agendar llamada en vez de a la demo. */
+  contactoDirecto?: boolean;
   /** Implantación · pago único, se perdona en compromiso semestral o anual. */
   implantacion: Money;
   promesa: string;
@@ -104,6 +113,7 @@ export const TIERS: Tier[] = [
     nombre: 'Gold',
     costeUsd: 205,
     mensual: { USD: 1_650, EUR: 1_099, COP: 2_200_000 },
+    contactoDirecto: true,
     implantacion: { USD: 1_650, EUR: 1_099, COP: 0 },
     promesa: 'Adquisición y contenido funcionando sin ampliar el equipo.',
     incluye: [
@@ -120,6 +130,7 @@ export const TIERS: Tier[] = [
     nombre: 'Enterprise',
     costeUsd: 360,
     mensual: { USD: 2_900, EUR: 1_899, COP: 3_870_000 },
+    contactoDirecto: true,
     implantacion: { USD: 2_900, EUR: 1_899, COP: 0 },
     promesa: 'Para empresas que ya no caben en un SaaS.',
     incluye: [

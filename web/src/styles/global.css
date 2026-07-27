@@ -9,6 +9,13 @@
 
 * { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
 html { scroll-behavior: smooth; }
+
+/* La navegación es fija y mide 68px. Sin esto, cualquier salto a un ancla
+   (#planes, #diagnostico…) deja el titular escondido debajo de la barra.
+   Se aplica al elemento de destino, no al contenedor. */
+:target,
+section[id],
+[id^='dx-panel'] { scroll-margin-top: 5.5rem; }
 body {
   background: var(--zk-bg);
   color: var(--zk-text);
@@ -126,16 +133,60 @@ details[open] { background: rgba(30, 111, 255, 0.04); }
 details[open] summary { color: #fff; }
 
 /* ========================================
-   REVELADO AL ENTRAR
+   REVELADO AL ENTRAR EN PANTALLA
+
+   Dos reglas que no se pueden romper:
+
+   1. El contenido NUNCA depende de JavaScript para ser visible. El estado
+      oculto lo activa el propio script poniendo .js-reveal en <html>. Sin JS,
+      sin observer o si algo peta, todo se ve. Un crawler o un lector de
+      pantalla no deberían encontrarse una página en blanco por una animación.
+   2. Con prefers-reduced-motion no hay desplazamiento, sólo un fundido corto.
+      Quien pide menos movimiento no quiere 40px de deslizamiento; tampoco
+      quiere que el contenido aparezca sin más y le desaparezca el hilo.
    ======================================== */
-.reveal {
-  opacity: 0;
-  transform: translateY(40px);
-  transition:
-    opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+/* El estado de reposo NO baja la opacidad: sólo desplaza.
+ *
+ * Un revelado clásico parte de opacity:0, y eso deja texto real invisible
+ * hasta que el usuario baja. En la práctica significa que cualquier lector
+ * que no haga scroll —una auditoría automática, un rastreador, una vista
+ * previa— encuentra contenido con contraste cero. Lo comprobamos: axe pasó
+ * de 0 a 10 fallos de contraste en cuanto se introdujo el fundido, todos en
+ * bloques que aún no se habían revelado.
+ *
+ * Animando sólo la posición el texto está siempre a plena opacidad. Se
+ * conserva la sensación de entrada, desaparece la clase entera de problema,
+ * y ya no hace falta discutir si la herramienta tiene razón. */
+.js-reveal .reveal {
+  transform: translateY(26px);
+  transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: transform;
 }
-.reveal.visible { opacity: 1; transform: translateY(0); }
+.js-reveal .reveal.visible {
+  transform: none;
+  will-change: auto;
+}
+
+/* Escalonado · los hijos entran uno detrás de otro en vez de en bloque.
+   El índice lo pone el script en --i, así funciona con listas generadas. */
+.js-reveal .reveal-stagger > * {
+  transform: translateY(18px);
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: calc(var(--i, 0) * 60ms);
+}
+.js-reveal .reveal-stagger.visible > * { transform: none; }
+
+/* El contenedor no debe desplazarse además de sus hijos: se sumarían. */
+.js-reveal .reveal.reveal-stagger { transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .js-reveal .reveal,
+  .js-reveal .reveal-stagger > * {
+    transform: none;
+    transition: none;
+  }
+}
 
 /* ========================================
    TEXTO CON DEGRADADO

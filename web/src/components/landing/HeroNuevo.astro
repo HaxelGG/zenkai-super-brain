@@ -92,6 +92,44 @@ const confianza = [
   }
   @media (min-width: 1024px) { .hero__wrap { padding-inline: 2rem; } }
 
+  /* Entrada escalonada al cargar · CSS puro, sin esperar a JavaScript.
+     Una sola orquestación al abrir la página crea más efecto que veinte
+     microinteracciones sueltas, y no cuesta ni un byte de script. */
+  /* Aquí sí se usa opacidad: es la carga inicial, dura 750 ms y termina sola
+     sin depender de que el usuario haga nada. No deja contenido invisible
+     esperando un scroll que quizá no llegue. */
+  @keyframes entra {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: none; }
+  }
+  .hero__h1 > *,
+  .hero__sub,
+  .hero__ctas,
+  .hero__trust,
+  .hero__scroll {
+    animation: entra 0.75s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  }
+  /* Cadena corta a propósito: termina entera en ~0,85 s. Con retardos más
+     largos el CTA tardaba más de medio segundo en aparecer, y hacer esperar
+     al elemento por el que existe la página es exactamente lo que no se debe
+     hacer con una animación de entrada. */
+  .hero__h1 > *:nth-child(1) { animation-delay: 0.03s; }
+  .hero__h1 > *:nth-child(2) { animation-delay: 0.09s; }
+  .hero__h1 > *:nth-child(3) { animation-delay: 0.15s; }
+  .hero__sub    { animation-delay: 0.20s; }
+  .hero__ctas   { animation-delay: 0.25s; }
+  .hero__trust  { animation-delay: 0.30s; }
+  .hero__scroll { animation-delay: 0.34s; }
+
+  /* Sin movimiento: aparece y punto. Nada de esperas ni deslizamientos. */
+  @media (prefers-reduced-motion: reduce) {
+    .hero__h1 > *,
+    .hero__sub,
+    .hero__ctas,
+    .hero__trust,
+    .hero__scroll { animation: none; opacity: 1; }
+  }
+
   .hero__h1 {
     font-size: clamp(2.5rem, 7.5vw, 4.75rem);
     font-weight: 800;
