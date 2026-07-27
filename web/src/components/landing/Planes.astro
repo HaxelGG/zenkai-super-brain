@@ -16,7 +16,7 @@ const pct = (n: number) => `${Math.round(n * 100)}%`;
     <div class="text-center mb-14 reveal">
       <div class="inline-flex items-center gap-2 mb-5">
         <div class="w-8 h-px bg-zk-accent"></div>
-        <span class="text-xs font-mono text-zk-accent uppercase tracking-[0.2em]">Planes</span>
+        <span class="text-xs font-mono text-zk-growth uppercase tracking-[0.2em]">Planes</span>
         <div class="w-8 h-px bg-zk-accent"></div>
       </div>
       <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight mb-5 leading-[1.05]">
@@ -65,7 +65,7 @@ const pct = (n: number) => `${Math.round(n * 100)}%`;
           <ul class="space-y-2.5 mb-7 text-sm text-zk-text2 flex-1">
             {t.incluye.map((f) => (
               <li class="flex gap-2.5">
-                <span class="text-zk-accent font-bold leading-5" aria-hidden="true">+</span>
+                <span class="text-zk-growth font-bold leading-5" aria-hidden="true">+</span>
                 <span>{f}</span>
               </li>
             ))}
@@ -97,7 +97,7 @@ const pct = (n: number) => `${Math.round(n * 100)}%`;
               <div class="flex items-baseline justify-between gap-2">
                 <span class="font-semibold text-sm">{c.etiqueta}</span>
                 {c.descuento > 0 && (
-                  <span class="text-xs font-mono text-zk-accent">−{pct(c.descuento)}</span>
+                  <span class="text-xs font-mono text-zk-growth">−{pct(c.descuento)}</span>
                 )}
               </div>
               <p class="text-xs text-zk-text2 mt-2 leading-relaxed">{c.nota}</p>
@@ -136,7 +136,7 @@ const pct = (n: number) => `${Math.round(n * 100)}%`;
     left: 22px;
     padding: 3px 10px;
     border-radius: 999px;
-    background: #1E6FFF;
+    background: var(--zk-accent-solid);
     color: #fff;
     font-family: 'Geist Mono', 'JetBrains Mono Variable', ui-monospace, monospace;
     font-size: 10px;
@@ -164,10 +164,10 @@ const pct = (n: number) => `${Math.round(n * 100)}%`;
     border-color: rgba(74, 158, 255, 0.5);
   }
   .tier-cta--primary {
-    background: #1E6FFF;
-    border-color: #1E6FFF;
+    background: var(--zk-accent-solid);
+    border-color: var(--zk-accent-solid);
   }
-  .tier-cta--primary:hover { background: #3B82FF; border-color: #3B82FF; }
+  .tier-cta--primary:hover { background: #2A6BF0; border-color: #2A6BF0; }
   .tier-cta:focus-visible { outline: 2px solid #4A9EFF; outline-offset: 2px; }
 
   .plazo {

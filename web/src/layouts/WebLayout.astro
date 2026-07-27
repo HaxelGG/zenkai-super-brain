@@ -40,16 +40,24 @@ const { title, description, canonical, ogImage, noindex } = Astro.props;
       const init = () => {
         document.querySelectorAll('.reveal').forEach((el) => el.classList.add('visible'));
 
-        // Mouse tracking para todas las .card-3d · alimenta el radial gradient ::before via --mouse-x/y
-        document.querySelectorAll<HTMLElement>('.card-3d').forEach((card) => {
-          card.addEventListener('mousemove', (e: MouseEvent) => {
-            const rect = card.getBoundingClientRect();
-            const x = ((e.clientX - rect.left) / rect.width) * 100;
-            const y = ((e.clientY - rect.top) / rect.height) * 100;
-            card.style.setProperty('--mouse-x', `${x}%`);
-            card.style.setProperty('--mouse-y', `${y}%`);
+        // Seguimiento del puntero para .card-3d · alimenta el gradiente radial
+        // ::before vía --mouse-x/y.
+        //
+        // En pantallas táctiles no se engancha siquiera: no hay puntero que
+        // seguir, el efecto está apagado por CSS, y un listener de mousemove
+        // por tarjeta que escribe custom properties en cada evento es trabajo
+        // de layout puro a cambio de nada.
+        if (matchMedia('(hover: hover) and (pointer: fine)').matches) {
+          document.querySelectorAll<HTMLElement>('.card-3d').forEach((card) => {
+            card.addEventListener('mousemove', (e: MouseEvent) => {
+              const rect = card.getBoundingClientRect();
+              const x = ((e.clientX - rect.left) / rect.width) * 100;
+              const y = ((e.clientY - rect.top) / rect.height) * 100;
+              card.style.setProperty('--mouse-x', `${x}%`);
+              card.style.setProperty('--mouse-y', `${y}%`);
+            });
           });
-        });
+        }
       };
       if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', init);

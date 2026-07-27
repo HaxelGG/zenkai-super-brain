@@ -34,7 +34,7 @@ const ventajas: Ventaja[] = [
     <div class="text-center mb-14 reveal">
       <div class="inline-flex items-center gap-2 mb-5">
         <div class="w-8 h-px bg-zk-accent"></div>
-        <span class="text-xs font-mono text-zk-accent uppercase tracking-[0.2em]">Lo que nos hace distintos</span>
+        <span class="text-xs font-mono text-zk-growth uppercase tracking-[0.2em]">Lo que nos hace distintos</span>
         <div class="w-8 h-px bg-zk-accent"></div>
       </div>
       <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight mb-5 leading-[1.05]">
@@ -47,7 +47,7 @@ const ventajas: Ventaja[] = [
       {ventajas.map((v) => (
         <div class="card-3d bg-gradient-to-br from-zk-surface to-zk-surface2 border border-zk-border2 rounded-2xl p-7 transition">
           <div class="w-12 h-12 rounded-xl bg-zk-accent/10 border border-zk-accent/30 flex items-center justify-center mb-5">
-            <svg class="w-6 h-6 text-zk-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" set:html={v.iconSvg}></svg>
+            <svg class="w-6 h-6 text-zk-growth" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" set:html={v.iconSvg}></svg>
           </div>
           <h3 class="text-xl font-bold mb-3">{v.title}</h3>
           <p class="text-zk-text2 leading-relaxed text-sm" set:html={v.bodyHtml}></p>

@@ -1,114 +1,46 @@
 /* =========================================================
-   ZENKAI · global.css · Capa visual landing v3.2
-   Extraído verbatim del bloque <style> del HTML standalone.
-   Tokens de color están en tailwind.config.mjs (paleta zk-*).
+   ZENKAI · global.css
+   Se carga en TODAS las páginas, así que aquí sólo vive lo que
+   se usa en más de un sitio. Todo lo demás va scoped en su
+   componente.
+   Los tokens están en tokens.css; la paleta de utilidades, en
+   tailwind.config.mjs.
    ========================================================= */
 
 * { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
 html { scroll-behavior: smooth; }
 body {
-  background: #030305;
-  color: #F5F5FA;
+  background: var(--zk-bg);
+  color: var(--zk-text);
   font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
   overflow-x: hidden;
 }
 
+/* Quien pide menos movimiento no debería tener que sufrir el scroll suave. */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+
 /* ========================================
-   KEYFRAMES PREMIUM
+   KEYFRAMES
+   Sólo los que consume alguna regla viva de este archivo.
    ======================================== */
-@keyframes glowPulse {
-  0%, 100% {
-    box-shadow:
-      0 0 0 0 rgba(30, 111, 255, 0),
-      0 0 40px 0 rgba(30, 111, 255, 0.2),
-      0 0 80px 0 rgba(30, 111, 255, 0.1);
-  }
-  50% {
-    box-shadow:
-      0 0 0 12px rgba(30, 111, 255, 0),
-      0 0 60px 10px rgba(30, 111, 255, 0.35),
-      0 0 120px 30px rgba(30, 111, 255, 0.18);
-  }
-}
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(28px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-@keyframes shimmer {
-  0% { background-position: -1200px 0; }
-  100% { background-position: 1200px 0; }
-}
 @keyframes float3D {
   0%, 100% { transform: translateY(0) translateZ(0); }
-  50% { transform: translateY(-12px) translateZ(20px); }
-}
-@keyframes orbit3D {
-  from { transform: rotateZ(0deg) translateX(var(--radius, 150px)) rotateZ(0deg) translateZ(0); }
-  to { transform: rotateZ(360deg) translateX(var(--radius, 150px)) rotateZ(-360deg) translateZ(0); }
-}
-@keyframes orbit3DReverse {
-  from { transform: rotateZ(360deg) translateX(var(--radius, 110px)) rotateZ(-360deg) translateZ(0); }
-  to { transform: rotateZ(0deg) translateX(var(--radius, 110px)) rotateZ(0deg) translateZ(0); }
-}
-@keyframes pulseRing {
-  0% { transform: scale(0.85); opacity: 1; }
-  100% { transform: scale(1.6); opacity: 0; }
+  50%      { transform: translateY(-12px) translateZ(20px); }
 }
 @keyframes gradientShift {
   0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+  50%      { background-position: 100% 50%; }
 }
-@keyframes blink { 50% { opacity: 0; } }
-@keyframes scaleIn {
-  from { opacity: 0; transform: scale(0.94); }
-  to { opacity: 1; transform: scale(1); }
-}
-@keyframes neuralPulse {
-  0%, 100% { stroke-dashoffset: 0; opacity: 0.15; }
-  50% { stroke-dashoffset: -40; opacity: 0.7; }
-}
-@keyframes nodeGlow {
-  0%, 100% { filter: drop-shadow(0 0 6px rgba(30, 111, 255, 0.6)); }
-  50% { filter: drop-shadow(0 0 16px rgba(30, 111, 255, 1)); }
-}
-@keyframes countUp { from { opacity: 0.3; } to { opacity: 1; } }
 @keyframes textGradient {
   0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+  50%      { background-position: 100% 50%; }
 }
 
 /* ========================================
-   GRADIENT MESH BACKGROUND (técnica Linear/Vercel 2026)
+   ATMÓSFERA · orbe y foco
    ======================================== */
-.mesh-bg {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  pointer-events: none;
-  z-index: 0;
-}
-.mesh-bg::before, .mesh-bg::after {
-  content: '';
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(100px);
-  will-change: transform;
-}
-.mesh-bg::before {
-  width: 600px; height: 600px;
-  top: -200px; left: 10%;
-  background: radial-gradient(circle, rgba(30, 111, 255, 0.4), rgba(167, 139, 250, 0.2), transparent 70%);
-  animation: float3D 12s ease-in-out infinite;
-}
-.mesh-bg::after {
-  width: 500px; height: 500px;
-  top: 100px; right: 5%;
-  background: radial-gradient(circle, rgba(0, 212, 255, 0.25), rgba(30, 111, 255, 0.15), transparent 70%);
-  animation: float3D 14s ease-in-out infinite reverse;
-}
-
-/* Variante orbe simple para otras secciones */
 .orb {
   position: absolute;
   border-radius: 50%;
@@ -123,29 +55,11 @@ body {
   background: radial-gradient(circle, rgba(30, 111, 255, 0.5), transparent 70%);
   animation: float3D 10s ease-in-out infinite;
 }
-.orb-2 {
-  width: 360px; height: 360px;
-  top: 100px; right: 5%;
-  background: radial-gradient(circle, rgba(167, 139, 250, 0.35), transparent 70%);
-  animation: float3D 12s ease-in-out infinite reverse;
-}
-.orb-3 {
-  width: 700px; height: 700px;
-  bottom: -250px; left: -100px;
-  background: radial-gradient(circle, rgba(30, 111, 255, 0.3), transparent 70%);
-  animation: float3D 16s ease-in-out infinite;
-}
-
-/* ========================================
-   SPOTLIGHT cónico del hero
-   ======================================== */
 .spotlight {
   background: radial-gradient(ellipse 70% 50% at 50% 0%, rgba(30, 111, 255, 0.18) 0%, transparent 60%);
 }
 
-/* ========================================
-   NOISE TEXTURE (grain sutil)
-   ======================================== */
+/* Grano sutil sobre todo el documento. */
 .noise::before {
   content: '';
   position: fixed;
@@ -157,30 +71,7 @@ body {
 }
 
 /* ========================================
-   GRID BACKGROUND sutil
-   ======================================== */
-.grid-bg {
-  background-image:
-    linear-gradient(rgba(30, 111, 255, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(30, 111, 255, 0.04) 1px, transparent 1px);
-  background-size: 64px 64px;
-  mask-image: radial-gradient(ellipse 90% 60% at 50% 0%, black 0%, transparent 75%);
-  -webkit-mask-image: radial-gradient(ellipse 90% 60% at 50% 0%, black 0%, transparent 75%);
-}
-
-/* ========================================
-   TEXTAREA GLOW
-   ======================================== */
-.textarea-glow {
-  box-shadow:
-    0 0 0 2px rgba(30, 111, 255, 0.45),
-    0 0 60px rgba(30, 111, 255, 0.3),
-    0 25px 50px -12px rgba(0, 0, 0, 0.7) !important;
-  border-color: rgba(30, 111, 255, 0.65) !important;
-}
-
-/* ========================================
-   BOTÓN PREMIUM con gradient + shimmer + 3D depth
+   BOTONES compartidos
    ======================================== */
 .btn-primary {
   position: relative;
@@ -188,7 +79,7 @@ body {
   background: linear-gradient(135deg, #1E6FFF 0%, #3B82F6 50%, #1E6FFF 100%);
   background-size: 200% 200%;
   animation: gradientShift 8s ease infinite;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.25),
     0 4px 16px rgba(30, 111, 255, 0.35),
@@ -200,15 +91,14 @@ body {
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.35),
     0 16px 40px rgba(30, 111, 255, 0.5),
-    0 0 0 1px rgba(30, 111, 255, 0.8),
-    0 0 60px rgba(30, 111, 255, 0.4);
+    0 0 0 1px rgba(30, 111, 255, 0.8);
 }
 .btn-primary::before {
   content: '';
   position: absolute;
   top: 0; left: -100%;
   width: 100%; height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
   transition: left 0.7s ease;
 }
 .btn-primary:hover::before { left: 100%; }
@@ -217,7 +107,7 @@ body {
   background: rgba(255, 255, 255, 0.025);
   border: 1px solid rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(12px);
-  transition: all 0.25s ease;
+  transition: background 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
 }
 .btn-ghost:hover {
   background: rgba(255, 255, 255, 0.06);
@@ -226,64 +116,29 @@ body {
 }
 
 /* ========================================
-   TIER FEATURED
+   FAQ (<details>)
    ======================================== */
-.tier-featured {
-  border-color: rgba(30, 111, 255, 0.5) !important;
-  background: linear-gradient(135deg, rgba(30, 111, 255, 0.08) 0%, rgba(30, 111, 255, 0.02) 100%) !important;
-  box-shadow:
-    0 0 0 1px rgba(30, 111, 255, 0.3),
-    0 24px 60px -20px rgba(30, 111, 255, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
-  position: relative;
-}
-.tier-badge {
-  position: absolute;
-  top: -14px; left: 50%; transform: translateX(-50%);
-  background: linear-gradient(135deg, #1E6FFF, #3B82F6);
-  color: white;
-  padding: 5px 14px; border-radius: 20px;
-  font-size: 10px; font-weight: 700;
-  letter-spacing: 0.1em; text-transform: uppercase;
-  box-shadow: 0 8px 24px rgba(30, 111, 255, 0.4);
-  white-space: nowrap;
-  z-index: 2;
-}
-
-/* ========================================
-   FAQ
-   ======================================== */
-details[open] summary svg { transform: rotate(180deg); }
 details summary svg { transition: transform 0.25s ease; }
+details[open] summary svg { transform: rotate(180deg); }
 details summary::-webkit-details-marker { display: none; }
 details summary::marker { display: none; }
 details[open] { background: rgba(30, 111, 255, 0.04); }
-details[open] summary { color: white; }
+details[open] summary { color: #fff; }
 
 /* ========================================
-   STEP LINE
-   ======================================== */
-.step-line {
-  opacity: 0;
-  animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-.step-line.delay-1 { animation-delay: 0.9s; }
-.step-line.delay-2 { animation-delay: 2.4s; }
-.step-line.delay-3 { animation-delay: 4.2s; }
-.step-line.delay-4 { animation-delay: 6.3s; }
-
-/* ========================================
-   REVEAL ON SCROLL
+   REVELADO AL ENTRAR
    ======================================== */
 .reveal {
   opacity: 0;
   transform: translateY(40px);
-  transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+  transition:
+    opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .reveal.visible { opacity: 1; transform: translateY(0); }
 
 /* ========================================
-   GRADIENT TEXT
+   TEXTO CON DEGRADADO
    ======================================== */
 .gradient-text {
   background: linear-gradient(135deg, #FFFFFF 0%, #7DA5FF 40%, #1E6FFF 100%);
@@ -293,47 +148,49 @@ details[open] summary { color: white; }
   background-size: 200% 200%;
   animation: textGradient 6s ease infinite;
 }
-.gradient-text-neon {
-  background: linear-gradient(135deg, #00D4FF 0%, #1E6FFF 50%, #A78BFA 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-size: 200% 200%;
-  animation: textGradient 5s ease infinite;
-}
 
 /* ========================================
-   CARD 3D TILT (la estrella visual)
+   TARJETA CON SEGUIMIENTO DE PUNTERO
+   El resplandor sigue al ratón vía --mouse-x/y (ver WebLayout).
+   En pantallas táctiles no hay puntero que seguir: ahí se apaga
+   entero, incluido el listener de JS.
    ======================================== */
 .card-3d {
   position: relative;
-  transform-style: preserve-3d;
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s, box-shadow 0.3s;
-  will-change: transform;
 }
 .card-3d::before {
   content: '';
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(30, 111, 255, 0.18), transparent 40%);
+  background: radial-gradient(
+    circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(30, 111, 255, 0.18),
+    transparent 40%
+  );
   opacity: 0;
   transition: opacity 0.4s;
   pointer-events: none;
 }
-.card-3d:hover::before { opacity: 1; }
-.card-3d:hover {
-  border-color: rgba(30, 111, 255, 0.45);
-  box-shadow:
-    0 30px 60px -20px rgba(30, 111, 255, 0.25),
-    0 0 0 1px rgba(30, 111, 255, 0.2);
+@media (hover: hover) and (pointer: fine) {
+  .card-3d { transform-style: preserve-3d; will-change: transform; }
+  .card-3d:hover::before { opacity: 1; }
+  .card-3d:hover {
+    border-color: rgba(30, 111, 255, 0.45);
+    box-shadow:
+      0 30px 60px -20px rgba(30, 111, 255, 0.25),
+      0 0 0 1px rgba(30, 111, 255, 0.2);
+  }
 }
+
+.compare-row:hover { background: rgba(30, 111, 255, 0.05); }
 
 /* ========================================
    SCROLLBAR
    ======================================== */
 ::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-track { background: #030305; }
+::-webkit-scrollbar-track { background: var(--zk-bg); }
 ::-webkit-scrollbar-thumb {
   background: linear-gradient(180deg, #1F1F2C, #2A2A3A);
   border-radius: 5px;
@@ -341,143 +198,16 @@ details[open] summary { color: white; }
 ::-webkit-scrollbar-thumb:hover { background: #1E6FFF; }
 
 /* ========================================
-   NEURAL DIAGRAM 3D
+   MOVIMIENTO REDUCIDO
+   Una sola regla que apaga todo lo decorativo de este archivo.
    ======================================== */
-.neural-container {
-  position: relative;
-  perspective: 1200px;
-  width: 100%;
-  aspect-ratio: 1;
-  max-width: 520px;
-  margin: 0 auto;
-}
-.neural-stage {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  transform-style: preserve-3d;
-  animation: float3D 8s ease-in-out infinite;
-  transition: transform 0.3s ease-out;
-}
-.neural-svg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-}
-.neural-line {
-  stroke: url(#neuralGradient);
-  stroke-width: 1;
-  fill: none;
-  stroke-dasharray: 4 4;
-  animation: neuralPulse 4s ease-in-out infinite;
-}
-.neural-node {
-  position: absolute;
-  transform: translate(-50%, -50%);
-  z-index: 10;
-}
-.neural-node-label {
-  background: rgba(13, 13, 23, 0.9);
-  border: 1px solid rgba(30, 111, 255, 0.4);
-  backdrop-filter: blur(10px);
-  padding: 6px 10px;
-  border-radius: 8px;
-  font-family: 'JetBrains Mono Variable', 'JetBrains Mono', monospace;
-  font-size: 10px;
-  font-weight: 600;
-  color: #F5F5FA;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 20px rgba(30, 111, 255, 0.2);
-  white-space: nowrap;
-  transition: all 0.3s;
-  cursor: default;
-}
-.neural-node:hover .neural-node-label {
-  border-color: #1E6FFF;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 30px rgba(30, 111, 255, 0.6);
-  transform: scale(1.1);
-}
-.neural-node-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #1E6FFF;
-  box-shadow: 0 0 12px rgba(30, 111, 255, 0.8);
-  margin: 0 auto 4px;
-  animation: nodeGlow 3s ease-in-out infinite;
-}
-.neural-core {
-  position: absolute;
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  width: 130px; height: 130px;
-  z-index: 20;
-}
-.neural-core-inner {
-  position: relative;
-  width: 100%; height: 100%;
-  border-radius: 24px;
-  overflow: hidden;
-  background: linear-gradient(135deg, #1E6FFF, #3B82F6);
-  animation: glowPulse 3s ease-in-out infinite;
-  box-shadow: 0 0 0 4px rgba(30, 111, 255, 0.2), 0 0 60px rgba(30, 111, 255, 0.5);
-}
-.neural-core-rings {
-  position: absolute;
-  inset: -20px;
-  border-radius: 50%;
-  border: 1px solid rgba(30, 111, 255, 0.2);
-}
-.neural-core-rings.r2 { inset: -40px; border-color: rgba(30, 111, 255, 0.1); }
-.neural-core-rings.r3 { inset: -60px; border-color: rgba(30, 111, 255, 0.05); }
-
-/* ========================================
-   COMPARE ROW
-   ======================================== */
-.compare-row:hover { background: rgba(30, 111, 255, 0.05); }
-
-/* ========================================
-   STAT CARD (3D hover effect)
-   ======================================== */
-.stat-card {
-  position: relative;
-  transform-style: preserve-3d;
-  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.stat-card:hover {
-  transform: translateY(-6px) rotateX(4deg) rotateY(-2deg);
-}
-.stat-card::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: linear-gradient(135deg, rgba(30, 111, 255, 0.1), transparent 60%);
-  opacity: 0;
-  transition: opacity 0.4s;
-  pointer-events: none;
-}
-.stat-card:hover::after { opacity: 1; }
-
-/* ========================================
-   RESPONSIVE
-   ======================================== */
-@media (max-width: 640px) {
-  .hero-h1 { font-size: 2.5rem !important; line-height: 1.05 !important; }
-  .neural-container { max-width: 380px; }
-}
-
-/* ========================================
-   NAVBAR GLASSMORPHISM
-   ======================================== */
-.nav-blur {
-  background: rgba(3, 3, 5, 0.6);
-  backdrop-filter: saturate(180%) blur(24px);
-  -webkit-backdrop-filter: saturate(180%) blur(24px);
-}
-
-.counter-num {
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: 'tnum';
+@media (prefers-reduced-motion: reduce) {
+  .orb-1,
+  .btn-primary,
+  .gradient-text { animation: none; }
+  .reveal { opacity: 1; transform: none; transition: none; }
+  .btn-primary:hover,
+  .btn-ghost:hover,
+  .card-3d:hover { transform: none; }
+  .btn-primary::before { display: none; }
 }

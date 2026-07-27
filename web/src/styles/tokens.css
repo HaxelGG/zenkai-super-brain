@@ -116,6 +116,15 @@
      y fallaba el 4,5:1 de WCAG AA para texto de cuerpo. #8A8A9E da 6,1:1. */
   --zk-muted:  #8A8A9E;
 
+  /* Azul de relleno para superficies con texto BLANCO encima.
+     El #1E6FFF de marca da 4,49:1 con blanco — falla el 4,5:1 de WCAG AA por
+     una centésima, y axe lo cazó en el CTA de plan, la etiqueta "Más elegido"
+     y el conmutador de moneda. Este tono, dos pasos más oscuro, da 5,4:1 y a
+     simple vista es el mismo azul.
+     Para TEXTO azul sobre fondo oscuro no vale ninguno de los dos: ahí se usa
+     --zk-growth (#4A9EFF), que da 7,3:1 sobre --zk-bg. */
+  --zk-accent-solid: #1A5FE6;
+
   /* Acentos por dominio · cada módulo hereda el suyo del campo `dominio`.
      Extraídos de las 14 piezas gráficas del catálogo. */
   --zk-growth: #4A9EFF;   /* Sales · Marketing · Commerce · Customer · Enterprise */
