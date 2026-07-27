@@ -139,6 +139,33 @@ export const getModulosDeDiagnostico = async (dx: Diagnostico): Promise<Modulo[]
     .filter((m): m is Modulo => Boolean(m));
 };
 
+// ────────────────────────────────────────────────────────────────────────────
+// Sectores
+// ────────────────────────────────────────────────────────────────────────────
+export type Sector = CollectionEntry<'sectores'>;
+
+/** Sectores publicados, por prioridad comercial. `modulo_disponible: false` los saca. */
+export const getSectores = async (): Promise<Sector[]> => {
+  const todos = await getCollection('sectores');
+  return todos
+    .filter((s) => s.data.modulo_disponible)
+    .sort((a, b) => a.data.prioridad - b.data.prioridad);
+};
+
+/**
+ * Resuelve los módulos de un sector.
+ *
+ * Un slug que no existe (o que apunta a un módulo oculto) se descarta en
+ * silencio en vez de romper el build: el sector se sigue publicando con los
+ * módulos que sí existan. Un enlace roto es peor que una tarjeta de menos.
+ */
+export const getModulosDeSector = async (sector: Sector): Promise<Modulo[]> => {
+  const modulos = await getModulos();
+  return sector.data.modulos
+    .map((slug) => modulos.find((m) => m.id === slug))
+    .filter((m): m is Modulo => Boolean(m));
+};
+
 /** Agrupa los módulos por pilar en un solo paso · lo usa el megamenú. */
 export const getMenu = async (): Promise<Array<Pilar & { modulos: Modulo[] }>> => {
   const modulos = await getModulos();

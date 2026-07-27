@@ -70,11 +70,21 @@ const sectores = defineCollection({
     nombre: z.string(),
     icon: z.string(),
     prioridad: z.number().int().min(1).max(8),
+    /** Titular de la página · el resultado, no el sector. */
+    titular: z.string(),
     dolor_principal: z.string(),
+    /** Arquitectura interna · NO se muestra en público. */
     agentes_prioritarios: z.array(AGENTES_CANONICOS),
+    /** false = no se publica la página ni aparece en listados ni en el sitemap. */
     modulo_disponible: z.boolean(),
     copy_corto: z.string(),
     copy_largo: z.string(),
+    /** Cómo se ve el día a día · concreto, en palabras del cliente. */
+    sintomas: z.array(z.string()).min(2).max(5),
+    /** Slugs de la colección `modulos` · el orden importa. */
+    modulos: z.array(z.string()).min(2),
+    ctaWhatsapp: z.string(),
+    seo: z.object({ title: z.string(), description: z.string() }),
   }),
 });
 

@@ -11,8 +11,9 @@ import { getMenu } from '../../lib/catalogo';
  * pilar. No hay una lista de enlaces que mantener sincronizada con el catálogo,
  * así que `status: hidden` en un .md también lo saca de aquí.
  *
- * "Sectores" todavía no está: sus rutas no existen y un enlace de menú que
- * lleva a un 404 es peor que un menú de cuatro elementos.
+ * Cinco elementos exactos: Soluciones, Sectores, Precios, Cómo trabajamos y
+ * WhatsApp. Ni uno más — a partir de ahí la navegación deja de orientar y
+ * empieza a dar a elegir.
  */
 const pilares = await getMenu();
 ---
@@ -62,6 +63,7 @@ const pilares = await getMenu();
         </div>
       </div>
 
+      <a href="/sectores/" class="nav__link">Sectores</a>
       <a href="/#planes" class="nav__link">Precios</a>
       <a href="/como-trabajamos/" class="nav__link">Cómo trabajamos</a>
     </nav>
@@ -131,6 +133,7 @@ const pilares = await getMenu();
       ))}
 
       <ul class="mobile-sueltos">
+        <li><a href="/sectores/" data-mobile-close>Sectores</a></li>
         <li><a href="/#planes" data-mobile-close>Precios</a></li>
         <li><a href="/como-trabajamos/" data-mobile-close>Cómo trabajamos</a></li>
         <li><a href="/privacy" data-mobile-close>Privacidad</a></li>

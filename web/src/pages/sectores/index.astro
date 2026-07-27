@@ -1,0 +1,135 @@
+---
+export const prerender = true;
+
+import WebLayout from '../../layouts/WebLayout.astro';
+import WhatsAppCTA from '../../components/WhatsAppCTA.astro';
+import { getSectores } from '../../lib/catalogo';
+
+const sectores = await getSectores();
+const site = Astro.site ?? new URL('https://zenkai.systems');
+const url = new URL('/sectores/', site).href;
+
+const breadcrumbJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Inicio', item: site.href },
+    { '@type': 'ListItem', position: 2, name: 'Sectores', item: url },
+  ],
+};
+---
+<WebLayout
+  title="Sectores · Cómo se aplica la IA en tu sector · ZENKAI"
+  description="Cómo funcionan los sistemas de IA en e-commerce, clínicas, servicios profesionales, restaurantes, inmobiliaria, formación online e industria."
+  canonical={url}
+>
+  <div data-dominio="growth">
+    <header class="wrap hero">
+      <nav class="crumbs" aria-label="Migas de pan">
+        <a href="/">Inicio</a>
+        <span aria-hidden="true">/</span>
+        <span class="crumbs__actual">Sectores</span>
+      </nav>
+      <p class="eyebrow">Sectores</p>
+      <h1>El sector cambia las palabras, no la arquitectura</h1>
+      <p class="lede">
+        Los módulos son los mismos; lo que cambia es qué duele, cómo se llama y
+        por dónde conviene empezar. Estos son los sectores donde ya sabemos por
+        dónde se empieza.
+      </p>
+    </header>
+
+    <section class="wrap band">
+      <ul class="grid">
+        {sectores.map((s) => (
+          <li>
+            <a href={`/sectores/${s.data.slug}/`} class="card">
+              <h2>{s.data.nombre}</h2>
+              <p class="card__titular">{s.data.titular}</p>
+              <p class="card__dolor">{s.data.dolor_principal}</p>
+              <span class="card__mas">Ver el sector →</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <section class="wrap band">
+      <div class="cierre">
+        <h2>¿Tu sector no está?</h2>
+        <p>
+          Que no tenga página no significa que no encaje: significa que todavía
+          no hemos escrito la nuestra. Cuéntanos a qué te dedicas y te decimos
+          con franqueza si podemos ayudarte.
+        </p>
+        <WhatsAppCTA
+          location="sectores-cierre"
+          message="Hola ZENKAI. Mi sector no está en la web. Me dedico a:"
+          size="lg"
+        />
+      </div>
+    </section>
+  </div>
+
+  <script is:inline type="application/ld+json" set:html={JSON.stringify(breadcrumbJsonLd)} />
+</WebLayout>
+
+<style>
+  .wrap { max-width: 68rem; margin: 0 auto; padding-inline: 1.25rem; }
+  @media (min-width: 1024px) { .wrap { padding-inline: 2rem; } }
+  .band { padding-block: 3.5rem; }
+  .band + .band { border-top: 1px solid var(--zk-border); }
+  .hero { padding-block: 6rem 1rem; }
+
+  .crumbs {
+    display: flex; flex-wrap: wrap; gap: 0.5rem;
+    font-family: var(--font-mono); font-size: 0.75rem;
+    color: var(--zk-muted); margin-bottom: 2rem;
+  }
+  .crumbs a { color: var(--zk-text-2); text-decoration: none; }
+  .crumbs a:hover { color: var(--zk-text); }
+  .crumbs__actual { color: var(--zk-accent); }
+
+  .eyebrow {
+    font-family: var(--font-mono); font-size: 0.6875rem;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--zk-accent); margin: 0 0 1rem;
+  }
+  h1 {
+    font-size: clamp(2rem, 5vw, 3.25rem);
+    line-height: 1.06; letter-spacing: -0.025em; font-weight: 700;
+    margin: 0 0 1.25rem; max-width: 20ch; text-wrap: balance;
+  }
+  .lede { font-size: 1.0625rem; line-height: 1.6; color: var(--zk-text-2); margin: 0; max-width: 54ch; }
+
+  .grid { list-style: none; margin: 0; padding: 0; display: grid; gap: 1rem; }
+  @media (min-width: 640px)  { .grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 1024px) { .grid { grid-template-columns: repeat(3, 1fr); } }
+
+  .card {
+    display: flex; flex-direction: column; height: 100%;
+    padding: 1.5rem;
+    border: 1px solid var(--zk-border);
+    border-radius: var(--zk-r-lg);
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 60%),
+      var(--zk-surface);
+    text-decoration: none; color: inherit;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .card:hover {
+    border-color: color-mix(in srgb, var(--zk-growth) 45%, transparent);
+    transform: translateY(-2px);
+  }
+  .card:focus-visible { outline: 2px solid var(--zk-growth); outline-offset: 3px; }
+  .card h2 { font-size: 1.125rem; font-weight: 700; margin: 0 0 0.5rem; color: var(--zk-growth); }
+  .card__titular { font-size: 0.9375rem; color: var(--zk-text); margin: 0 0 0.625rem; text-wrap: balance; }
+  .card__dolor { font-size: 0.8125rem; line-height: 1.5; color: var(--zk-text-2); margin: 0 0 1.25rem; flex: 1; }
+  .card__mas { font-family: var(--font-mono); font-size: 0.6875rem; color: var(--zk-muted); }
+
+  .cierre { text-align: center; display: grid; justify-items: center; gap: 0.75rem; }
+  .cierre h2 { font-size: 1.75rem; font-weight: 700; margin: 0; }
+  .cierre p { color: var(--zk-text-2); margin: 0 0 0.75rem; max-width: 52ch; }
+
+  @media (prefers-reduced-motion: reduce) { .card:hover { transform: none; } }
+</style>

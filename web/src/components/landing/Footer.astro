@@ -48,6 +48,7 @@ const destacados = await getModulosCore();
           {pilares.map((p) => (
             <li><a href={`/soluciones/${p.id}/`} class="text-zk-text2 hover:text-zk-text transition">{p.nombre}</a></li>
           ))}
+          <li><a href="/sectores/" class="text-zk-text2 hover:text-zk-text transition">Por sector</a></li>
           <li><a href="/#diagnostico" class="text-zk-text2 hover:text-zk-text transition">No sé cuál necesito</a></li>
         </ul>
       </div>
