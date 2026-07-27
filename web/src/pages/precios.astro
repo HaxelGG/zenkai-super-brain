@@ -2,10 +2,11 @@
 export const prerender = true;
 
 import WebLayout from '../layouts/WebLayout.astro';
+import PageHero from '../components/PageHero.astro';
 import Planes from '../components/landing/Planes.astro';
 import WhatsAppCTA from '../components/WhatsAppCTA.astro';
 import { TIERS } from '../data/pricing';
-import { CURRENCIES, CURRENCY_CODES } from '../lib/currency';
+import { CURRENCIES, CURRENCY_CODES, formatPrice } from '../lib/currency';
 
 const site = Astro.site ?? new URL('https://zenkai.systems');
 const url = new URL('/precios/', site).href;
@@ -72,19 +73,18 @@ const preguntas = [
   canonical={url}
 >
   <div data-dominio="growth">
-    <header class="wrap hero">
-      <nav class="crumbs" aria-label="Migas de pan">
-        <a href="/">Inicio</a>
-        <span aria-hidden="true">/</span>
-        <span class="crumbs__actual">Precios</span>
-      </nav>
-      <p class="eyebrow">Precios</p>
-      <h1>Los precios están aquí porque no tenemos nada que esconder</h1>
-      <p class="lede">
-        Cuatro planes. Cada uno incluye todo lo del anterior. Sin permanencia
-        obligatoria y sin llamada previa para saber cuánto cuesta.
-      </p>
-    </header>
+    {/* El titular anterior era "Los precios están aquí porque no tenemos nada
+        que esconder". Defenderse de una acusación que nadie ha hecho la
+        introduce: el visitante llega a mirar precios, no a sospechar. Y en un
+        posicionamiento de infraestructura, sonar a la defensiva cuesta más
+        que la franqueza que gana. */}
+    <PageHero
+      migas={[{ label: 'Inicio', href: '/' }, { label: 'Precios' }]}
+      eyebrow="Precios"
+      titulo="Precios claros desde el principio"
+      lede="Cuatro planes, tres regiones y ninguna permanencia obligatoria. Sabes cuánto cuesta antes de hablar con nosotros."
+      compacto
+    />
 
     <Planes />
 
@@ -130,10 +130,13 @@ const preguntas = [
             {TIERS.map((t) => (
               <tr>
                 <th scope="row">{t.nombre}</th>
+                {/* formatPrice y no "importe + código": la cabecera de la
+                    columna ya dice la región y el símbolo ya dice la moneda.
+                    "269 € EUR/mes" repite el dato dos veces y hace más ancha
+                    la única tabla del sitio que necesita caber en un móvil. */}
                 {CURRENCY_CODES.map((c) => (
                   <td class="num">
-                    {t.mensual[c].toLocaleString(CURRENCIES[c].locale)} {c}
-                    <span class="mes">/mes</span>
+                    {formatPrice(t.mensual[c], c)}<span class="mes">/mes</span>
                   </td>
                 ))}
               </tr>
@@ -181,54 +184,40 @@ const preguntas = [
   .wrap { max-width: 68rem; margin: 0 auto; padding-inline: 1.25rem; }
   @media (min-width: 1024px) { .wrap { padding-inline: 2rem; } }
   .band { padding-block: 3.5rem; border-top: 1px solid var(--zk-border); }
-  .hero { padding-block: 6rem 0.5rem; }
 
-  .crumbs {
-    display: flex; flex-wrap: wrap; gap: 0.5rem;
-    font-family: var(--font-mono); font-size: 0.75rem;
-    color: var(--zk-muted); margin-bottom: 2rem;
+  /* Todos los H2 de sección del sitio se declaran igual: familia display,
+     paso --t-h2 y el mismo margen inferior. Antes cada página elegía el suyo
+     (1,5 rem aquí, 1,75 en el cierre) y a la misma altura de página se leían
+     dos niveles distintos. */
+  .h2 {
+    font-size: var(--t-h2); font-weight: 700; line-height: 1.08;
+    letter-spacing: -0.025em; margin: 0 0 1.5rem; max-width: 22ch;
   }
-  .crumbs a { color: var(--zk-text-2); text-decoration: none; }
-  .crumbs a:hover { color: var(--zk-text); }
-  .crumbs__actual { color: var(--zk-growth); }
+  .nota { font-size: var(--t-card); line-height: 1.6; color: var(--zk-text-2); margin: 0 0 1.75rem; max-width: 62ch; }
+  .nota--pie { font-size: var(--t-micro); color: var(--zk-muted); margin: 1.25rem 0 0; }
 
-  .eyebrow {
-    font-family: var(--font-mono); font-size: 0.6875rem;
-    letter-spacing: 0.18em; text-transform: uppercase;
-    color: var(--zk-growth); margin: 0 0 1rem;
-  }
-  h1 {
-    font-size: clamp(2rem, 5vw, 3.25rem);
-    line-height: 1.06; letter-spacing: -0.025em; font-weight: 700;
-    margin: 0 0 1.25rem; max-width: 22ch; text-wrap: balance;
-  }
-  .lede { font-size: 1.0625rem; line-height: 1.6; color: var(--zk-text-2); margin: 0; max-width: 52ch; }
-
-  .h2 { font-size: 1.5rem; font-weight: 700; margin: 0 0 1.25rem; }
-  .nota { font-size: 0.9375rem; line-height: 1.6; color: var(--zk-text-2); margin: 0 0 1.75rem; max-width: 62ch; }
-  .nota--pie { font-size: 0.8125rem; color: var(--zk-muted); margin: 1.25rem 0 0; }
-
-  .calc { list-style: none; margin: 0; padding: 0; display: grid; gap: 1rem; }
+  .calc { list-style: none; margin: 0; padding: 0; display: grid; gap: 1.125rem; }
   @media (min-width: 760px) { .calc { grid-template-columns: repeat(2, 1fr); } }
   .calc li {
-    display: flex; gap: 1rem;
-    padding: 1.5rem;
+    display: flex; gap: 1.125rem;
+    padding: 1.75rem;
     border: 1px solid var(--zk-border);
     border-radius: var(--zk-r-lg);
     background: var(--zk-surface);
   }
   .calc__n {
-    font-family: var(--font-mono); font-size: 0.75rem;
-    color: var(--zk-growth); flex-shrink: 0; padding-top: 0.2rem;
+    font-family: var(--font-mono); font-size: var(--t-eyebrow);
+    color: var(--zk-growth); flex-shrink: 0; padding-top: 0.25rem;
+    font-variant-numeric: tabular-nums;
   }
-  .calc h3 { font-size: 0.9375rem; font-weight: 700; margin: 0 0 0.5rem; }
-  .calc p { font-size: 0.875rem; line-height: 1.6; color: var(--zk-text-2); margin: 0; text-wrap: pretty; }
+  .calc h3 { font-size: 1.0625rem; font-weight: 650; line-height: 1.3; letter-spacing: -0.01em; margin: 0 0 0.625rem; }
+  .calc p { font-size: var(--t-card); line-height: 1.55; color: var(--zk-text-2); margin: 0; }
 
   .tabla-wrap { overflow-x: auto; border: 1px solid var(--zk-border); border-radius: var(--zk-r-lg); }
-  .tabla { width: 100%; border-collapse: collapse; font-size: 0.875rem; min-width: 34rem; }
-  .tabla th, .tabla td { padding: 0.875rem 1rem; text-align: left; }
+  .tabla { width: 100%; border-collapse: collapse; font-size: var(--t-micro); min-width: 30rem; }
+  .tabla th, .tabla td { padding: 0.9375rem 1rem; text-align: left; }
   .tabla thead th {
-    font-family: var(--font-mono); font-size: 0.6875rem;
+    font-family: var(--font-mono); font-size: var(--t-eyebrow);
     letter-spacing: 0.1em; text-transform: uppercase;
     color: var(--zk-muted); font-weight: 500;
     background: var(--zk-bg-2);
@@ -236,8 +225,11 @@ const preguntas = [
   }
   .tabla tbody tr + tr { border-top: 1px solid var(--zk-border); }
   .tabla tbody th { font-weight: 700; color: var(--zk-text); }
-  .tabla .num { font-family: var(--font-mono); color: var(--zk-text-2); white-space: nowrap; }
-  .tabla .mes { color: var(--zk-muted); font-size: 0.9em; }
+  .tabla .num {
+    font-family: var(--font-mono); color: var(--zk-text-2); white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+  .tabla .mes { color: var(--zk-muted); }
 
   .qa { display: grid; gap: 0.625rem; max-width: 52rem; }
   .qa details {
@@ -246,19 +238,21 @@ const preguntas = [
     background: var(--zk-surface);
   }
   .qa summary {
-    padding: 1rem 1.25rem;
-    cursor: pointer; font-weight: 600; font-size: 0.9375rem;
-    list-style: none;
+    padding: 1.0625rem 1.25rem;
+    cursor: pointer; font-weight: 600; font-size: var(--t-card);
+    list-style: none; min-height: 44px;
   }
   .qa summary::-webkit-details-marker { display: none; }
-  .qa summary:focus-visible { outline: 2px solid var(--zk-growth); outline-offset: -2px; }
   .qa p {
     margin: 0; padding: 0 1.25rem 1.125rem;
-    font-size: 0.875rem; line-height: 1.65; color: var(--zk-text-2);
+    font-size: var(--t-micro); line-height: 1.6; color: var(--zk-text-2);
     max-width: 64ch;
   }
 
   .cierre { text-align: center; display: grid; justify-items: center; gap: 0.75rem; }
-  .cierre h2 { font-size: 1.75rem; font-weight: 700; margin: 0; }
-  .cierre p { color: var(--zk-text-2); margin: 0 0 0.75rem; max-width: 50ch; }
+  .cierre h2 {
+    font-size: var(--t-h2); font-weight: 700; line-height: 1.08;
+    letter-spacing: -0.025em; margin: 0; max-width: 18ch;
+  }
+  .cierre p { color: var(--zk-text-2); margin: 0 0 0.75rem; max-width: 50ch; font-size: var(--t-body-lg); }
 </style>

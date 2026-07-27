@@ -1,0 +1,139 @@
+---
+/**
+ * Cabecera de página interna · plantilla ÚNICA.
+ *
+ * ── Por qué existe ────────────────────────────────────────────────────────
+ * Seis rutas repetían la misma cabecera —migas, eyebrow, H1, entradilla— con
+ * el mismo marcado copiado y pegado, y con cinco tamaños distintos de
+ * entradilla (1,0625 / 1,125 / 1,1875 rem), tres anchos máximos distintos de
+ * H1 (20ch, 22ch, sin límite) y dos colores distintos de miga. Nada de eso
+ * era una decisión: era deriva. El efecto es que /precios y /sectores se leen
+ * como dos sitios distintos aunque el contenido esté igual de bien escrito.
+ *
+ * La coherencia entre páginas no se consigue documentando la regla. Se
+ * consigue haciendo que sólo haya un sitio donde cambiarla.
+ *
+ * ── Qué NO hace ───────────────────────────────────────────────────────────
+ * No decide el contenido ni el color de acento. El acento lo hereda de
+ * [data-dominio] del contenedor, como el resto del sitio.
+ */
+import type { HTMLAttributes } from 'astro/types';
+
+export interface Miga {
+  label: string;
+  /** Sin href = posición actual. */
+  href?: string;
+}
+
+interface Props extends HTMLAttributes<'header'> {
+  migas: Miga[];
+  eyebrow: string;
+  titulo: string;
+  lede?: string;
+  /** Compacta la cabecera cuando debajo viene contenido denso. */
+  compacto?: boolean;
+}
+
+const { migas, eyebrow, titulo, lede, compacto = false, class: className, ...rest } = Astro.props;
+const conAside = Astro.slots.has('aside');
+---
+<header class:list={['ph', compacto && 'ph--compacto', className]} {...rest}>
+  <div class="ph__wrap">
+    <nav class="ph__migas" aria-label="Migas de pan">
+      {migas.map((m, i) => (
+        <>
+          {i > 0 && <span class="ph__sep" aria-hidden="true">/</span>}
+          {m.href
+            ? <a href={m.href}>{m.label}</a>
+            : <span class="ph__actual" aria-current="page">{m.label}</span>}
+        </>
+      ))}
+    </nav>
+
+    <div class:list={['ph__grid', conAside && 'ph__grid--aside']}>
+      <div class="ph__texto">
+        <p class="ph__eyebrow">{eyebrow}</p>
+        <h1 class="ph__h1">{titulo}</h1>
+        {lede && <p class="ph__lede">{lede}</p>}
+        {Astro.slots.has('default') && <div class="ph__cta"><slot /></div>}
+      </div>
+      {conAside && <div class="ph__aside"><slot name="aside" /></div>}
+    </div>
+  </div>
+</header>
+
+<style>
+  .ph { padding-block: 7rem 2.5rem; }
+  .ph--compacto { padding-block: 7rem 1.5rem; }
+  @media (min-width: 1024px) {
+    .ph { padding-block: 8.5rem 3rem; }
+    .ph--compacto { padding-block: 8.5rem 2rem; }
+  }
+
+  .ph__wrap { max-width: 68rem; margin: 0 auto; padding-inline: 1.25rem; }
+  @media (min-width: 1024px) { .ph__wrap { padding-inline: 2rem; } }
+
+  /* Migas · mono a 12px porque es una ruta, no una frase. Es exactamente el
+     caso para el que se reserva bajar de 14px. */
+  .ph__migas {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem;
+    font-family: var(--font-mono);
+    font-size: var(--t-eyebrow);
+    color: var(--zk-muted);
+    margin-bottom: 2rem;
+  }
+  .ph__migas a {
+    display: inline-flex; align-items: center;
+    color: var(--zk-text-2); text-decoration: none;
+    /* 44px de alto real sin engordar la fila: el área táctil crece hacia
+       fuera y el margen negativo la devuelve al flujo. Medido: con 0,6rem
+       salían 37px porque la altura de línea del mono es menor que la del
+       cuerpo. */
+    min-height: 44px; margin-block: -0.75rem;
+  }
+  .ph__migas a:hover { color: var(--zk-text); text-decoration: underline; }
+  .ph__sep { color: var(--zk-muted); opacity: 0.6; }
+  .ph__actual { color: var(--zk-accent, var(--zk-growth)); }
+
+  .ph__grid { display: grid; gap: 2.5rem; }
+  @media (min-width: 940px) {
+    .ph__grid--aside { grid-template-columns: minmax(0, 1fr) 22rem; align-items: center; }
+  }
+  .ph__aside { display: none; }
+  @media (min-width: 940px) { .ph__aside { display: block; } }
+
+  .ph__eyebrow {
+    font-family: var(--font-mono);
+    font-size: var(--t-eyebrow);
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--zk-accent, var(--zk-growth));
+    margin: 0 0 1rem;
+  }
+
+  /* Display L · un escalón por debajo del H1 de la home, que es el único
+     Display XL del sitio. Esa diferencia es lo que hace que la portada se
+     sienta como la portada. */
+  .ph__h1 {
+    font-family: var(--font-display);
+    font-size: var(--t-display-l);
+    font-weight: 720;
+    line-height: 1.02;
+    letter-spacing: -0.035em;
+    margin: 0 0 1.25rem;
+    max-width: 20ch;
+    text-wrap: balance;
+  }
+
+  .ph__lede {
+    font-size: var(--t-body-lg);
+    line-height: 1.6;
+    color: var(--zk-text-2);
+    margin: 0;
+    max-width: 54ch;
+    text-wrap: pretty;
+  }
+
+  .ph__cta { margin-top: 2rem; display: flex; flex-wrap: wrap; gap: 0.875rem 1rem; align-items: center; }
+</style>

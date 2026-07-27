@@ -2,6 +2,7 @@
 export const prerender = true;
 
 import WebLayout from '../../layouts/WebLayout.astro';
+import PageHero from '../../components/PageHero.astro';
 import WhatsAppCTA from '../../components/WhatsAppCTA.astro';
 import DomainArt from '../../components/DomainArt.astro';
 import { getModulos, getPilar } from '../../lib/catalogo';
@@ -51,35 +52,26 @@ const breadcrumbJsonLd = {
   <div data-dominio={d.dominio}>
 
     {/* ── Cabecera ───────────────────────────────────────────────── */}
-    <header class="mod-hero">
-      <div class="wrap">
-        <nav class="crumbs" aria-label="Migas de pan">
-          <a href="/">Inicio</a>
-          <span aria-hidden="true">/</span>
-          {pilar && <><a href={`/soluciones/${pilar.id}/`}>{pilar.nombre}</a><span aria-hidden="true">/</span></>}
-          <span class="crumbs__actual">{d.nombre}</span>
-        </nav>
-
-        <div class="mod-hero__grid">
-          <div>
-            <p class="eyebrow">{d.nombre}</p>
-            <h1>{d.titular}</h1>
-            <p class="lede">{d.promesa}</p>
-            <div class="mod-hero__cta">
-              <WhatsAppCTA
-                location={`modulo-${modulo.id}`}
-                context={d.nombre}
-                message={d.ctaWhatsapp}
-                label="Hablar por WhatsApp"
-                size="lg"
-              />
-              <a href="/#hero-demo" class="btn-ghost">Ver mi propuesta gratis</a>
-            </div>
-          </div>
-          <div class="mod-hero__art"><DomainArt variant={d.orden} /></div>
-        </div>
-      </div>
-    </header>
+    <PageHero
+      migas={[
+        { label: 'Inicio', href: '/' },
+        ...(pilar ? [{ label: pilar.nombre, href: `/soluciones/${pilar.id}/` }] : []),
+        { label: d.nombre },
+      ]}
+      eyebrow={d.nombre}
+      titulo={d.titular}
+      lede={d.promesa}
+    >
+      <WhatsAppCTA
+        location={`modulo-${modulo.id}`}
+        context={d.nombre}
+        message={d.ctaWhatsapp}
+        label="Hablar por WhatsApp"
+        size="lg"
+      />
+      <a href="/#hero-demo" class="mod-secundario">Ver mi propuesta gratis</a>
+      <DomainArt slot="aside" variant={d.orden} />
+    </PageHero>
 
     {/* ── El problema, en palabras del cliente ───────────────────── */}
     <section class="wrap band">
@@ -186,55 +178,37 @@ const breadcrumbJsonLd = {
   .band { padding-block: 3.5rem; }
   .band + .band { border-top: 1px solid var(--zk-border); }
 
-  .mod-hero { padding-block: 5rem 1rem; }
-  .mod-hero__grid {
-    display: grid;
-    gap: 2.5rem;
-    align-items: center;
+  /* Enlace secundario del hero · deja de ser .btn-ghost porque ahora convive
+     con el CTA de WhatsApp dentro de PageHero y dos botones del mismo tamaño
+     compiten: el visitante no sabe cuál es el camino principal. */
+  .mod-secundario {
+    display: inline-flex; align-items: center;
+    min-height: 48px; padding-inline: 0.25rem;
+    color: var(--zk-text-2);
+    font-size: var(--t-micro); font-weight: 550;
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: color 0.2s, border-color 0.2s;
   }
-  @media (min-width: 900px) {
-    .mod-hero__grid { grid-template-columns: 1.35fr 1fr; gap: 3.5rem; }
-  }
-  .mod-hero__art { aspect-ratio: 1; max-width: 320px; margin-inline: auto; }
-  .mod-hero__cta { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 2rem; }
-
-  .crumbs {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    color: var(--zk-muted);
-    margin-bottom: 2rem;
-  }
-  .crumbs a { color: var(--zk-text-2); text-decoration: none; }
-  .crumbs a:hover { color: var(--zk-text); }
-  .crumbs__actual { color: var(--zk-accent); }
+  .mod-secundario:hover { color: var(--zk-text); border-color: var(--zk-border-hi); }
 
   .eyebrow {
     font-family: var(--font-mono);
-    font-size: 0.6875rem;
-    letter-spacing: 0.18em;
+    font-size: var(--t-eyebrow);
+    font-weight: 500;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
     color: var(--zk-accent);
     margin: 0 0 1rem;
   }
 
-  h1 {
-    font-size: clamp(2rem, 5vw, 3.25rem);
-    line-height: 1.06;
-    letter-spacing: -0.02em;
-    font-weight: 700;
-    margin: 0 0 1.25rem;
-    text-wrap: balance;
-  }
-  .lede { font-size: 1.125rem; color: var(--zk-text-2); margin: 0; max-width: 40ch; }
-
   .h2 {
-    font-size: 1.5rem;
+    font-size: var(--t-h2);
     font-weight: 700;
-    letter-spacing: -0.01em;
+    line-height: 1.08;
+    letter-spacing: -0.025em;
     margin: 0 0 1.75rem;
+    max-width: 22ch;
   }
 
   .problema {
@@ -242,12 +216,11 @@ const breadcrumbJsonLd = {
     padding-left: 1.5rem;
   }
   .problema__texto {
-    font-size: 1.25rem;
-    line-height: 1.55;
+    font-size: var(--t-h3);
+    line-height: 1.5;
     color: var(--zk-text);
     margin: 0;
     max-width: 58ch;
-    text-wrap: pretty;
   }
 
   .grid-cap, .grid-ben {
@@ -266,33 +239,40 @@ const breadcrumbJsonLd = {
       var(--zk-surface);
     border: 1px solid var(--zk-border);
     border-radius: var(--zk-r-lg);
-    padding: 1.25rem;
+    padding: 1.5rem;
     transition: border-color 0.2s, transform 0.2s;
   }
   .cap:hover, .ben:hover {
     border-color: color-mix(in srgb, var(--zk-accent) 40%, transparent);
     transform: translateY(-2px);
   }
-  .cap h3, .ben h3 { font-size: 0.9375rem; font-weight: 600; margin: 0 0 0.5rem; }
-  .cap p, .ben p { font-size: 0.875rem; line-height: 1.55; color: var(--zk-text-2); margin: 0; }
+  .cap h3, .ben h3 {
+    font-size: 1.0625rem; font-weight: 650; line-height: 1.3;
+    letter-spacing: -0.012em; margin: 0 0 0.625rem;
+  }
+  .cap p, .ben p { font-size: var(--t-card); line-height: 1.55; color: var(--zk-text-2); margin: 0; }
 
   .pills { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.5rem; }
   .pill {
-    padding: 0.4rem 0.8rem;
+    padding: 0.45rem 0.85rem;
     border: 1px solid var(--zk-border);
     border-radius: 999px;
-    font-size: 0.8125rem;
+    font-size: var(--t-micro);
     color: var(--zk-text-2);
     background: var(--zk-surface);
   }
-  .pill--kpi { font-family: var(--font-mono); font-size: 0.75rem; }
+  /* KPI sí es mono: es un dato medible, no una frase. */
+  .pill--kpi { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
   .pills--gris .pill { color: var(--zk-muted); }
 
-  .nota { font-size: 0.875rem; color: var(--zk-muted); max-width: 60ch; margin: -0.75rem 0 1.5rem; }
+  .nota { font-size: var(--t-micro); line-height: 1.5; color: var(--zk-muted); max-width: 60ch; margin: -0.75rem 0 1.5rem; }
 
   .cierre { text-align: center; display: grid; justify-items: center; gap: 0.75rem; }
-  .cierre h2 { font-size: 1.75rem; font-weight: 700; margin: 0; }
-  .cierre p { color: var(--zk-text-2); margin: 0 0 0.75rem; }
+  .cierre h2 {
+    font-size: var(--t-h2); font-weight: 700; line-height: 1.08;
+    letter-spacing: -0.025em; margin: 0; max-width: 18ch;
+  }
+  .cierre p { color: var(--zk-text-2); margin: 0 0 0.75rem; font-size: var(--t-body-lg); }
 
   .btn-ghost {
     display: inline-flex;

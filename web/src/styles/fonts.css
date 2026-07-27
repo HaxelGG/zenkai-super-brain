@@ -1,0 +1,113 @@
+/* =========================================================
+   ZENKAI · fuentes autohospedadas
+   =========================================================
+
+   Se declaran a mano en vez de importar el CSS de fontsource
+   porque ese CSS trae cirílico, vietnamita, símbolos y las
+   variantes cursivas de las tres familias: 24 declaraciones
+   @font-face para un sitio que se escribe en español y no usa
+   ni una cursiva. El unicode-range evita la DESCARGA, sí, pero
+   no evita que las declaraciones viajen en el CSS crítico ni
+   que alguien active una cursiva sin darse cuenta.
+
+   Aquí hay exactamente lo que la web pinta:
+   · Sora Variable  — display (H1, H2 comerciales)      latin + latin-ext
+   · Geist Variable — cuerpo, interfaz, botones          latin + latin-ext
+   · Geist Mono Var — eyebrows, datos, etiquetas         latin + latin-ext
+   · Orbitron 800   — SÓLO el wordmark                   latin
+
+   Los archivos son los .woff2 variables del paquete de
+   fontsource; Vite los resuelve, les pone huella y los sirve
+   desde nuestro dominio. Nada se pide a un tercero.
+
+   Peso total descargable en una página en español:
+   Sora 33 KB + Geist 29 KB + Geist Mono 23 KB + Orbitron 7 KB.
+   Las variantes latin-ext sólo bajan si aparece un carácter
+   que las necesite.
+
+   font-display: swap en todas. El texto se lee desde el primer
+   fotograma con la fuente del sistema y cambia al llegar la
+   real; la alternativa (block) es dejar el titular en blanco.
+   ========================================================= */
+
+/* ── Display · Sora ────────────────────────────────────────
+   Rango variable completo 100-800 en un único archivo: pedir
+   pesos sueltos costaría una petición por peso. Usamos 700-760. */
+@font-face {
+  font-family: 'Sora Variable';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 800;
+  src: url('@fontsource-variable/sora/files/sora-latin-wght-normal.woff2') format('woff2-variations');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215,
+    U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Sora Variable';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 800;
+  src: url('@fontsource-variable/sora/files/sora-latin-ext-wght-normal.woff2') format('woff2-variations');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304,
+    U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0,
+    U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* ── Cuerpo · Geist ──────────────────────────────────────── */
+@font-face {
+  font-family: 'Geist Variable';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url('@fontsource-variable/geist/files/geist-latin-wght-normal.woff2') format('woff2-variations');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215,
+    U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Geist Variable';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url('@fontsource-variable/geist/files/geist-latin-ext-wght-normal.woff2') format('woff2-variations');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304,
+    U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0,
+    U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* ── Datos · Geist Mono ──────────────────────────────────── */
+@font-face {
+  font-family: 'Geist Mono Variable';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url('@fontsource-variable/geist-mono/files/geist-mono-latin-wght-normal.woff2') format('woff2-variations');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215,
+    U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Geist Mono Variable';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url('@fontsource-variable/geist-mono/files/geist-mono-latin-ext-wght-normal.woff2') format('woff2-variations');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304,
+    U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0,
+    U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* ── Wordmark · Orbitron ──────────────────────────────────
+   Un solo peso, un solo subset, y su uso está confinado a
+   Brand.astro. A tamaño de lectura destroza la legibilidad. */
+@font-face {
+  font-family: 'Orbitron';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 800;
+  src: url('@fontsource/orbitron/files/orbitron-latin-800-normal.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215,
+    U+FEFF, U+FFFD;
+}

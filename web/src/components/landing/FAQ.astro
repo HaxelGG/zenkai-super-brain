@@ -10,28 +10,20 @@ const faqs: QA[] = [
     a: 'Es gratis y no te llamamos. La propuesta se genera automáticamente, queda en tu pantalla, puedes descargarla o pedirla por WhatsApp. Si quieres hablar, <strong class="text-zk-text">tú agendas</strong>. Si no, te quedas con la propuesta. No hay sales pipeline persiguiéndote.',
   },
   {
-    q: '¿Hay algún descuento?',
-    a: 'Sí, y es el único: <strong class="text-zk-text">cuanto más tiempo te comprometes, menos pagas</strong>. Mes a mes pagas la tarifa normal; a tres meses baja un 15%; a seis, un 25% y desaparece la implantación; al año, un 27%. No hay ofertas de lanzamiento ni descuentos por negociar, porque eso significaría que el precio de la lista estaba inflado.',
-  },
-  {
     q: 'No vendo por internet todavía. ¿Esto es para mí?',
     a: 'Sí. El <strong class="text-zk-text">plan Starter</strong> está pensado justo para eso: asistente de IA por WhatsApp, panel propio, recordatorios y agenda de citas. Es la primera presencia digital que atiende sola, sin pedirte que antes inviertas en publicidad.',
-  },
-  {
-    q: '¿Por qué publican precios? Las agencias serias no lo hacen.',
-    a: 'Las agencias que no publican precios cobran lo que pueden, no lo que cuesta. El nuestro sale de una fórmula: <span class="font-mono text-zk-text">coste real de mantenimiento × un multiplicador según tu región</span>, porque el poder adquisitivo de Bogotá y el de Múnich no son el mismo. Publicarlo es tu garantía de no estar pagando el triple que el cliente de al lado.',
-  },
-  {
-    q: '¿Tengo que firmar permanencia?',
-    a: 'No. Puedes quedarte mes a mes y marcharte cuando quieras. Si <em>eliges</em> comprometerte a más tiempo el precio baja y la implantación se perdona desde los 6 meses — pero es una elección tuya, no una condición para empezar.',
   },
   {
     q: '¿Mis datos se quedan guardados? ¿Los venden?',
     a: 'Tu texto se procesa con Claude (Anthropic) para generar la propuesta. Si solo pruebas la demo sin dejar contacto, <strong class="text-zk-text">no queda nada nuestro</strong>. Si nos das email/WhatsApp para enviar el PDF, se guarda <em>solo</em> para mandarte ESA propuesta. No vendemos data. Nunca.',
   },
   {
-    q: '¿En qué países operan? ¿Cobran en USD?',
-    a: 'Equipo remoto entre <strong class="text-zk-text">Pereira (Colombia)</strong>, <strong class="text-zk-text">Barcelona</strong> y <strong class="text-zk-text">Murcia (España)</strong>. Servimos clientes en LATAM, España y EE.UU. Facturamos en USD, y si pagas en euros el conmutador de arriba te muestra <strong class="text-zk-text">el precio en EUR que vas a pagar</strong>: es un precio de lista fijado, no una conversión aproximada que después no cuadre con la factura. Los importes en EUR van sin IVA.',
+    /* Decía "Facturamos en USD" y a continuación explicaba que el precio en
+       euros es un precio de lista fijado. Las dos cosas no pueden ser
+       ciertas a la vez, y la contradicción estaba en la respuesta que un
+       comprador europeo lee antes de decidir. */
+    q: '¿En qué países operan? ¿En qué moneda se paga?',
+    a: 'Equipo remoto entre <strong class="text-zk-text">Pereira (Colombia)</strong>, <strong class="text-zk-text">Barcelona</strong> y <strong class="text-zk-text">Murcia (España)</strong>. Servimos clientes en LATAM, España y EE.UU. <strong class="text-zk-text">Cada precio está fijado en su moneda</strong> y se factura en ella: el importe en euros que ves arriba es el que vas a pagar en euros, no una conversión del día que después no cuadra con la factura. Los importes en EUR y COP van sin IVA.',
   },
   {
     q: '¿Puedo implementar la propuesta con otra agencia?',
@@ -43,32 +35,61 @@ const faqs: QA[] = [
   },
 ];
 ---
-<section id="faq" class="py-24 lg:py-32 border-t border-zk-border/50 relative">
+<section id="faq" class="py-20 lg:py-24 border-t border-zk-border/50 relative">
 
   <div class="max-w-3xl mx-auto px-5 lg:px-8">
 
     <div class="text-center mb-12 reveal">
       <div class="inline-flex items-center gap-2 mb-5">
         <div class="w-8 h-px bg-zk-accent"></div>
-        <span class="text-xs font-mono text-zk-growth uppercase tracking-[0.2em]">Preguntas frecuentes</span>
+        <span class="t-eyebrow">Preguntas frecuentes</span>
         <div class="w-8 h-px bg-zk-accent"></div>
       </div>
-      <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight mb-5 leading-[1.05]">
-        Lo que todos preguntan<br>
-        <span class="text-zk-text2">antes de probar.</span>
-      </h2>
+      <h2 class="t-h2 mb-5">Lo que todos preguntan antes de probar</h2>
     </div>
 
     <div class="space-y-3 reveal">
       {faqs.map((f) => (
         <details class="group bg-gradient-to-br from-zk-surface to-zk-surface2 border border-zk-border2 rounded-xl overflow-hidden hover:border-zk-accent/40 transition">
-          <summary class="px-6 py-5 cursor-pointer flex items-center justify-between gap-4 font-medium text-zk-text2">
+          <summary class="faq__q">
             <span>{f.q}</span>
             <svg class="w-5 h-5 shrink-0 text-zk-muted" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
           </summary>
-          <div class="px-6 pb-5 text-zk-text2 leading-relaxed text-sm" set:html={f.a}></div>
+          <div class="faq__a" set:html={f.a}></div>
         </details>
       ))}
     </div>
+
+    {/* Las tres preguntas que faltan aquí —descuentos, permanencia y por qué
+        publicamos precios— estaban repetidas palabra por palabra en el FAQ de
+        /precios. Repetir una respuesta no la hace más creíble; sólo alarga la
+        página y obliga a mantener dos copias que acaban divergiendo. */}
+    <p class="faq__pie reveal">
+      Las dudas sobre precio, permanencia y facturación están respondidas en
+      <a href="/precios/">la página de precios</a>.
+    </p>
   </div>
 </section>
+
+<style>
+  /* El enunciado iba en --zk-text-2 y la respuesta también: pregunta y
+     respuesta con el mismo peso y el mismo color hacen que el acordeón se lea
+     como un muro. El enunciado es lo que se escanea. */
+  .faq__q {
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    padding: 1.25rem 1.5rem; cursor: pointer;
+    font-size: var(--t-card); font-weight: 600; color: var(--zk-text);
+    min-height: 44px;
+  }
+  .faq__a {
+    padding: 0 1.5rem 1.25rem;
+    font-size: var(--t-micro); line-height: 1.65; color: var(--zk-text-2);
+    max-width: 68ch;
+  }
+  .faq__pie {
+    margin: 1.75rem 0 0; text-align: center;
+    font-size: var(--t-micro); color: var(--zk-muted);
+  }
+  .faq__pie a { color: var(--zk-growth); text-decoration: none; font-weight: 550; }
+  .faq__pie a:hover { text-decoration: underline; }
+</style>

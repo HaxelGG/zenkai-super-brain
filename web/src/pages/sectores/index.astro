@@ -2,6 +2,7 @@
 export const prerender = true;
 
 import WebLayout from '../../layouts/WebLayout.astro';
+import PageHero from '../../components/PageHero.astro';
 import WhatsAppCTA from '../../components/WhatsAppCTA.astro';
 import { getSectores } from '../../lib/catalogo';
 
@@ -24,20 +25,13 @@ const breadcrumbJsonLd = {
   canonical={url}
 >
   <div data-dominio="growth">
-    <header class="wrap hero">
-      <nav class="crumbs" aria-label="Migas de pan">
-        <a href="/">Inicio</a>
-        <span aria-hidden="true">/</span>
-        <span class="crumbs__actual">Sectores</span>
-      </nav>
-      <p class="eyebrow">Sectores</p>
-      <h1>El sector cambia las palabras, no la arquitectura</h1>
-      <p class="lede">
-        Los módulos son los mismos; lo que cambia es qué duele, cómo se llama y
-        por dónde conviene empezar. Estos son los sectores donde ya sabemos por
-        dónde se empieza.
-      </p>
-    </header>
+    <PageHero
+      migas={[{ label: 'Inicio', href: '/' }, { label: 'Sectores' }]}
+      eyebrow="Sectores"
+      titulo="El sector cambia las palabras, no la arquitectura"
+      lede="Los módulos son los mismos; lo que cambia es qué duele, cómo se llama y por dónde conviene empezar."
+      compacto
+    />
 
     <section class="wrap band">
       <ul class="grid reveal reveal-stagger">
@@ -79,30 +73,8 @@ const breadcrumbJsonLd = {
   @media (min-width: 1024px) { .wrap { padding-inline: 2rem; } }
   .band { padding-block: 3.5rem; }
   .band + .band { border-top: 1px solid var(--zk-border); }
-  .hero { padding-block: 6rem 1rem; }
 
-  .crumbs {
-    display: flex; flex-wrap: wrap; gap: 0.5rem;
-    font-family: var(--font-mono); font-size: 0.75rem;
-    color: var(--zk-muted); margin-bottom: 2rem;
-  }
-  .crumbs a { color: var(--zk-text-2); text-decoration: none; }
-  .crumbs a:hover { color: var(--zk-text); }
-  .crumbs__actual { color: var(--zk-accent); }
-
-  .eyebrow {
-    font-family: var(--font-mono); font-size: 0.6875rem;
-    letter-spacing: 0.18em; text-transform: uppercase;
-    color: var(--zk-accent); margin: 0 0 1rem;
-  }
-  h1 {
-    font-size: clamp(2rem, 5vw, 3.25rem);
-    line-height: 1.06; letter-spacing: -0.025em; font-weight: 700;
-    margin: 0 0 1.25rem; max-width: 20ch; text-wrap: balance;
-  }
-  .lede { font-size: 1.0625rem; line-height: 1.6; color: var(--zk-text-2); margin: 0; max-width: 54ch; }
-
-  .grid { list-style: none; margin: 0; padding: 0; display: grid; gap: 1rem; }
+  .grid { list-style: none; margin: 0; padding: 0; display: grid; gap: 1.25rem; }
   @media (min-width: 640px)  { .grid { grid-template-columns: repeat(2, 1fr); } }
   @media (min-width: 1024px) { .grid { grid-template-columns: repeat(3, 1fr); } }
 
@@ -122,14 +94,25 @@ const breadcrumbJsonLd = {
     transform: translateY(-2px);
   }
   .card:focus-visible { outline: 2px solid var(--zk-growth); outline-offset: 3px; }
-  .card h2 { font-size: 1.125rem; font-weight: 700; margin: 0 0 0.5rem; color: var(--zk-growth); }
-  .card__titular { font-size: 0.9375rem; color: var(--zk-text); margin: 0 0 0.625rem; text-wrap: balance; }
-  .card__dolor { font-size: 0.8125rem; line-height: 1.5; color: var(--zk-text-2); margin: 0 0 1.25rem; flex: 1; }
-  .card__mas { font-family: var(--font-mono); font-size: 0.6875rem; color: var(--zk-muted); }
+  /* El H2 de tarjeta NO usa la display: son 24 titulillos de 18px en rejilla,
+     y ahí Sora deja de ser voz de marca para convertirse en ruido. La display
+     titula la página, no cada elemento de una lista. */
+  .card h2 {
+    font-family: var(--font-body);
+    font-size: 1.125rem; font-weight: 650; letter-spacing: -0.012em;
+    margin: 0 0 0.5rem; color: var(--zk-growth);
+  }
+  .card__titular { font-size: var(--t-card); line-height: 1.45; color: var(--zk-text); margin: 0 0 0.625rem; }
+  .card__dolor { font-size: var(--t-micro); line-height: 1.5; color: var(--zk-text-2); margin: 0 0 1.5rem; flex: 1; }
+  .card__mas { font-size: var(--t-micro); font-weight: 550; color: var(--zk-growth); }
+  .card:hover .card__mas { text-decoration: underline; }
 
   .cierre { text-align: center; display: grid; justify-items: center; gap: 0.75rem; }
-  .cierre h2 { font-size: 1.75rem; font-weight: 700; margin: 0; }
-  .cierre p { color: var(--zk-text-2); margin: 0 0 0.75rem; max-width: 52ch; }
+  .cierre h2 {
+    font-size: var(--t-h2); font-weight: 700; line-height: 1.08;
+    letter-spacing: -0.025em; margin: 0; max-width: 18ch;
+  }
+  .cierre p { color: var(--zk-text-2); margin: 0 0 0.75rem; max-width: 52ch; font-size: var(--t-body-lg); }
 
   @media (prefers-reduced-motion: reduce) { .card:hover { transform: none; } }
 </style>

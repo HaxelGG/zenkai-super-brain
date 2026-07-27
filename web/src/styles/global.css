@@ -19,8 +19,111 @@ section[id],
 body {
   background: var(--zk-bg);
   color: var(--zk-text);
+  font-family: var(--font-body);
   font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
   overflow-x: hidden;
+}
+
+/* ========================================
+   SISTEMA TIPOGRÁFICO
+
+   La familia display se asigna por ELEMENTO, no por clase. Es la única forma
+   de garantizar que no queda un H1 en Geist en alguna de las 29 rutas: una
+   clase hay que acordarse de ponerla, un selector de elemento no.
+
+   H1 y H2 son siempre voz de marca. H3 y por debajo son lectura, y ahí Sora
+   estorba: sus contrapunzones abiertos y su interletraje ancho piden tamaño.
+   ======================================== */
+h1, h2 {
+  font-family: var(--font-display);
+  /* Sora es más ancha que Geist al mismo cuerpo. Sin apretar el interletraje
+     un titular de tres líneas gana una cuarta. */
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+h3, h4, h5, h6 { font-family: var(--font-body); }
+
+p { text-wrap: pretty; }
+
+/* Escala · ocho pasos, los de tokens.css. Cualquier tamaño fuera de aquí es
+   un valor suelto y hay que justificarlo. */
+.t-display-xl {
+  font-family: var(--font-display);
+  font-size: var(--t-display-xl);
+  font-weight: 750;
+  line-height: 0.98;
+  letter-spacing: -0.045em;
+}
+.t-display-l {
+  font-family: var(--font-display);
+  font-size: var(--t-display-l);
+  font-weight: 720;
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+}
+.t-h2 {
+  font-family: var(--font-display);
+  font-size: var(--t-h2);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+}
+.t-h3 {
+  font-family: var(--font-body);
+  font-size: var(--t-h3);
+  font-weight: 650;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+}
+.t-body-lg { font-size: var(--t-body-lg); line-height: 1.6; }
+.t-body    { font-size: var(--t-body);    line-height: 1.6; }
+.t-card    { font-size: var(--t-card);    line-height: 1.55; }
+.t-micro   { font-size: var(--t-micro);   line-height: 1.45; }
+
+/* Eyebrow · la ÚNICA licencia para bajar de 14px, y sólo porque no es texto
+   que haya que leer para decidir nada: es una etiqueta de sección. */
+.t-eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--t-eyebrow);
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--zk-growth);
+}
+
+/* ========================================
+   CIFRAS
+
+   Las proporcionales hacen que "1.099" y "399" no alineen en una columna de
+   precios, y que un contador tiemble al cambiar de dígito. Tabulares: todas
+   las cifras ocupan lo mismo.
+   ======================================== */
+.tabular,
+[data-price-eur],
+[data-precio],
+.currency-btn,
+.currency-code,
+time,
+th[scope='col'],
+td.num {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+
+/* ========================================
+   FOCO VISIBLE · una sola definición para todo el sitio
+   Los componentes que declaran el suyo lo hacen para ajustar el offset,
+   nunca para quitarlo.
+   ======================================== */
+:focus-visible {
+  outline: 2px solid var(--zk-growth);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--zk-growth) 32%, transparent);
+  color: var(--zk-text);
 }
 
 /* Quien pide menos movimiento no debería tener que sufrir el scroll suave. */

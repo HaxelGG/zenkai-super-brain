@@ -86,7 +86,7 @@ const paneles = await Promise.all(
 
   .dx__head { max-width: 44rem; margin-bottom: 2.5rem; }
   .eyebrow {
-    font-family: var(--font-mono); font-size: 0.6875rem;
+    font-family: var(--font-mono); font-size: var(--t-eyebrow);
     letter-spacing: 0.18em; text-transform: uppercase;
     color: var(--zk-growth); margin: 0 0 1rem;
   }
@@ -177,11 +177,11 @@ const paneles = await Promise.all(
   }
   .dx__card:focus-visible { outline: 2px solid var(--zk-accent); outline-offset: 3px; }
   .dx__card h3 { font-size: 0.9375rem; font-weight: 700; margin: 0 0 0.375rem; color: var(--zk-accent); }
-  .dx__card p { font-size: 0.8125rem; line-height: 1.5; color: var(--zk-text-2); margin: 0 0 0.875rem; flex: 1; }
-  .dx__mas { font-family: var(--font-mono); font-size: 0.6875rem; letter-spacing: 0.08em; color: var(--zk-muted); }
+  .dx__card p { font-size: var(--t-micro); line-height: 1.5; color: var(--zk-text-2); margin: 0 0 0.875rem; flex: 1; }
+  .dx__mas { font-size: var(--t-micro); font-weight: 550; color: var(--zk-growth); }
 
   .dx__cta { display: flex; flex-wrap: wrap; align-items: center; gap: 0.875rem 1.25rem; }
-  .dx__nota { font-size: 0.8125rem; color: var(--zk-muted); margin: 0; }
+  .dx__nota { font-size: var(--t-micro); line-height: 1.5; color: var(--zk-text-2); margin: 0; }
 
   @media (prefers-reduced-motion: reduce) { .dx__card:hover { transform: none; } }
 </style>

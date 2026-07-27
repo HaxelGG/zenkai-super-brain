@@ -1,6 +1,7 @@
 ---
 export const prerender = true;
 import WebLayout from '../layouts/WebLayout.astro';
+import { WA_NUMERO, WA_VISIBLE } from '../lib/contacto';
 
 const updated = '12 de mayo de 2026';
 ---
@@ -82,7 +83,7 @@ const updated = '12 de mayo de 2026';
       <p>
         ZENKAI Growth Systems · Pereira, Colombia<br>
         Email: <a href="mailto:hola@zenkai.systems">hola@zenkai.systems</a><br>
-        WhatsApp: <a href="https://wa.me/34622874482">+34 622 874 482</a>
+        WhatsApp: <a href={`https://wa.me/${WA_NUMERO}`}>{WA_VISIBLE}</a>
       </p>
 
       <p class="back">
@@ -100,31 +101,36 @@ const updated = '12 de mayo de 2026';
   @media (min-width: 1024px) {
     .privacy-page { padding: 9rem 2rem 6rem; }
   }
+  /* Esta página iba por libre: colores escritos a mano (#9999AE, #5A5A70),
+     tamaños en px sueltos y su propia pila de fuentes. El eyebrow daba 3,1:1
+     — la única violación de contraste que quedaba en todo el sitio. */
   .privacy-wrap {
     max-width: 720px;
     margin: 0 auto;
-    color: #9999AE;
+    color: var(--zk-text-2);
     line-height: 1.7;
-    font-size: 15px;
+    font-size: var(--t-card);
   }
   .eyebrow {
-    font-family: 'Geist Mono', 'JetBrains Mono Variable', monospace;
-    font-size: 11px;
+    font-family: var(--font-mono);
+    font-size: var(--t-eyebrow);
+    font-weight: 500;
     text-transform: uppercase;
-    letter-spacing: 0.18em;
-    color: #5A5A70;
+    letter-spacing: 0.16em;
+    color: var(--zk-muted);
     margin-bottom: 1rem;
   }
   .privacy-wrap h1 {
-    color: #F5F5FA;
-    font-size: 2.5rem;
-    font-weight: 700;
-    line-height: 1.1;
+    color: var(--zk-text);
+    font-size: var(--t-display-l);
+    font-weight: 720;
+    line-height: 1.02;
+    letter-spacing: -0.035em;
     margin: 0 0 1.25rem;
   }
   .privacy-wrap .lead {
-    font-size: 17px;
-    color: #C5C5D6;
+    font-size: var(--t-body-lg);
+    color: var(--zk-text-2);
     margin-bottom: 3rem;
   }
   .privacy-wrap h2 {

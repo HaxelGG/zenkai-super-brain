@@ -42,10 +42,15 @@ export default {
           neon: '#00D4FF',
         },
       },
+      // Espejo de los tokens de styles/tokens.css. Se declaran apuntando a la
+      // custom property y no a la lista de familias para que exista UNA sola
+      // fuente de verdad: cambiar la display en tokens.css cambia también
+      // `font-display` de Tailwind, sin tener que acordarse de este archivo.
       fontFamily: {
-        sans: ['"Geist Variable"', 'Geist', 'system-ui', 'sans-serif'],
-        mono: ['"Geist Mono Variable"', '"Geist Mono"', 'ui-monospace', 'monospace'],
-        wordmark: ['Orbitron', 'system-ui', 'sans-serif'],
+        display: 'var(--font-display)',
+        sans: 'var(--font-body)',
+        mono: 'var(--font-mono)',
+        wordmark: 'var(--font-wordmark)',
       },
     },
   },

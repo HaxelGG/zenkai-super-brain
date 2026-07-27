@@ -172,7 +172,14 @@ const enSoluciones = activo('/soluciones') || activo('/modulos');
   }
   @media (min-width: 1024px) { .nav__bar { padding-inline: 2rem; } }
 
-  .nav__brand { text-decoration: none; transition: opacity 0.2s; flex-shrink: 0; }
+  /* El wordmark es el enlace a la portada y medía 32-35 px de alto: por
+     debajo del objetivo táctil de 44. Se le da altura al ENLACE, no al
+     logotipo, así el dibujo no cambia de tamaño. */
+  .nav__brand {
+    display: inline-flex; align-items: center;
+    min-height: 44px;
+    text-decoration: none; transition: opacity 0.2s; flex-shrink: 0;
+  }
   .nav__brand:hover { opacity: 0.85; }
 
   .nav__links { display: none; align-items: center; gap: 0.25rem; }
@@ -229,7 +236,7 @@ const enSoluciones = activo('/soluciones') || activo('/modulos');
     display: block; font-size: 1.0625rem; font-weight: 700;
     color: var(--zk-accent); margin-bottom: 0.25rem;
   }
-  .mega__pilarTxt { display: block; font-size: 0.8125rem; color: var(--zk-text-2); line-height: 1.45; }
+  .mega__pilarTxt { display: block; font-size: var(--t-micro); color: var(--zk-text-2); line-height: 1.45; }
   .mega__pilar:hover .mega__pilarNombre { text-decoration: underline; }
 
   .mega__lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.125rem; }
@@ -263,7 +270,7 @@ const enSoluciones = activo('/soluciones') || activo('/modulos');
 
   .currency-switch {
     display: flex; align-items: center; flex-shrink: 0;
-    font-family: var(--font-mono); font-size: 0.6875rem;
+    font-family: var(--font-mono); font-size: var(--t-eyebrow);
     background: var(--zk-surface);
     border: 1px solid var(--zk-border);
     border-radius: var(--zk-r-sm);
@@ -274,6 +281,11 @@ const enSoluciones = activo('/soluciones') || activo('/modulos');
     min-width: 48px; min-height: 48px; padding: 0 6px;
     background: transparent; border: 0; color: var(--zk-muted);
     font: inherit; cursor: pointer;
+    /* DESPUÉS de `font: inherit` y no antes: el atajo `font` reinicia
+       font-variant-numeric a normal, así que la regla global de cifras
+       tabulares moría aquí en silencio. Se comprobó leyendo el computed
+       style, no el CSS. */
+    font-variant-numeric: tabular-nums;
     transition: color 0.2s, background 0.2s;
   }
   .currency-btn:hover { color: var(--zk-text); }
@@ -334,7 +346,7 @@ const enSoluciones = activo('/soluciones') || activo('/modulos');
   .mobile-grupo { margin-bottom: 1.5rem; }
   .mobile-grupo__tit {
     display: block; margin-bottom: 0.5rem;
-    font-size: 0.75rem; font-family: var(--font-mono);
+    font-size: var(--t-eyebrow); font-family: var(--font-mono);
     letter-spacing: 0.14em; text-transform: uppercase;
     color: var(--zk-accent); text-decoration: none;
   }
@@ -387,11 +399,23 @@ const enSoluciones = activo('/soluciones') || activo('/modulos');
       if (isCurrencyCode(cur)) applyCurrency(cur);
     });
   });
+  // Se aplica SIEMPRE, no sólo cuando hay una moneda guardada.
+  //
+  // Antes, en la primera visita no se llamaba a applyCurrency y el aviso
+  // "IVA no incluido" —que es la nota de EUR, la moneda por defecto— no
+  // aparecía hasta que el visitante tocaba el conmutador. Es decir: el único
+  // matiz fiscal de la página de precios estaba oculto justo para quien
+  // llegaba por primera vez desde Europa.
   try {
     const saved = localStorage.getItem('zk-currency');
     if (saved && isCurrencyCode(saved)) applyCurrency(saved);
-    else if (saved) { localStorage.removeItem('zk-currency'); applyCurrency(DEFAULT_CURRENCY); }
-  } catch {}
+    else {
+      if (saved) localStorage.removeItem('zk-currency');
+      applyCurrency(DEFAULT_CURRENCY);
+    }
+  } catch {
+    applyCurrency(DEFAULT_CURRENCY);
+  }
 
   // ── Megamenú ──────────────────────────────────────────────────────────────
   const megaBtn = document.getElementById('mega-btn');

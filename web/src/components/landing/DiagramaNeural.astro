@@ -17,11 +17,11 @@ import Brand from './Brand.astro';
         <span class="dot"></span>
         <span class="dim">La infraestructura</span>
       </div>
-      <h2>
-        <span class="gradient-cool">Una red neural</span><br>
-        <span class="gradient-warm">de 12 agentes IA</span><br>
-        <span class="gradient-cool">trabajando por ti.</span>
-      </h2>
+      {/* Tres degradados tipográficos en tres líneas, y uno de ellos naranja
+          — un color que no aparece en ningún otro sitio del sistema. El
+          degradado sobre texto es el recurso del hero y sólo del hero: si se
+          repite en cada sección deja de señalar nada. */}
+      <h2 class="t-h2">Una red neural de 12 agentes IA trabajando por ti</h2>
       <div class="prose">
         <p>
           ZENKAI no es un chatbot. Es un <strong>sistema multi-agente neuronal</strong> donde cada agente especializado se conecta con los demás como una red de neuronas.
@@ -172,26 +172,10 @@ import Brand from './Brand.astro';
     text-transform: uppercase;
   }
 
-  .neural-text h2 {
-    font-family: 'Geist', system-ui, sans-serif;
-    font-size: clamp(2rem, 4vw, 3rem);
-    font-weight: 700;
-    letter-spacing: -0.04em;
-    line-height: 1.05;
-    margin-bottom: 1.5rem;
-  }
-  .gradient-cool {
-    background: linear-gradient(135deg, #FFFFFF 0%, #B8D4FF 50%, #4A9EFF 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-  .gradient-warm {
-    background: linear-gradient(135deg, #FFB855 0%, #FF8830 50%, #FFAF55 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
+  /* Declaraba 'Geist' a mano y por eso este H2 se saltaba el sistema: era el
+     único titular de 48px del sitio que no hablaba con la voz de marca.
+     La familia la pone ahora la clase .t-h2; aquí sólo queda el margen. */
+  .neural-text h2 { margin-bottom: 1.5rem; }
 
   .prose {
     color: #9999AE;

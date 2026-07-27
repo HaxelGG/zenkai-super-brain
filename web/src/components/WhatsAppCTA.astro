@@ -13,7 +13,13 @@
  *    botón verde que no lleva a WhatsApp y el código de color deja de significar.
  *
  * Un `wa.me` fuera de este componente es un bug.
+ *
+ * El NÚMERO ya no vive aquí: está en lib/contacto.ts, porque el diálogo de
+ * error de la demo también tiene que construir un enlace desde el cliente y
+ * esa era una segunda copia del teléfono esperando a quedarse obsoleta.
  */
+import { waHref } from '../lib/contacto';
+
 interface Props {
   /** Dónde vive este CTA · viaja en el mensaje. Ej: "hero", "cierre", "modulo-sales-ai". */
   location: string;
@@ -37,11 +43,9 @@ const {
   class: className = '',
 } = Astro.props;
 
-const numero = import.meta.env.PUBLIC_WA_NUMBER ?? '34622874482';
-
 const base = message ?? 'Hola ZENKAI. Vengo de la web y quiero contaros mi caso.';
 const marca = context ? `\n\n(origen: ${location} · ${context})` : `\n\n(origen: ${location})`;
-const href = `https://wa.me/${numero}?text=${encodeURIComponent(base + marca)}`;
+const href = waHref(base + marca);
 ---
 <a
   href={href}

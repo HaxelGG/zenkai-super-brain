@@ -1,11 +1,13 @@
 ---
-// Tres familias, no cuatro. Geist (cuerpo) + Geist Mono (eyebrows y datos) +
-// Orbitron 800 sólo para el wordmark. Salen Inter, JetBrains Mono y Orbitron 700:
-// eran peso de descarga que no pintaba nada distinto en pantalla.
-import '@fontsource-variable/geist';
-import '@fontsource-variable/geist-mono';
-import '@fontsource/orbitron/800.css';
+// Las @font-face se declaran a mano en styles/fonts.css: importar los paquetes
+// de fontsource enteros traía cirílico, vietnamita, símbolos y las cursivas de
+// tres familias — 24 caras para un sitio en español que no usa ni una cursiva.
+import '../styles/fonts.css';
 import '../styles/tokens.css';
+// El H1 es Sora y es el elemento LCP. Sin precarga el navegador no descubre la
+// fuente hasta haber descargado y analizado el CSS, y el titular se pinta dos
+// veces: una con la del sistema y otra al llegar la real.
+import soraLatin from '@fontsource-variable/sora/files/sora-latin-wght-normal.woff2?url';
 import '../styles/global.css';
 import SeoHead from '../components/SeoHead.astro';
 import NavBar from '../components/landing/NavBar.astro';
@@ -26,6 +28,7 @@ const { title, description, canonical, ogImage, noindex } = Astro.props;
 <html lang="es">
   <head>
     <SeoHead {title} {description} {canonical} {ogImage} {noindex} />
+    <link rel="preload" as="font" type="font/woff2" href={soraLatin} crossorigin />
   </head>
   <body class="bg-zk-bg text-zk-text font-sans antialiased noise">
     <NavBar />

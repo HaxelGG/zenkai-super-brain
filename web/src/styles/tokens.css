@@ -25,13 +25,27 @@
   --color-error: #EF4444;
   --color-error-subtle: rgba(239, 68, 68, 0.08);
 
-  /* === 4. Typography === */
-  /* Geist para cuerpo y titulares · Geist Mono para eyebrows, etiquetas y datos.
-     Orbitron queda EXCLUSIVAMENTE para el wordmark (ver Brand.astro): es una
-     display face geométrica que a tamaño de lectura destroza la legibilidad. */
-  --font-sans: 'Geist Variable', system-ui, sans-serif;
+  /* === 4. Typography ===
+     TRES familias con tres trabajos distintos y sin solaparse:
+
+     · Sora      — voz de marca. Sólo titula. Es una grotesca geométrica con
+                   contrapunzones abiertos y terminaciones rectas: a 60 px lee
+                   como infraestructura, no como agencia. A 16 px no lee.
+     · Geist     — todo lo que se lee de verdad. Cuerpo, navegación, botones,
+                   tarjetas, formularios. Neutral a propósito.
+     · Geist Mono— sólo DATOS: eyebrows, pasos 01-03, plazos, monedas, estados.
+                   Nunca una frase comercial completa.
+     · Orbitron  — EXCLUSIVAMENTE el wordmark (ver Brand.astro).
+
+     Geist titulaba y cuerpo a la vez, y por eso la web se leía correcta pero
+     anónima: sin contraste entre voz y lectura no hay jerarquía de marca, sólo
+     tamaños distintos de la misma cosa. */
+  --font-display: 'Sora Variable', 'Geist Variable', system-ui, sans-serif;
+  --font-body: 'Geist Variable', system-ui, sans-serif;
   --font-mono: 'Geist Mono Variable', ui-monospace, monospace;
-  --font-wordmark: 'Orbitron', var(--font-sans);
+  --font-wordmark: 'Orbitron', var(--font-body);
+  /* Alias heredado · muchos componentes ya escriben var(--font-sans). */
+  --font-sans: var(--font-body);
   --text-xs: 0.75rem;     /* 12px · line-height 1rem */
   --text-sm: 0.875rem;    /* 14px · line-height 1.25rem */
   --text-base: 1rem;      /* 16px · line-height 1.5rem */
@@ -109,12 +123,22 @@
   --zk-border:    rgba(255, 255, 255, 0.08);
   --zk-border-hi: rgba(255, 255, 255, 0.16);
 
-  /* Texto */
+  /* Texto · TRES niveles y ni uno más.
+     Con dos, todo lo que no era titular caía al mismo gris y la página se leía
+     plana. Con cinco, nadie sabe cuál usar.
+
+     Los tres cumplen 4,5:1 sobre --zk-bg (#08080C), así que la jerarquía la
+     hace el tono y NO la opacidad. Bajar la opacidad para sugerir jerarquía es
+     lo que dejaba los textos secundarios apagados: es un atajo que se paga en
+     legibilidad, y a partir de cierto punto en accesibilidad.
+
+     · text   #F5F5FA — 18,6:1 · titulares y texto principal
+     · text-2 #B8B8C8 — 10,3:1 · párrafos secundarios, descripciones (antes
+                        #A0A0B4, 7,7:1 · correcto pero visiblemente apagado)
+     · muted  #9292A6 —  6,4:1 · SÓLO datos accesorios, nunca un párrafo largo */
   --zk-text:   #F5F5FA;
-  --zk-text-2: #A0A0B4;
-  /* --zk-muted subido de #6B6B7B a #8A8A9E: el original daba 3,9:1 sobre --zk-bg
-     y fallaba el 4,5:1 de WCAG AA para texto de cuerpo. #8A8A9E da 6,1:1. */
-  --zk-muted:  #8A8A9E;
+  --zk-text-2: #B8B8C8;
+  --zk-muted:  #9292A6;
 
   /* Azul de relleno para superficies con texto BLANCO encima.
      El #1E6FFF de marca da 4,49:1 con blanco — falla el 4,5:1 de WCAG AA por
@@ -140,6 +164,29 @@
   --zk-whatsapp-hover: #1FBA59;
   --zk-whatsapp-ink:   #05270F;
 
+  /* ══════════════════════════════════════════════════════════════════════════
+     12 · ESCALA TIPOGRÁFICA · ocho pasos, ninguno suelto
+     ══════════════════════════════════════════════════════════════════════════
+     Antes convivían 38, 44, 48, 52, 60 y 76 px sin relación entre ellos: cada
+     página había elegido su tamaño a ojo, así que dos secciones equivalentes
+     de rutas distintas se leían como niveles distintos. Estos ocho pasos son
+     los únicos permitidos; se aplican con las clases .t-* de global.css.
+
+     Los clamp() no llevan unidad de viewport suelta a propósito: el mínimo en
+     rem garantiza que un usuario con el zoom del navegador subido siga
+     escalando el texto, cosa que un valor puro en vw no hace. */
+  --t-display-xl: clamp(3.25rem, 5.5vw, 4.75rem);
+  --t-display-l:  clamp(2.5rem, 4.2vw, 3.5rem);
+  --t-h2:         clamp(2rem, 3vw, 3rem);
+  --t-h3:         clamp(1.125rem, 1.6vw, 1.5rem);
+  --t-body-lg:    clamp(1.0625rem, 1.2vw, 1.1875rem);
+  --t-body:       1rem;
+  --t-card:       0.9375rem;   /* 15px */
+  --t-micro:      0.875rem;    /* 14px · SUELO de todo texto funcional */
+  /* 12-13px viven aquí y sólo aquí: eyebrows, códigos, estados técnicos y
+     adornos. Nunca información que haya que leer para decidir algo. */
+  --t-eyebrow:    0.75rem;     /* 12px */
+
   /* Radios */
   --zk-r-sm: 8px;
   --zk-r-md: 12px;
@@ -159,5 +206,5 @@
 html, body {
   background-color: var(--color-bg-base);
   color: var(--color-text-primary);
-  font-family: var(--font-sans);
+  font-family: var(--font-body);
 }

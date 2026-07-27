@@ -4,77 +4,122 @@
 import { TIERS, COMPROMISOS, priceAttrs } from '../../data/pricing';
 import { CURRENCIES, DEFAULT_CURRENCY, formatPrice } from '../../lib/currency';
 
+interface Props {
+  /**
+   * En la home, sin el bloque de compromisos.
+   *
+   * Son cuatro tarjetas de descuento por permanencia: información que sólo
+   * significa algo cuando YA has elegido plan, y esa decisión se toma en
+   * /precios. En la home ocupaban 300 px para responder una pregunta que
+   * nadie se hace antes de saber cuánto cuesta lo básico.
+   */
+  compacto?: boolean;
+}
+const { compacto = false } = Astro.props;
+
 const fmt = (money: Record<string, number>) =>
   formatPrice(money[DEFAULT_CURRENCY], DEFAULT_CURRENCY);
 
 const calcomLink = 'https://cal.com/zenkai-growth-systems/strategy-call';
 const pct = (n: number) => `${Math.round(n * 100)}%`;
+const mejorDto = Math.max(...COMPROMISOS.map((c) => c.descuento));
 ---
-<section id="planes" class="py-24 lg:py-32 border-t border-zk-border/50 relative overflow-hidden">
+<section id="planes" class="py-20 lg:py-24 border-t border-zk-border/50 relative overflow-hidden">
   <div class="max-w-6xl mx-auto px-5 lg:px-8 relative z-10">
 
+    {/* El titular llevaba la segunda línea en gris. Un H2 a medio apagar se
+        lee como un control desactivado, no como jerarquía: la mitad de la
+        frase parecía no estar disponible. Blanco entero, y el azul se reserva
+        para el eyebrow — una palabra, no media frase. */}
     <div class="text-center mb-14 reveal">
       <div class="inline-flex items-center gap-2 mb-5">
         <div class="w-8 h-px bg-zk-accent"></div>
-        <span class="text-xs font-mono text-zk-growth uppercase tracking-[0.2em]">Planes</span>
+        <span class="t-eyebrow">Planes</span>
         <div class="w-8 h-px bg-zk-accent"></div>
       </div>
-      <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight mb-5 leading-[1.05]">
-        Empiezas chico.<br>
-        <span class="text-zk-text2">Escalas cuando los números lo justifiquen.</span>
+      <h2 class="planes__h2">
+        Empiezas chico. Escalas cuando los números lo justifiquen.
       </h2>
-      <p class="text-lg text-zk-text2 max-w-2xl mx-auto">
+      <p class="planes__lede">
         Cada plan incluye todo lo del anterior. Sin permanencia obligatoria: si te comprometes es porque quieres, y entonces pagas menos.
       </p>
-      <p class="text-sm text-zk-muted mt-3">
-        Mostrando precios para <span class="currency-region font-medium text-zk-text2">{CURRENCIES[DEFAULT_CURRENCY].region}</span>. Cambia la región arriba.
+      <p class="planes__region">
+        Mostrando precios para <span class="currency-region">{CURRENCIES[DEFAULT_CURRENCY].region}</span>. Cambia la región arriba.
       </p>
     </div>
 
-    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 reveal reveal-stagger">
+    {/* Rejilla en tres tramos y no en dos:
+        · ≥1280 — cuatro columnas. Es la única anchura donde cuatro tarjetas
+          de plan caben sin que la lista de características se parta en dos
+          líneas por punto.
+        · 768-1279 — 2×2. Entre 1024 y 1279 el layout anterior ya metía cuatro
+          columnas de 220px: los precios rompían línea y "Ver mi propuesta
+          gratis" salía en tres.
+        · <768 — una columna. */}
+    <div class="planes__grid reveal reveal-stagger">
       {TIERS.map((t) => (
         <div class:list={['tier-card', t.destacado && 'tier-card--destacado']}>
           {t.destacado && <div class="tier-flag">Más elegido</div>}
 
-          <h3 class="text-xl font-bold">{t.nombre}</h3>
-          <p class="text-sm text-zk-text2 mt-1.5 mb-3 min-h-[2.5rem]">{t.promesa}</p>
+          <h3 class="tier-nombre">{t.nombre}</h3>
+          <p class="tier-promesa">{t.promesa}</p>
 
           {/* "Starter", "Silver" y "Gold" no dicen nada por sí solos. Nadie sabe
               si es "Silver" mirando una lista de funciones; sí sabe si tiene
               tienda online o si le falta quien conteste. */}
           <p class="paraTi"><span>Para ti si</span> {t.paraTi}</p>
 
-          <div class="pb-5 mb-5 border-b border-zk-border">
-            <div class="flex items-baseline gap-1.5">
+          <div class="tier-precio">
+            <div class="tier-precio__fila">
               <span
-                class="text-3xl font-bold tracking-tight"
+                class="tier-precio__n"
                 {...priceAttrs(t.mensual)}
                 data-price-suffix=""
               >{fmt(t.mensual)}</span>
-              <span class="text-sm font-mono text-zk-muted">
-                <span class="currency-code">{DEFAULT_CURRENCY}</span>/mes
-              </span>
+              <span class="tier-precio__mes">/mes</span>
             </div>
-            <div class="text-xs text-zk-text2 mt-2">
+            <div class="tier-implantacion">
               Implantación
               <span
-                class="font-mono text-zk-text"
                 {...priceAttrs(t.implantacion)}
                 data-price-zero="sin coste"
               >{t.implantacion[DEFAULT_CURRENCY] === 0 ? 'sin coste' : fmt(t.implantacion)}</span>
-              <span class="text-zk-muted">· una vez, gratis desde 6 meses</span>
+              <span class="tier-implantacion__nota">· una vez, gratis desde 6 meses</span>
             </div>
-            <div class="currency-note hidden text-xs text-zk-muted mt-1.5"></div>
+            <div class="currency-note hidden"></div>
           </div>
 
-          <ul class="space-y-2.5 mb-7 text-sm text-zk-text2 flex-1">
-            {t.incluye.map((f) => (
-              <li class="flex gap-2.5">
-                <span class="text-zk-growth font-bold leading-5" aria-hidden="true">+</span>
-                <span>{f}</span>
-              </li>
-            ))}
-          </ul>
+          {/* Cinco características visibles como máximo. Enterprise y Gold
+              traían seis: a partir de la quinta nadie compara, sólo mide qué
+              columna es más larga. El resto sigue accesible — plegado, no
+              escondido en hover, que no existe en táctil ni con teclado.
+
+              La lista y el desplegable van en UN contenedor a propósito: así
+              todas las tarjetas tienen exactamente seis hijos y el subgrid de
+              abajo puede alinearlas fila a fila. */}
+          <div class="tier-feats">
+            <ul class="tier-lista">
+              {t.incluye.slice(0, 5).map((f) => (
+                <li>
+                  <span class="tier-lista__mas" aria-hidden="true">+</span>
+                  <span>{f}</span>
+                </li>
+              ))}
+            </ul>
+            {t.incluye.length > 5 && (
+              <details class="tier-mas">
+                <summary>Ver todo lo incluido</summary>
+                <ul class="tier-lista">
+                  {t.incluye.slice(5).map((f) => (
+                    <li>
+                      <span class="tier-lista__mas" aria-hidden="true">+</span>
+                      <span>{f}</span>
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            )}
+          </div>
 
           {/* El destino del CTA sale de un campo explícito, no de comparar el
               coste interno. Antes era `t.costeUsd >= 205`, que metía un dato de
@@ -89,40 +134,83 @@ const pct = (n: number) => `${Math.round(n * 100)}%`;
     </div>
 
     {/* Compromiso · opcional, siempre */}
+    {compacto ? (
+      <p class="planes__pie reveal">
+        Sin permanencia obligatoria. Si eliges comprometerte a más tiempo, pagas
+        hasta un <strong>{pct(mejorDto)} menos</strong> y desaparece la implantación.
+        <a href="/precios/">Ver plazos y cómo se calcula →</a>
+      </p>
+    ) : (
     <div class="mt-12 reveal">
-      <div class="rounded-2xl border border-zk-border bg-zk-surface/40 p-7 lg:p-9">
-        <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1 mb-2">
-          <h3 class="text-xl font-bold">Cuanto más tiempo, menos pagas</h3>
-          <span class="text-xs font-mono text-zk-muted uppercase tracking-[0.15em]">opcional</span>
+      <div class="compromiso">
+        <div class="compromiso__cab">
+          <h3 class="compromiso__tit">Cuanto más tiempo, menos pagas</h3>
+          <span class="compromiso__opt">opcional</span>
         </div>
-        <p class="text-sm text-zk-text2 mb-7 max-w-2xl">
+        <p class="compromiso__txt">
           Puedes quedarte mes a mes y marcharte cuando quieras. Comprometerte es una elección, no un candado — y se premia.
         </p>
 
-        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="compromiso__grid">
           {COMPROMISOS.map((c) => (
             <div class:list={['plazo', c.destacado && 'plazo--destacado']}>
-              <div class="flex items-baseline justify-between gap-2">
-                <span class="font-semibold text-sm">{c.etiqueta}</span>
-                {c.descuento > 0 && (
-                  <span class="text-xs font-mono text-zk-growth">−{pct(c.descuento)}</span>
-                )}
+              <div class="plazo__cab">
+                <span class="plazo__et">{c.etiqueta}</span>
+                {c.descuento > 0 && <span class="plazo__pct">−{pct(c.descuento)}</span>}
               </div>
-              <p class="text-xs text-zk-text2 mt-2 leading-relaxed">{c.nota}</p>
+              <p class="plazo__nota">{c.nota}</p>
             </div>
           ))}
         </div>
       </div>
     </div>
+    )}
   </div>
 </section>
 
 <style>
+  /* ── Cabecera de sección ────────────────────────────────────────────── */
+  .planes__h2 {
+    font-size: var(--t-h2); font-weight: 700; line-height: 1.08;
+    letter-spacing: -0.025em; color: var(--zk-text);
+    margin: 0 auto 1.25rem; max-width: 20ch;
+  }
+  .planes__lede {
+    font-size: var(--t-body-lg); line-height: 1.6;
+    color: var(--zk-text-2); margin: 0 auto; max-width: 46rem;
+  }
+  .planes__region { font-size: var(--t-micro); color: var(--zk-muted); margin-top: 0.75rem; }
+  .planes__region .currency-region { color: var(--zk-text-2); font-weight: 550; }
+
+  /* ── Rejilla ─────────────────────────────────────────────────────────
+     Seis filas explícitas y cada tarjeta ocupa las seis con `subgrid`.
+     Es lo que hace que los cuatro PRECIOS caigan a la misma altura aunque
+     "Para ti si…" mida cuatro líneas en Silver y tres en Starter. Sin esto
+     cada tarjeta se apila por su cuenta y las cifras salen escalonadas —
+     que es justo lo que impide comparar de un vistazo, que es para lo único
+     que existe una tabla de planes.
+
+     Con `min-height` en cada bloque también se alinearía, pero habría que
+     recalcularlo a mano en cada anchura y con cada cambio de copy. Aquí lo
+     resuelve el navegador. */
+  .planes__grid {
+    display: grid; gap: 1.25rem; grid-template-columns: 1fr;
+    /* Dos juegos de seis filas: a cuatro columnas sólo se usa el primero,
+       pero en 2×2 hay dos filas visuales y la segunda también necesita su
+       fila elástica. Sin repetir, las tarjetas de abajo caían en filas
+       implícitas y el botón se pegaba a la última característica. */
+    grid-template-rows: repeat(2, auto auto auto auto 1fr auto);
+  }
+  @media (min-width: 768px)  { .planes__grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 1280px) { .planes__grid { grid-template-columns: repeat(4, 1fr); gap: 1rem; } }
+
+  /* ── Tarjeta de plan ────────────────────────────────────────────────── */
   .tier-card {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-row: span 6;
+    grid-template-rows: subgrid;
     position: relative;
-    padding: 26px 22px;
+    padding: 30px 24px;
     border-radius: 16px;
     border: 1px solid var(--zk-border, rgba(255, 255, 255, 0.08));
     background:
@@ -138,37 +226,101 @@ const pct = (n: number) => `${Math.round(n * 100)}%`;
     border-color: rgba(74, 158, 255, 0.45);
     box-shadow: 0 0 0 1px rgba(74, 158, 255, 0.15);
   }
+
+  .tier-nombre {
+    font-size: var(--t-h3); font-weight: 700;
+    letter-spacing: -0.015em; line-height: 1.2; margin: 0;
+  }
+  .tier-promesa {
+    font-size: var(--t-card); line-height: 1.5;
+    color: var(--zk-text-2); margin: 0.5rem 0 0.875rem;
+  }
+
+  /* El microcopy de esta caja estaba a 12,5px y su etiqueta a 9,5px — por
+     debajo de lo que se puede leer cómodamente y por debajo del suelo que se
+     aplica al resto del sitio. Es además el texto que MÁS trabaja de toda la
+     tarjeta: es el que deja al visitante autoseleccionarse. */
   .paraTi {
-    font-size: 12.5px;
-    line-height: 1.5;
+    font-size: var(--t-micro);
+    line-height: 1.45;
     color: var(--zk-text-2);
     background: rgba(74, 158, 255, 0.07);
     border-left: 2px solid color-mix(in srgb, var(--zk-growth) 55%, transparent);
     border-radius: 0 var(--zk-r-sm) var(--zk-r-sm) 0;
-    padding: 9px 11px;
-    margin: 0 0 20px;
-    min-height: 62px;
+    padding: 11px 13px;
+    margin: 0 0 22px;
+    /* Sin min-height: la altura común la reparte ahora el subgrid. */
   }
   .paraTi span {
     display: block;
-    font-family: 'Geist Mono', ui-monospace, monospace;
-    font-size: 9.5px;
+    font-family: var(--font-mono);
+    font-size: var(--t-eyebrow);
     letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--zk-growth);
-    margin-bottom: 3px;
+    margin-bottom: 5px;
   }
+
+  /* ── Precio ─────────────────────────────────────────────────────────── */
+  .tier-precio { padding-bottom: 22px; margin-bottom: 22px; border-bottom: 1px solid var(--zk-border); }
+  .tier-precio__fila { display: flex; align-items: baseline; gap: 0.3rem; }
+  /* Cifras tabulares: sin ellas "1.099" y "399" no alinean entre tarjetas y
+     la columna de precios se ve torcida aunque nadie sepa decir por qué. */
+  .tier-precio__n {
+    font-size: 2rem; font-weight: 700; letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+  }
+  /* Sólo "/mes". El código de moneda salía además del símbolo — "269 € EUR/mes"
+     dice tres veces lo mismo, y el conmutador de la barra ya marca cuál está
+     activa. */
+  .tier-precio__mes { font-size: var(--t-micro); font-family: var(--font-mono); color: var(--zk-muted); }
+
+  .tier-implantacion { font-size: var(--t-micro); line-height: 1.45; color: var(--zk-text-2); margin-top: 0.625rem; }
+  .tier-implantacion [data-price-eur] {
+    font-family: var(--font-mono); color: var(--zk-text);
+    font-variant-numeric: tabular-nums;
+  }
+  .tier-implantacion__nota { color: var(--zk-muted); }
+  .currency-note { font-size: var(--t-micro); color: var(--zk-muted); margin-top: 0.375rem; }
+  .currency-note.hidden { display: none; }
+
+  /* ── Características ────────────────────────────────────────────────── */
+  .tier-lista {
+    list-style: none; margin: 0; padding: 0;
+    display: grid; gap: 0.625rem;
+    font-size: var(--t-micro); line-height: 1.45; color: var(--zk-text-2);
+  }
+  .tier-lista li { display: flex; gap: 0.625rem; }
+  .tier-lista__mas { color: var(--zk-growth); font-weight: 700; line-height: 1.45; }
+
+  .tier-mas { margin-top: 0.75rem; }
+  .tier-mas summary {
+    display: inline-flex; align-items: center;
+    min-height: 44px;
+    font-size: var(--t-micro); font-weight: 550;
+    color: var(--zk-growth); cursor: pointer; list-style: none;
+  }
+  .tier-mas summary::-webkit-details-marker { display: none; }
+  .tier-mas summary::after { content: ' ↓'; }
+  .tier-mas[open] summary::after { content: ' ↑'; }
+  .tier-mas[open] summary { margin-bottom: 0.625rem; }
+
+  /* La fila de características es la única elástica (1fr en la plantilla):
+     absorbe la diferencia de longitud entre planes y deja los cuatro botones
+     alineados abajo sin un solo margin: auto. */
+  .tier-feats { align-self: start; }
+  .tier-card > .tier-cta { margin-top: 28px; align-self: end; }
 
   .tier-flag {
     position: absolute;
     top: -10px;
-    left: 22px;
-    padding: 3px 10px;
+    left: 24px;
+    padding: 4px 11px;
     border-radius: 999px;
     background: var(--zk-accent-solid);
     color: #fff;
-    font-family: 'Geist Mono', 'JetBrains Mono Variable', ui-monospace, monospace;
-    font-size: 10px;
+    font-family: var(--font-mono);
+    font-size: 11px;
     letter-spacing: 0.12em;
     text-transform: uppercase;
   }
@@ -182,7 +334,7 @@ const pct = (n: number) => `${Math.round(n * 100)}%`;
     border-radius: 10px;
     border: 1px solid var(--zk-border-hi, rgba(255, 255, 255, 0.16));
     color: #F5F5FA;
-    font-size: 14px;
+    font-size: var(--t-micro);
     font-weight: 600;
     text-align: center;
     text-decoration: none;
@@ -199,13 +351,47 @@ const pct = (n: number) => `${Math.round(n * 100)}%`;
   .tier-cta--primary:hover { background: #2A6BF0; border-color: #2A6BF0; }
   .tier-cta:focus-visible { outline: 2px solid #4A9EFF; outline-offset: 2px; }
 
+  .planes__pie {
+    margin: 2.25rem auto 0; max-width: 50rem; text-align: center;
+    font-size: var(--t-card); line-height: 1.6; color: var(--zk-text-2);
+  }
+  .planes__pie strong { color: var(--zk-text); font-weight: 650; }
+  .planes__pie a { color: var(--zk-growth); text-decoration: none; font-weight: 550; white-space: nowrap; }
+  .planes__pie a:hover { text-decoration: underline; }
+
+  /* ── Compromiso ─────────────────────────────────────────────────────── */
+  .compromiso {
+    border-radius: var(--zk-r-xl);
+    border: 1px solid var(--zk-border);
+    background: color-mix(in srgb, var(--zk-surface) 40%, transparent);
+    padding: 1.75rem;
+  }
+  @media (min-width: 1024px) { .compromiso { padding: 2.25rem; } }
+  .compromiso__cab { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.25rem 0.75rem; margin-bottom: 0.5rem; }
+  .compromiso__tit { font-size: var(--t-h3); font-weight: 700; letter-spacing: -0.015em; margin: 0; }
+  .compromiso__opt {
+    font-family: var(--font-mono); font-size: var(--t-eyebrow);
+    letter-spacing: 0.15em; text-transform: uppercase; color: var(--zk-muted);
+  }
+  .compromiso__txt { font-size: var(--t-card); line-height: 1.55; color: var(--zk-text-2); margin: 0 0 1.75rem; max-width: 46rem; }
+  .compromiso__grid { display: grid; gap: 1rem; grid-template-columns: 1fr; }
+  @media (min-width: 640px)  { .compromiso__grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 1024px) { .compromiso__grid { grid-template-columns: repeat(4, 1fr); } }
+
   .plazo {
-    padding: 16px;
+    padding: 18px;
     border-radius: 12px;
     border: 1px solid var(--zk-border, rgba(255, 255, 255, 0.08));
     background: rgba(8, 8, 12, 0.5);
   }
   .plazo--destacado { border-color: rgba(74, 158, 255, 0.4); }
+  .plazo__cab { display: flex; align-items: baseline; justify-content: space-between; gap: 0.5rem; }
+  .plazo__et { font-size: var(--t-card); font-weight: 600; }
+  .plazo__pct {
+    font-family: var(--font-mono); font-size: var(--t-micro); color: var(--zk-growth);
+    font-variant-numeric: tabular-nums;
+  }
+  .plazo__nota { font-size: var(--t-micro); line-height: 1.45; color: var(--zk-text-2); margin-top: 0.5rem; }
 
   @media (prefers-reduced-motion: reduce) {
     .tier-card:hover { transform: none; }

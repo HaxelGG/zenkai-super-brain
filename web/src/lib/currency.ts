@@ -64,9 +64,22 @@ export const DEFAULT_CURRENCY: CurrencyCode = 'EUR';
 export const isCurrencyCode = (value: unknown): value is CurrencyCode =>
   typeof value === 'string' && (CURRENCY_CODES as string[]).includes(value);
 
-/** "$2,000" · "1.900 €" · "$805.000" */
+/**
+ * "$500" · "1.099 €" · "$2.200.000"
+ *
+ * `useGrouping: 'always'` a propósito. La convención tipográfica del español
+ * no separa los millares de un número de cuatro cifras, así que
+ * `(1099).toLocaleString('es-ES')` devuelve "1099". Correcto en prosa,
+ * inconsistente en una tabla de precios: junto a "$1,650" en la columna de
+ * USD y a "$2.200.000" en la de COP, un "1099 €" suelto se lee como un
+ * descuido — y en la única página donde el visitante compara cifras línea a
+ * línea, eso cuesta más que la corrección gramatical.
+ *
+ * Se evita `style: 'currency'` porque coloca el símbolo según el locale y
+ * aquí la posición es una decisión de diseño declarada en CURRENCIES.
+ */
 export const formatPrice = (amount: number, code: CurrencyCode): string => {
   const { symbol, locale, position } = CURRENCIES[code];
-  const n = amount.toLocaleString(locale);
+  const n = new Intl.NumberFormat(locale, { useGrouping: 'always' }).format(amount);
   return position === 'before' ? `${symbol}${n}` : `${n} ${symbol}`;
 };

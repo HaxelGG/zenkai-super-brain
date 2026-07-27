@@ -29,33 +29,21 @@ const SECTOR_SLUGS = z.enum([
   "manufactura",
 ]);
 
-const CTA_ACTION = z.enum(["form", "calcom", "whatsapp"]);
+// CTA_ACTION se ha eliminado con la colección `tiers`: era su único uso.
 
 // ────────────────────────────────────────────────────────────────────────────
-// Collection · tiers
-// Source: web/src/content/tiers/*.md (frontmatter completo · body opcional)
-// Datos extraídos literalmente del spec §3.1-3.5
+// La colección `tiers` se ha eliminado.
+//
+// Describía cinco planes —Lite, Starter, Growth, Pro, Enterprise— con precios
+// en un único campo `precio_USD`. Los planes reales son cuatro (Starter,
+// Silver, Gold, Enterprise) y sus importes viven en data/pricing.ts fijados
+// por moneda. La colección no la renderizaba ninguna ruta desde el rediseño,
+// pero seguía siendo la fuente de la que se copiaban frases a mano: de ahí
+// salían "plan Lite" en la comparativa y "desde $90 USD".
+//
+// Un dato obsoleto que nadie pinta no es inofensivo mientras alguien lo pueda
+// leer y creer.
 // ────────────────────────────────────────────────────────────────────────────
-const tiers = defineCollection({
-  loader: glob({ pattern: "*.md", base: "./src/content/tiers" }),
-  schema: z.object({
-    nombre: z.string(),
-    precio_USD: z.number().int().nonnegative(),
-    precio_USD_recurrente: z.number().int().nonnegative().optional(),
-    descripcion: z.string(),
-    destacado: z.boolean().default(false),
-    features: z.array(z.string()).min(3),
-    cta_label: z.string(),
-    cta_action: CTA_ACTION,
-    limitaciones: z.array(z.string()).default([]),
-    tiempo_implementacion: z.string(),
-    // Camino B (decidido al inicio de Tarea 1.2):
-    // modulos_por_sector es contenido público de la landing — la tabla
-    // "Variantes por sector" del spec está pensada para mostrarse en cada
-    // página de sector. costos/margen son datos internos · fuera de scope.
-    modulos_por_sector: z.record(SECTOR_SLUGS, z.string()),
-  }),
-});
 
 // ────────────────────────────────────────────────────────────────────────────
 // Collection · sectores
@@ -143,4 +131,4 @@ const modulos = defineCollection({
   }),
 });
 
-export const collections = { tiers, sectores, modulos };
+export const collections = { sectores, modulos };

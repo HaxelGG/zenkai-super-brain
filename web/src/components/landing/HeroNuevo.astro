@@ -20,11 +20,19 @@ import WhatsAppCTA from '../WhatsAppCTA.astro';
 import ShaderField from '../ShaderField.astro';
 import Constelacion from '../Constelacion.astro';
 
+/**
+ * Tres, no cuatro, y a 14px.
+ *
+ * Estaban a 13px, que es tamaño de nota al pie para el argumento que quita el
+ * miedo justo debajo del botón. Y "Precio fijado en tu moneda" no pertenece
+ * aquí: es una garantía que sólo significa algo cuando ya estás mirando un
+ * importe, y su sitio es /precios. En el fold ocupaba un cuarto de la fila
+ * para responder una pregunta que nadie se ha hecho todavía.
+ */
 const confianza = [
-  'Sin tarjeta ni email para ver tu propuesta',
-  'Contesta una persona, no un bot',
+  'Sin tarjeta ni email',
+  'Responde nuestro equipo',
   'Sin permanencia obligatoria',
-  'Precio fijado en tu moneda',
 ];
 ---
 <section class="hero" data-hero>
@@ -151,12 +159,28 @@ const confianza = [
     .hero__scroll { animation: none; opacity: 1; }
   }
 
+  /* Display XL · el único de todo el sitio. Las cabeceras internas usan
+     Display L, y esa diferencia de un escalón es lo que hace que la portada
+     se sienta la portada.
+
+     Peso 750 y no 800: Sora a 76px con peso 800 cierra los contrapunzones y
+     el titular se convierte en una mancha negra. 750 mantiene la rotundidad
+     y devuelve el aire dentro de las letras — que es de donde sale la
+     sensación de precisión, no del grosor. */
   .hero__h1 {
-    font-size: clamp(2.5rem, 7.5vw, 4.75rem);
-    font-weight: 800;
+    font-family: var(--font-display);
+    font-size: var(--t-display-xl);
+    font-weight: 750;
     line-height: 0.98;
-    letter-spacing: -0.04em;
+    letter-spacing: -0.045em;
     margin: 0 0 1.75rem;
+  }
+  /* El mínimo del clamp son 52px, y a 360px de ancho eso partía el titular en
+     SEIS líneas. Un titular de seis líneas en un móvil ya no es un titular:
+     es un párrafo grande, y el fold entero se va a scroll. 42px conserva la
+     escala de portada y lo deja en cuatro. Medido en 360×800 y 390×844. */
+  @media (max-width: 400px) {
+    .hero__h1 { font-size: 2.625rem; letter-spacing: -0.038em; }
   }
   .hero__linea { display: block; }
 
@@ -187,13 +211,19 @@ const confianza = [
     .hero__linea--acc { transition: none; }
   }
 
+  /* Ancho a 42ch y no 46ch: bajo un titular de tres líneas cortas, un párrafo
+     que llega casi al mismo ancho compite con él. Menos ancho da tres líneas
+     equilibradas en vez de dos larguísimas y una corta.
+     Color --zk-text (no --zk-text-2): son 21px y es la frase que explica a
+     qué se dedica la empresa. Apagarla para "crear jerarquía" es exactamente
+     el atajo que dejaba la web con aspecto de borrador. */
   .hero__sub {
     font-size: clamp(1.0625rem, 2.1vw, 1.3125rem);
     line-height: 1.55;
-    color: var(--zk-text-2);
-    max-width: 46ch;
+    color: var(--zk-text);
+    opacity: 0.92;
+    max-width: 42ch;
     margin: 0 0 2.5rem;
-    text-wrap: pretty;
   }
 
   .hero__ctas {
@@ -239,7 +269,7 @@ const confianza = [
     display: inline-flex; align-items: center; gap: 0.5rem;
     min-height: 48px;
     color: var(--zk-text-2);
-    font-size: 0.9375rem; font-weight: 500;
+    font-size: var(--t-card); font-weight: 550;
     text-decoration: none;
     border-bottom: 1px solid transparent;
     transition: color 0.2s, border-color 0.2s;
@@ -249,17 +279,18 @@ const confianza = [
 
   .hero__trust {
     list-style: none; margin: 0 0 3rem; padding: 0;
-    display: flex; flex-wrap: wrap; gap: 0.625rem 1.5rem;
+    display: flex; flex-wrap: wrap; gap: 0.75rem 1.75rem;
   }
   .hero__trust li {
-    display: inline-flex; align-items: center; gap: 0.4rem;
-    font-size: 0.8125rem; color: var(--zk-muted);
+    display: inline-flex; align-items: center; gap: 0.45rem;
+    font-size: var(--t-micro); line-height: 1.45; color: var(--zk-text-2);
   }
   .hero__trust svg { color: var(--zk-whatsapp); flex-shrink: 0; }
 
   .hero__scroll {
     display: inline-flex; align-items: center; gap: 0.5rem;
-    font-family: var(--font-mono); font-size: 0.75rem;
+    min-height: 44px;
+    font-family: var(--font-mono); font-size: var(--t-eyebrow);
     letter-spacing: 0.12em; text-transform: uppercase;
     color: var(--zk-muted); text-decoration: none;
     transition: color 0.2s;

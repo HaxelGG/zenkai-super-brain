@@ -13,14 +13,17 @@ const destacados = await getModulosCore();
     <div class="grid lg:grid-cols-5 gap-10 mb-12">
 
       <div class="lg:col-span-2">
-        <a href="/" class="brand-link inline-block mb-5">
+        <a href="/" class="brand-link inline-flex items-center min-h-11 mb-5">
           <Brand variant="large" showTagline={true} />
         </a>
         <p class="text-sm text-zk-text2 leading-relaxed mb-6 max-w-sm">
           Construimos sistemas de IA que generan ventas, reducen costos y automatizan operaciones. Tu propuesta gratis en 30 segundos.
         </p>
         <div class="space-y-2 text-sm">
-          <a href="mailto:hola@zenkai.systems" class="flex items-center gap-2 text-zk-text2 hover:text-zk-text transition group">
+          {/* min-h-11 = 44px. Era el único enlace del pie que no llegaba al
+              objetivo táctil: medía 20px de alto porque sólo lo definía la
+              altura de línea del texto. */}
+          <a href="mailto:hola@zenkai.systems" class="flex items-center gap-2 min-h-11 text-zk-text2 hover:text-zk-text transition group">
             <svg class="w-4 h-4 group-hover:text-zk-growth transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
             <span class="font-mono">hola@zenkai.systems</span>
           </a>
@@ -75,7 +78,7 @@ const destacados = await getModulosCore();
 
     </div>
 
-    <div class="border-t border-zk-border pt-6 flex flex-col sm:flex-row justify-between gap-4 text-xs text-zk-muted">
+    <div class="border-t border-zk-border pt-6 flex flex-col sm:flex-row justify-between gap-4 text-sm text-zk-muted">
       <div>© 2026 ZENKAI Growth Systems · Construido remoto · Operando en LATAM y Europa</div>
       <div class="font-mono">Hecho con Claude · Astro · Vercel</div>
     </div>

@@ -2,6 +2,7 @@
 export const prerender = true;
 
 import WebLayout from '../../layouts/WebLayout.astro';
+import PageHero from '../../components/PageHero.astro';
 import WhatsAppCTA from '../../components/WhatsAppCTA.astro';
 import DomainArt from '../../components/DomainArt.astro';
 import { getSectores, getModulosDeSector } from '../../lib/catalogo';
@@ -36,32 +37,24 @@ const breadcrumbJsonLd = {
 ---
 <WebLayout title={d.seo.title} description={d.seo.description} canonical={url}>
   <div data-dominio="growth">
-    <header class="wrap hero">
-      <nav class="crumbs" aria-label="Migas de pan">
-        <a href="/">Inicio</a>
-        <span aria-hidden="true">/</span>
-        <a href="/sectores/">Sectores</a>
-        <span aria-hidden="true">/</span>
-        <span class="crumbs__actual">{d.nombre}</span>
-      </nav>
-
-      <div class="hero__grid">
-        <div>
-          <p class="eyebrow">{d.nombre}</p>
-          <h1>{d.titular}</h1>
-          <p class="lede">{d.copy_corto}</p>
-          <div class="hero__cta">
-            <WhatsAppCTA
-              location={`sector-${d.slug}`}
-              context={d.nombre}
-              message={d.ctaWhatsapp}
-              size="lg"
-            />
-          </div>
-        </div>
-        <div class="hero__art"><DomainArt variant={d.prioridad + 3} /></div>
-      </div>
-    </header>
+    <PageHero
+      migas={[
+        { label: 'Inicio', href: '/' },
+        { label: 'Sectores', href: '/sectores/' },
+        { label: d.nombre },
+      ]}
+      eyebrow={d.nombre}
+      titulo={d.titular}
+      lede={d.copy_corto}
+    >
+      <WhatsAppCTA
+        location={`sector-${d.slug}`}
+        context={d.nombre}
+        message={d.ctaWhatsapp}
+        size="lg"
+      />
+      <DomainArt slot="aside" variant={d.prioridad + 3} />
+    </PageHero>
 
     <section class="wrap band">
       <h2 class="h2">Si esto te suena, es esto</h2>
@@ -115,45 +108,21 @@ const breadcrumbJsonLd = {
   @media (min-width: 1024px) { .wrap { padding-inline: 2rem; } }
   .band { padding-block: 3.5rem; }
   .band + .band { border-top: 1px solid var(--zk-border); }
-  .hero { padding-block: 6rem 1rem; }
 
-  .hero__grid { display: grid; gap: 2.5rem; align-items: center; }
-  @media (min-width: 900px) { .hero__grid { grid-template-columns: 1.4fr 1fr; gap: 3.5rem; } }
-  .hero__art { aspect-ratio: 1; max-width: 280px; margin-inline: auto; }
-  .hero__cta { margin-top: 2rem; }
-
-  .crumbs {
-    display: flex; flex-wrap: wrap; gap: 0.5rem;
-    font-family: var(--font-mono); font-size: 0.75rem;
-    color: var(--zk-muted); margin-bottom: 2rem;
+  .h2 {
+    font-size: var(--t-h2); font-weight: 700; line-height: 1.08;
+    letter-spacing: -0.025em; margin: 0 0 1.5rem; max-width: 22ch;
   }
-  .crumbs a { color: var(--zk-text-2); text-decoration: none; }
-  .crumbs a:hover { color: var(--zk-text); }
-  .crumbs__actual { color: var(--zk-accent); }
 
-  .eyebrow {
-    font-family: var(--font-mono); font-size: 0.6875rem;
-    letter-spacing: 0.18em; text-transform: uppercase;
-    color: var(--zk-accent); margin: 0 0 1rem;
-  }
-  h1 {
-    font-size: clamp(2rem, 5vw, 3.25rem);
-    line-height: 1.06; letter-spacing: -0.025em; font-weight: 700;
-    margin: 0 0 1.25rem; text-wrap: balance;
-  }
-  .lede { font-size: 1.0625rem; line-height: 1.6; color: var(--zk-text-2); margin: 0; max-width: 48ch; }
-
-  .h2 { font-size: 1.5rem; font-weight: 700; margin: 0 0 1.5rem; }
-
-  .sintomas { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.625rem; }
+  .sintomas { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.75rem; }
   @media (min-width: 760px) { .sintomas { grid-template-columns: repeat(2, 1fr); } }
   .sintomas li {
     position: relative;
-    padding: 0.875rem 1rem 0.875rem 2.25rem;
+    padding: 1rem 1.125rem 1rem 2.25rem;
     border: 1px solid var(--zk-border);
     border-radius: var(--zk-r-md);
     background: var(--zk-surface);
-    font-size: 0.9375rem; color: var(--zk-text-2);
+    font-size: var(--t-card); line-height: 1.5; color: var(--zk-text-2);
   }
   .sintomas li::before {
     content: '';
@@ -190,13 +159,17 @@ const breadcrumbJsonLd = {
     transform: translateY(-2px);
   }
   .card:focus-visible { outline: 2px solid var(--zk-accent); outline-offset: 3px; }
-  .card__art { width: 44px; height: 44px; margin-bottom: 0.875rem; }
-  .card h3 { font-size: 0.9375rem; font-weight: 700; margin: 0 0 0.375rem; color: var(--zk-accent); }
-  .card p { font-size: 0.8125rem; line-height: 1.5; color: var(--zk-text-2); margin: 0 0 1rem; flex: 1; }
-  .card__mas { font-family: var(--font-mono); font-size: 0.6875rem; color: var(--zk-muted); }
+  .card__art { width: 44px; height: 44px; margin-bottom: 1rem; }
+  .card h3 { font-size: var(--t-card); font-weight: 650; letter-spacing: -0.01em; margin: 0 0 0.5rem; color: var(--zk-accent); }
+  .card p { font-size: var(--t-micro); line-height: 1.5; color: var(--zk-text-2); margin: 0 0 1.25rem; flex: 1; }
+  .card__mas { font-size: var(--t-micro); font-weight: 550; color: var(--zk-accent); }
+  .card:hover .card__mas { text-decoration: underline; }
 
   .cierre { text-align: center; display: grid; justify-items: center; gap: 0.75rem; }
-  .cierre h2 { font-size: 1.75rem; font-weight: 700; margin: 0; }
+  .cierre h2 {
+    font-size: var(--t-h2); font-weight: 700; line-height: 1.08;
+    letter-spacing: -0.025em; margin: 0; max-width: 18ch;
+  }
   .cierre p { color: var(--zk-text-2); margin: 0 0 0.75rem; max-width: 48ch; }
 
   @media (prefers-reduced-motion: reduce) { .card:hover { transform: none; } }

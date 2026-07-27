@@ -2,6 +2,7 @@
 export const prerender = true;
 
 import WebLayout from '../../layouts/WebLayout.astro';
+import PageHero from '../../components/PageHero.astro';
 import WhatsAppCTA from '../../components/WhatsAppCTA.astro';
 import DomainArt from '../../components/DomainArt.astro';
 import { PILARES, getModulosPorPilar, getModuloMedida } from '../../lib/catalogo';
@@ -38,24 +39,19 @@ const breadcrumbJsonLd = {
   canonical={url}
 >
   <div data-dominio={pilar.dominio}>
-    <header class="wrap hero">
-      <nav class="crumbs" aria-label="Migas de pan">
-        <a href="/">Inicio</a>
-        <span aria-hidden="true">/</span>
-        <span class="crumbs__actual">{pilar.nombre}</span>
-      </nav>
-      <p class="eyebrow">{pilar.nombre}</p>
-      <h1>{pilar.titular}</h1>
-      <p class="lede">{pilar.promesa}</p>
-      <div class="hero__cta">
-        <WhatsAppCTA
-          location={`pilar-${pilar.id}`}
-          context={pilar.nombre}
-          message={`Hola ZENKAI. Me interesa lo de ${pilar.nombre.toLowerCase()} y quiero contaros mi caso.`}
-          size="lg"
-        />
-      </div>
-    </header>
+    <PageHero
+      migas={[{ label: 'Inicio', href: '/' }, { label: pilar.nombre }]}
+      eyebrow={pilar.nombre}
+      titulo={pilar.titular}
+      lede={pilar.promesa}
+    >
+      <WhatsAppCTA
+        location={`pilar-${pilar.id}`}
+        context={pilar.nombre}
+        message={`Hola ZENKAI. Me interesa lo de ${pilar.nombre.toLowerCase()} y quiero contaros mi caso.`}
+        size="lg"
+      />
+    </PageHero>
 
     <section class="wrap band">
       <h2 class="h2">{modulos.length} {modulos.length === 1 ? 'módulo' : 'módulos'} en este pilar</h2>
@@ -109,33 +105,20 @@ const breadcrumbJsonLd = {
   @media (min-width: 1024px) { .wrap { padding-inline: 2rem; } }
   .band { padding-block: 3.5rem; }
   .band + .band { border-top: 1px solid var(--zk-border); }
-  .hero { padding-block: 5rem 2rem; }
 
-  .crumbs {
-    display: flex; flex-wrap: wrap; gap: 0.5rem;
-    font-family: var(--font-mono); font-size: 0.75rem;
-    color: var(--zk-muted); margin-bottom: 2rem;
-  }
-  .crumbs a { color: var(--zk-text-2); text-decoration: none; }
-  .crumbs a:hover { color: var(--zk-text); }
-  .crumbs__actual { color: var(--zk-accent); }
-
+  /* La cabecera vive en PageHero.astro · aquí ya no hay migas, eyebrow ni H1
+     que mantener sincronizados con las otras cinco rutas internas. */
   .eyebrow {
-    font-family: var(--font-mono); font-size: 0.6875rem;
-    letter-spacing: 0.18em; text-transform: uppercase;
+    font-family: var(--font-mono); font-size: var(--t-eyebrow);
+    font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase;
     color: var(--zk-accent); margin: 0 0 1rem;
   }
-  h1 {
-    font-size: clamp(2rem, 5.5vw, 3.5rem);
-    line-height: 1.05; letter-spacing: -0.02em; font-weight: 700;
-    margin: 0 0 1.25rem; max-width: 18ch; text-wrap: balance;
+  .h2 {
+    font-size: var(--t-h2); font-weight: 700; line-height: 1.08;
+    letter-spacing: -0.025em; margin: 0 0 1.75rem; max-width: 22ch;
   }
-  .lede { font-size: 1.1875rem; color: var(--zk-text-2); margin: 0; max-width: 52ch; }
-  .hero__cta { margin-top: 2rem; }
 
-  .h2 { font-size: 1.5rem; font-weight: 700; margin: 0 0 1.75rem; }
-
-  .grid { list-style: none; margin: 0; padding: 0; display: grid; gap: 1rem; }
+  .grid { list-style: none; margin: 0; padding: 0; display: grid; gap: 1.25rem; }
   @media (min-width: 640px)  { .grid { grid-template-columns: repeat(2, 1fr); } }
   @media (min-width: 1024px) { .grid { grid-template-columns: repeat(3, 1fr); } }
 
@@ -155,14 +138,19 @@ const breadcrumbJsonLd = {
     transform: translateY(-2px);
   }
   .card:focus-visible { outline: 2px solid var(--zk-accent); outline-offset: 3px; }
-  .card__art { width: 56px; height: 56px; margin-bottom: 1rem; }
-  .card h3 { font-size: 1.0625rem; font-weight: 700; margin: 0 0 0.375rem; }
-  .card__titular { font-size: 0.9375rem; color: var(--zk-text); margin: 0 0 0.5rem; }
-  .card__promesa { font-size: 0.8125rem; line-height: 1.5; color: var(--zk-text-2); margin: 0 0 1.25rem; flex: 1; }
+  .card__art { width: 56px; height: 56px; margin-bottom: 1.125rem; }
+  .card h3 { font-size: 1.0625rem; font-weight: 650; letter-spacing: -0.012em; margin: 0 0 0.5rem; }
+  .card__titular { font-size: var(--t-card); line-height: 1.45; color: var(--zk-text); margin: 0 0 0.625rem; }
+  /* Subida de 13 a 14px: es la descripción que decide el clic, no un adorno.
+     El suelo de 14px vale para todo lo que haya que leer. */
+  .card__promesa { font-size: var(--t-micro); line-height: 1.5; color: var(--zk-text-2); margin: 0 0 1.5rem; flex: 1; }
+  /* "Ver módulo" deja de ser mono. Es una frase, no un dato: en monoespaciada
+     a 12px se lee peor y encima compite con los eyebrows, que sí son datos. */
   .card__mas {
-    font-family: var(--font-mono); font-size: 0.75rem;
-    letter-spacing: 0.08em; color: var(--zk-accent);
+    font-size: var(--t-micro); font-weight: 550;
+    color: var(--zk-accent);
   }
+  .card:hover .card__mas { text-decoration: underline; }
 
   .medida {
     display: flex; flex-wrap: wrap; gap: 1.5rem;
@@ -175,12 +163,15 @@ const breadcrumbJsonLd = {
     transition: border-color 0.2s;
   }
   .medida:hover { border-color: var(--zk-accent); }
-  .medida h2 { font-size: 1.5rem; font-weight: 700; margin: 0 0 0.5rem; }
-  .medida p { color: var(--zk-text-2); margin: 0; max-width: 48ch; }
+  .medida h2 { font-size: var(--t-h3); font-weight: 700; margin: 0 0 0.5rem; }
+  .medida p { color: var(--zk-text-2); margin: 0; max-width: 48ch; font-size: var(--t-card); }
 
   .cierre { text-align: center; display: grid; justify-items: center; gap: 0.75rem; }
-  .cierre h2 { font-size: 1.75rem; font-weight: 700; margin: 0; }
-  .cierre p { color: var(--zk-text-2); margin: 0 0 0.75rem; max-width: 46ch; }
+  .cierre h2 {
+    font-size: var(--t-h2); font-weight: 700; line-height: 1.08;
+    letter-spacing: -0.025em; margin: 0; max-width: 18ch;
+  }
+  .cierre p { color: var(--zk-text-2); margin: 0 0 0.75rem; max-width: 46ch; font-size: var(--t-body-lg); }
 
   @media (prefers-reduced-motion: reduce) { .card:hover { transform: none; } }
 </style>

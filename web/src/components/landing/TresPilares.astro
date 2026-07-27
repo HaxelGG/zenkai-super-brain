@@ -63,7 +63,7 @@ const medida = await getModuloMedida();
 
   .pil__head { max-width: 44rem; margin-bottom: 2.5rem; }
   .eyebrow {
-    font-family: var(--font-mono); font-size: 0.6875rem;
+    font-family: var(--font-mono); font-size: var(--t-eyebrow);
     letter-spacing: 0.18em; text-transform: uppercase;
     color: var(--zk-growth); margin: 0 0 1rem;
   }
@@ -96,7 +96,7 @@ const medida = await getModuloMedida();
 
   .pil__cardhead { display: flex; align-items: baseline; justify-content: space-between; gap: 0.75rem; margin-bottom: 0.75rem; }
   .pil__card h3 { font-size: 1.5rem; font-weight: 700; margin: 0; color: var(--zk-accent); letter-spacing: -0.01em; }
-  .pil__count { font-family: var(--font-mono); font-size: 0.6875rem; color: var(--zk-muted); white-space: nowrap; }
+  .pil__count { font-family: var(--font-mono); font-size: var(--t-eyebrow); color: var(--zk-muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
 
   .pil__titular { font-size: 1rem; font-weight: 600; color: var(--zk-text); margin: 0 0 0.5rem; text-wrap: balance; }
   .pil__promesa { font-size: 0.875rem; line-height: 1.55; color: var(--zk-text-2); margin: 0 0 1.25rem; }
@@ -106,14 +106,14 @@ const medida = await getModuloMedida();
     display: flex; flex-wrap: wrap; gap: 0.375rem; flex: 1; align-content: start;
   }
   .pil__modulos li {
-    font-family: var(--font-mono); font-size: 0.6875rem;
+    font-family: var(--font-mono); font-size: var(--t-eyebrow);
     padding: 0.25rem 0.5rem;
     border: 1px solid var(--zk-border); border-radius: 999px;
     color: var(--zk-text-2);
   }
   .pil__resto { color: var(--zk-muted) !important; border-style: dashed !important; }
 
-  .pil__mas { font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.08em; color: var(--zk-accent); }
+  .pil__mas { font-size: var(--t-micro); font-weight: 550; color: var(--zk-accent); }
 
   .pil__medida {
     display: flex; flex-wrap: wrap; gap: 1rem;
