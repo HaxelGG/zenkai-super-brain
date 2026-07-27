@@ -18,6 +18,7 @@
  */
 import WhatsAppCTA from '../WhatsAppCTA.astro';
 import ShaderField from '../ShaderField.astro';
+import Constelacion from '../Constelacion.astro';
 
 const confianza = [
   'Sin tarjeta ni email para ver tu propuesta',
@@ -27,7 +28,10 @@ const confianza = [
 ];
 ---
 <section class="hero">
+  {/* Dos capas: la atmósfera (shader) da color y movimiento difuso; la
+      constelación pone la estructura 3D con profundidad real encima. */}
   <ShaderField class="hero__bg" />
+  <Constelacion class="hero__cons" />
 
   <div class="hero__wrap">
     <h1 class="hero__h1">
@@ -81,6 +85,22 @@ const confianza = [
   @media (min-width: 1024px) { .hero { padding-block: 9rem 5.5rem; } }
 
   .hero__bg { z-index: 0; }
+
+  /* La estructura 3D va sobre la atmósfera y siempre debajo del texto.
+     En escritorio se desplaza al lado derecho para que sea un objeto que
+     acompaña al titular, no una textura que se le pone detrás. En móvil se
+     queda centrada y muy tenue: ahí el texto ocupa todo y competir sería
+     ganarle legibilidad. */
+  .hero__cons { z-index: 1; opacity: 0.55; }
+  @media (min-width: 900px) {
+    .hero__cons {
+      left: 42%;
+      opacity: 1;
+    }
+  }
+  @media (max-width: 899px) {
+    .hero__cons { opacity: 0.4; }
+  }
 
   .hero__wrap {
     position: relative; z-index: 1;

@@ -1,0 +1,238 @@
+---
+/**
+ * Constelación 3D · estructura neuronal con profundidad real.
+ *
+ * ── Por qué esto y no más shader ──────────────────────────────────────────
+ * El campo de ruido daba atmósfera pero no leía como 3D: era una textura
+ * plana que se movía. Esto es geometría de verdad — nodos en un espacio
+ * tridimensional, proyectados con perspectiva, rotando sobre dos ejes y
+ * reaccionando al puntero como si la cámara se inclinara.
+ *
+ * ── Por qué Canvas 2D y no WebGL ──────────────────────────────────────────
+ * La escena son ~150 puntos y unas cuantas centenas de líneas. En WebGL eso
+ * obliga a regenerar buffers cada fotograma o a montar instancing para algo
+ * que Canvas 2D dibuja sin despeinarse. Y ahorra la compilación del shader,
+ * que era el pico de bloqueo medido en la carga.
+ *
+ * Se sabe que el objetivo puede ser una gráfica integrada (medido en una
+ * Intel UHD 620), así que todo está dimensionado para eso:
+ * · La proyección es aritmética plana, sin matrices ni librerías.
+ * · Las líneas se calculan sobre una rejilla espacial, no comparando todos
+ *   los pares: con 150 nodos serían 11.175 comparaciones por fotograma.
+ * · 30 fps, resolución limitada y parada total fuera de pantalla.
+ */
+interface Props {
+  class?: string;
+}
+const { class: className = '' } = Astro.props;
+---
+<div class:list={['cons', className]} data-constelacion aria-hidden="true"></div>
+
+<style>
+  .cons { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+  .cons :global(canvas) {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    display: block;
+    opacity: 0;
+    transition: opacity 1.4s ease;
+  }
+  .cons :global(canvas.listo) { opacity: 1; }
+</style>
+
+<script>
+  interface Nodo {
+    x: number; y: number; z: number;
+    /** Deriva propia · sin esto la nube gira rígida y se nota que es un truco. */
+    vx: number; vy: number; vz: number;
+    r: number;
+    pulso: number;
+  }
+
+  const montar = (host: HTMLElement) => {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d', { alpha: true });
+    if (!ctx) return;
+    host.appendChild(canvas);
+
+    const quieto = matchMedia('(prefers-reduced-motion: reduce)');
+    const finoYConHover = matchMedia('(hover: hover) and (pointer: fine)');
+
+    // Menos nodos en pantallas pequeñas: el móvil tiene menos sitio y menos GPU.
+    const N = window.innerWidth < 768 ? 70 : 150;
+    const RADIO = 310;
+    const DIST_ENLACE = 120;
+    const FOCAL = 620;
+
+    const nodos: Nodo[] = Array.from({ length: N }, () => {
+      // Distribución en el volumen de una esfera. Usar ángulos al azar sin la
+      // raíz cúbica amontona los puntos en el centro y se ve como una bola.
+      const u = Math.random();
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos(2 * Math.random() - 1);
+      const r = RADIO * Math.cbrt(u);
+      return {
+        x: r * Math.sin(phi) * Math.cos(theta),
+        y: r * Math.sin(phi) * Math.sin(theta) * 0.72,
+        z: r * Math.cos(phi),
+        vx: (Math.random() - 0.5) * 0.16,
+        vy: (Math.random() - 0.5) * 0.16,
+        vz: (Math.random() - 0.5) * 0.16,
+        r: 0.9 + Math.random() * 1.7,
+        pulso: Math.random() * Math.PI * 2,
+      };
+    });
+
+    let w = 0, h = 0, dpr = 1;
+    const medir = () => {
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const cw = host.clientWidth, ch = host.clientHeight;
+      if (cw === w && ch === h) return;
+      w = cw; h = ch;
+      canvas.width = Math.round(w * dpr);
+      canvas.height = Math.round(h * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+    medir();
+
+    // La cámara se inclina hacia el puntero, con retardo. Un seguimiento 1:1
+    // se siente mecánico; este se siente como mover un objeto con la mano.
+    let objX = 0, objY = 0, camX = 0, camY = 0;
+    if (finoYConHover.matches) {
+      window.addEventListener('pointermove', (e) => {
+        const r = host.getBoundingClientRect();
+        objX = ((e.clientX - r.left) / r.width - 0.5) * 0.85;
+        objY = ((e.clientY - r.top) / r.height - 0.5) * 0.55;
+      }, { passive: true });
+      window.addEventListener('pointerleave', () => { objX = 0; objY = 0; }, { passive: true });
+    }
+
+    const proy = new Float32Array(N * 4); // x, y, escala, profundidad 0-1
+
+    const dibujar = (t: number) => {
+      medir();
+      camX += (objX - camX) * 0.045;
+      camY += (objY - camY) * 0.045;
+
+      const rotY = t * 0.000085 + camX;
+      const rotX = Math.sin(t * 0.00006) * 0.16 + camY;
+      const cy = Math.cos(rotY), sy = Math.sin(rotY);
+      const cx = Math.cos(rotX), sx = Math.sin(rotX);
+      const cxCentro = w / 2, cyCentro = h / 2;
+
+      ctx.clearRect(0, 0, w, h);
+
+      for (let i = 0; i < N; i++) {
+        const n = nodos[i];
+        // Deriva propia, contenida dentro de la esfera.
+        n.x += n.vx; n.y += n.vy; n.z += n.vz;
+        const d2 = n.x * n.x + n.y * n.y + n.z * n.z;
+        if (d2 > RADIO * RADIO) { n.vx *= -1; n.vy *= -1; n.vz *= -1; }
+
+        // Rotación en Y y luego en X · a mano, sin matrices.
+        const x1 = n.x * cy - n.z * sy;
+        const z1 = n.x * sy + n.z * cy;
+        const y2 = n.y * cx - z1 * sx;
+        const z2 = n.y * sx + z1 * cx;
+
+        // Perspectiva: lo cercano se agranda, lo lejano se encoge.
+        const esc = FOCAL / (FOCAL + z2 + RADIO);
+        proy[i * 4] = cxCentro + x1 * esc;
+        proy[i * 4 + 1] = cyCentro + y2 * esc;
+        proy[i * 4 + 2] = esc;
+        proy[i * 4 + 3] = Math.max(0, Math.min(1, (z2 + RADIO) / (RADIO * 2)));
+      }
+
+      // ── Aristas ────────────────────────────────────────────────────────
+      // Rejilla espacial: cada nodo sólo se compara con los de su celda y las
+      // vecinas. Comparar todos contra todos serían 11.175 pares por fotograma
+      // en una gráfica integrada, y se nota.
+      const celda = DIST_ENLACE;
+      const rejilla = new Map<number, number[]>();
+      for (let i = 0; i < N; i++) {
+        const gx = Math.floor(proy[i * 4] / celda);
+        const gy = Math.floor(proy[i * 4 + 1] / celda);
+        const k = gx * 73856093 + gy * 19349663;
+        const l = rejilla.get(k);
+        if (l) l.push(i); else rejilla.set(k, [i]);
+      }
+
+      ctx.lineWidth = 0.6;
+      for (let i = 0; i < N; i++) {
+        const xi = proy[i * 4], yi = proy[i * 4 + 1];
+        const gx = Math.floor(xi / celda), gy = Math.floor(yi / celda);
+        for (let ox = -1; ox <= 1; ox++) {
+          for (let oy = -1; oy <= 1; oy++) {
+            const vec = rejilla.get((gx + ox) * 73856093 + (gy + oy) * 19349663);
+            if (!vec) continue;
+            for (const j of vec) {
+              if (j <= i) continue;
+              const dx = xi - proy[j * 4], dy = yi - proy[j * 4 + 1];
+              const d = Math.hypot(dx, dy);
+              if (d > DIST_ENLACE) continue;
+              // La opacidad cae con la distancia Y con la profundidad: así el
+              // fondo se difumina y el ojo lee volumen.
+              const prof = (proy[i * 4 + 3] + proy[j * 4 + 3]) * 0.5;
+              const a = (1 - d / DIST_ENLACE) * 0.3 * (0.25 + prof * 0.75);
+              if (a < 0.012) continue;
+              ctx.strokeStyle = `rgba(90,150,255,${a.toFixed(3)})`;
+              ctx.beginPath();
+              ctx.moveTo(xi, yi);
+              ctx.lineTo(proy[j * 4], proy[j * 4 + 1]);
+              ctx.stroke();
+            }
+          }
+        }
+      }
+
+      // ── Nodos ──────────────────────────────────────────────────────────
+      for (let i = 0; i < N; i++) {
+        const n = nodos[i];
+        const esc = proy[i * 4 + 2];
+        const prof = proy[i * 4 + 3];
+        const late = 0.75 + Math.sin(t * 0.0013 + n.pulso) * 0.25;
+        const radio = n.r * esc * late;
+        // Los cercanos tiran a violeta, los lejanos a azul: separa los planos
+        // sin necesidad de desenfoque, que en Canvas 2D sería caro.
+        const rojo = Math.round(74 + prof * 90);
+        const verde = Math.round(158 - prof * 60);
+        const alfa = (0.2 + prof * 0.75) * 0.85;
+        ctx.fillStyle = `rgba(${rojo},${verde},255,${alfa.toFixed(3)})`;
+        ctx.beginPath();
+        ctx.arc(proy[i * 4], proy[i * 4 + 1], Math.max(0.35, radio), 0, 6.283185);
+        ctx.fill();
+      }
+
+      canvas.classList.add('listo');
+    };
+
+    const INTERVALO = 1000 / 30;
+    let ultimo = 0, raf = 0, corriendo = false;
+    const bucle = (t: number) => {
+      raf = requestAnimationFrame(bucle);
+      if (t - ultimo < INTERVALO) return;
+      ultimo = t;
+      dibujar(t);
+    };
+    const arrancar = () => { if (corriendo || quieto.matches) return; corriendo = true; raf = requestAnimationFrame(bucle); };
+    const parar = () => { corriendo = false; cancelAnimationFrame(raf); };
+
+    if (quieto.matches) {
+      dibujar(0); // una foto de la estructura, sin movimiento
+    } else {
+      arrancar();
+    }
+
+    document.addEventListener('visibilitychange', () => (document.hidden ? parar() : arrancar()));
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(([e]) => (e.isIntersecting ? arrancar() : parar()), { threshold: 0 }).observe(host);
+    }
+  };
+
+  const iniciar = () => document.querySelectorAll<HTMLElement>('[data-constelacion]').forEach(montar);
+  if ('requestIdleCallback' in window) {
+    (window as Window & typeof globalThis).requestIdleCallback(iniciar, { timeout: 2000 });
+  } else {
+    setTimeout(iniciar, 700);
+  }
+</script>

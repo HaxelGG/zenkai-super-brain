@@ -114,14 +114,17 @@ const { class: className = '' } = Astro.props;
       vec3 azul   = vec3(0.290, 0.620, 1.000);
       vec3 violeta= vec3(0.545, 0.361, 0.965);
 
+      // Intensidades subidas tras verlo en pantalla: la primera versión era
+      // tan discreta que el fondo parecía plano. La viñeta sigue protegiendo
+      // la legibilidad del titular, pero el campo ahora se ve.
       vec3 col = fondo;
-      col = mix(col, azul    * 0.62, smoothstep(0.32, 0.88, f) * 0.50);
-      col = mix(col, violeta * 0.55, smoothstep(0.58, 0.98, f) * 0.30);
-      col += azul * halo * 0.13;
+      col = mix(col, azul    * 0.88, smoothstep(0.26, 0.94, f) * 0.80);
+      col = mix(col, violeta * 0.82, smoothstep(0.50, 1.00, f) * 0.55);
+      col += azul * halo * 0.24;
 
-      // Viñeta: el centro se apaga para que el titular tenga contraste.
-      float vig = smoothstep(1.30, 0.20, length(uv - 0.5));
-      col *= mix(0.42, 1.0, vig);
+      // Viñeta: los bordes se apagan para que el titular tenga contraste.
+      float vig = smoothstep(1.30, 0.18, length(uv - 0.5));
+      col *= mix(0.28, 1.0, vig);
 
       // Grano fino · rompe el banding de los degradados en pantallas de 8 bits.
       col += (hash(gl_FragCoord.xy + uTime) - 0.5) * 0.016;
