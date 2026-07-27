@@ -7,6 +7,7 @@
 // error en su campo y la propuesta se devuelve igual.
 
 import { generateProposal, type ProposalOutput } from './proposal';
+import { nombreDeModulo } from './modulos';
 import { synthesizeSpeech } from './voice';
 import { dispatchToN8n } from './n8n';
 import { sendProposalByEmail } from './email';
@@ -76,7 +77,7 @@ export const orchestrate = async (
       sector: proposal.sector_detectado,
       tier: proposal.tier_recomendado,
       headline: proposal.propuesta.headline,
-      inversion_mensual_usd: proposal.propuesta.inversion_mensual_usd,
+      modulos: proposal.modulos_recomendados,
     });
     result.n8n = d.ok
       ? { ok: true, status: d.status }
@@ -89,6 +90,7 @@ export const orchestrate = async (
         to: opts.email,
         sector: proposal.sector_detectado,
         tier: proposal.tier_recomendado,
+        modulos: proposal.modulos_recomendados.map((s) => nombreDeModulo(s)),
         propuesta: proposal.propuesta,
       });
       result.email = { ok: true, id: sent.id };

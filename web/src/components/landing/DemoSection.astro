@@ -4,8 +4,17 @@
 // Tres estados: input → loading (mín 8s) → propuesta real renderizada del JSON
 // Turnstile widget render condicional · solo si PUBLIC_TURNSTILE_SITE_KEY está definida
 import { MIN_TEXTO, MAX_TEXTO } from '../../lib/limits';
+import { MODULOS } from '../../lib/modulos';
+import { TIERS } from '../../data/pricing';
+
 const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? '';
-const waNumber = import.meta.env.PUBLIC_WA_NUMBER ?? '573226272302';
+const waNumber = import.meta.env.PUBLIC_WA_NUMBER ?? '34622874482';
+
+// El cliente necesita dos cosas del servidor para poder pintar la propuesta sin
+// que el modelo invente nada: cómo se llama cada módulo (para enlazarlo) y cuánto
+// cuesta cada plan (para que el precio salga de la tabla oficial y no del LLM).
+const nombresModulos = Object.fromEntries(MODULOS.map((m) => [m.slug, m.nombre]));
+const preciosPorTier = Object.fromEntries(TIERS.map((t) => [t.nombre, t.mensual]));
 ---
 
 <section id="hero-demo" class="relative py-24 lg:py-32 border-t border-zk-border/50 overflow-hidden">
@@ -15,7 +24,7 @@ const waNumber = import.meta.env.PUBLIC_WA_NUMBER ?? '573226272302';
     <div class="text-center mb-12">
       <div class="section-badge">
         <span class="section-badge-line warm"></span>
-        <span class="section-badge-text warm">Probalo ahora</span>
+        <span class="section-badge-text warm">Pruébalo ahora</span>
         <span class="section-badge-line warm"></span>
       </div>
       <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight mb-5 leading-[1.05]">
@@ -49,7 +58,7 @@ const waNumber = import.meta.env.PUBLIC_WA_NUMBER ?? '573226272302';
           maxlength={MAX_TEXTO}
           data-min={MIN_TEXTO}
           data-max={MAX_TEXTO}
-          placeholder="Tengo una clínica dental en Medellín, 3 doctores. Queremos agendar citas por WhatsApp y reducir el 25% de no-shows que tenemos…"
+          placeholder="Tengo una clínica dental con 3 doctores. Queremos que las citas se agenden por WhatsApp y que dejen de caerse las que nadie confirma…"
           class="w-full bg-transparent text-zk-text placeholder:text-zk-muted text-base px-5 py-3 resize-none focus:outline-none font-sans leading-relaxed"
         ></textarea>
 
@@ -94,7 +103,9 @@ const waNumber = import.meta.env.PUBLIC_WA_NUMBER ?? '573226272302';
             <span class="relative inline-flex rounded-full h-3 w-3 bg-zk-accent"></span>
           </div>
           <div>
-            <div class="text-sm font-medium text-zk-text">Analizando con Claude Sonnet 4.6</div>
+            {/* Sin nombre de modelo: el proveedor es configurable (LLM_PROVIDER),
+                así que una etiqueta fija sería falsa la mitad de las veces. */}
+            <div class="text-sm font-medium text-zk-text">Analizando tu caso</div>
             <div class="text-xs font-mono text-zk-muted">Tiempo estimado: 15-30 segundos</div>
           </div>
         </div>
@@ -137,6 +148,12 @@ const waNumber = import.meta.env.PUBLIC_WA_NUMBER ?? '573226272302';
 
       {/* ESTADO 3 · PROPUESTA (renderizada dinámicamente del JSON) */}
       <div id="demo-proposal" class="hidden"></div>
+
+      {/* Datos del servidor para el render de la propuesta. Van como JSON en el
+          DOM y no en el bundle para que sigan un único origen: el catálogo y la
+          tabla de precios reales. */}
+      <script id="demo-modulos" type="application/json" is:inline set:html={JSON.stringify(nombresModulos)}></script>
+      <script id="demo-precios" type="application/json" is:inline set:html={JSON.stringify(preciosPorTier)}></script>
 
       {/* ESTADO 4 · ERROR · con fallback a WhatsApp llevando el brief ya escrito */}
       <div id="demo-error" class="hidden demo-box p-6 border-l-4 border-red-500" data-wa-number={waNumber}>
@@ -339,6 +356,26 @@ const waNumber = import.meta.env.PUBLIC_WA_NUMBER ?? '573226272302';
     color: #5A5A70;
     margin-bottom: 6px;
   }
+  .proposal-mods { display: grid; gap: 8px; }
+  @media (min-width: 640px) { .proposal-mods { grid-template-columns: repeat(2, 1fr); } }
+  .proposal-mod {
+    display: block;
+    padding: 11px 13px;
+    border: 1px solid #1F1F2C;
+    border-radius: 10px;
+    background: rgba(8, 8, 12, 0.55);
+    text-decoration: none;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .proposal-mod:hover { border-color: rgba(74, 158, 255, 0.5); background: rgba(74, 158, 255, 0.06); }
+  .proposal-mod strong { display: block; font-size: 13.5px; color: #4A9EFF; font-weight: 700; }
+  .proposal-mod span {
+    display: block; margin-top: 2px;
+    font-family: 'Geist Mono', ui-monospace, monospace;
+    font-size: 9.5px; letter-spacing: 0.12em; text-transform: uppercase; color: #8A8A9E;
+  }
+  .proposal-mod.es-principal { border-color: rgba(74, 158, 255, 0.45); background: rgba(74, 158, 255, 0.08); }
+
   .proposal-pill {
     display: inline-block;
     padding: 4px 10px;
@@ -355,11 +392,14 @@ const waNumber = import.meta.env.PUBLIC_WA_NUMBER ?? '573226272302';
   /* eslint-disable no-console */
   const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T | null;
 
+  // Ejemplos sin ciudad ni plataforma local: este sitio se sirve por defecto a
+  // Europa, y un placeholder que habla de Medellín o de Rappi le dice al
+  // visitante español que la web no está escrita para él.
   const placeholders = [
-    'Tengo una clínica dental en Medellín, 3 doctores. Queremos agendar citas por WhatsApp y reducir el 25% de no-shows que tenemos…',
-    'Vendo ropa por Instagram, tengo Shopify, facturo $12K USD/mes. Quiero recuperar carritos abandonados y entender qué ads me generan ventas…',
-    'Tengo restaurante en Bogotá, 8K seguidores. 70% de pedidos llegan por Rappi que se queda con 30%. Quiero pedidos directos por WhatsApp…',
-    'Soy abogado independiente en Barcelona, 8 años de experiencia. Paso más tiempo redactando propuestas que cerrando casos…',
+    'Tengo una clínica dental con 3 doctores. Queremos que las citas se agenden por WhatsApp y que dejen de caerse las que nadie confirma…',
+    'Vendo ropa por Instagram y tengo la tienda en Shopify. Quiero recuperar los carritos abandonados y saber qué anuncio trae compradores de verdad…',
+    'Tengo un restaurante de 6 mesas. La mayoría de pedidos entran por una app que se lleva comisión y quiero recuperar el pedido directo…',
+    'Soy abogado independiente. Paso más tiempo redactando propuestas que llevando casos…',
   ];
 
   const textarea = $<HTMLTextAreaElement>('demo-textarea');
@@ -409,15 +449,14 @@ const waNumber = import.meta.env.PUBLIC_WA_NUMBER ?? '573226272302';
       headline: string;
       dolor_identificado: string;
       solucion: string;
-      agentes_activos: string[];
       stack: string[];
       timeline_dias: number;
-      inversion_mensual_usd: number;
       proyeccion_90d: string;
     }
     interface ApiResponse {
       sector_detectado: string;
       tier_recomendado: string;
+      modulos_recomendados: string[];
       propuesta: Propuesta;
       rateLimit?: { remaining: number; limit: number; bypassed: boolean };
     }
@@ -425,10 +464,42 @@ const waNumber = import.meta.env.PUBLIC_WA_NUMBER ?? '573226272302';
     const escape = (s: string): string =>
       s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
+    // Catálogo para poder enlazar cada módulo recomendado a su página real.
+    // Antes se listaban nombres internos de agentes, que no llevaban a ninguna
+    // parte y no significaban nada para quien leía la propuesta.
+    const NOMBRES: Record<string, string> = JSON.parse(
+      document.getElementById('demo-modulos')?.textContent || '{}',
+    );
+
+    // El precio NO lo inventa el modelo: sale de la tabla oficial, en la
+    // moneda que el visitante tenga elegida. Así la propuesta nunca puede
+    // contradecir a la página de precios.
+    const PRECIOS: Record<string, Record<string, number>> = JSON.parse(
+      document.getElementById('demo-precios')?.textContent || '{}',
+    );
+
     const renderPropuesta = (data: ApiResponse): string => {
       const p = data.propuesta;
-      const agentes = p.agentes_activos.map((a) => `<span class="proposal-pill">${escape(a)}</span>`).join(' ');
+      const modulos = (data.modulos_recomendados || [])
+        .map((slug, i) => `<a href="/modulos/${encodeURIComponent(slug)}/" class="proposal-mod${i === 0 ? ' es-principal' : ''}">
+            <strong>${escape(NOMBRES[slug] || slug)}</strong>
+            ${i === 0 ? '<span>resuelve el problema central</span>' : ''}
+          </a>`)
+        .join('');
       const stack = p.stack.map((s) => `<span class="proposal-pill">${escape(s)}</span>`).join(' ');
+
+      // Moneda activa · la misma que el visitante eligió en la cabecera.
+      let moneda = 'EUR';
+      try {
+        const g = localStorage.getItem('zk-currency');
+        if (g && PRECIOS[data.tier_recomendado]?.[g] !== undefined) moneda = g;
+      } catch { /* sin localStorage se usa el default */ }
+      const importe = PRECIOS[data.tier_recomendado]?.[moneda];
+      const precioTxt = importe === undefined
+        ? ''
+        : new Intl.NumberFormat(moneda === 'EUR' ? 'es-ES' : moneda === 'COP' ? 'es-CO' : 'en-US', {
+            style: 'currency', currency: moneda, maximumFractionDigits: 0,
+          }).format(importe);
       return `
         <div class="proposal-card space-y-5">
           <div class="flex flex-wrap gap-2 items-center">
@@ -444,22 +515,23 @@ const waNumber = import.meta.env.PUBLIC_WA_NUMBER ?? '573226272302';
             <div class="proposal-label">Solución</div>
             <p class="text-zk-text2 text-sm">${escape(p.solucion)}</p>
           </div>
-          <div class="grid sm:grid-cols-2 gap-3">
-            <div class="proposal-block">
-              <div class="proposal-label">Agentes activos</div>
-              <div class="flex flex-wrap gap-1.5">${agentes}</div>
-            </div>
+          <div class="proposal-block">
+            <div class="proposal-label">Módulos que resuelven tu caso</div>
+            <div class="proposal-mods">${modulos}</div>
+          </div>
+          <div class="grid sm:grid-cols-3 gap-3">
             <div class="proposal-block">
               <div class="proposal-label">Stack</div>
               <div class="flex flex-wrap gap-1.5">${stack}</div>
             </div>
             <div class="proposal-block">
-              <div class="proposal-label">Timeline</div>
+              <div class="proposal-label">Puesta en marcha</div>
               <div class="text-zk-text font-semibold">${p.timeline_dias} días</div>
             </div>
             <div class="proposal-block">
-              <div class="proposal-label">Inversión mensual</div>
-              <div class="text-zk-text font-semibold">$${p.inversion_mensual_usd.toLocaleString('en-US')} USD</div>
+              <div class="proposal-label">Plan recomendado</div>
+              <div class="text-zk-text font-semibold">${escape(data.tier_recomendado)}</div>
+              ${precioTxt ? `<div class="text-xs text-zk-text2 mt-1">desde ${precioTxt}/mes · <a href="/precios/" class="text-zk-growth hover:underline">ver planes</a></div>` : ''}
             </div>
           </div>
           <div class="proposal-block" style="background: linear-gradient(135deg, rgba(30,111,255,0.15), rgba(74,158,255,0.05)); border-color: rgba(74,158,255,0.4);">
@@ -468,7 +540,7 @@ const waNumber = import.meta.env.PUBLIC_WA_NUMBER ?? '573226272302';
           </div>
           <div class="flex flex-col sm:flex-row gap-3 pt-2">
             <a href="https://cal.com/zenkai-growth-systems/strategy-call" target="_blank" rel="noopener" class="btn-primary text-white font-semibold px-6 py-3 rounded-xl text-center text-sm">
-              Conversar 30 min · 50% off primer mes
+              Comentarla con nosotros · 30 min
             </a>
             <button id="proposal-reset" class="text-sm font-mono text-zk-growth hover:underline">Probar otro negocio</button>
           </div>
@@ -495,7 +567,7 @@ const waNumber = import.meta.env.PUBLIC_WA_NUMBER ?? '573226272302';
      * forma de atribuir de dónde vino la conversación sin poner cookies.
      */
     const buildWaHref = (context: string, texto: string): string => {
-      const number = demoError.dataset.waNumber || '573226272302';
+      const number = demoError.dataset.waNumber || '34622874482';
       // 600 chars del textarea + preámbulo entra de sobra en el límite de wa.me.
       const msg = texto
         ? `Hola ZENKAI. Intenté generar mi propuesta en la web y no me cargó.\n\nEsto es lo que escribí:\n"${texto}"\n\n(origen: demo-web · ${context})`
@@ -603,7 +675,7 @@ const waNumber = import.meta.env.PUBLIC_WA_NUMBER ?? '573226272302';
           // lead válido y no tiene sentido hacerlo esperar una hora.
           showError('Llegaste al límite de 5 propuestas por hora.', 'rate-limit', texto);
         } else if (status === 403) {
-          showError('Validación de seguridad falló. Recargá la página y probá de nuevo.');
+          showError('Validación de seguridad falló. Recarga la página y prueba de nuevo.');
         } else if (status === 400) {
           showError(`El texto debe tener entre ${MIN} y ${MAX} caracteres.`);
         } else {

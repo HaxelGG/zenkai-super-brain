@@ -2,6 +2,7 @@ import type { APIRoute } from 'astro';
 import { z } from 'zod';
 import { generateProposal } from '../../lib/proposal';
 import { MIN_TEXTO, MAX_TEXTO } from '../../lib/limits';
+import { nombreDeModulo } from '../../lib/modulos';
 import { createDemo } from '../../lib/airtable';
 import { checkRateLimit } from '../../lib/rate-limit';
 import { verifyTurnstile } from '../../lib/turnstile';
@@ -100,6 +101,7 @@ const handle = async (request: Request, requestId: string): Promise<Response> =>
         to: email,
         sector: result.data.sector_detectado,
         tier: result.data.tier_recomendado,
+        modulos: result.data.modulos_recomendados.map((s) => nombreDeModulo(s)),
         propuesta: result.data.propuesta,
       });
     } catch (err) {

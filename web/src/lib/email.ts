@@ -4,14 +4,14 @@ export interface PropuestaEmailPayload {
   to: string;
   sector: string;
   tier: string;
+  /** Nombres de los módulos recomendados · ya resueltos, no slugs. */
+  modulos?: string[];
   propuesta: {
     headline: string;
     dolor_identificado: string;
     solucion: string;
-    agentes_activos: string[];
     stack: string[];
     timeline_dias: number;
-    inversion_mensual_usd: number;
     proyeccion_90d: string;
   };
 }
@@ -46,11 +46,14 @@ const renderHtml = (p: PropuestaEmailPayload): string => `
   </div>
 
   <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
-    <tr><td style="padding: 8px 0; color: #666;">Agentes activos:</td><td style="padding: 8px 0;"><strong>${p.propuesta.agentes_activos.join(' · ')}</strong></td></tr>
+    ${p.modulos?.length ? `<tr><td style="padding: 8px 0; color: #666;">Módulos:</td><td style="padding: 8px 0;"><strong>${p.modulos.join(' · ')}</strong></td></tr>` : ''}
     <tr><td style="padding: 8px 0; color: #666;">Stack:</td><td style="padding: 8px 0;"><strong>${p.propuesta.stack.join(' · ')}</strong></td></tr>
-    <tr><td style="padding: 8px 0; color: #666;">Timeline:</td><td style="padding: 8px 0;"><strong>${p.propuesta.timeline_dias} días</strong></td></tr>
-    <tr><td style="padding: 8px 0; color: #666;">Inversión:</td><td style="padding: 8px 0;"><strong>$${p.propuesta.inversion_mensual_usd} USD/mes</strong></td></tr>
+    <tr><td style="padding: 8px 0; color: #666;">Puesta en marcha:</td><td style="padding: 8px 0;"><strong>${p.propuesta.timeline_dias} días</strong></td></tr>
+    <tr><td style="padding: 8px 0; color: #666;">Plan recomendado:</td><td style="padding: 8px 0;"><strong>${p.tier}</strong></td></tr>
   </table>
+  <p style="font-size: 13px; color: #666; margin: 0 0 16px;">
+    El precio del plan está en <a href="https://zenkai.systems/precios/" style="color: #1E6FFF;">zenkai.systems/precios</a>, en tu moneda y sin letra pequeña.
+  </p>
 
   <div style="background: #1E6FFF; color: #fff; padding: 16px; border-radius: 8px; margin: 24px 0;">
     <div style="font-size: 12px; text-transform: uppercase; opacity: 0.8; letter-spacing: 0.1em;">Proyección a 90 días</div>
@@ -58,7 +61,7 @@ const renderHtml = (p: PropuestaEmailPayload): string => `
   </div>
 
   <p style="font-size: 12px; color: #888; margin-top: 32px; padding-top: 16px; border-top: 1px solid #eee;">
-    Generado por ZENKAI Growth Systems · Si querés discutirla, agendá 30 min: <a href="https://cal.com/zenkai-growth-systems/strategy-call" style="color: #1E6FFF;">cal.com/zenkai-growth-systems/strategy-call</a>
+    Generado por ZENKAI Growth Systems · Si quieres comentarla, agenda 30 min: <a href="https://cal.com/zenkai-growth-systems/strategy-call" style="color: #1E6FFF;">cal.com/zenkai-growth-systems/strategy-call</a>
   </p>
 </body></html>`;
 

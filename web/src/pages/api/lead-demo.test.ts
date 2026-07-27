@@ -17,14 +17,13 @@ const TEXTO = 'Tengo una clínica dental en Medellín, 4 odontólogos. Perdemos 
 const validProposal = {
   sector_detectado: 'salud',
   tier_recomendado: 'Starter',
+  modulos_recomendados: ['customer-ai'],
   propuesta: {
     headline: 'Tu clínica con WhatsApp 24/7',
     dolor_identificado: 'Perdés turnos.',
     solucion: 'Construimos un agente.',
-    agentes_activos: ['ECHO', 'HERMES'],
     stack: ['WhatsApp Cloud API', 'Cal.com'],
     timeline_dias: 14,
-    inversion_mensual_usd: 600,
     proyeccion_90d: 'Recuperás 80% de turnos.',
   },
 };

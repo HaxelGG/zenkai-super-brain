@@ -36,14 +36,13 @@ const validModelResponse = {
       text: JSON.stringify({
         sector_detectado: 'salud',
         tier_recomendado: 'Starter',
+  modulos_recomendados: ['customer-ai'],
         propuesta: {
           headline: 'Tu clínica con WhatsApp 24/7 y agenda automática',
           dolor_identificado: 'Perdés turnos por no contestar a tiempo.',
           solucion: 'Construimos un agente que califica leads y agenda en Cal.com.',
-          agentes_activos: ['ECHO', 'HERMES', 'ATLAS'],
           stack: ['WhatsApp Cloud API', 'Cal.com', 'Airtable'],
           timeline_dias: 14,
-          inversion_mensual_usd: 600,
           proyeccion_90d: 'Recuperás 80% de turnos perdidos en 90 días.',
         },
       }),
@@ -129,7 +128,11 @@ describe('POST /api/protocolo', () => {
     const body = await res.json();
     expect(body.sector_detectado).toBe('salud');
     expect(body.tier_recomendado).toBe('Starter');
-    expect(body.propuesta.agentes_activos).toContain('ECHO');
+    // Módulos del catálogo real, no nombres internos de agentes: lo que se
+    // devuelve tiene que poder enlazarse a /modulos/<slug>.
+    expect(body.modulos_recomendados).toContain('customer-ai');
+    expect(body.propuesta).not.toHaveProperty('agentes_activos');
+    expect(body.propuesta).not.toHaveProperty('inversion_mensual_usd');
     expect(mockCreate).toHaveBeenCalledOnce();
     const callArgs = mockCreate.mock.calls[0][0];
     expect(callArgs.model).toBe('claude-sonnet-4-6');
@@ -156,6 +159,7 @@ describe('POST /api/protocolo', () => {
           text: JSON.stringify({
             sector_detectado: 'aerospace',
             tier_recomendado: 'Starter',
+  modulos_recomendados: ['customer-ai'],
             propuesta: validModelResponse.content[0].text
               ? JSON.parse(validModelResponse.content[0].text).propuesta
               : {},

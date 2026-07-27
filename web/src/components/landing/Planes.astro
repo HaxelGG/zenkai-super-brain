@@ -37,7 +37,12 @@ const pct = (n: number) => `${Math.round(n * 100)}%`;
           {t.destacado && <div class="tier-flag">Más elegido</div>}
 
           <h3 class="text-xl font-bold">{t.nombre}</h3>
-          <p class="text-sm text-zk-text2 mt-1.5 mb-5 min-h-[2.5rem]">{t.promesa}</p>
+          <p class="text-sm text-zk-text2 mt-1.5 mb-3 min-h-[2.5rem]">{t.promesa}</p>
+
+          {/* "Starter", "Silver" y "Gold" no dicen nada por sí solos. Nadie sabe
+              si es "Silver" mirando una lista de funciones; sí sabe si tiene
+              tienda online o si le falta quien conteste. */}
+          <p class="paraTi"><span>Para ti si</span> {t.paraTi}</p>
 
           <div class="pb-5 mb-5 border-b border-zk-border">
             <div class="flex items-baseline gap-1.5">
@@ -133,6 +138,27 @@ const pct = (n: number) => `${Math.round(n * 100)}%`;
     border-color: rgba(74, 158, 255, 0.45);
     box-shadow: 0 0 0 1px rgba(74, 158, 255, 0.15);
   }
+  .paraTi {
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--zk-text-2);
+    background: rgba(74, 158, 255, 0.07);
+    border-left: 2px solid color-mix(in srgb, var(--zk-growth) 55%, transparent);
+    border-radius: 0 var(--zk-r-sm) var(--zk-r-sm) 0;
+    padding: 9px 11px;
+    margin: 0 0 20px;
+    min-height: 62px;
+  }
+  .paraTi span {
+    display: block;
+    font-family: 'Geist Mono', ui-monospace, monospace;
+    font-size: 9.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--zk-growth);
+    margin-bottom: 3px;
+  }
+
   .tier-flag {
     position: absolute;
     top: -10px;

@@ -1,9 +1,16 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { z } from 'zod';
 import { MIN_TEXTO, MAX_TEXTO } from './limits';
+import { MODULOS, MODULO_SLUGS } from './modulos';
 
 export const SECTORES = ['salud', 'restaurante', 'ecommerce', 'servicios', 'inmobiliaria', 'educacion', 'manufactura', 'generico'] as const;
-export const TIERS = ['Lite', 'Starter', 'Growth', 'Pro', 'Enterprise'] as const;
+
+/** Los planes reales. Deben coincidir con data/pricing.ts. */
+export const TIERS = ['Starter', 'Silver', 'Gold', 'Enterprise'] as const;
+
+// El catálogo vive en lib/modulos.ts · datos puros sin dependencias, para que
+// un test que mockee este archivo no lo deje en undefined.
+export { MODULOS, MODULO_SLUGS } from './modulos';
 
 export { MIN_TEXTO, MAX_TEXTO };
 
@@ -22,55 +29,81 @@ export type ProposalInput = z.infer<typeof InputSchema>;
 export const OutputSchema = z.object({
   sector_detectado: z.enum(SECTORES),
   tier_recomendado: z.enum(TIERS),
+  /**
+   * Módulos del catálogo real, por slug. Sustituye a `agentes_activos`, que
+   * exponía nombres internos (ARES, HERMES) que no significan nada para quien
+   * lee la propuesta y no se pueden enlazar a ninguna página.
+   */
+  modulos_recomendados: z.array(z.enum(MODULO_SLUGS)).min(1).max(4),
   propuesta: z.object({
     headline: z.string(),
     dolor_identificado: z.string(),
     solucion: z.string(),
-    agentes_activos: z.array(z.string()),
     stack: z.array(z.string()),
     timeline_dias: z.number().int().positive(),
-    inversion_mensual_usd: z.number().int().positive(),
     proyeccion_90d: z.string(),
   }),
 });
 export type ProposalOutput = z.infer<typeof OutputSchema>;
 
-const SYSTEM_PROMPT = `Sos el Super Cerebro de ZENKAI Growth Systems, una agencia de IA con sede en Pereira, Colombia, que digitaliza empresas con agentes IA.
+const CATALOGO = MODULOS.map((m) => `- ${m.slug} (${m.nombre}): ${m.resuelve}`).join('\n');
 
-CAPA DE PRODUCTO:
-- 12 agentes Master (ARES marketing, HERMES ventas, ATLAS ops, NEXUS IA, APOLLO diseño, MUSE contenido, FORGE dev, ORACLE finanzas, HIVE rrhh, ECHO atención, LEX legal, ZEUS estrategia).
-- 5 tiers: Lite (componente simple), Starter (un departamento), Growth (multi-dept Pro), Pro (enterprise), Enterprise (corporativo).
-- 8 sectores: salud, restaurante, ecommerce, servicios, inmobiliaria, educacion, manufactura, generico.
+const SYSTEM_PROMPT = `Eres el sistema de diagnóstico de ZENKAI Growth Systems, una agencia que construye sistemas de IA para empresas.
+
+CATÁLOGO COMPLETO — estos son los 14 módulos que ZENKAI vende:
+${CATALOGO}
+
+PLANES (4, en este orden de menor a mayor):
+- Starter: asistente de IA por texto, WhatsApp y otros canales, panel, recordatorios, agendamiento.
+- Silver: todo Starter + página web, automatizaciones, CRM a medida, dashboard de KPIs, identidad visual.
+- Gold: todo Silver + tienda online, campañas de voz/email/WhatsApp, campañas de Meta Ads, predicción, vídeo con IA.
+- Enterprise: todo Gold + desarrollo a medida, integraciones con sistemas propios, volumen alto, account manager.
 
 TU TAREA:
-Recibís una descripción de empresa de 25-600 caracteres y devolvés EXCLUSIVAMENTE un JSON válido con esta estructura exacta:
+Recibes la descripción de una empresa (25-600 caracteres) y devuelves EXCLUSIVAMENTE un JSON válido:
 
 {
-  "sector_detectado": "<uno de: salud|restaurante|ecommerce|servicios|inmobiliaria|educacion|manufactura|generico>",
-  "tier_recomendado": "<uno de: Lite|Starter|Growth|Pro|Enterprise>",
+  "sector_detectado": "<salud|restaurante|ecommerce|servicios|inmobiliaria|educacion|manufactura|generico>",
+  "tier_recomendado": "<Starter|Silver|Gold|Enterprise>",
+  "modulos_recomendados": ["<slug>", "<slug>"],
   "propuesta": {
-    "headline": "<frase corta de 8-12 palabras que vende el resultado>",
-    "dolor_identificado": "<1-2 frases sobre el problema principal>",
-    "solucion": "<2-3 frases sobre qué construimos>",
-    "agentes_activos": ["<nombre>", "<nombre>", "<nombre>"],
+    "headline": "<frase de 8-12 palabras que nombra el resultado, no la tecnología>",
+    "dolor_identificado": "<1-2 frases sobre el problema principal, en las palabras del usuario>",
+    "solucion": "<2-3 frases sobre qué se construye CONCRETAMENTE para este caso>",
     "stack": ["<herramienta>", "<herramienta>"],
     "timeline_dias": <entero entre 7 y 90>,
-    "inversion_mensual_usd": <entero entre 300 y 5000>,
-    "proyeccion_90d": "<1 frase sobre resultado esperado a 90 días>"
+    "proyeccion_90d": "<1 frase sobre qué habrá cambiado a 90 días>"
   }
 }
 
-REGLAS DURAS:
-- Voz "tú" en todo el copy (no "usted", no "vos").
-- NO inventes estadísticas. Si necesitás cifras, usá rangos plausibles del sector.
-- Tier debe escalar con la complejidad descrita: empresa simple → Lite/Starter; multi-departamento → Growth/Pro; corporativo → Enterprise.
-- Agentes activos: 2-4 nombres en MAYÚSCULAS de la lista de 12.
-- Stack: 2-4 herramientas reales (WhatsApp Cloud API, Airtable, Make, Cal.com, Resend, n8n, Shopify, etc.).
-- Si no podés inferir sector con >70% certeza, usá "generico".
-- El brief puede llegar muy corto (25 caracteres). Si falta información NO la inventes:
-  elegí el tier más conservador que encaje y describí el dolor en los términos que el
-  usuario usó, sin añadir detalles de empresa que él no mencionó.
-- NUNCA incluyas texto fuera del JSON. Solo el JSON parseable.`;
+REGLA MÁS IMPORTANTE — RESPONDE A LO QUE TE PIDEN:
+Los modulos_recomendados deben resolver lo que la persona describió, no lo que sea
+más habitual. Si pide una TIENDA ONLINE, el primer módulo es commerce-ai. Si su
+problema es que nadie contesta, customer-ai. Si es que no sabe qué funciona,
+intelligence-ai. Si necesita contratar, hr-ai. Si son contratos, legal-ai.
+NUNCA propongas un agente de WhatsApp para un problema que no es de atención.
+Entre 1 y 4 módulos, ordenados: el primero es el que resuelve el problema central.
+
+El plan se deduce de los módulos, no al revés:
+- Sólo customer-ai o sólo atención → Starter
+- Necesita web, CRM, automatizaciones u operaciones → Silver
+- Necesita tienda online, campañas o producción de contenido → Gold
+- Sistemas propios, integraciones legacy o varios departamentos → Enterprise
+
+OTRAS REGLAS DURAS:
+- Voz "tú". Español de España. Nunca "usted" ni voseo.
+- NO menciones precios, cuotas ni inversión. El precio lo pone el sistema desde su
+  tabla oficial; cualquier cifra que inventes contradiría la página de precios.
+- NO menciones nombres internos de agentes (ARES, HERMES, ATLAS…). El cliente compra
+  módulos, no nuestra arquitectura.
+- NO inventes estadísticas, porcentajes ni resultados. proyeccion_90d describe QUÉ
+  habrá cambiado, nunca cuánto ("las consultas fuera de horario dejan de perderse",
+  no "+40% de ventas").
+- Stack: 2-4 herramientas reales y coherentes con los módulos elegidos (Shopify,
+  WooCommerce, WhatsApp Cloud API, n8n, Airtable, Cal.com, HubSpot, Meta Ads…).
+- Si el brief es muy corto o ambiguo, NO rellenes huecos: usa "generico", elige el
+  plan más conservador que encaje y describe el dolor sólo con lo que dijo.
+- NUNCA incluyas texto fuera del JSON. Sólo el JSON parseable.`;
 
 export type GenerateResult =
   | { ok: true; data: ProposalOutput }

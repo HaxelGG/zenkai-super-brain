@@ -48,6 +48,18 @@ export interface Tier {
   /** Implantación · pago único, se perdona en compromiso semestral o anual. */
   implantacion: Money;
   promesa: string;
+  /**
+   * "Esto es para ti si…" · el criterio de autoselección.
+   *
+   * Starter, Silver, Gold y Enterprise no dicen nada por sí solos: son
+   * etiquetas de nivel, no descripciones. Un visitante no sabe si es "Silver"
+   * mirando una lista de características — sabe si tiene tienda online, o si
+   * ya tiene alguien atendiendo. Esto le deja elegir por su situación en vez
+   * de por comparación de funciones.
+   */
+  paraTi: string;
+  /** Qué NO incluye · evita la decepción del tercer mes. */
+  noIncluye?: string;
   incluye: string[];
   destacado?: boolean;
 }
@@ -83,6 +95,7 @@ export const TIERS: Tier[] = [
     mensual: { USD: 500, EUR: 269, COP: 535_000 },
     implantacion: { USD: 500, EUR: 269, COP: 0 },
     promesa: 'Que nadie se quede sin respuesta.',
+    paraTi: 'Recibes consultas por WhatsApp o redes y no siempre hay alguien para contestarlas.',
     incluye: [
       'Asistente IA de texto 24/7',
       'WhatsApp y canales alternativos',
@@ -98,6 +111,7 @@ export const TIERS: Tier[] = [
     mensual: { USD: 600, EUR: 399, COP: 805_000 },
     implantacion: { USD: 600, EUR: 399, COP: 0 },
     promesa: 'La operación deja de depender de que alguien se acuerde.',
+    paraTi: 'Ya atiendes bien, pero el trabajo entre herramientas y el seguimiento manual te comen el día.',
     incluye: [
       'Todo lo de Starter',
       'Página web',
@@ -116,6 +130,7 @@ export const TIERS: Tier[] = [
     contactoDirecto: true,
     implantacion: { USD: 1_650, EUR: 1_099, COP: 0 },
     promesa: 'Adquisición y contenido funcionando sin ampliar el equipo.',
+    paraTi: 'Quieres crecer con campañas, tienda y contenido, y hoy no tienes quién los lleve.',
     incluye: [
       'Todo lo de Silver',
       'Tienda online',
@@ -133,6 +148,7 @@ export const TIERS: Tier[] = [
     contactoDirecto: true,
     implantacion: { USD: 2_900, EUR: 1_899, COP: 0 },
     promesa: 'Para empresas que ya no caben en un SaaS.',
+    paraTi: 'Tienes sistemas propios, volumen alto o requisitos que ningún producto de catálogo cubre.',
     incluye: [
       'Todo lo de Gold',
       'Asistente interno a medida',
