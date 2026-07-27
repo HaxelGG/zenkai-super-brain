@@ -34,7 +34,9 @@ const { class: className = '' } = Astro.props;
 </div>
 
 <style>
-  .field { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+  /* z-index aquí y no en el hero: los estilos con ámbito del padre no
+     alcanzan la raíz de un componente hijo. */
+  .field { position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
 
   /* Debajo del canvas. Si WebGL falla, esto es lo que se ve — y es lo que se
      veía antes de todo esto, así que el peor caso es el estado anterior. */
@@ -58,6 +60,8 @@ const { class: className = '' } = Astro.props;
 </style>
 
 <script>
+  import { objetivo, zonas, alMedir, LERP } from '../lib/campo';
+
   const VERT = `
     attribute vec2 position;
     void main() { gl_Position = vec4(position, 0.0, 1.0); }
@@ -69,6 +73,21 @@ const { class: className = '' } = Astro.props;
     uniform float uTime;
     uniform vec2  uMouse;
     uniform float uMouseAmt;
+    // Cajas del titular y del CTA en coordenadas UV (y hacia arriba).
+    uniform vec4  uZonaTxt;
+    uniform vec4  uZonaCta;
+
+    // Máscara suave de un rectángulo · distancia con signo: negativa dentro.
+    // El borde es ANCHO a propósito: con uno estrecho el límite del recorte
+    // se hace visible y HIERVE cuando la luminancia del campo cruza el umbral
+    // mientras el ruido se mueve por debajo.
+    float zona(vec2 uv, vec4 c, float suave) {
+      vec2 centro = (c.xy + c.zw) * 0.5;
+      vec2 mitad  = (c.zw - c.xy) * 0.5;
+      vec2 d = abs(uv - centro) - mitad;
+      float fuera = length(max(d, 0.0)) + min(max(d.x, d.y), 0.0);
+      return 1.0 - smoothstep(0.0, suave, fuera);
+    }
 
     float hash(vec2 p) {
       return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
@@ -122,9 +141,34 @@ const { class: className = '' } = Astro.props;
       col = mix(col, violeta * 0.82, smoothstep(0.50, 1.00, f) * 0.55);
       col += azul * halo * 0.24;
 
-      // Viñeta: los bordes se apagan para que el titular tenga contraste.
+      // Viñeta: los bordes se apagan.
       float vig = smoothstep(1.30, 0.18, length(uv - 0.5));
       col *= mix(0.28, 1.0, vig);
+
+      // ── Techo de luminancia · el contraste deja de depender del ojo ──────
+      //
+      // WCAG: contraste = (L1 + 0.05) / (L2 + 0.05).
+      //
+      // El texto peor del fold no es el blanco: es la línea de acento, que
+      // arranca en #4A9EFF con L1 = 0,331. Para 3:1 (texto grande) hace falta
+      // L2 <= 0,077. Fijamos 0,070 por margen; para el blanco de las otras dos
+      // líneas eso mismo da 8,7:1, o sea AAA de sobra.
+      //
+      // Bajo el CTA el techo es 0,030 y NO es legibilidad: es RESERVA DE
+      // NEGRO. El botón verde sobre un campo a L=0,03 pasa a ser el máximo de
+      // contraste local de toda la pantalla POR CONSTRUCCIÓN. "El CTA domina
+      // el fold" deja de ser una regla que recordar y pasa a ser una
+      // propiedad del shader.
+      //
+      // Y de paso el fondo se aparta del texto, que es oclusión: la señal de
+      // profundidad más fuerte que existe, sin duplicar un nodo del DOM.
+      //
+      // col*col aproxima la linealización sRGB. Cuesta un mul en vez de tres
+      // pow, y en una gráfica integrada un pow cuesta cuatro veces un mul.
+      float lum = dot(col * col, vec3(0.2126, 0.7152, 0.0722));
+      float techo = min(mix(1.0, 0.070, zona(uv, uZonaTxt, 0.17)),
+                        mix(1.0, 0.030, zona(uv, uZonaCta, 0.12)));
+      col *= min(1.0, sqrt(techo / max(lum, 1e-5)));
 
       // Grano fino · rompe el banding de los degradados en pantallas de 8 bits.
       col += (hash(gl_FragCoord.xy + uTime) - 0.5) * 0.016;
@@ -179,6 +223,8 @@ const { class: className = '' } = Astro.props;
     const uTime = gl.getUniformLocation(prog, 'uTime');
     const uMouse = gl.getUniformLocation(prog, 'uMouse');
     const uMouseAmt = gl.getUniformLocation(prog, 'uMouseAmt');
+    const uZonaTxt = gl.getUniformLocation(prog, 'uZonaTxt');
+    const uZonaCta = gl.getUniformLocation(prog, 'uZonaCta');
 
     host.appendChild(canvas);
 
@@ -224,17 +270,36 @@ const { class: className = '' } = Astro.props;
       return true;
     };
 
-    // El halo persigue al puntero con retardo · un seguimiento 1:1 se siente
-    // mecánico, este se siente material.
-    let mx = 0.5, my = 0.55, tx = 0.5, ty = 0.55, fuerza = 0;
-    if (finoYConHover.matches) {
-      window.addEventListener('pointermove', (e) => {
-        const r = host.getBoundingClientRect();
-        tx = (e.clientX - r.left) / r.width;
-        ty = 1 - (e.clientY - r.top) / r.height;
-        fuerza = 1;
-      }, { passive: true });
-    }
+    // El puntero YA NO se escucha aquí: viene del campo compartido, que es el
+    // único listener del hero. Antes había dos, y el otro medía el DOM dentro
+    // del evento.
+    let mx = 0.5, my = 0.55;
+    const fuerza = finoYConHover.matches ? 1 : 0;
+
+    /**
+     * Sube al shader las cajas del titular y del CTA.
+     *
+     * Nada de codificar una elipse a mano en UV ni de duplicar el breakpoint
+     * de 900px en dos archivos: la caja SALE DEL DOM. Cambia el copy, se
+     * traduce la página, se añade una cuarta línea — la protección sigue
+     * siendo correcta sin que nadie se acuerde de actualizarla.
+     */
+    const LEJOS: [number, number, number, number] = [-9, -9, -8, -8];
+    const subirZonas = () => {
+      const cw = host.clientWidth || 1;
+      const ch = host.clientHeight || 1;
+      let txt = LEJOS;
+      let cta = LEJOS;
+      for (const z of zonas()) {
+        // GL tiene la Y hacia arriba; el DOM, hacia abajo.
+        const uv: [number, number, number, number] =
+          [z.x0 / cw, 1 - z.y1 / ch, z.x1 / cw, 1 - z.y0 / ch];
+        if (z.tipo === 'cta') cta = uv; else txt = uv;
+      }
+      gl.uniform4f(uZonaTxt, txt[0], txt[1], txt[2], txt[3]);
+      gl.uniform4f(uZonaCta, cta[0], cta[1], cta[2], cta[3]);
+      if (!corriendo) pintar(performance.now()); // congelado → repintar una vez
+    };
 
     let raf = 0;
     let corriendo = false;
@@ -244,9 +309,14 @@ const { class: className = '' } = Astro.props;
 
     const pintar = (ahora: number) => {
       medir();
-      mx += (tx - mx) * 0.06;
-      my += (ty - my) * 0.06;
-      gl.uniform1f(uTime, (ahora - t0) / 1000);
+      // El campo da la Y hacia abajo y en rango -1..1; GL la quiere hacia
+      // arriba y en 0..1.
+      const o = objetivo();
+      mx += (o.x * 0.5 + 0.5 - mx) * LERP;
+      my += (0.5 - o.y * 0.5 - my) * LERP;
+      // Acotado: a los diez minutos uTime valdría 600 y el grano dejaría de
+      // ser grano por pérdida de precisión en mediump.
+      gl.uniform1f(uTime, ((ahora - t0) / 1000) % 600);
       gl.uniform2f(uMouse, mx, my);
       gl.uniform1f(uMouseAmt, fuerza);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
@@ -321,6 +391,9 @@ const { class: className = '' } = Astro.props;
     }
 
     medir();
+    alMedir(subirZonas);
+    subirZonas();
+
     if (quieto.matches) {
       // Un fotograma y ya: se ve la textura, no se mueve nada.
       pintar(performance.now());

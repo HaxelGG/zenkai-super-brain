@@ -27,14 +27,14 @@ const confianza = [
   'Precio fijado en tu moneda',
 ];
 ---
-<section class="hero">
+<section class="hero" data-hero>
   {/* Dos capas: la atmósfera (shader) da color y movimiento difuso; la
       constelación pone la estructura 3D con profundidad real encima. */}
   <ShaderField class="hero__bg" />
   <Constelacion class="hero__cons" />
 
   <div class="hero__wrap">
-    <h1 class="hero__h1">
+    <h1 class="hero__h1" data-zona="texto">
       <span class="hero__linea">Vende más.</span>
       <span class="hero__linea">Atiende a todos.</span>
       <span class="hero__linea hero__linea--acc">Opera con menos fricción.</span>
@@ -46,12 +46,14 @@ const confianza = [
     </p>
 
     <div class="hero__ctas">
+      <span class="hero__ctaZona" data-zona="cta" data-luz>
       <WhatsAppCTA
         location="hero"
         message="Hola ZENKAI. Vengo de la web. Esto es lo que me está costando dinero ahora mismo:"
         label="Cuéntanos qué te cuesta dinero"
         size="lg"
       />
+      </span>
       <a href="#hero-demo" class="hero__secundario">
         <span>O mira tu propuesta en 30 segundos</span>
         <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
@@ -81,29 +83,23 @@ const confianza = [
 </section>
 
 <style>
+  /* Tipadas a propósito. Sin @property el navegador las trata como texto:
+     no interpolan, y un valor basura silencia la declaración entera en vez
+     de caer al inicial. Registradas, el fallo es imposible y el motor puede
+     animarlas en el hilo de composición. */
+  @property --px  { syntax: '<number>'; initial-value: 0; inherits: true; }
+  @property --py  { syntax: '<number>'; initial-value: 0; inherits: true; }
+  @property --pxq { syntax: '<number>'; initial-value: 0; inherits: true; }
+
   .hero { position: relative; padding-block: 7rem 4.5rem; overflow: hidden; }
   @media (min-width: 1024px) { .hero { padding-block: 9rem 5.5rem; } }
 
-  .hero__bg { z-index: 0; }
-
-  /* La estructura 3D va sobre la atmósfera y siempre debajo del texto.
-     En escritorio se desplaza al lado derecho para que sea un objeto que
-     acompaña al titular, no una textura que se le pone detrás. En móvil se
-     queda centrada y muy tenue: ahí el texto ocupa todo y competir sería
-     ganarle legibilidad. */
-  .hero__cons { z-index: 1; opacity: 0.55; }
-  @media (min-width: 900px) {
-    .hero__cons {
-      left: 42%;
-      opacity: 1;
-    }
-  }
-  @media (max-width: 899px) {
-    .hero__cons { opacity: 0.4; }
-  }
+  /* La atmósfera y la estructura 3D se colocan y se apilan a sí mismas: son
+     estilos con ámbito de sus propios componentes y no de éste. Aquí sólo
+     queda garantizar que el texto va por encima de las dos. */
 
   .hero__wrap {
-    position: relative; z-index: 1;
+    position: relative; z-index: 2;
     max-width: 60rem; margin: 0 auto; padding-inline: 1.25rem;
   }
   @media (min-width: 1024px) { .hero__wrap { padding-inline: 2rem; } }
@@ -118,7 +114,16 @@ const confianza = [
     from { opacity: 0; transform: translateY(18px); }
     to   { opacity: 1; transform: none; }
   }
-  .hero__h1 > *,
+  /* El titular NO se desvanece: sólo sube. La opacidad en el elemento LCP
+     retrasa la métrica hasta que la animación termina — el navegador no
+     cuenta como "pintado" un texto que está a opacidad 0. Sube y ya. */
+  @keyframes sube {
+    from { transform: translateY(20px); }
+    to   { transform: none; }
+  }
+  .hero__h1 > * {
+    animation: sube 0.7s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  }
   .hero__sub,
   .hero__ctas,
   .hero__trust,
@@ -154,10 +159,32 @@ const confianza = [
     margin: 0 0 1.75rem;
   }
   .hero__linea { display: block; }
+
+  /* Un solo acento en el fold.
+     Antes el degradado iba de azul a violeta. Dos tintas de familias
+     distintas en la línea más grande de la página compiten entre ellas y
+     ninguna gana: el ojo lee "colorido", no "marca". Ahora es UNA tinta —
+     el azul de ZENKAI — abriéndose a blanco frío, que es lo que hace la luz
+     al incidir sobre una superficie. Y el brillo se desplaza con el puntero,
+     de modo que la fuente de luz de la frase y la cámara de la constelación
+     apuntan al mismo sitio. */
   .hero__linea--acc {
-    background: linear-gradient(100deg, #4A9EFF 0%, #7DA5FF 45%, #A78BFA 100%);
+    background: linear-gradient(
+      100deg,
+      #2E7BE8 0%,
+      #4A9EFF 28%,
+      #EAF3FF 52%,
+      #4A9EFF 76%,
+      #2E7BE8 100%
+    );
+    background-size: 260% 100%;
+    background-position: calc(50% + var(--pxq, 0) * 26%) 0;
     -webkit-background-clip: text; background-clip: text;
     -webkit-text-fill-color: transparent; color: transparent;
+    transition: background-position 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero__linea--acc { transition: none; }
   }
 
   .hero__sub {
@@ -173,6 +200,41 @@ const confianza = [
     display: flex; flex-wrap: wrap; align-items: center;
     gap: 0.875rem 1.5rem; margin-bottom: 2.5rem;
   }
+  /* ── El CTA es la fuente de luz ────────────────────────────────────────
+     No un botón con sombra: un objeto que EMITE. El halo se desplaza con el
+     puntero igual que el brillo del titular y que la cámara de la escena, y
+     al cargar da un único pulso — una sola vez, a los 620 ms, cuando el
+     resto del fold ya se ha posado. Un latido perpetuo se lee como banner
+     publicitario; uno solo se lee como algo que acaba de encenderse. */
+  .hero__ctaZona {
+    position: relative;
+    display: inline-flex;
+    isolation: isolate;
+  }
+  .hero__ctaZona::before {
+    content: '';
+    position: absolute;
+    inset: -70% -40%;
+    z-index: -1;
+    pointer-events: none;
+    background: radial-gradient(
+      50% 50% at calc(50% + var(--px, 0) * 22%) calc(50% + var(--py, 0) * 30%),
+      rgba(37, 211, 102, 0.34) 0%,
+      rgba(37, 211, 102, 0.12) 42%,
+      transparent 72%
+    );
+    opacity: 0;
+    animation: enciende 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.62s forwards;
+  }
+  @keyframes enciende {
+    0%   { opacity: 0;    transform: scale(0.82); }
+    45%  { opacity: 1;    transform: scale(1.06); }
+    100% { opacity: 0.72; transform: scale(1); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero__ctaZona::before { animation: none; opacity: 0.72; }
+  }
+
   .hero__secundario {
     display: inline-flex; align-items: center; gap: 0.5rem;
     min-height: 48px;
@@ -211,4 +273,15 @@ const confianza = [
   @media (prefers-reduced-motion: reduce) {
     .hero__scroll svg { animation: none; }
   }
+
 </style>
+
+<script>
+  import { iniciarCampo } from '../../lib/campo';
+
+  // Una sola llamada arranca el campo para las cuatro capas: shader,
+  // constelación, degradado del titular y halo del botón. Antes cada una
+  // tenía su propio listener y su propia física.
+  const hero = document.querySelector<HTMLElement>('[data-hero]');
+  if (hero) iniciarCampo(hero);
+</script>
