@@ -17,6 +17,7 @@
  * dejó de ser el objetivo.
  */
 import WhatsAppCTA from '../WhatsAppCTA.astro';
+import ShaderField from '../ShaderField.astro';
 
 const confianza = [
   'Sin tarjeta ni email para ver tu propuesta',
@@ -26,7 +27,7 @@ const confianza = [
 ];
 ---
 <section class="hero">
-  <div class="hero__bg" aria-hidden="true"></div>
+  <ShaderField class="hero__bg" />
 
   <div class="hero__wrap">
     <h1 class="hero__h1">
@@ -79,12 +80,7 @@ const confianza = [
   .hero { position: relative; padding-block: 7rem 4.5rem; overflow: hidden; }
   @media (min-width: 1024px) { .hero { padding-block: 9rem 5.5rem; } }
 
-  .hero__bg {
-    position: absolute; inset: 0; z-index: 0; pointer-events: none;
-    background:
-      radial-gradient(ellipse 70% 55% at 50% 25%, rgba(30, 111, 255, 0.13), transparent 65%),
-      radial-gradient(ellipse 45% 40% at 82% 10%, rgba(139, 92, 246, 0.07), transparent 60%);
-  }
+  .hero__bg { z-index: 0; }
 
   .hero__wrap {
     position: relative; z-index: 1;

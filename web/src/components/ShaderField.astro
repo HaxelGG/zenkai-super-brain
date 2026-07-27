@@ -1,0 +1,360 @@
+---
+/**
+ * Campo generativo en WebGL · fondo vivo del hero.
+ *
+ * ── Por qué WebGL crudo y no Three.js ──────────────────────────────────────
+ * Three pesa cientos de KB y sirve para escenas 3D con geometría, luces y
+ * cámara. Aquí no hay escena: hay UN triángulo que cubre la pantalla y un
+ * fragment shader que pinta cada píxel. Todo el aparato de Three sobraría.
+ * Esto son ~3 KB y no añade dependencia.
+ *
+ * ── Qué dibuja ────────────────────────────────────────────────────────────
+ * Ruido fractal con domain warping: el ruido se usa para deformar sus propias
+ * coordenadas, que es lo que convierte un patrón de nubes en algo que fluye
+ * como tinta. Coloreado con los acentos de marca, con un halo que sigue al
+ * puntero y una viñeta que mantiene el texto legible por encima.
+ *
+ * ── Reglas que no se rompen ───────────────────────────────────────────────
+ * · Si no hay WebGL, el canvas no se crea y queda el degradado CSS de debajo.
+ *   El hero nunca depende de esto para verse.
+ * · prefers-reduced-motion: pinta UN fotograma y para. Se ve la textura, no
+ *   se mueve nada.
+ * · El bucle se detiene cuando el hero sale de pantalla o la pestaña se
+ *   oculta. Un shader animado en una pestaña de fondo es quemar batería.
+ * · DPR limitado a 1.5: a 3x en un móvil son 9 veces más píxeles por
+ *   fotograma a cambio de una diferencia que nadie ve en un fondo difuso.
+ */
+interface Props {
+  class?: string;
+}
+const { class: className = '' } = Astro.props;
+---
+<div class:list={['field', className]} data-shader-field aria-hidden="true">
+  <div class="field__fallback"></div>
+</div>
+
+<style>
+  .field { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+
+  /* Debajo del canvas. Si WebGL falla, esto es lo que se ve — y es lo que se
+     veía antes de todo esto, así que el peor caso es el estado anterior. */
+  .field__fallback {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 70% 55% at 50% 25%, rgba(30, 111, 255, 0.13), transparent 65%),
+      radial-gradient(ellipse 45% 40% at 82% 10%, rgba(139, 92, 246, 0.07), transparent 60%);
+  }
+
+  .field :global(canvas) {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    display: block;
+    opacity: 0;
+    transition: opacity 1.1s ease;
+  }
+  /* Aparece cuando el primer fotograma ya está pintado: así no hay un
+     parpadeo de canvas negro tapando el degradado. */
+  .field :global(canvas.listo) { opacity: 1; }
+</style>
+
+<script>
+  const VERT = `
+    attribute vec2 position;
+    void main() { gl_Position = vec4(position, 0.0, 1.0); }
+  `;
+
+  const FRAG = `
+    precision mediump float;
+    uniform vec2  uRes;
+    uniform float uTime;
+    uniform vec2  uMouse;
+    uniform float uMouseAmt;
+
+    float hash(vec2 p) {
+      return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+    }
+
+    float noise(vec2 p) {
+      vec2 i = floor(p), f = fract(p);
+      vec2 u = f * f * (3.0 - 2.0 * f);
+      return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), u.x),
+                 mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), u.x), u.y);
+    }
+
+    // Tres octavas. Empecé con cinco y medí: el coste por píxel se disparaba
+    // y en un fondo difuso y desenfocado las dos últimas octavas no se ven.
+    float fbm(vec2 p) {
+      float v = 0.0, a = 0.5;
+      for (int i = 0; i < 3; i++) {
+        v += a * noise(p);
+        p *= 2.02;
+        a *= 0.5;
+      }
+      return v;
+    }
+
+    void main() {
+      vec2 uv = gl_FragCoord.xy / uRes.xy;
+      float aspect = uRes.x / uRes.y;
+      vec2 p = vec2(uv.x * aspect, uv.y) * 1.35;
+
+      float t = uTime * 0.028;
+
+      // Domain warping: el ruido desplaza sus propias coordenadas. Es lo que
+      // separa "nubes estáticas" de algo que parece fluir.
+      // Un solo nivel de deformación, no dos: el segundo costaba dos fbm más
+      // por píxel y aportaba detalle que la viñeta y el desenfoque se comen.
+      vec2 q = vec2(fbm(p + t), fbm(p + vec2(3.2, 1.7) - t * 0.8));
+      float f = fbm(p + 1.9 * q);
+
+      vec2 m = vec2(uMouse.x * aspect, uMouse.y) * 1.35;
+      float halo = smoothstep(0.85, 0.0, distance(p, m)) * uMouseAmt;
+
+      vec3 fondo  = vec3(0.031, 0.031, 0.047);
+      vec3 azul   = vec3(0.290, 0.620, 1.000);
+      vec3 violeta= vec3(0.545, 0.361, 0.965);
+
+      vec3 col = fondo;
+      col = mix(col, azul    * 0.62, smoothstep(0.32, 0.88, f) * 0.50);
+      col = mix(col, violeta * 0.55, smoothstep(0.58, 0.98, f) * 0.30);
+      col += azul * halo * 0.13;
+
+      // Viñeta: el centro se apaga para que el titular tenga contraste.
+      float vig = smoothstep(1.30, 0.20, length(uv - 0.5));
+      col *= mix(0.42, 1.0, vig);
+
+      // Grano fino · rompe el banding de los degradados en pantallas de 8 bits.
+      col += (hash(gl_FragCoord.xy + uTime) - 0.5) * 0.016;
+
+      gl_FragColor = vec4(col, 1.0);
+    }
+  `;
+
+  const compilar = (gl: WebGLRenderingContext, tipo: number, src: string) => {
+    const s = gl.createShader(tipo);
+    if (!s) return null;
+    gl.shaderSource(s, src);
+    gl.compileShader(s);
+    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
+      // Un shader que no compila no debe romper la página: se descarta y
+      // queda el degradado CSS.
+      gl.deleteShader(s);
+      return null;
+    }
+    return s;
+  };
+
+  const montar = (host: HTMLElement) => {
+    const canvas = document.createElement('canvas');
+    const gl =
+      (canvas.getContext('webgl', { antialias: false, alpha: false, powerPreference: 'low-power' }) ||
+        canvas.getContext('experimental-webgl')) as WebGLRenderingContext | null;
+    if (!gl) return;
+
+    const vs = compilar(gl, gl.VERTEX_SHADER, VERT);
+    const fs = compilar(gl, gl.FRAGMENT_SHADER, FRAG);
+    if (!vs || !fs) return;
+
+    const prog = gl.createProgram();
+    if (!prog) return;
+    gl.attachShader(prog, vs);
+    gl.attachShader(prog, fs);
+    gl.linkProgram(prog);
+    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return;
+    gl.useProgram(prog);
+
+    // Un solo triángulo sobredimensionado cubre la pantalla con 3 vértices en
+    // vez de los 6 de dos triángulos, y sin la costura de la diagonal.
+    const buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+    const loc = gl.getAttribLocation(prog, 'position');
+    gl.enableVertexAttribArray(loc);
+    gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+
+    const uRes = gl.getUniformLocation(prog, 'uRes');
+    const uTime = gl.getUniformLocation(prog, 'uTime');
+    const uMouse = gl.getUniformLocation(prog, 'uMouse');
+    const uMouseAmt = gl.getUniformLocation(prog, 'uMouseAmt');
+
+    host.appendChild(canvas);
+
+    const quieto = matchMedia('(prefers-reduced-motion: reduce)');
+    const finoYConHover = matchMedia('(hover: hover) and (pointer: fine)');
+
+    /**
+     * ¿Hay GPU de verdad detrás?
+     *
+     * WebGL existe aunque no haya aceleración: el navegador lo emula por
+     * software (SwiftShader en Chrome, llvmpipe en Linux, Basic Render en
+     * Windows sin drivers). Ahí cada fotograma se rasteriza en la CPU y
+     * bloquea el hilo principal. Preguntarlo directamente es más barato y más
+     * fiable que deducirlo cronometrando, así que se pregunta primero y se
+     * cronometra sólo como respaldo.
+     */
+    const porSoftware = (() => {
+      try {
+        const info = gl.getExtension('WEBGL_debug_renderer_info');
+        if (!info) return false;
+        const nombre = String(gl.getParameter(info.UNMASKED_RENDERER_WEBGL) || '');
+        return /swiftshader|llvmpipe|software|basic render|microsoft basic/i.test(nombre);
+      } catch {
+        return false;
+      }
+    })();
+
+    let ancho = 0;
+    let alto = 0;
+    const medir = () => {
+      // Se renderiza a MEDIA resolución y el CSS lo estira. En un campo
+      // difuso la diferencia no se ve, y son cuatro veces menos píxeles que
+      // calcular por fotograma. Es la optimización que más rinde de todas:
+      // el coste de un shader va con el número de píxeles, no con el código.
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5) * 0.5;
+      const w = Math.round(host.clientWidth * dpr);
+      const h = Math.round(host.clientHeight * dpr);
+      if (w === ancho && h === alto) return false;
+      ancho = w; alto = h;
+      canvas.width = w; canvas.height = h;
+      gl.viewport(0, 0, w, h);
+      gl.uniform2f(uRes, w, h);
+      return true;
+    };
+
+    // El halo persigue al puntero con retardo · un seguimiento 1:1 se siente
+    // mecánico, este se siente material.
+    let mx = 0.5, my = 0.55, tx = 0.5, ty = 0.55, fuerza = 0;
+    if (finoYConHover.matches) {
+      window.addEventListener('pointermove', (e) => {
+        const r = host.getBoundingClientRect();
+        tx = (e.clientX - r.left) / r.width;
+        ty = 1 - (e.clientY - r.top) / r.height;
+        fuerza = 1;
+      }, { passive: true });
+    }
+
+    let raf = 0;
+    let corriendo = false;
+    /** true = el campo se queda como imagen fija y el bucle no vuelve. */
+    let congelado = false;
+    let t0 = performance.now();
+
+    const pintar = (ahora: number) => {
+      medir();
+      mx += (tx - mx) * 0.06;
+      my += (ty - my) * 0.06;
+      gl.uniform1f(uTime, (ahora - t0) / 1000);
+      gl.uniform2f(uMouse, mx, my);
+      gl.uniform1f(uMouseAmt, fuerza);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+      canvas.classList.add('listo');
+    };
+
+    // 30 fps, no 60. El campo se mueve despacio a propósito; al doble de
+    // fotogramas se ve exactamente igual y cuesta el doble de GPU.
+    const INTERVALO = 1000 / 30;
+    let ultimo = 0;
+
+    /**
+     * Guardia de rendimiento adaptativo.
+     *
+     * No todos los dispositivos tienen GPU utilizable. Sin aceleración, este
+     * shader se rasteriza en la CPU y cada fotograma bloquea el hilo principal
+     * — medido: el tiempo de bloqueo pasaba de 0 a casi 500 ms. Ahí la
+     * animación deja de ser un detalle bonito y se convierte en una web que
+     * va a tirones.
+     *
+     * Así que se mide. Se cronometran los primeros fotogramas y, si salen
+     * caros, el bucle se detiene y se queda el último fotograma pintado: un
+     * campo estático, que sigue siendo bonito y cuesta exactamente cero.
+     *
+     * Quien tiene GPU ve el movimiento. Quien no, ve una imagen. Nadie ve
+     * una página lenta.
+     */
+    const MUESTRAS = 4;
+    const UMBRAL_MS = 7;
+    let medidos = 0;
+    let acumulado = 0;
+    
+
+    const bucle = (ahora: number) => {
+      raf = requestAnimationFrame(bucle);
+      if (ahora - ultimo < INTERVALO) return;
+      ultimo = ahora;
+
+      if (medidos < MUESTRAS) {
+        const t = performance.now();
+        pintar(ahora);
+        // finish() fuerza a esperar a que la GPU acabe · sin esto se mediría
+        // sólo el tiempo de encolar el trabajo, que siempre es cercano a cero.
+        gl.finish();
+        acumulado += performance.now() - t;
+        medidos++;
+        if (medidos === MUESTRAS && acumulado / MUESTRAS > UMBRAL_MS) {
+          congelado = true;
+          parar();
+        }
+        return;
+      }
+      pintar(ahora);
+    };
+    const arrancar = () => {
+      if (corriendo || congelado || quieto.matches) return;
+      corriendo = true;
+      raf = requestAnimationFrame(bucle);
+    };
+    const parar = () => {
+      corriendo = false;
+      cancelAnimationFrame(raf);
+    };
+
+    // Sin GPU real ni siquiera se pinta el primer fotograma: compilar el
+    // shader y rasterizar una pantalla completa en CPU cuesta unos 200 ms de
+    // hilo bloqueado, y justo en los equipos donde 200 ms se notan. Se retira
+    // el canvas y queda el degradado CSS, que no es peor: es lo que había.
+    if (porSoftware) {
+      canvas.remove();
+      return;
+    }
+
+    medir();
+    if (quieto.matches) {
+      // Un fotograma y ya: se ve la textura, no se mueve nada.
+      pintar(performance.now());
+      congelado = true;
+    } else {
+      arrancar();
+    }
+
+    window.addEventListener('resize', () => { if (!corriendo) pintar(performance.now()); }, { passive: true });
+    document.addEventListener('visibilitychange', () => (document.hidden ? parar() : arrancar()));
+
+    // Fuera de pantalla no se pinta. Si el observer no existe, se sigue
+    // pintando: el coste de un shader visible es menor que el de un fondo
+    // congelado a media página.
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(
+        ([e]) => (e.isIntersecting ? arrancar() : parar()),
+        { threshold: 0 },
+      ).observe(host);
+    }
+  };
+
+  /**
+   * Se monta cuando el hilo principal está libre, no durante la carga.
+   *
+   * Compilar el shader y hacer el primer dibujado bloquea el hilo unos cuantos
+   * milisegundos. Hacerlo mientras el navegador aún está pintando el texto
+   * empeora las métricas de carga a cambio de un fondo que nadie está mirando
+   * todavía. Con requestIdleCallback entra después, y hasta entonces se ve el
+   * degradado CSS — que es exactamente lo que había antes.
+   */
+  const montarTodos = () =>
+    document.querySelectorAll<HTMLElement>('[data-shader-field]').forEach(montar);
+
+  if ('requestIdleCallback' in window) {
+    (window as Window & typeof globalThis).requestIdleCallback(montarTodos, { timeout: 2500 });
+  } else {
+    setTimeout(montarTodos, 900);
+  }
+</script>
