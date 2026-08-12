@@ -1,0 +1,111 @@
+---
+/**
+ * WorkflowViz — AI workflow visualizations.
+ * Muestra pipelines de automatizacion como flujos visuales.
+ */
+
+const workflows = [
+  {
+    title: 'From lead to sale',
+    steps: ['Lead captured', 'AI Agent qualifies', 'CRM updated', 'Follow-up sent', 'Appointment booked', 'Sale closed'],
+  },
+  {
+    title: 'From inquiry to resolution',
+    steps: ['Customer message', 'AI understands intent', 'Knowledge retrieval', 'AI responds', 'CRM updated', 'Human escalation if needed'],
+  },
+];
+---
+
+<section class="band" aria-labelledby="wf-titulo">
+  <div class="wrap">
+    <div class="reveal">
+      <p class="eyebrow">Workflows</p>
+      <h2 id="wf-titulo" class="h2">
+        See how<br />
+        <span class="text-gradient">AI agents work.</span>
+      </h2>
+      <p class="lede">
+        Every step is automated. From the moment a lead enters your system
+        to the moment a sale closes. No human intervention required.
+      </p>
+    </div>
+
+    <div class="wf-grid reveal-stagger">
+      {workflows.map((wf) => (
+        <div class="wf-card">
+          <h3 class="wf-title">{wf.title}</h3>
+          <div class="wf-flow">
+            {wf.steps.map((s, i) => (
+              <>
+                <div class="wf-step">
+                  <div class="wf-step__dot">{i + 1}</div>
+                  <span>{s}</span>
+                </div>
+                {i < wf.steps.length - 1 && (
+                  <div class="wf-arrow">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(99,138,255,0.3)" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+                  </div>
+                )}
+              </>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .band { padding-block: 6rem; border-top: 1px solid rgba(255,255,255,0.05); }
+  .wrap { max-width: 48rem; margin-inline: auto; padding-inline: 1.5rem; }
+  .eyebrow {
+    font-family: var(--font-mono); font-size: 0.6875rem; font-weight: 500;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: rgba(99, 138, 255, 0.7); margin-bottom: 0.75rem; text-align: center;
+  }
+  .h2 {
+    font-family: var(--font-display); font-size: clamp(1.5rem, 4vw, 2.25rem);
+    font-weight: 700; letter-spacing: -0.02em; line-height: 1.15;
+    color: var(--zk-heading, #f5f5fa); text-align: center; margin-bottom: 1rem;
+  }
+  .text-gradient {
+    background: linear-gradient(135deg, #638AFF 0%, #8B5CF6 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .lede {
+    font-size: 1rem; line-height: 1.6; color: var(--zk-text2, #a1a1aa);
+    text-align: center; max-width: 30rem; margin-inline: auto; margin-bottom: 2.5rem;
+  }
+
+  .wf-grid { display: grid; gap: 2rem; }
+  .wf-card {
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 0.875rem;
+    background: rgba(255,255,255,0.012);
+    padding: 1.75rem;
+  }
+  .wf-title {
+    font-family: var(--font-display); font-size: 1.0625rem; font-weight: 600;
+    color: var(--zk-heading, #f5f5fa); margin-bottom: 1.25rem; text-align: center;
+  }
+  .wf-flow {
+    display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+  }
+  .wf-step {
+    display: flex; align-items: center; gap: 0.75rem;
+    padding: 0.65rem 1rem; border-radius: 0.5rem;
+    border: 1px solid rgba(255,255,255,0.04);
+    background: rgba(255,255,255,0.01); width: 100%; max-width: 22rem;
+    font-size: 0.875rem; color: var(--zk-text2, #a1a1aa);
+    transition: border-color 0.3s;
+  }
+  .wf-step:hover { border-color: rgba(99,138,255,0.15); }
+  .wf-step__dot {
+    width: 1.5rem; height: 1.5rem; border-radius: 50%;
+    background: rgba(99,138,255,0.1); color: #638AFF;
+    font-family: var(--font-mono); font-size: 0.6875rem; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .wf-arrow { padding: 0.15rem 0; }
+</style>

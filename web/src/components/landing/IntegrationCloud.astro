@@ -1,0 +1,103 @@
+---
+/**
+ * IntegrationCloud — Visual ecosystem of connected tools.
+ * All tools orbiting ZENKAI CORE with subtle hover animation.
+ */
+
+const tools = [
+  'WhatsApp', 'Shopify', 'HubSpot', 'Salesforce', 'Google Workspace',
+  'Microsoft 365', 'Slack', 'Instagram', 'Facebook', 'Telegram',
+  'Email', 'CRM', 'ERP', 'API', 'Calendar', 'Stripe',
+];
+---
+
+<section class="band" aria-labelledby="int-titulo">
+  <div class="wrap">
+    <div class="reveal">
+      <p class="eyebrow">Integrations</p>
+      <h2 id="int-titulo" class="h2">
+        Works with<br />
+        <span class="text-gradient">your business.</span>
+      </h2>
+      <p class="lede">
+        ZENKAI connects to the tools you already use. No rip and replace.
+        One intelligent layer across your entire stack.
+      </p>
+    </div>
+
+    <div class="int-cloud reveal">
+      <div class="int-core">ZENKAI CORE</div>
+      <div class="int-tools">
+        {tools.map((t) => (
+          <span class="int-tool">{t}</span>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .band { padding-block: 6rem; border-top: 1px solid rgba(255,255,255,0.05); }
+  .wrap { max-width: 48rem; margin-inline: auto; padding-inline: 1.5rem; }
+  .eyebrow {
+    font-family: var(--font-mono); font-size: 0.6875rem; font-weight: 500;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: rgba(99, 138, 255, 0.7); margin-bottom: 0.75rem; text-align: center;
+  }
+  .h2 {
+    font-family: var(--font-display); font-size: clamp(1.5rem, 4vw, 2.25rem);
+    font-weight: 700; letter-spacing: -0.02em; line-height: 1.15;
+    color: var(--zk-heading, #f5f5fa); text-align: center; margin-bottom: 1rem;
+  }
+  .text-gradient {
+    background: linear-gradient(135deg, #638AFF 0%, #8B5CF6 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .lede {
+    font-size: 1rem; line-height: 1.6; color: var(--zk-text2, #a1a1aa);
+    text-align: center; max-width: 30rem; margin-inline: auto; margin-bottom: 2.5rem;
+  }
+
+  .int-cloud {
+    text-align: center;
+    padding: 2.5rem 1.5rem;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 1rem;
+    background: rgba(255,255,255,0.01);
+    position: relative;
+  }
+  .int-core {
+    display: inline-block;
+    font-family: var(--font-display); font-size: 0.9375rem; font-weight: 700;
+    color: var(--zk-heading, #f5f5fa); letter-spacing: 0.1em;
+    padding: 0.65rem 1.5rem;
+    border: 1px solid rgba(99,138,255,0.2);
+    border-radius: 0.5rem;
+    background: rgba(99,138,255,0.06);
+    margin-bottom: 1.75rem;
+    position: relative;
+  }
+  .int-core::after {
+    content: ''; position: absolute; bottom: -12px; left: 50%; transform: translateX(-50%);
+    width: 2px; height: 12px; background: rgba(99,138,255,0.2);
+  }
+  .int-tools {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem;
+    max-width: 36rem; margin-inline: auto;
+  }
+  .int-tool {
+    font-family: var(--font-mono); font-size: 0.6875rem;
+    padding: 0.35rem 0.75rem;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 0.35rem;
+    color: var(--zk-text2, #a1a1aa);
+    background: rgba(255,255,255,0.015);
+    transition: border-color 0.3s, color 0.3s, transform 0.2s;
+    cursor: default;
+  }
+  .int-tool:hover {
+    border-color: rgba(99,138,255,0.25);
+    color: var(--zk-heading, #f5f5fa);
+    transform: translateY(-1px);
+  }
+</style>

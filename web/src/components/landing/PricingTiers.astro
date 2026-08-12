@@ -1,0 +1,190 @@
+---
+/**
+ * PricingTiers — Enterprise pricing architecture.
+ * Starter → Growth → Scale → Enterprise
+ * Visual progression that communicates "more capability, more automation, more intelligence"
+ */
+import WhatsAppCTA from '../WhatsAppCTA.astro';
+
+const tiers = [
+  {
+    name: 'Starter', price: '95', period: '/month', setup: '500',
+    desc: 'For small businesses ready to automate.',
+    features: ['Web or online store', 'CRM', '1 AI Agent (Sales or Support)', 'Basic automation', 'Email support'],
+    cta: 'Get started', highlight: false,
+  },
+  {
+    name: 'Growth', price: '195', period: '/month', setup: '500',
+    desc: 'For growing businesses that need full coverage.',
+    features: ['Everything in Starter', '2 AI Agents', 'WhatsApp & social integration', 'Workflow automation', 'Priority support', 'Monthly optimization'],
+    cta: 'Get started', highlight: true,
+  },
+  {
+    name: 'Scale', price: '395', period: '/month', setup: '1,000',
+    desc: 'For operations that require serious AI infrastructure.',
+    features: ['Everything in Growth', '4 AI Agents', 'Custom integrations', 'Advanced analytics', 'Dedicated account manager', 'SLA guarantee', 'White-label option'],
+    cta: 'Get started', highlight: false,
+  },
+  {
+    name: 'Enterprise', price: 'Custom', period: '', setup: '',
+    desc: 'For large-scale deployments with dedicated infrastructure.',
+    features: ['Everything in Scale', 'Unlimited AI Agents', 'Dedicated infrastructure', 'Custom AI models', 'On-premise deployment', 'Advanced security & compliance', 'Custom SLAs'],
+    cta: 'Contact us', highlight: false,
+  },
+];
+---
+
+<section class="band" id="pricing" aria-labelledby="pricing-titulo">
+  <div class="wrap">
+    <div class="reveal">
+      <p class="eyebrow">Pricing</p>
+      <h2 id="pricing-titulo" class="h2">
+        Plans that scale<br />
+        <span class="text-gradient">with your business.</span>
+      </h2>
+      <p class="lede">
+        From solo operations to enterprise infrastructure. One platform.
+        Pay for the capacity you need. Upgrade anytime.
+      </p>
+    </div>
+
+    <div class="pricing-grid reveal-stagger">
+      {tiers.map((t) => (
+        <div class:list={['pricing-card', t.highlight && 'pricing-card--featured']}>
+          {t.highlight && <div class="pricing-badge">Most popular</div>}
+          <div class="pricing-card__header">
+            <h3 class="pricing-card__name">{t.name}</h3>
+            <p class="pricing-card__desc">{t.desc}</p>
+          </div>
+          <div class="pricing-card__price">
+            <span class="pricing-card__amount">€{t.price}</span>
+            <span class="pricing-card__period">{t.period}</span>
+          </div>
+          {t.setup && <p class="pricing-card__setup">€{t.setup} one-time implementation</p>}
+          <ul class="pricing-card__features">
+            {t.features.map((f) => (
+              <li>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+                <span>{f}</span>
+              </li>
+            ))}
+          </ul>
+          <div class="pricing-card__cta">
+            {t.name === 'Enterprise' ? (
+              <WhatsAppCTA location={`pricing-${t.name.toLowerCase()}`} message="Hola ZENKAI. Quiero informacion sobre el plan Enterprise." label={t.cta} variant="block" />
+            ) : (
+              <a href={`#plan-${t.name.toLowerCase()}`} class="pricing-btn">{t.cta}</a>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <p class="pricing-note reveal">All plans include 14-day money-back guarantee. No hidden fees. Cancel anytime.</p>
+  </div>
+</section>
+
+<style>
+  .band { padding-block: 6rem; border-top: 1px solid rgba(255,255,255,0.05); }
+  .wrap { max-width: 64rem; margin-inline: auto; padding-inline: 1.5rem; }
+  .eyebrow {
+    font-family: var(--font-mono); font-size: 0.6875rem; font-weight: 500;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: rgba(99, 138, 255, 0.7); margin-bottom: 0.75rem; text-align: center;
+  }
+  .h2 {
+    font-family: var(--font-display); font-size: clamp(1.5rem, 4vw, 2.25rem);
+    font-weight: 700; letter-spacing: -0.02em; line-height: 1.15;
+    color: var(--zk-heading, #f5f5fa); text-align: center; margin-bottom: 1rem;
+  }
+  .text-gradient {
+    background: linear-gradient(135deg, #638AFF 0%, #8B5CF6 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .lede {
+    font-size: 1rem; line-height: 1.6; color: var(--zk-text2, #a1a1aa);
+    text-align: center; max-width: 30rem; margin-inline: auto; margin-bottom: 2.5rem;
+  }
+
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .pricing-card {
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 0.875rem;
+    background: rgba(255,255,255,0.015);
+    padding: 1.75rem;
+    display: flex; flex-direction: column;
+    position: relative;
+    transition: border-color 0.3s, transform 0.3s;
+  }
+  .pricing-card:hover { border-color: rgba(99,138,255,0.2); transform: translateY(-2px); }
+  .pricing-card--featured {
+    border-color: rgba(99,138,255,0.25);
+    background: linear-gradient(135deg, rgba(99,138,255,0.04), rgba(139,92,246,0.02));
+  }
+  .pricing-badge {
+    position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
+    font-size: 0.6875rem; font-weight: 600; color: #fff;
+    background: linear-gradient(135deg, #638AFF, #4A6FEF);
+    padding: 0.25rem 0.9rem; border-radius: 1rem;
+    white-space: nowrap;
+  }
+
+  .pricing-card__header { margin-bottom: 1.25rem; }
+  .pricing-card__name {
+    font-family: var(--font-display); font-size: 1.125rem;
+    font-weight: 700; color: var(--zk-heading, #f5f5fa); margin-bottom: 0.25rem;
+  }
+  .pricing-card__desc {
+    font-size: 0.8125rem; color: var(--zk-text2, #a1a1aa); margin: 0; line-height: 1.45;
+  }
+  .pricing-card__price {
+    display: flex; align-items: baseline; gap: 0.15rem; margin-bottom: 0.5rem;
+  }
+  .pricing-card__amount {
+    font-family: var(--font-display); font-size: 2rem; font-weight: 700; color: var(--zk-heading, #f5f5fa);
+  }
+  .pricing-card__period {
+    font-size: 0.875rem; color: var(--zk-text2, #a1a1aa);
+  }
+  .pricing-card__setup {
+    font-size: 0.75rem; color: var(--zk-muted, #71717a); margin: 0 0 1.25rem;
+  }
+  .pricing-card__features {
+    list-style: none; padding: 0; margin: 0 0 1.5rem;
+    display: flex; flex-direction: column; gap: 0.6rem;
+    flex: 1;
+  }
+  .pricing-card__features li {
+    display: flex; align-items: flex-start; gap: 0.5rem;
+    font-size: 0.8125rem; color: var(--zk-text2, #a1a1aa); line-height: 1.4;
+  }
+  .pricing-card__features svg { flex-shrink: 0; margin-top: 1px; }
+
+  .pricing-btn {
+    display: block; text-align: center; padding: 0.65rem 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--zk-heading, #f5f5fa); font-size: 0.875rem; font-weight: 600;
+    text-decoration: none; transition: all 0.2s;
+    background: rgba(255,255,255,0.03);
+  }
+  .pricing-btn:hover { background: rgba(99,138,255,0.1); border-color: rgba(99,138,255,0.3); }
+  .pricing-card--featured .pricing-btn {
+    background: linear-gradient(135deg, #638AFF, #4A6FEF);
+    border-color: transparent; color: #fff;
+  }
+  .pricing-card--featured .pricing-btn:hover { box-shadow: 0 4px 16px rgba(99,138,255,0.3); }
+
+  .pricing-note {
+    text-align: center; font-size: 0.8125rem; color: var(--zk-muted, #52525b);
+  }
+  @media (max-width: 768px) {
+    .pricing-grid { grid-template-columns: 1fr; }
+  }
+</style>

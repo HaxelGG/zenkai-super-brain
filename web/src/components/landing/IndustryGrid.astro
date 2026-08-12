@@ -1,0 +1,86 @@
+---
+/**
+ * IndustryGrid — Sector-specific solutions.
+ * Healthcare, Hospitality, Ecommerce, Real Estate, Professional Services, Restaurants
+ */
+---
+
+<section class="band" aria-labelledby="ind-titulo">
+  <div class="wrap">
+    <div class="reveal">
+      <p class="eyebrow">Industries</p>
+      <h2 id="ind-titulo" class="h2">
+        Built for<br />
+        <span class="text-gradient">modern businesses.</span>
+      </h2>
+    </div>
+
+    <div class="ind-grid reveal-stagger">
+      {[
+        { sector: 'Healthcare', icon: 'M22 12h-4l-3 9L9 3l-3 9H2', mods: 'Customer AI, Operations AI, Intelligence AI', pain: 'Manual patient inquiries, missed appointments, slow billing' },
+        { sector: 'Hospitality', icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0h4', mods: 'Customer AI, Commerce AI, Marketing AI', pain: 'Reservation management, 24/7 guest communication' },
+        { sector: 'Ecommerce', icon: 'M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z', mods: 'Sales AI, Commerce AI, Marketing AI', pain: 'Cart abandonment, customer inquiries, inventory sync' },
+        { sector: 'Real Estate', icon: 'M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z', mods: 'Sales AI, Customer AI, Intelligence AI', pain: 'Lead qualification, property matching, follow-ups' },
+        { sector: 'Professional Services', icon: 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z', mods: 'Operations AI, Finance AI, Knowledge AI', pain: 'Project tracking, invoicing, client communication' },
+        { sector: 'Restaurants', icon: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253', mods: 'Customer AI, Commerce AI, Operations AI', pain: 'Reservation management, order automation, reviews' },
+      ].map((ind) => (
+        <div class="ind-card card-3d">
+          <div class="ind-card__icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d={ind.icon}/></svg>
+          </div>
+          <h3 class="ind-card__name">{ind.sector}</h3>
+          <p class="ind-card__pain">{ind.pain}</p>
+          <div class="ind-card__mods">{ind.mods}</div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .band { padding-block: 6rem; border-top: 1px solid rgba(255,255,255,0.05); }
+  .wrap { max-width: 48rem; margin-inline: auto; padding-inline: 1.5rem; }
+  .eyebrow {
+    font-family: var(--font-mono); font-size: 0.6875rem; font-weight: 500;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: rgba(99, 138, 255, 0.7); margin-bottom: 0.75rem; text-align: center;
+  }
+  .h2 {
+    font-family: var(--font-display); font-size: clamp(1.5rem, 4vw, 2.25rem);
+    font-weight: 700; letter-spacing: -0.02em; line-height: 1.15;
+    color: var(--zk-heading, #f5f5fa); text-align: center; margin-bottom: 2.5rem;
+  }
+  .text-gradient {
+    background: linear-gradient(135deg, #638AFF 0%, #8B5CF6 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .ind-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+    gap: 1rem;
+  }
+  .ind-card {
+    padding: 1.5rem; border-radius: 0.75rem;
+    border: 1px solid rgba(255,255,255,0.06);
+    background: rgba(255,255,255,0.012);
+    transition: border-color 0.3s, transform 0.3s;
+  }
+  .ind-card:hover { border-color: rgba(99,138,255,0.2); }
+  .ind-card__icon {
+    width: 2.25rem; height: 2.25rem; border-radius: 0.5rem;
+    background: rgba(99,138,255,0.08); color: #638AFF;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 0.85rem;
+  }
+  .ind-card__name {
+    font-family: var(--font-display); font-size: 1rem; font-weight: 600;
+    color: var(--zk-heading, #f5f5fa); margin-bottom: 0.5rem;
+  }
+  .ind-card__pain {
+    font-size: 0.8125rem; line-height: 1.5; color: var(--zk-text2, #a1a1aa);
+    margin-bottom: 0.75rem;
+  }
+  .ind-card__mods {
+    font-family: var(--font-mono); font-size: 0.6875rem; color: rgba(99,138,255,0.6);
+  }
+</style>
