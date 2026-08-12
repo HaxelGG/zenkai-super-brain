@@ -8,20 +8,25 @@ import ComoFunciona from '../components/landing/ComoFunciona.astro';
 import PlanZenkai from '../components/landing/PlanZenkai.astro';
 import Ecosistema from '../components/landing/Ecosistema.astro';
 import FAQ from '../components/landing/FAQ.astro';
+import SalesSimulator from '../components/landing/SalesSimulator.astro';
 import CTAFinal from '../components/landing/CTAFinal.astro';
 import StickyBar from '../components/landing/StickyBar.astro';
+import ChatWidget from '../components/landing/ChatWidget.astro';
 
 /**
  * Estructura optimizada para conversion.
  *
- *  1 Hero         → Propuesta de valor + precio + urgencia en 5s
+ *  1 Hero          → Propuesta de valor + precio + urgencia en 5s
  *  2 Antes/Después → Dolor vs solucion visual
- *  3 Confianza     → Testimonios reales + garantia + sectores
- *  4 Como funciona → 3 pasos, elimina friccion
- *  5 Plan Zenkai   → Precio detallado + devolucion 14 dias
- *  6 Ecosistema    → Prueba de que no es humo
- *  7 FAQ           → Ultimas objeciones
- *  8 Cierre        → WhatsApp + email
+ *  3 Confianza      → Testimonios reales + garantia + sectores
+ *  4 Como funciona  → 3 pasos, elimina friccion
+ *  5 Plan Zenkai    → Precio detallado + devolucion 14 dias
+ *  6 Demo Ventas    → Simulador interactivo del agente de ventas
+ *  7 Ecosistema     → Prueba de que no es humo
+ *  8 FAQ            → Ultimas objeciones
+ *  9 Cierre         → WhatsApp + email
+ *
+ *  Flotante: ChatWidget (asistente IA siempre disponible)
  */
 ---
 
@@ -34,8 +39,10 @@ import StickyBar from '../components/landing/StickyBar.astro';
   <Confianza />
   <ComoFunciona />
   <PlanZenkai />
+  <SalesSimulator />
   <Ecosistema />
   <FAQ />
   <CTAFinal />
   <StickyBar />
+  <ChatWidget />
 </WebLayout>

@@ -1,0 +1,235 @@
+---
+/**
+ * ChatWidget — asistente IA flotante.
+ *
+ * Botón circular abajo-derecha. Al abrirse muestra un chat completo con
+ * historial, input y typing indicator. Usa /api/chat como backend.
+ */
+---
+
+<button id="cw-trigger" class="cw-trigger" aria-label="Abrir chat de ayuda" title="¿Necesitas ayuda?">
+  <svg class="cw-trigger__open" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+  <svg class="cw-trigger__close" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+</button>
+
+<div id="cw-panel" class="cw-panel" aria-hidden="true" role="dialog" aria-label="Chat de ayuda Zenkai">
+  <div class="cw-header">
+    <div class="cw-header__avatar">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5a3 3 0 1 0-5.997.125A4 4 0 0 0 3.477 10.896 4 4 0 0 0 4.033 17.484A3 3 0 1 0 12 18Z M12 5a3 3 0 1 1 5.997.125A4 4 0 0 1 20.523 10.896a4 4 0 0 1-.556 6.588A3 3 0 1 1 12 18Z M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4"/></svg>
+    </div>
+    <div>
+      <div class="cw-header__title">Asistente Zenkai</div>
+      <div class="cw-header__sub">Respuesta inmediata · IA</div>
+    </div>
+  </div>
+  <div id="cw-messages" class="cw-messages"></div>
+  <div class="cw-input-area">
+    <input id="cw-input" type="text" class="cw-input" placeholder="Escribe tu pregunta..." maxlength="500" autocomplete="off" />
+    <button id="cw-send" class="cw-send" aria-label="Enviar">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21 23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+    </button>
+  </div>
+</div>
+
+<script>
+  const trigger = document.getElementById('cw-trigger')!;
+  const panel = document.getElementById('cw-panel')!;
+  const messagesEl = document.getElementById('cw-messages')!;
+  const input = document.getElementById('cw-input') as HTMLInputElement;
+  const sendBtn = document.getElementById('cw-send')!;
+
+  let open = false;
+  let loading = false;
+  const history: { role: 'user' | 'assistant'; content: string }[] = [];
+
+  const WELCOME = '¡Hola! Soy el asistente de Zenkai. Pregúntame lo que quieras sobre nuestros servicios, precios o cómo funciona todo.';
+
+  function addMessage(role: 'user' | 'assistant', text: string) {
+    const div = document.createElement('div');
+    div.className = `cw-msg cw-msg--${role}`;
+    div.textContent = text;
+    messagesEl.appendChild(div);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  function addTyping() {
+    const div = document.createElement('div');
+    div.className = 'cw-msg cw-msg--assistant cw-typing';
+    div.innerHTML = '<span></span><span></span><span></span>';
+    div.id = 'cw-typing';
+    messagesEl.appendChild(div);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  function removeTyping() {
+    document.getElementById('cw-typing')?.remove();
+  }
+
+  async function send() {
+    const text = input.value.trim();
+    if (!text || loading) return;
+    input.value = '';
+    loading = true;
+    sendBtn.setAttribute('disabled', '');
+    addMessage('user', text);
+    history.push({ role: 'user', content: text });
+    addTyping();
+
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: history }),
+      });
+      const data = await res.json();
+      removeTyping();
+      const reply = data.reply || 'Lo siento, ha ocurrido un error. ¿Puedes intentarlo de nuevo?';
+      addMessage('assistant', reply);
+      history.push({ role: 'assistant', content: reply });
+    } catch {
+      removeTyping();
+      addMessage('assistant', 'Parece que hay un problema de conexión. Puedes escribirnos directamente por WhatsApp al +34 622 874 482.');
+    }
+    loading = false;
+    sendBtn.removeAttribute('disabled');
+  }
+
+  trigger.addEventListener('click', () => {
+    open = !open;
+    panel.setAttribute('aria-hidden', String(!open));
+    trigger.classList.toggle('cw-trigger--open', open);
+    if (open && history.length === 0) {
+      addMessage('assistant', WELCOME);
+      history.push({ role: 'assistant', content: WELCOME });
+    }
+    if (open) input.focus();
+  });
+
+  sendBtn.addEventListener('click', send);
+  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') send(); });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && open) { trigger.click(); }
+  });
+</script>
+
+<style>
+  .cw-trigger {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    z-index: 100;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: 1px solid rgba(99,102,241,0.4);
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 32px rgba(99,102,241,0.35);
+    transition: transform 0.3s cubic-bezier(0.16,1,0.3,1), box-shadow 0.3s;
+    padding: 0;
+  }
+  .cw-trigger:hover {
+    transform: scale(1.08);
+    box-shadow: 0 12px 40px rgba(99,102,241,0.5);
+  }
+  .cw-trigger__close { display: none; }
+  .cw-trigger--open .cw-trigger__open { display: none; }
+  .cw-trigger--open .cw-trigger__close { display: block; }
+
+  .cw-panel {
+    position: fixed;
+    bottom: 5.5rem;
+    right: 1.5rem;
+    z-index: 99;
+    width: min(380px, calc(100vw - 2rem));
+    height: 520px;
+    max-height: calc(100vh - 8rem);
+    border-radius: 1rem;
+    border: 1px solid var(--zk-border, #1f1f2c);
+    background: var(--zk-card, #0d0d1a);
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+  }
+  .cw-panel[aria-hidden="false"] { display: flex; }
+
+  .cw-header {
+    display: flex; align-items: center; gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--zk-border, #1f1f2c);
+    background: rgba(99,102,241,0.06);
+  }
+  .cw-header__avatar {
+    width: 36px; height: 36px; border-radius: 0.5rem;
+    background: rgba(99,102,241,0.15); color: var(--zk-accent, #6366f1);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .cw-header__title { font-size: 0.9375rem; font-weight: 600; color: var(--zk-heading, #f5f5fa); }
+  .cw-header__sub { font-size: 0.75rem; color: var(--zk-muted, #71717a); }
+
+  .cw-messages {
+    flex: 1; overflow-y: auto; padding: 1rem;
+    display: flex; flex-direction: column; gap: 0.75rem;
+  }
+  .cw-msg {
+    max-width: 85%; padding: 0.65rem 0.9rem; border-radius: 0.75rem;
+    font-size: 0.875rem; line-height: 1.5; animation: cwFadeIn 0.3s ease;
+  }
+  @keyframes cwFadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  .cw-msg--assistant {
+    align-self: flex-start;
+    background: rgba(99,102,241,0.08);
+    color: var(--zk-text, #e4e4e7);
+    border-bottom-left-radius: 0.25rem;
+  }
+  .cw-msg--user {
+    align-self: flex-end;
+    background: rgba(99,102,241,0.2);
+    color: #fff;
+    border-bottom-right-radius: 0.25rem;
+  }
+  .cw-typing { display: flex; gap: 4px; padding: 0.75rem 1rem; }
+  .cw-typing span {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--zk-muted, #71717a);
+    animation: cwBounce 1.2s infinite;
+  }
+  .cw-typing span:nth-child(2) { animation-delay: 0.2s; }
+  .cw-typing span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes cwBounce { 0%,60%,100% { transform: translateY(0); } 30% { transform: translateY(-6px); } }
+
+  .cw-input-area {
+    display: flex; align-items: center; gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border-top: 1px solid var(--zk-border, #1f1f2c);
+  }
+  .cw-input {
+    flex: 1; padding: 0.6rem 0.9rem;
+    border-radius: 0.5rem; border: 1px solid var(--zk-border, #1f1f2c);
+    background: rgba(255,255,255,0.03); color: var(--zk-text, #e4e4e7);
+    font-size: 0.875rem; outline: none;
+    transition: border-color 0.2s;
+  }
+  .cw-input:focus { border-color: var(--zk-accent, #6366f1); }
+  .cw-input::placeholder { color: var(--zk-muted, #52525b); }
+  .cw-send {
+    width: 38px; height: 38px; border-radius: 0.5rem;
+    border: none; background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: white; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: opacity 0.2s; flex-shrink: 0;
+  }
+  .cw-send:hover { opacity: 0.9; }
+  .cw-send[disabled] { opacity: 0.4; cursor: not-allowed; }
+
+  @media (max-width: 480px) {
+    .cw-trigger { bottom: 5rem; }
+    .cw-panel { bottom: 9rem; right: 0.5rem; height: 440px; }
+  }
+</style>

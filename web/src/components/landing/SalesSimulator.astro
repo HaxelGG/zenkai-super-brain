@@ -1,0 +1,235 @@
+---
+/**
+ * SalesSimulator — demo interactiva del agente de ventas IA.
+ *
+ * Un chat simulado que muestra cómo el agente de ventas de Zenkai
+ * conversa con un cliente potencial. El visitante escribe como si
+ * fuera un cliente interesado y el agente responde en tiempo real.
+ */
+---
+
+<section class="band" id="demo-ventas" aria-labelledby="sim-titulo">
+  <div class="wrap">
+    <div class="reveal">
+      <p class="eyebrow">Pruébalo tú mismo</p>
+      <h2 id="sim-titulo" class="h2">
+        Así es como tu agente de ventas<br />
+        <span class="text-gradient">conversa con tus clientes.</span>
+      </h2>
+      <p class="lede">
+        Escribe como si fueras un cliente interesado en tu negocio. El agente IA te responde al instante.
+        Esto es lo que tus clientes experimentarían 24/7.
+      </p>
+    </div>
+
+    <div class="sim-phone reveal">
+      <div class="sim-header">
+        <div class="sim-header__avatar">ZK</div>
+        <div>
+          <div class="sim-header__name">Agente de Ventas Zenkai</div>
+          <div class="sim-header__status">En línea · Responde al instante</div>
+        </div>
+      </div>
+      <div id="sim-messages" class="sim-messages">
+        <div class="sim-msg sim-msg--agent">
+          ¡Hola! Soy el agente virtual de <strong>Zenkai</strong>. Estoy aquí para resolver tus dudas sobre cómo la IA puede ayudarte a vender más. ¿Qué tipo de negocio tienes y qué te gustaría automatizar?
+        </div>
+      </div>
+      <div class="sim-bottom">
+        <div class="sim-sugerencias" id="sim-sugerencias">
+          <button class="sim-sug" data-msg="Tengo una clínica dental y quiero automatizar las citas y la atención al cliente">Clínica dental</button>
+          <button class="sim-sug" data-msg="Tengo un restaurante y quiero que la IA responda los WhatsApp y reserve mesas">Restaurante</button>
+          <button class="sim-sug" data-msg="Vendo online y quiero que la IA me ayude a vender más y atender preguntas">Ecommerce</button>
+        </div>
+        <div class="sim-input-area">
+          <input id="sim-input" type="text" class="sim-input" placeholder="Escribe como si fueras un cliente..." maxlength="300" autocomplete="off" />
+          <button id="sim-send" class="sim-send" aria-label="Enviar">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21 23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  const messagesEl = document.getElementById('sim-messages')!;
+  const input = document.getElementById('sim-input') as HTMLInputElement;
+  const sendBtn = document.getElementById('sim-send')!;
+  const sugerencias = document.getElementById('sim-sugerencias')!;
+
+  let loading = false;
+  const history: { role: string; content: string }[] = [];
+
+  function addMsg(role: 'user' | 'agent', text: string, html = false) {
+    const div = document.createElement('div');
+    div.className = `sim-msg sim-msg--${role}`;
+    if (html) div.innerHTML = text;
+    else div.textContent = text;
+    messagesEl.appendChild(div);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  function addTypingSim() {
+    const div = document.createElement('div');
+    div.className = 'sim-msg sim-msg--agent sim-typing';
+    div.innerHTML = '<span></span><span></span><span></span>';
+    div.id = 'sim-typing';
+    messagesEl.appendChild(div);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  function removeTypingSim() { document.getElementById('sim-typing')?.remove(); }
+
+  async function sendMsg(text: string) {
+    if (loading) return;
+    input.value = '';
+    loading = true;
+    sendBtn.setAttribute('disabled', '');
+    sugerencias.style.display = 'none';
+
+    addMsg('user', text);
+    history.push({ role: 'user', content: text });
+    addTypingSim();
+
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [
+            { role: 'system', content: 'Eres un agente de ventas de ZENKAI haciendo una demo en vivo en la web. El visitante está probando cómo funciona el agente de ventas IA. Responde como si estuvieras atendiendo a un cliente real interesado en los servicios de Zenkai (500€ + 95€/mes, incluye web, CRM, agente de ventas, atención al cliente, facturación, agenda, diagnóstico). Sé persuasivo pero natural. Si el lead está cualificado, invítalo a hablar por WhatsApp. Máximo 4 frases. Sin markdown.' },
+            ...history.slice(-8),
+          ],
+        }),
+      });
+      const data = await res.json();
+      removeTypingSim();
+      const reply = data.reply || '¡Perfecto! Cuéntame más sobre tu negocio y te digo exactamente cómo podemos ayudarte.';
+      addMsg('agent', reply);
+      history.push({ role: 'assistant', content: reply });
+    } catch {
+      removeTypingSim();
+      addMsg('agent', 'Estoy teniendo un problema técnico. ¿Puedes intentarlo de nuevo en un momento?');
+    }
+    loading = false;
+    sendBtn.removeAttribute('disabled');
+  }
+
+  sendBtn.addEventListener('click', () => { const t = input.value.trim(); if (t) sendMsg(t); });
+  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { const t = input.value.trim(); if (t) sendMsg(t); } });
+
+  sugerencias.querySelectorAll('.sim-sug').forEach(btn => {
+    btn.addEventListener('click', () => { sendMsg(btn.dataset.msg || ''); });
+  });
+</script>
+
+<style>
+  .band { padding-block: 5rem; border-top: 1px solid var(--zk-border, #1f1f2c); }
+  .wrap { max-width: 44rem; margin-inline: auto; padding-inline: 1.5rem; }
+
+  .eyebrow {
+    font-size: 0.8125rem; font-weight: 600; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--zk-accent, #6366f1);
+    margin-bottom: 0.75rem; text-align: center;
+  }
+  .h2 {
+    font-family: 'Sora Variable', 'Sora', system-ui, sans-serif;
+    font-size: clamp(1.5rem, 4vw, 2.25rem); font-weight: 700;
+    letter-spacing: -0.02em; line-height: 1.15;
+    color: var(--zk-heading, #f5f5fa); text-align: center; margin-bottom: 1rem;
+  }
+  .text-gradient {
+    background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .lede {
+    font-size: 1rem; line-height: 1.6; color: var(--zk-muted, #a1a1aa);
+    text-align: center; max-width: 30rem; margin-inline: auto; margin-bottom: 2rem;
+  }
+
+  .sim-phone {
+    max-width: 400px; margin-inline: auto;
+    border-radius: 1rem; border: 1px solid var(--zk-border, #1f1f2c);
+    background: var(--zk-card, #0d0d1a); overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
+  .sim-header {
+    display: flex; align-items: center; gap: 0.75rem;
+    padding: 0.9rem 1rem;
+    background: rgba(99,102,241,0.08);
+    border-bottom: 1px solid var(--zk-border, #1f1f2c);
+  }
+  .sim-header__avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: linear-gradient(135deg, #6366f1, #a855f7);
+    color: white; font-weight: 700; font-size: 0.875rem;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .sim-header__name { font-size: 0.875rem; font-weight: 600; color: var(--zk-heading, #f5f5fa); }
+  .sim-header__status { font-size: 0.7rem; color: #22c55e; }
+
+  .sim-messages {
+    height: 320px; overflow-y: auto; padding: 1rem;
+    display: flex; flex-direction: column; gap: 0.6rem;
+    background: rgba(0,0,0,0.15);
+  }
+  .sim-msg {
+    max-width: 88%; padding: 0.55rem 0.8rem; border-radius: 0.75rem;
+    font-size: 0.8125rem; line-height: 1.5; animation: simFadeIn 0.3s ease;
+  }
+  @keyframes simFadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+  .sim-msg--agent {
+    align-self: flex-start;
+    background: rgba(99,102,241,0.1); color: var(--zk-text, #e4e4e7);
+    border-bottom-left-radius: 0.25rem;
+  }
+  .sim-msg--user {
+    align-self: flex-end;
+    background: rgba(34,197,94,0.12); color: #dcfce7;
+    border-bottom-right-radius: 0.25rem;
+  }
+  .sim-typing { display: flex; gap: 4px; padding: 0.65rem 0.9rem; }
+  .sim-typing span {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--zk-muted, #71717a);
+    animation: simBounce 1.2s infinite;
+  }
+  .sim-typing span:nth-child(2) { animation-delay: 0.2s; }
+  .sim-typing span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes simBounce { 0%,60%,100% { transform: translateY(0); } 30% { transform: translateY(-5px); } }
+
+  .sim-bottom { border-top: 1px solid var(--zk-border, #1f1f2c); }
+  .sim-sugerencias {
+    display: flex; flex-wrap: wrap; gap: 0.4rem; padding: 0.6rem 0.75rem;
+  }
+  .sim-sug {
+    font-size: 0.6875rem; padding: 0.35rem 0.65rem; border-radius: 2rem;
+    border: 1px solid var(--zk-border, #1f1f2c);
+    background: rgba(99,102,241,0.06); color: var(--zk-text2, #a1a1aa);
+    cursor: pointer; transition: all 0.2s; white-space: nowrap;
+  }
+  .sim-sug:hover {
+    border-color: var(--zk-accent, #6366f1);
+    background: rgba(99,102,241,0.12); color: #fff;
+  }
+  .sim-input-area {
+    display: flex; align-items: center; gap: 0.5rem; padding: 0.6rem 0.75rem;
+  }
+  .sim-input {
+    flex: 1; padding: 0.55rem 0.8rem; border-radius: 1.5rem;
+    border: 1px solid var(--zk-border, #1f1f2c);
+    background: rgba(255,255,255,0.03); color: var(--zk-text);
+    font-size: 0.8125rem; outline: none;
+  }
+  .sim-input:focus { border-color: var(--zk-accent, #6366f1); }
+  .sim-input::placeholder { color: var(--zk-muted, #52525b); }
+  .sim-send {
+    width: 34px; height: 34px; border-radius: 50%; border: none;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: white; cursor: pointer; display: flex;
+    align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .sim-send:hover { opacity: 0.9; }
+  .sim-send[disabled] { opacity: 0.4; cursor: not-allowed; }
+</style>
