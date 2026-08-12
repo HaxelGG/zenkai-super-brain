@@ -12,6 +12,7 @@ import '../styles/global.css';
 import SeoHead from '../components/SeoHead.astro';
 import NavBar from '../components/landing/NavBar.astro';
 import Footer from '../components/landing/Footer.astro';
+import ScrollGlow from '../components/landing/ScrollGlow.astro';
 // WhatsAppFloat (botón circular flotante sin etiqueta) queda sustituido por la
 // barra fija inferior de StickyBar.astro, que sí dice a dónde lleva.
 
@@ -31,6 +32,7 @@ const { title, description, canonical, ogImage, noindex } = Astro.props;
     <link rel="preload" as="font" type="font/woff2" href={soraLatin} crossorigin />
   </head>
   <body class="bg-zk-bg text-zk-text font-sans antialiased noise">
+    <ScrollGlow />
     <NavBar />
     <main><slot /></main>
     <Footer />
@@ -134,14 +136,23 @@ const { title, description, canonical, ogImage, noindex } = Astro.props;
         // seguir, el efecto está apagado por CSS, y un listener de mousemove
         // por tarjeta que escribe custom properties en cada evento es trabajo
         // de layout puro a cambio de nada.
+        // Efecto 3D con perspective + rotate.
         if (matchMedia('(hover: hover) and (pointer: fine)').matches) {
           document.querySelectorAll<HTMLElement>('.card-3d').forEach((card) => {
             card.addEventListener('mousemove', (e: MouseEvent) => {
               const rect = card.getBoundingClientRect();
               const x = ((e.clientX - rect.left) / rect.width) * 100;
               const y = ((e.clientY - rect.top) / rect.height) * 100;
+              const rotateY = ((e.clientX - rect.left) / rect.width - 0.5) * 6;
+              const rotateX = ((e.clientY - rect.top) / rect.height - 0.5) * -4;
               card.style.setProperty('--mouse-x', `${x}%`);
               card.style.setProperty('--mouse-y', `${y}%`);
+              card.style.setProperty('--rotate-y', `${rotateY}deg`);
+              card.style.setProperty('--rotate-x', `${rotateX}deg`);
+            });
+            card.addEventListener('mouseleave', () => {
+              card.style.setProperty('--rotate-y', '0deg');
+              card.style.setProperty('--rotate-x', '0deg');
             });
           });
         }

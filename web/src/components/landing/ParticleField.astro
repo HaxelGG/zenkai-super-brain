@@ -1,0 +1,144 @@
+---
+/**
+ * ParticleField — fondo de partículas vivas para el Hero.
+ *
+ * 200 partículas con movimiento browniano suave. Reaccionan sutilmente al mouse.
+ * En móvil: 80 partículas, 20fps. Sin prefers-reduced-motion: no se renderiza.
+ * Seguro: si no pinta un frame en 4s, el canvas se oculta.
+ */
+---
+<canvas
+  class="pf-canvas"
+  data-particle-count="200"
+  data-particle-count-mobile="80"
+  aria-hidden="true"
+></canvas>
+
+<script>
+  const canvas = document.querySelector<HTMLCanvasElement>('.pf-canvas');
+  if (!canvas) throw new Error('ParticleField: canvas not found');
+
+  const mqReduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+  if (mqReduced.matches) {
+    canvas.remove();
+  } else {
+    const ctx = canvas.getContext('2d')!;
+    const isMobile = window.innerWidth < 768;
+    const targetCount = isMobile
+      ? parseInt(canvas.dataset.particleCountMobile || '80')
+      : parseInt(canvas.dataset.particleCount || '200');
+    const fps = isMobile ? 20 : 45;
+    const interval = 1000 / fps;
+
+    let w = 0, h = 0;
+    let mouseX = -1000, mouseY = -1000;
+    let targetMouseX = -1000, targetMouseY = -1000;
+    let particles: { x: number; y: number; vx: number; vy: number; r: number; alpha: number; hue: number }[] = [];
+    let animId = 0;
+    let lastFrameTime = 0;
+    let safetyTimer: ReturnType<typeof setTimeout>;
+
+    function resize() {
+      const rect = canvas.parentElement?.getBoundingClientRect();
+      w = rect?.width || window.innerWidth;
+      h = rect?.height || window.innerHeight;
+      canvas.width = w;
+      canvas.height = h;
+      initParticles();
+    }
+
+    function initParticles() {
+      particles = Array.from({ length: targetCount }, () => ({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3,
+        r: Math.random() * 2.5 + 1.5,
+        alpha: Math.random() * 0.06 + 0.015,
+        hue: Math.random() > 0.5 ? 230 + Math.random() * 15 : 270 + Math.random() * 20,
+      }));
+    }
+
+    function draw(timestamp: number) {
+      if (timestamp - lastFrameTime < interval) {
+        animId = requestAnimationFrame(draw);
+        return;
+      }
+      lastFrameTime = timestamp;
+      clearTimeout(safetyTimer);
+      safetyTimer = setTimeout(() => { canvas.style.opacity = '0'; }, 4000);
+
+      // Lerp del mouse
+      mouseX += (targetMouseX - mouseX) * 0.05;
+      mouseY += (targetMouseY - mouseY) * 0.05;
+
+      ctx.clearRect(0, 0, w, h);
+
+      for (const p of particles) {
+        // Movimiento browniano
+        p.vx += (Math.random() - 0.5) * 0.08;
+        p.vy += (Math.random() - 0.5) * 0.08;
+        p.vx *= 0.99;
+        p.vy *= 0.99;
+
+        // Leve atracción al mouse
+        const dx = mouseX - p.x;
+        const dy = mouseY - p.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 300 && dist > 1) {
+          p.vx += (dx / dist) * 0.015;
+          p.vy += (dy / dist) * 0.015;
+        }
+
+        p.x += p.vx;
+        p.y += p.vy;
+
+        // Wrap alrededor
+        if (p.x < -20) p.x = w + 20;
+        if (p.x > w + 20) p.x = -20;
+        if (p.y < -20) p.y = h + 20;
+        if (p.y > h + 20) p.y = -20;
+
+        // Pintar
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = `hsla(${p.hue}, 70%, 65%, ${p.alpha})`;
+        ctx.fill();
+      }
+
+      animId = requestAnimationFrame(draw);
+    }
+
+    function onMouseMove(e: MouseEvent) {
+      const rect = canvas.getBoundingClientRect();
+      targetMouseX = e.clientX - rect.left;
+      targetMouseY = e.clientY - rect.top;
+    }
+
+    resize();
+    window.addEventListener('resize', resize);
+    canvas.addEventListener('mousemove', onMouseMove, { passive: true });
+    lastFrameTime = performance.now();
+    animId = requestAnimationFrame(draw);
+
+    // Limpiar si el componente se desmonta (Astro view transitions)
+    document.addEventListener('astro:before-swap', () => {
+      cancelAnimationFrame(animId);
+      clearTimeout(safetyTimer);
+      window.removeEventListener('resize', resize);
+      canvas.removeEventListener('mousemove', onMouseMove);
+    });
+  }
+</script>
+
+<style>
+  .pf-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    transition: opacity 0.8s;
+  }
+</style>

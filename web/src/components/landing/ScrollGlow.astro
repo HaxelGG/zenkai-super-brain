@@ -1,0 +1,99 @@
+---
+/**
+ * ScrollGlow — iluminación ambiental que sigue el scroll y el mouse.
+ *
+ * Dos capas:
+ * 1. Gradiente vertical que se mueve con el progreso de scroll (--scroll-pos).
+ * 2. Spot pequeño que sigue al mouse con lerp de 200ms.
+ *
+ * Sin JS: el gradiente se queda en el centro (degradación elegante).
+ * Prefers-reduced-motion: el spot del mouse se desactiva.
+ */
+---
+<div class="sg-root" aria-hidden="true">
+  <div class="sg-scroll"></div>
+  <div class="sg-mouse"></div>
+</div>
+
+<script>
+  const root = document.querySelector<HTMLDivElement>('.sg-root');
+  const scrollLayer = root?.querySelector<HTMLDivElement>('.sg-scroll');
+  const mouseLayer = root?.querySelector<HTMLDivElement>('.sg-mouse');
+  if (!root || !scrollLayer || !mouseLayer) throw new Error('ScrollGlow: elements not found');
+
+  const mqReduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  let ticking = false;
+  function updateScroll() {
+    const scrollY = window.scrollY;
+    const maxScroll = document.body.scrollHeight - window.innerHeight;
+    const progress = maxScroll > 0 ? scrollY / maxScroll : 0;
+    scrollLayer.style.setProperty('--scroll-pos', `${progress * 100}%`);
+    ticking = false;
+  }
+
+  window.addEventListener('scroll', () => {
+    if (!ticking) { ticking = true; requestAnimationFrame(updateScroll); }
+  }, { passive: true });
+
+  if (!mqReduced.matches) {
+    let mouseX = -1000, mouseY = -1000;
+    let targetX = -1000, targetY = -1000;
+    let rafId = 0;
+
+    function lerpMouse() {
+      mouseX += (targetX - mouseX) * 0.08;
+      mouseY += (targetY - mouseY) * 0.08;
+      mouseLayer.style.setProperty('--mx', `${mouseX}px`);
+      mouseLayer.style.setProperty('--my', `${mouseY}px`);
+      rafId = requestAnimationFrame(lerpMouse);
+    }
+
+    document.addEventListener('mousemove', (e: MouseEvent) => {
+      targetX = e.clientX;
+      targetY = e.clientY;
+    }, { passive: true });
+
+    rafId = requestAnimationFrame(lerpMouse);
+
+    document.addEventListener('astro:before-swap', () => {
+      cancelAnimationFrame(rafId);
+    });
+  }
+
+  updateScroll();
+</script>
+
+<style>
+  .sg-root {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .sg-scroll {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      ellipse 80% 45% at 50% var(--scroll-pos, 50%),
+      rgba(99, 102, 241, 0.035) 0%,
+      transparent 65%
+    );
+    transition: background 0.8s ease;
+  }
+
+  .sg-mouse {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      circle 180px at var(--mx, -500px) var(--my, -500px),
+      rgba(99, 102, 241, 0.04) 0%,
+      transparent 70%
+    );
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sg-mouse { display: none; }
+  }
+</style>

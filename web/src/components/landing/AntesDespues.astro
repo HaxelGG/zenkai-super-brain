@@ -136,12 +136,26 @@ const filas = [
   }
 
   @media (max-width: 480px) {
-    .tabla__col {
-      padding: 0.7rem 0.5rem;
+    .tabla__header { display: none; }
+    .tabla__row {
+      display: flex;
+      flex-direction: column;
+      padding: 1rem;
+      gap: 0.5rem;
+    }
+    .tabla__col--antes {
+      color: #ef4444;
       font-size: 0.8125rem;
+      padding: 0;
+    }
+    .tabla__col--despues {
+      color: #22c55e;
+      font-size: 0.8125rem;
+      padding: 0;
     }
     .tabla__col--flecha {
-      padding: 0.7rem 0.1rem;
+      padding: 0.25rem 0;
+      transform: rotate(90deg);
     }
     .tabla__col--flecha svg {
       width: 16px;

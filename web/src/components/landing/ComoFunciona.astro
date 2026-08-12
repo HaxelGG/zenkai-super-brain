@@ -30,7 +30,7 @@ const pasos = [
     <div class="como-grid reveal-stagger">
       {pasos.map((p) => (
         <div class="como-card card-3d">
-          <div class="como-card__num">{p.num}</div>
+          <div class="como-card__num icon-hover">{p.num}</div>
           <h3 class="como-card__titulo">{p.titulo}</h3>
           <p class="como-card__desc">{p.desc}</p>
         </div>
@@ -146,5 +146,19 @@ const pasos = [
 
   .como-cta {
     text-align: center;
+  }
+
+  @media (max-width: 480px) {
+    .como-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      text-align: left;
+      padding: 1.25rem;
+    }
+    .como-card__num {
+      margin: 0;
+      flex-shrink: 0;
+    }
   }
 </style>
