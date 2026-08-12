@@ -8,28 +8,28 @@ import WhatsAppCTA from '../WhatsAppCTA.astro';
 
 const tiers = [
   {
-    name: 'Starter', price: '95', period: '/month', setup: '500',
-    desc: 'For small businesses ready to automate.',
-    features: ['Web or online store', 'CRM', '1 AI Agent (Sales or Support)', 'Basic automation', 'Email support'],
-    cta: 'Get started', highlight: false,
+    name: 'Starter', price: '95', period: '/mes', setup: '500',
+    desc: 'Para pequenas empresas listas para automatizar.',
+    features: ['Web o tienda online', 'CRM', '1 Agente de IA (Ventas o Atencion)', 'Automatizacion basica', 'Soporte por email'],
+    cta: 'Empezar', highlight: false,
   },
   {
-    name: 'Growth', price: '195', period: '/month', setup: '500',
-    desc: 'For growing businesses that need full coverage.',
-    features: ['Everything in Starter', '2 AI Agents', 'WhatsApp & social integration', 'Workflow automation', 'Priority support', 'Monthly optimization'],
-    cta: 'Get started', highlight: true,
+    name: 'Growth', price: '195', period: '/mes', setup: '500',
+    desc: 'Para empresas en crecimiento que necesitan cobertura completa.',
+    features: ['Todo lo de Starter', '2 Agentes de IA', 'Integracion WhatsApp y redes', 'Automatizacion de workflows', 'Soporte prioritario', 'Optimizacion mensual'],
+    cta: 'Empezar', highlight: true,
   },
   {
-    name: 'Scale', price: '395', period: '/month', setup: '1,000',
-    desc: 'For operations that require serious AI infrastructure.',
-    features: ['Everything in Growth', '4 AI Agents', 'Custom integrations', 'Advanced analytics', 'Dedicated account manager', 'SLA guarantee', 'White-label option'],
-    cta: 'Get started', highlight: false,
+    name: 'Scale', price: '395', period: '/mes', setup: '1.000',
+    desc: 'Para operaciones que requieren infraestructura de IA seria.',
+    features: ['Todo lo de Growth', '4 Agentes de IA', 'Integraciones personalizadas', 'Analitica avanzada', 'Account manager dedicado', 'Garantia de SLA', 'Opcion white-label'],
+    cta: 'Empezar', highlight: false,
   },
   {
     name: 'Enterprise', price: 'Custom', period: '', setup: '',
-    desc: 'For large-scale deployments with dedicated infrastructure.',
-    features: ['Everything in Scale', 'Unlimited AI Agents', 'Dedicated infrastructure', 'Custom AI models', 'On-premise deployment', 'Advanced security & compliance', 'Custom SLAs'],
-    cta: 'Contact us', highlight: false,
+    desc: 'Para despliegues a gran escala con infraestructura dedicada.',
+    features: ['Todo lo de Scale', 'Agentes de IA ilimitados', 'Infraestructura dedicada', 'Modelos de IA personalizados', 'Despliegue on-premise', 'Seguridad y cumplimiento avanzados', 'SLAs personalizados'],
+    cta: 'Contactanos', highlight: false,
   },
 ];
 ---
@@ -37,21 +37,21 @@ const tiers = [
 <section class="band" id="pricing" aria-labelledby="pricing-titulo">
   <div class="wrap">
     <div class="reveal">
-      <p class="eyebrow">Pricing</p>
+      <p class="eyebrow">Precios</p>
       <h2 id="pricing-titulo" class="h2">
-        Plans that scale<br />
-        <span class="text-gradient">with your business.</span>
+        Planes que escalan<br />
+        <span class="text-gradient">con tu negocio.</span>
       </h2>
       <p class="lede">
-        From solo operations to enterprise infrastructure. One platform.
-        Pay for the capacity you need. Upgrade anytime.
+        Desde operaciones individuales hasta infraestructura empresarial. Una sola plataforma.
+        Paga por la capacidad que necesitas. Mejora de plan cuando quieras.
       </p>
     </div>
 
     <div class="pricing-grid reveal-stagger">
       {tiers.map((t) => (
         <div class:list={['pricing-card', t.highlight && 'pricing-card--featured']}>
-          {t.highlight && <div class="pricing-badge">Most popular</div>}
+          {t.highlight && <div class="pricing-badge">Mas popular</div>}
           <div class="pricing-card__header">
             <h3 class="pricing-card__name">{t.name}</h3>
             <p class="pricing-card__desc">{t.desc}</p>
@@ -60,7 +60,7 @@ const tiers = [
             <span class="pricing-card__amount">€{t.price}</span>
             <span class="pricing-card__period">{t.period}</span>
           </div>
-          {t.setup && <p class="pricing-card__setup">€{t.setup} one-time implementation</p>}
+          {t.setup && <p class="pricing-card__setup">{t.setup}€ de implementacion unica</p>}
           <ul class="pricing-card__features">
             {t.features.map((f) => (
               <li>
@@ -80,7 +80,7 @@ const tiers = [
       ))}
     </div>
 
-    <p class="pricing-note reveal">All plans include 14-day money-back guarantee. No hidden fees. Cancel anytime.</p>
+    <p class="pricing-note reveal">Todos los planes incluyen garantia de devolucion de 14 dias. Sin costes ocultos. Cancela cuando quieras.</p>
   </div>
 </section>
 
