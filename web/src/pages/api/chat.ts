@@ -11,21 +11,32 @@ interface ChatMessage {
   content: string;
 }
 
+const rateMap = new Map<string, { count: number; reset: number }>();
+
 export const POST: APIRoute = async ({ request }) => {
   try {
+    const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+    const now = Date.now();
+    const r = rateMap.get(ip);
+    if (r && now < r.reset) {
+      if (r.count >= 15) {
+        return new Response(JSON.stringify({ error: 'Demasiadas solicitudes' }), { status: 429, headers: { 'Content-Type': 'application/json' } });
+      }
+      r.count++;
+    } else {
+      rateMap.set(ip, { count: 1, reset: now + 60_000 });
+    }
+    if (rateMap.size > 10000) rateMap.clear();
+
     const body = await request.json();
     const messages: ChatMessage[] = body.messages || [];
-
     if (!Array.isArray(messages) || messages.length === 0) {
-      return new Response(JSON.stringify({ error: 'messages required' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return new Response(JSON.stringify({ error: 'messages required' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
     }
 
     const fullMessages: ChatMessage[] = [
-      { role: 'system', content: SYSTEM_PROMPT },
-      ...messages.slice(-10),
+      { role: 'system', content: body.systemPrompt || SYSTEM_PROMPT },
+      ...messages.slice(-12),
     ];
 
     const response = await fetch(DEEPSEEK_URL, {

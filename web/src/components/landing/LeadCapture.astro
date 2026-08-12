@@ -106,6 +106,8 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ nombre, email, fuente: 'web-oferta-sorpresa', pagina: location.pathname }),
       });
+      // Track conversion
+      try { window.va?.('event', { name: 'lead_captured', data: { source: 'oferta-sorpresa' } }); } catch {}
       form.querySelector('.lead-form__fields')!.setAttribute('hidden', '');
       submitBtn.setAttribute('hidden', '');
       success.removeAttribute('hidden');
