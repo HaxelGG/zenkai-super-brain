@@ -3,6 +3,8 @@ import type { APIRoute } from 'astro';
 export const prerender = false;
 
 const N8N_WEBHOOK = import.meta.env.N8N_LEAD_WEBHOOK || '';
+const RESEND_KEY = import.meta.env.RESEND_API_KEY || '';
+const NOTIFY_EMAIL = 'hola@zenkai.systems';
 
 export const POST: APIRoute = async ({ request }) => {
   try {
@@ -36,9 +38,38 @@ export const POST: APIRoute = async ({ request }) => {
       } catch (e) {
         console.error('n8n webhook error:', e);
       }
+    } else {
+      console.warn('N8N_LEAD_WEBHOOK no configurado. El lead solo se guarda en logs.');
     }
 
-    console.log('Lead capturado:', JSON.stringify(lead));
+    // Enviar notificacion por email con Resend (fallback)
+    if (RESEND_KEY) {
+      try {
+        await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${RESEND_KEY}`,
+          },
+          body: JSON.stringify({
+            from: 'Zenkai Leads <leads@zenkai.systems>',
+            to: [NOTIFY_EMAIL],
+            subject: `Nuevo lead: ${lead.nombre}`,
+            html: `<h2>Nuevo lead desde la web</h2>
+              <p><strong>Nombre:</strong> ${lead.nombre}</p>
+              <p><strong>Email:</strong> ${lead.email}</p>
+              <p><strong>Fuente:</strong> ${lead.fuente}</p>
+              <p><strong>Pagina:</strong> ${lead.pagina}</p>
+              <p><strong>Fecha:</strong> ${lead.timestamp}</p>`,
+          }),
+        });
+      } catch (e) {
+        console.error('Resend email error:', e);
+      }
+    }
+
+    // Log estructurado para Vercel Logs
+    console.log(JSON.stringify({ event: 'lead_capturado', ...lead }));
 
     return new Response(JSON.stringify({ success: true, message: 'Lead registrado' }), {
       status: 200,
