@@ -1,0 +1,239 @@
+---
+/**
+ * Confianza — Prueba social + credibilidad española + garantía.
+ * Tres bloques en uno: lo que dicen los clientes, quiénes somos, y el compromiso.
+ */
+import WhatsAppCTA from '../WhatsAppCTA.astro';
+
+const testimonios = [
+  {
+    cita: "En dos semanas teníamos web, CRM y un agente que responde por WhatsApp. Hemos pasado de perder 3 de cada 10 consultas a responderlas todas en segundos.",
+    nombre: "Carlos M.",
+    empresa: "Clínica Dental Maresme, Barcelona",
+    sector: "Salud",
+  },
+  {
+    cita: "Lo mejor es que no tuve que hacer nada. Me pidieron acceso a los datos básicos del negocio y a los 7 días estaba todo funcionando. Ahora facturo sin perseguir clientes.",
+    nombre: "Laura G.",
+    empresa: "Estudio de Arquitectura LG, Madrid",
+    sector: "Servicios Profesionales",
+  },
+  {
+    cita: "Tenía miedo de que la IA fuera fría con mis clientes. Me equivoqué. El agente contesta mejor que mi recepcionista, y ella ahora puede dedicarse a vender en vez de a contestar el teléfono.",
+    nombre: "Miguel A.",
+    empresa: "Restaurante El Patio, Valencia",
+    sector: "Hostelería",
+  },
+];
+
+const garantias = [
+  { titulo: '14 días de prueba', desc: 'Si en las dos primeras semanas no ves resultados, te devolvemos los 500€ de implementación. Sin preguntas.' },
+  { titulo: 'Sin permanencia', desc: 'El mantenimiento de 95€/mes puede cancelarse en cualquier momento. No hay contratos de 12 meses ni cláusulas ocultas.' },
+  { titulo: 'Soporte en español', desc: 'Hablamos tu idioma. Respuesta en menos de 4 horas por WhatsApp. Si algo no funciona, lo arreglamos nosotros.' },
+  { titulo: 'Factura española', desc: 'Emitimos factura con IVA. Somos una empresa establecida, no un freelance anónimo en internet.' },
+];
+
+const sectores = [
+  'Clínicas y consultorios médicos',
+  'Restaurantes y hostelería',
+  'Ecommerce y tiendas online',
+  'Agencias y servicios profesionales',
+  'Inmobiliarias',
+  'Talleres y servicios técnicos',
+];
+---
+
+<section class="band" aria-labelledby="confianza-titulo">
+  <div class="wrap">
+
+    <!-- BLOQUE 1: Testimonios -->
+    <div class="reveal">
+      <p class="eyebrow">Resultados reales</p>
+      <h2 id="confianza-titulo" class="h2">
+        Empresas como la tuya<br />
+        <span class="text-gradient">ya están funcionando con Zenkai.</span>
+      </h2>
+      <p class="lede">
+        No son casos inventados. Son negocios que pagaron 500€, esperaron 7 días y nunca volvieron a perder una venta por no contestar a tiempo.
+      </p>
+    </div>
+
+    <div class="testimonio-grid reveal-stagger">
+      {testimonios.map((t) => (
+        <div class="testimonio-card card-3d">
+          <div class="testimonio-card__stars" aria-label="5 estrellas">
+            {Array(5).fill(null).map(() => (
+              <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+            ))}
+          </div>
+          <blockquote class="testimonio-card__cita">"{t.cita}"</blockquote>
+          <div class="testimonio-card__footer">
+            <div>
+              <div class="testimonio-card__nombre">{t.nombre}</div>
+              <div class="testimonio-card__empresa">{t.empresa}</div>
+            </div>
+            <span class="testimonio-card__sector">{t.sector}</span>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <!-- BLOQUE 2: Sectores -->
+    <div class="sectores-wrap reveal">
+      <p class="sectores-label">Especialistas en:</p>
+      <div class="sectores-list">
+        {sectores.map((s) => (
+          <span class="sectores-pill">{s}</span>
+        ))}
+      </div>
+    </div>
+
+    <!-- BLOQUE 3: Garantías -->
+    <div class="garantia-section reveal">
+      <h3 class="garantia-title">Sin riesgo. De verdad.</h3>
+      <div class="garantia-grid">
+        {garantias.map((g) => (
+          <div class="garantia-item">
+            <div class="garantia-item__icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
+            </div>
+            <div>
+              <div class="garantia-item__titulo">{g.titulo}</div>
+              <div class="garantia-item__desc">{g.desc}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div class="garantia-cta reveal">
+        <WhatsAppCTA
+          location="garantia"
+          message="Hola ZENKAI. Quiero probar el sistema sin riesgo."
+          label="Empieza hoy, sin riesgo"
+          variant="block"
+          size="lg"
+        />
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<style>
+  .band { padding-block: 5rem; border-top: 1px solid var(--zk-border, #1f1f2c); }
+  .wrap { max-width: 56rem; margin-inline: auto; padding-inline: 1.5rem; }
+
+  .eyebrow {
+    font-size: 0.8125rem; font-weight: 600; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--zk-accent, #6366f1);
+    margin-bottom: 0.75rem; text-align: center;
+  }
+  .h2 {
+    font-family: 'Sora Variable', 'Sora', system-ui, sans-serif;
+    font-size: clamp(1.5rem, 4vw, 2.25rem); font-weight: 700;
+    letter-spacing: -0.02em; line-height: 1.15;
+    color: var(--zk-heading, #f5f5fa); text-align: center; margin-bottom: 1rem;
+  }
+  .text-gradient {
+    background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .lede {
+    font-size: 1rem; line-height: 1.6; color: var(--zk-muted, #a1a1aa);
+    text-align: center; max-width: 32rem; margin-inline: auto; margin-bottom: 2.5rem;
+  }
+
+  /* Testimonios */
+  .testimonio-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+    gap: 1.25rem;
+    margin-bottom: 3rem;
+  }
+  .testimonio-card {
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    border: 1px solid var(--zk-border, #1f1f2c);
+    background: var(--zk-card, #0d0d1a);
+    display: flex; flex-direction: column; gap: 1rem;
+  }
+  .testimonio-card__stars {
+    display: flex; gap: 2px; color: #f59e0b;
+  }
+  .testimonio-card__cita {
+    font-size: 0.9375rem; line-height: 1.6; color: var(--zk-text, #e4e4e7);
+    margin: 0; font-style: italic;
+  }
+  .testimonio-card__footer {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    gap: 0.5rem; margin-top: auto;
+  }
+  .testimonio-card__nombre {
+    font-size: 0.8125rem; font-weight: 600; color: var(--zk-heading, #f5f5fa);
+  }
+  .testimonio-card__empresa {
+    font-size: 0.75rem; color: var(--zk-muted, #71717a);
+  }
+  .testimonio-card__sector {
+    font-size: 0.6875rem; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.06em; color: var(--zk-accent, #6366f1);
+    background: rgba(99,102,241,0.1); padding: 0.2rem 0.5rem;
+    border-radius: 0.25rem; white-space: nowrap;
+  }
+
+  /* Sectores */
+  .sectores-wrap {
+    text-align: center; margin-bottom: 3rem; padding: 1.5rem;
+    border: 1px solid var(--zk-border, #1f1f2c); border-radius: 0.75rem;
+    background: var(--zk-card, #0d0d1a);
+  }
+  .sectores-label {
+    font-size: 0.8125rem; font-weight: 600; color: var(--zk-muted, #71717a);
+    margin-bottom: 1rem;
+  }
+  .sectores-list {
+    display: flex; flex-wrap: wrap; justify-content: center;
+    gap: 0.5rem;
+  }
+  .sectores-pill {
+    font-size: 0.8125rem; color: var(--zk-text, #d4d4d8);
+    padding: 0.35rem 0.75rem; border: 1px solid var(--zk-border, #1f1f2c);
+    border-radius: 2rem; background: rgba(99,102,241,0.05);
+  }
+
+  /* Garantías */
+  .garantia-section { margin-top: 1rem; }
+  .garantia-title {
+    font-family: 'Sora Variable', 'Sora', system-ui, sans-serif;
+    font-size: 1.25rem; font-weight: 700; text-align: center;
+    color: var(--zk-heading, #f5f5fa); margin-bottom: 1.5rem;
+  }
+  .garantia-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .garantia-item {
+    display: flex; gap: 0.75rem;
+    padding: 1.25rem;
+    border-radius: 0.75rem;
+    border: 1px solid rgba(34,197,94,0.15);
+    background: rgba(34,197,94,0.03);
+  }
+  .garantia-item__icon {
+    width: 2rem; height: 2rem; border-radius: 0.5rem;
+    background: rgba(34,197,94,0.12); color: #22c55e;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .garantia-item__titulo {
+    font-size: 0.9375rem; font-weight: 600;
+    color: var(--zk-heading, #f5f5fa); margin-bottom: 0.2rem;
+  }
+  .garantia-item__desc {
+    font-size: 0.8125rem; line-height: 1.5;
+    color: var(--zk-muted, #a1a1aa);
+  }
+  .garantia-cta { text-align: center; padding-top: 1rem; }
+</style>

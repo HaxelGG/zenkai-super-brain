@@ -3,41 +3,38 @@ export const prerender = true;
 import WebLayout from '../layouts/WebLayout.astro';
 import HeroSimple from '../components/landing/HeroSimple.astro';
 import AntesDespues from '../components/landing/AntesDespues.astro';
+import Confianza from '../components/landing/Confianza.astro';
 import ComoFunciona from '../components/landing/ComoFunciona.astro';
 import PlanZenkai from '../components/landing/PlanZenkai.astro';
 import Ecosistema from '../components/landing/Ecosistema.astro';
-import Transparencia from '../components/landing/Transparencia.astro';
 import FAQ from '../components/landing/FAQ.astro';
 import CTAFinal from '../components/landing/CTAFinal.astro';
 import StickyBar from '../components/landing/StickyBar.astro';
 
 /**
- * Nueva estructura simplificada.
+ * Estructura optimizada para conversion.
  *
- *  1 Hero          → "Qué es, cuánto cuesta, qué incluye" en 5 segundos
- *  2 Antes/Después → "Esto es lo que cambia" — el dolor y la solución lado a lado
- *  3 Cómo funciona → "En 3 pasos" — elimina la fricción de compra
- *  4 Plan Zenkai    → "Un plan, un precio, todo incluido" — sin decisiones difíciles
- *  5 Ecosistema     → "5 productos integrados" — prueba de que no es humo
- *  6 Transparencia  → RGPD + AI Act para el comprador europeo
- *  7 FAQ            → Últimas objeciones
- *  8 Cierre         → CTA final
- *
- *  Cada bloque añade una capa de valor. El empresario que scrollea entero
- *  ya está convencido antes de llegar al precio.
+ *  1 Hero         → Propuesta de valor + precio + urgencia en 5s
+ *  2 Antes/Después → Dolor vs solucion visual
+ *  3 Confianza     → Testimonios reales + garantia + sectores
+ *  4 Como funciona → 3 pasos, elimina friccion
+ *  5 Plan Zenkai   → Precio detallado + devolucion 14 dias
+ *  6 Ecosistema    → Prueba de que no es humo
+ *  7 FAQ           → Ultimas objeciones
+ *  8 Cierre        → WhatsApp + email
  */
 ---
 
 <WebLayout
-  title="ZENKAI · Tu empresa con IA en 7 días · 500€ + 95€/mes"
-  description="Montamos el sistema digital completo de tu negocio: web, CRM, agente de ventas IA, atención al cliente, facturación y agenda. 500€ de implementación + 95€/mes de mantenimiento."
+  title="ZENKAI · Tu empresa con IA en 7 días · 500€ + 95€/mes · Garantía 14 días"
+  description="Montamos el sistema digital completo de tu negocio: web, CRM, agente de ventas IA, atención al cliente, facturación y agenda. 500€ de implementación + 95€/mes. Con garantía de devolución."
 >
   <HeroSimple />
   <AntesDespues />
+  <Confianza />
   <ComoFunciona />
   <PlanZenkai />
   <Ecosistema />
-  <Transparencia />
   <FAQ />
   <CTAFinal />
   <StickyBar />

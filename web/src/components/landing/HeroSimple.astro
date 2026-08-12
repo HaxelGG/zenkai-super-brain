@@ -34,7 +34,8 @@ const incluido = [
 
     <p class="hero__sub reveal">
       Te montamos todo el sistema digital de tu negocio por <strong>500€</strong>.
-      Luego <strong>95€ al mes</strong> y lo mantenemos nosotros. Tú solo te preocupas de vender.
+      Luego <strong>95€ al mes</strong> y lo mantenemos nosotros. Tú solo te preocupas de vender.<br />
+      <span class="hero__sectores">Clínicas, restaurantes, ecommerce, inmobiliarias, agencias y más.</span>
     </p>
 
     <div class="hero__ctas reveal">
@@ -44,6 +45,11 @@ const incluido = [
         label="Quiero mi sistema de IA"
         size="lg"
       />
+    </div>
+
+    <div class="hero__secundarios reveal">
+      <a href="#plan" class="hero__link-sec">Ver qué incluye el plan &darr;</a>
+      <span class="hero__urgencia">Siguiente implantación: <strong>lunes que viene</strong></span>
     </div>
 
     <div class="hero__incluido reveal-stagger">
@@ -134,8 +140,39 @@ const incluido = [
     font-weight: 600;
   }
 
-  .hero__ctas {
-    margin-bottom: 2.5rem;
+  .hero__sectores {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--zk-muted, #71717a);
+  }
+
+  .hero__ctas { margin-bottom: 1rem; }
+
+  .hero__secundarios {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .hero__link-sec {
+    font-size: 0.875rem;
+    color: var(--zk-accent, #6366f1);
+    text-decoration: none;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    transition: color 0.2s;
+  }
+  .hero__link-sec:hover { color: #818cf8; }
+
+  .hero__urgencia {
+    font-size: 0.75rem;
+    color: var(--zk-muted, #71717a);
+  }
+  .hero__urgencia strong {
+    color: #f59e0b;
+    font-weight: 600;
   }
 
   .hero__incluye-label {
