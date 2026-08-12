@@ -14,21 +14,30 @@ const tiers = [
     cta: 'Empezar', highlight: false,
   },
   {
-    name: 'Growth', price: '195', period: '/mes', setup: '500',
-    desc: 'Para empresas en crecimiento que necesitan cobertura completa.',
-    features: ['Todo lo de Starter', '2 Agentes de IA', 'Integracion WhatsApp y redes', 'Automatizacion de workflows', 'Soporte prioritario', 'Optimizacion mensual'],
+    name: 'Growth', price: '440', period: '/mes', setup: '500',
+    desc: 'Para empresas que quieren crecer con IA y marketing automatizado.',
+    features: [
+      'Todo lo de Starter',
+      '4 Agentes de IA trabajando en paralelo',
+      'Integracion WhatsApp y redes sociales',
+      'Integraciones personalizadas con tus herramientas',
+      '2 campanas publicitarias al mes (coste incluido)',
+      '12 piezas de contenido premium para redes sociales',
+      'Email marketing automatizado con secuencias',
+      'Optimizacion de conversion (A/B testing)',
+      'Analitica avanzada con dashboards',
+      'Informe mensual de resultados',
+      'Reunion estrategica mensual',
+      'Account manager dedicado',
+      'Soporte prioritario 24/7',
+      'Garantia de SLA',
+    ],
     cta: 'Empezar', highlight: true,
-  },
-  {
-    name: 'Scale', price: '395', period: '/mes', setup: '1.000',
-    desc: 'Para operaciones que requieren infraestructura de IA seria.',
-    features: ['Todo lo de Growth', '4 Agentes de IA', 'Integraciones personalizadas', 'Analitica avanzada', 'Account manager dedicado', 'Garantia de SLA', 'Opcion white-label'],
-    cta: 'Empezar', highlight: false,
   },
   {
     name: 'Enterprise', price: 'Custom', period: '', setup: '',
     desc: 'Para despliegues a gran escala con infraestructura dedicada.',
-    features: ['Todo lo de Scale', 'Agentes de IA ilimitados', 'Infraestructura dedicada', 'Modelos de IA personalizados', 'Despliegue on-premise', 'Seguridad y cumplimiento avanzados', 'SLAs personalizados'],
+    features: ['Todo lo de Growth', 'Agentes de IA ilimitados', 'Infraestructura dedicada', 'Modelos de IA personalizados', 'Despliegue on-premise', 'Seguridad y cumplimiento avanzados', 'Opcion white-label', 'SLAs personalizados'],
     cta: 'Contactanos', highlight: false,
   },
 ];
@@ -108,9 +117,10 @@ const tiers = [
 
   .pricing-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
     gap: 1rem;
     margin-bottom: 1.5rem;
+    align-items: stretch;
   }
 
   .pricing-card {
@@ -126,6 +136,12 @@ const tiers = [
   .pricing-card--featured {
     border-color: rgba(99,138,255,0.25);
     background: linear-gradient(135deg, rgba(99,138,255,0.04), rgba(139,92,246,0.02));
+    transform: scale(1.02);
+  }
+  .pricing-card--featured:hover { transform: scale(1.02) translateY(-2px); }
+  @media (max-width: 768px) {
+    .pricing-card--featured { transform: none; }
+    .pricing-card--featured:hover { transform: translateY(-2px); }
   }
   .pricing-badge {
     position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
