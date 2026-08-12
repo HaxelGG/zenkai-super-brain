@@ -1,0 +1,104 @@
+---
+/**
+ * AIActivityFeed — Consola de actividad simulada.
+ * Muestra eventos como si ZENKAI estuviera trabajando en vivo.
+ * Cada evento aparece secuencialmente con fade-in.
+ */
+---
+
+<section class="band" aria-labelledby="feed-titulo">
+  <div class="wrap">
+    <div class="reveal">
+      <p class="eyebrow">Live Activity</p>
+      <h2 id="feed-titulo" class="h2">
+        Your business,<br />
+        <span class="text-gradient">always on.</span>
+      </h2>
+      <p class="lede">
+        This is what happens when AI agents run your operations 24/7.
+        Every event represents a real capability of the ZENKAI system.
+      </p>
+    </div>
+
+    <div class="feed-console reveal" id="feed-console">
+      <div class="feed-header">
+        <div class="feed-dot"></div>
+        <span>ZENKAI CORE</span>
+        <span class="feed-status">SYSTEM ONLINE</span>
+      </div>
+      <div class="feed-events" id="feed-events">
+        <div class="feed-event feed-event--fade">Sales Agent qualified a lead from website</div>
+        <div class="feed-event feed-event--fade">Customer Agent answered WhatsApp inquiry</div>
+        <div class="feed-event feed-event--fade">CRM updated automatically with new contact</div>
+        <div class="feed-event feed-event--fade">Appointment scheduled via AI Calendar</div>
+        <div class="feed-event feed-event--fade">Finance Agent generated invoice #1042</div>
+        <div class="feed-event feed-event--fade">Marketing Agent launched campaign segment</div>
+        <div class="feed-event feed-event--fade">Knowledge base updated with new document</div>
+      </div>
+    </div>
+    <p class="feed-note reveal">Simulated activity &mdash; representative of ZENKAI AI agent capabilities.</p>
+  </div>
+</section>
+
+<script>
+  const events = document.querySelectorAll<HTMLDivElement>('.feed-event--fade');
+  let i = 0;
+  function showNext() {
+    if (i < events.length) {
+      events[i].classList.add('feed-event--visible');
+      i++;
+      setTimeout(showNext, 800 + Math.random() * 600);
+    }
+  }
+  // Iniciar cuando la seccion es visible
+  const obs = new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting) { showNext(); obs.disconnect(); }
+  }, { threshold: 0.3 });
+  obs.observe(document.getElementById('feed-console')!);
+</script>
+
+<style>
+  .band { padding-block: 6rem; border-top: 1px solid rgba(255,255,255,0.05); }
+  .wrap { max-width: 48rem; margin-inline: auto; padding-inline: 1.5rem; }
+  .eyebrow {
+    font-family: var(--font-mono); font-size: 0.6875rem; font-weight: 500;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: rgba(99, 138, 255, 0.7); margin-bottom: 0.75rem; text-align: center;
+  }
+  .h2 {
+    font-family: var(--font-display); font-size: clamp(1.5rem, 4vw, 2.25rem);
+    font-weight: 700; letter-spacing: -0.02em; line-height: 1.15;
+    color: var(--zk-heading, #f5f5fa); text-align: center; margin-bottom: 1rem;
+  }
+  .text-gradient {
+    background: linear-gradient(135deg, #638AFF 0%, #8B5CF6 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .lede {
+    font-size: 1rem; line-height: 1.6; color: var(--zk-text2, #a1a1aa);
+    text-align: center; max-width: 30rem; margin-inline: auto; margin-bottom: 2rem;
+  }
+  .feed-console {
+    max-width: 32rem; margin-inline: auto;
+    border: 1px solid rgba(255,255,255,0.06); border-radius: 0.75rem;
+    background: rgba(0,0,0,0.3); overflow: hidden;
+  }
+  .feed-header {
+    display: flex; align-items: center; gap: 0.5rem;
+    padding: 0.75rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.05);
+    font-family: var(--font-mono); font-size: 0.75rem; color: var(--zk-text2, #a1a1aa);
+  }
+  .feed-dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 8px rgba(34,197,94,0.4); }
+  .feed-status { margin-left: auto; color: #22c55e; font-size: 0.6875rem; }
+  .feed-events { padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.5rem; }
+  .feed-event {
+    font-family: var(--font-mono); font-size: 0.75rem; color: rgba(180,180,200,0.5);
+    opacity: 0; transform: translateX(-8px);
+    transition: opacity 0.4s, transform 0.4s, color 0.3s;
+  }
+  .feed-event--visible { opacity: 1; transform: none; color: rgba(200,200,220,0.85); }
+  .feed-note {
+    text-align: center; font-size: 0.6875rem; color: var(--zk-muted, #52525b);
+    margin-top: 1rem;
+  }
+</style>
