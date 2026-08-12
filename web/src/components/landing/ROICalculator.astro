@@ -262,4 +262,14 @@ import WhatsAppCTA from '../WhatsAppCTA.astro';
     padding: 1.5rem 1.75rem 1.75rem;
     text-align: center;
   }
+
+  @media (max-width: 480px) {
+    .roi-sliders { padding: 1.25rem; }
+    .roi-results { padding: 1.25rem; }
+    .roi-cta { padding: 1.25rem; }
+    .roi-result-item { flex-direction: column; gap: 0.15rem; }
+    .roi-result__number { font-size: 1rem; }
+    .roi-result-item--total-loss .roi-result__number { font-size: 1.25rem; }
+    .roi-result-item--profit .roi-result__number { font-size: 1.25rem; }
+  }
 </style>

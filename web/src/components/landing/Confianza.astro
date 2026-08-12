@@ -236,4 +236,11 @@ const sectores = [
     color: var(--zk-muted, #a1a1aa);
   }
   .garantia-cta { text-align: center; padding-top: 1rem; }
+
+  @media (max-width: 640px) {
+    .testimonio-grid { grid-template-columns: 1fr; }
+    .garantia-grid { grid-template-columns: 1fr; }
+    .sectores-list { gap: 0.35rem; }
+    .sectores-pill { font-size: 0.75rem; padding: 0.3rem 0.6rem; }
+  }
 </style>
