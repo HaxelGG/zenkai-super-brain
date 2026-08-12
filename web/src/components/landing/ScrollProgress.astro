@@ -1,0 +1,37 @@
+---
+/**
+ * ScrollProgress — Barra sutil de progreso de scroll.
+ * 2px, gradiente azul, solo aparece despues de bajar 100px.
+ */
+---
+
+<div class="sp-bar" aria-hidden="true"><div class="sp-fill" id="sp-fill"></div></div>
+
+<script>
+  const fill = document.getElementById('sp-fill')!;
+  let ticking = false;
+  const update = () => {
+    const scrolled = window.scrollY;
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = max > 0 ? (scrolled / max) * 100 : 0;
+    fill.style.width = pct + '%';
+    fill.style.opacity = scrolled > 100 ? '1' : '0';
+    ticking = false;
+  };
+  window.addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } }, { passive: true });
+  update();
+</script>
+
+<style>
+  .sp-bar {
+    position: fixed; top: 0; left: 0; right: 0; height: 2px;
+    z-index: 90; pointer-events: none;
+  }
+  .sp-fill {
+    height: 100%; width: 0;
+    background: linear-gradient(90deg, #638AFF, #8B5CF6);
+    transition: width 0.1s linear, opacity 0.4s;
+    opacity: 0;
+  }
+  @media (prefers-reduced-motion: reduce) { .sp-fill { transition: none; } }
+</style>

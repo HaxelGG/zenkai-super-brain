@@ -1,0 +1,74 @@
+---
+/**
+ * FinalCTA — Cierre emocional enterprise.
+ * "Your business is already running on software. It's time to make it intelligent."
+ */
+import WhatsAppCTA from '../WhatsAppCTA.astro';
+---
+
+<section class="band" aria-labelledby="final-titulo">
+  <div class="wrap">
+    <div class="reveal">
+      <h2 id="final-titulo" class="final-h2">
+        Your business is already running on software.<br />
+        <span class="final-grad">It's time to make it intelligent.</span>
+      </h2>
+      <p class="final-sub">
+        Build an AI system that connects your people, data and workflows.
+        One layer. Entire business. Always on.
+      </p>
+      <div class="final-ctas">
+        <a href="#diagnostico" class="final-primary">
+          Build my AI system
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+        <WhatsAppCTA location="final-cta" message="Hola ZENKAI. He leido la web y quiero hablar." label="Talk to ZENKAI" variant="inline" />
+      </div>
+      <p class="final-trust">14-day money-back guarantee · No commitment · Cancel anytime</p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .band { padding-block: 8rem; border-top: 1px solid rgba(255,255,255,0.05); position: relative; overflow: hidden; }
+  .band::before {
+    content: ''; position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(ellipse 60% 50% at 50% 100%, rgba(99,138,255,0.07) 0%, transparent 60%);
+  }
+  .wrap { max-width: 48rem; margin-inline: auto; padding-inline: 1.5rem; text-align: center; position: relative; z-index: 1; }
+  .final-h2 {
+    font-family: var(--font-display);
+    font-size: clamp(1.75rem, 4.5vw, 3rem);
+    font-weight: 700; letter-spacing: -0.03em; line-height: 1.15;
+    color: var(--zk-heading, #f5f5fa); margin-bottom: 1.25rem;
+    text-wrap: balance;
+  }
+  .final-grad {
+    background: linear-gradient(135deg, #638AFF 0%, #8B5CF6 50%, #A78BFA 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .final-sub {
+    font-size: 1.0625rem; line-height: 1.6; color: var(--zk-text2, #a1a1aa);
+    max-width: 32rem; margin-inline: auto; margin-bottom: 2rem;
+  }
+  .final-ctas {
+    display: flex; align-items: center; justify-content: center;
+    gap: 1.25rem; margin-bottom: 1.25rem; flex-wrap: wrap;
+  }
+  .final-primary {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    padding: 0.8rem 1.75rem; border-radius: 0.5rem;
+    background: linear-gradient(135deg, #638AFF, #4A6FEF); color: #fff;
+    font-size: 0.9375rem; font-weight: 600; text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 24px rgba(99,138,255,0.3);
+  }
+  .final-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 36px rgba(99,138,255,0.4); }
+  .final-trust {
+    font-size: 0.75rem; color: var(--zk-muted, #52525b);
+  }
+  @media (max-width: 640px) {
+    .final-ctas { flex-direction: column; }
+    .band { padding-block: 5rem; }
+  }
+</style>

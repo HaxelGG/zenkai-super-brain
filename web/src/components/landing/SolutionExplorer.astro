@@ -1,0 +1,159 @@
+---
+/**
+ * SolutionExplorer — Tabs interactivos Revenue/Customer/Operations/Intelligence.
+ * El usuario selecciona una categoría y ve las soluciones AI correspondientes.
+ */
+
+const categorias = [
+  {
+    id: 'revenue', label: 'Revenue',
+    headline: 'Grow your revenue',
+    soluciones: [
+      { name: 'Sales AI', desc: 'Automatically qualify leads, send follow-ups and update your CRM.' },
+      { name: 'Marketing AI', desc: 'Autonomous campaigns that generate demand 24/7.' },
+      { name: 'Commerce AI', desc: 'Your store, cart and payments working together.' },
+      { name: 'Creative AI', desc: 'On-brand content generated in seconds, not days.' },
+    ],
+  },
+  {
+    id: 'customer', label: 'Customer Experience',
+    headline: 'Delight every customer',
+    soluciones: [
+      { name: 'Customer AI', desc: '24/7 support across WhatsApp, web, email and social.' },
+      { name: 'Knowledge AI', desc: 'Your documents and data become instant answers.' },
+    ],
+  },
+  {
+    id: 'operations', label: 'Operations',
+    headline: 'Run leaner operations',
+    soluciones: [
+      { name: 'Operations AI', desc: 'Workflows that execute themselves, no human needed.' },
+      { name: 'Finance AI', desc: 'Invoices, collections and reconciliation on autopilot.' },
+      { name: 'HR AI', desc: 'Hiring, onboarding and internal processes streamlined.' },
+    ],
+  },
+  {
+    id: 'intelligence', label: 'Intelligence',
+    headline: 'Make smarter decisions',
+    soluciones: [
+      { name: 'Intelligence AI', desc: 'Dashboards and analytics that tell you what matters.' },
+      { name: 'Enterprise AI', desc: 'Dedicated infrastructure for large-scale operations.' },
+    ],
+  },
+];
+---
+
+<section class="band" aria-labelledby="expl-titulo">
+  <div class="wrap">
+    <div class="reveal">
+      <p class="eyebrow">Solutions</p>
+      <h2 id="expl-titulo" class="h2">
+        What do you want<br />
+        <span class="text-gradient">to improve?</span>
+      </h2>
+    </div>
+
+    <div class="expl-tabs reveal" role="tablist" aria-label="Solution categories">
+      {categorias.map((c, i) => (
+        <button
+          class:list={['expl-tab', i === 0 && 'expl-tab--active']}
+          role="tab"
+          aria-selected={i === 0 ? 'true' : 'false'}
+          data-cat={c.id}
+        >{c.label}</button>
+      ))}
+    </div>
+
+    <div class="expl-panels reveal">
+      {categorias.map((c, i) => (
+        <div class:list={['expl-panel', i === 0 && 'expl-panel--active']} data-panel={c.id} role="tabpanel">
+          <h3 class="expl-headline">{c.headline}</h3>
+          <div class="expl-sols">
+            {c.soluciones.map((s) => (
+              <div class="expl-sol card-3d">
+                <h4 class="expl-sol__name">{s.name}</h4>
+                <p class="expl-sol__desc">{s.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>('.expl-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.expl-tab').forEach(t => {
+        t.classList.remove('expl-tab--active');
+        t.setAttribute('aria-selected', 'false');
+      });
+      tab.classList.add('expl-tab--active');
+      tab.setAttribute('aria-selected', 'true');
+      document.querySelectorAll('.expl-panel').forEach(p => {
+        p.classList.toggle('expl-panel--active', p.getAttribute('data-panel') === tab.dataset.cat);
+      });
+    });
+  });
+</script>
+
+<style>
+  .band { padding-block: 6rem; border-top: 1px solid rgba(255,255,255,0.05); }
+  .wrap { max-width: 48rem; margin-inline: auto; padding-inline: 1.5rem; }
+  .eyebrow {
+    font-family: var(--font-mono); font-size: 0.6875rem; font-weight: 500;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: rgba(99, 138, 255, 0.7); margin-bottom: 0.75rem; text-align: center;
+  }
+  .h2 {
+    font-family: var(--font-display); font-size: clamp(1.5rem, 4vw, 2.25rem);
+    font-weight: 700; letter-spacing: -0.02em; line-height: 1.15;
+    color: var(--zk-heading, #f5f5fa); text-align: center; margin-bottom: 2rem;
+  }
+  .text-gradient {
+    background: linear-gradient(135deg, #638AFF 0%, #8B5CF6 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .expl-tabs {
+    display: flex; flex-wrap: wrap; justify-content: center;
+    gap: 0.5rem; margin-bottom: 2rem;
+  }
+  .expl-tab {
+    padding: 0.5rem 1.25rem; border-radius: 2rem;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.02); color: var(--zk-text2, #a1a1aa);
+    font-size: 0.875rem; font-weight: 500; cursor: pointer;
+    transition: all 0.25s;
+    font: inherit;
+  }
+  .expl-tab:hover { border-color: rgba(99,138,255,0.25); color: #fff; }
+  .expl-tab--active {
+    background: rgba(99,138,255,0.1); border-color: rgba(99,138,255,0.35);
+    color: #fff;
+  }
+  .expl-panel { display: none; }
+  .expl-panel--active { display: block; animation: explFade 0.4s cubic-bezier(0.16,1,0.3,1); }
+  @keyframes explFade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  .expl-headline {
+    font-family: var(--font-display); font-size: 1.25rem; font-weight: 600;
+    color: var(--zk-heading, #f5f5fa); text-align: center; margin-bottom: 1.5rem;
+  }
+  .expl-sols {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+    gap: 1rem;
+  }
+  .expl-sol {
+    padding: 1.25rem; border-radius: 0.75rem;
+    border: 1px solid rgba(255,255,255,0.06);
+    background: rgba(255,255,255,0.012);
+  }
+  .expl-sol__name {
+    font-family: var(--font-display); font-size: 1rem; font-weight: 600;
+    color: var(--zk-heading, #f5f5fa); margin-bottom: 0.4rem;
+  }
+  .expl-sol__desc {
+    font-size: 0.8125rem; line-height: 1.5; color: var(--zk-text2, #a1a1aa); margin: 0;
+  }
+</style>

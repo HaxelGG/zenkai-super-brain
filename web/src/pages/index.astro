@@ -14,10 +14,12 @@ import IndustryGrid from '../components/landing/IndustryGrid.astro';
 import IntegrationCloud from '../components/landing/IntegrationCloud.astro';
 import Confianza from '../components/landing/Confianza.astro';
 import FAQ from '../components/landing/FAQ.astro';
-import CTAFinal from '../components/landing/CTAFinal.astro';
 import StickyBar from '../components/landing/StickyBar.astro';
 import ChatWidget from '../components/landing/ChatWidget.astro';
 import CursorSpotlight from '../components/landing/CursorSpotlight.astro';
+import FinalCTA from '../components/landing/FinalCTA.astro';
+import SolutionExplorer from '../components/landing/SolutionExplorer.astro';
+import ScrollProgress from '../components/landing/ScrollProgress.astro';
 
 /**
  * ZENKAI — AI Business Infrastructure
@@ -38,15 +40,33 @@ import CursorSpotlight from '../components/landing/CursorSpotlight.astro';
  */
 ---
 
+<script is:inline type="application/ld+json" set:html={JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: 'ZENKAI',
+  applicationCategory: 'BusinessApplication',
+  operatingSystem: 'Web',
+  url: 'https://zenkai.systems',
+  description: 'AI business infrastructure that connects sales, customer service and operations into one intelligent system.',
+  offers: [
+    { '@type': 'Offer', name: 'Starter', price: '95', priceCurrency: 'EUR', description: 'For small businesses ready to automate' },
+    { '@type': 'Offer', name: 'Growth', price: '195', priceCurrency: 'EUR', description: 'For growing businesses that need full coverage' },
+    { '@type': 'Offer', name: 'Scale', price: '395', priceCurrency: 'EUR', description: 'For operations that require serious AI infrastructure' },
+  ],
+  featureList: ['AI Agents', 'Automation', 'CRM Integration', 'WhatsApp Integration', 'Analytics', 'Workflow Automation', 'Customer Service AI', 'Sales AI'],
+})} />
+
 <WebLayout
   title="ZENKAI · AI Business Infrastructure · Your business, powered by AI"
   description="ZENKAI connects sales, customer service and operations into one intelligent system. AI Agents, Automation, Integrations, Analytics. Built for modern businesses."
 >
+  <ScrollProgress />
   <CursorSpotlight />
   <CoreHero />
   <AIActivityFeed />
   <ProblemSelector />
   <TrustStack />
+  <SolutionExplorer />
   <WorkflowViz />
   <SalesSimulator />
   <ROICalculator />
@@ -56,7 +76,7 @@ import CursorSpotlight from '../components/landing/CursorSpotlight.astro';
   <IntegrationCloud />
   <Confianza />
   <FAQ />
-  <CTAFinal />
+  <FinalCTA />
   <StickyBar />
   <ChatWidget />
 </WebLayout>
