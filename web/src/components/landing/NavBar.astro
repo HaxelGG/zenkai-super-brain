@@ -1,7 +1,6 @@
 ---
 import Brand from './Brand.astro';
 import WhatsAppCTA from '../WhatsAppCTA.astro';
-import { CURRENCY_CODES, DEFAULT_CURRENCY } from '../../lib/currency';
 import { getMenu } from '../../lib/catalogo';
 
 /**
@@ -75,15 +74,6 @@ const enSoluciones = activo('/soluciones') || activo('/modulos');
     </nav>
 
     <div class="nav__acciones">
-      <div class="currency-switch" role="group" aria-label="Moneda de los precios">
-        {CURRENCY_CODES.map((code) => (
-          <button
-            class:list={['currency-btn', code === DEFAULT_CURRENCY ? 'is-active' : '']}
-            data-currency={code}
-            aria-pressed={code === DEFAULT_CURRENCY ? 'true' : 'false'}
-          >{code}</button>
-        ))}
-      </div>
 
       <div class="nav__wa">
         <WhatsAppCTA
@@ -268,30 +258,6 @@ const enSoluciones = activo('/soluciones') || activo('/modulos');
   .nav__wa { display: none; }
   @media (min-width: 640px) { .nav__wa { display: block; } }
 
-  .currency-switch {
-    display: flex; align-items: center; flex-shrink: 0;
-    font-family: var(--font-mono); font-size: var(--t-eyebrow);
-    background: var(--zk-surface);
-    border: 1px solid var(--zk-border);
-    border-radius: var(--zk-r-sm);
-    overflow: hidden;
-  }
-  .currency-btn {
-    display: inline-flex; align-items: center; justify-content: center;
-    min-width: 48px; min-height: 48px; padding: 0 6px;
-    background: transparent; border: 0; color: var(--zk-muted);
-    font: inherit; cursor: pointer;
-    /* DESPUÉS de `font: inherit` y no antes: el atajo `font` reinicia
-       font-variant-numeric a normal, así que la regla global de cifras
-       tabulares moría aquí en silencio. Se comprobó leyendo el computed
-       style, no el CSS. */
-    font-variant-numeric: tabular-nums;
-    transition: color 0.2s, background 0.2s;
-  }
-  .currency-btn:hover { color: var(--zk-text); }
-  .currency-btn.is-active { color: #fff; background: var(--zk-accent-solid); }
-  .currency-btn:focus-visible { outline: 2px solid var(--zk-growth); outline-offset: -2px; }
-
   .mobile-burger {
     display: inline-flex; align-items: center; justify-content: center;
     width: 48px; height: 48px;
@@ -362,61 +328,6 @@ const enSoluciones = activo('/soluciones') || activo('/modulos');
 </style>
 
 <script>
-  import { CURRENCIES, DEFAULT_CURRENCY, formatPrice, isCurrencyCode } from '../../lib/currency';
-  import type { CurrencyCode } from '../../lib/currency';
-
-  // ── Conmutador de moneda ──────────────────────────────────────────────────
-  // Sin conversión: cada elemento trae su importe fijado en cada moneda.
-  const applyCurrency = (cur: CurrencyCode) => {
-    document.querySelectorAll<HTMLButtonElement>('.currency-btn').forEach((b) => {
-      const activo = b.dataset.currency === cur;
-      b.classList.toggle('is-active', activo);
-      b.setAttribute('aria-pressed', String(activo));
-    });
-    document.querySelectorAll<HTMLElement>('[data-price-eur]').forEach((el) => {
-      const raw = el.dataset[`price${cur.charAt(0)}${cur.slice(1).toLowerCase()}`];
-      const amount = Number(raw);
-      if (raw === undefined || Number.isNaN(amount)) return;
-      el.textContent = amount === 0 && el.dataset.priceZero
-        ? el.dataset.priceZero
-        : `${formatPrice(amount, cur)}${el.dataset.priceSuffix ?? ''}`;
-    });
-    document.querySelectorAll<HTMLElement>('.currency-code').forEach((el) => { el.textContent = cur; });
-    document.querySelectorAll<HTMLElement>('.currency-region').forEach((el) => {
-      el.textContent = CURRENCIES[cur].region;
-    });
-    const note = CURRENCIES[cur].note;
-    document.querySelectorAll<HTMLElement>('.currency-note').forEach((el) => {
-      el.textContent = note ?? '';
-      el.classList.toggle('hidden', !note);
-    });
-    try { localStorage.setItem('zk-currency', cur); } catch {}
-  };
-
-  document.querySelectorAll<HTMLButtonElement>('.currency-btn').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const cur = btn.dataset.currency;
-      if (isCurrencyCode(cur)) applyCurrency(cur);
-    });
-  });
-  // Se aplica SIEMPRE, no sólo cuando hay una moneda guardada.
-  //
-  // Antes, en la primera visita no se llamaba a applyCurrency y el aviso
-  // "IVA no incluido" —que es la nota de EUR, la moneda por defecto— no
-  // aparecía hasta que el visitante tocaba el conmutador. Es decir: el único
-  // matiz fiscal de la página de precios estaba oculto justo para quien
-  // llegaba por primera vez desde Europa.
-  try {
-    const saved = localStorage.getItem('zk-currency');
-    if (saved && isCurrencyCode(saved)) applyCurrency(saved);
-    else {
-      if (saved) localStorage.removeItem('zk-currency');
-      applyCurrency(DEFAULT_CURRENCY);
-    }
-  } catch {
-    applyCurrency(DEFAULT_CURRENCY);
-  }
-
   // ── Megamenú ──────────────────────────────────────────────────────────────
   const megaBtn = document.getElementById('mega-btn');
   const megaPanel = document.getElementById('mega-panel');

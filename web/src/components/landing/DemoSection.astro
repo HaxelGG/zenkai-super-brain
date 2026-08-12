@@ -487,17 +487,13 @@ const preciosPorTier = Object.fromEntries(TIERS.map((t) => [t.nombre, t.mensual]
         .join('');
       const stack = p.stack.map((s) => `<span class="proposal-pill">${escape(s)}</span>`).join(' ');
 
-      // Moneda activa · la misma que el visitante eligió en la cabecera.
-      let moneda = 'EUR';
-      try {
-        const g = localStorage.getItem('zk-currency');
-        if (g && PRECIOS[data.tier_recomendado]?.[g] !== undefined) moneda = g;
-      } catch { /* sin localStorage se usa el default */ }
+      // Precio fijo en EUR para el mercado europeo.
+      const moneda = 'EUR';
       const importe = PRECIOS[data.tier_recomendado]?.[moneda];
       const precioTxt = importe === undefined
         ? ''
-        : new Intl.NumberFormat(moneda === 'EUR' ? 'es-ES' : moneda === 'COP' ? 'es-CO' : 'en-US', {
-            style: 'currency', currency: moneda, maximumFractionDigits: 0,
+        : new Intl.NumberFormat('es-ES', {
+            style: 'currency', currency: 'EUR', maximumFractionDigits: 0,
           }).format(importe);
       return `
         <div class="proposal-card space-y-5">
