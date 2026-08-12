@@ -2,57 +2,57 @@
 export const prerender = true;
 
 import WebLayout from '../layouts/WebLayout.astro';
-import PlanZenkai from '../components/landing/PlanZenkai.astro';
+import PricingTiers from '../components/landing/PricingTiers.astro';
 import WhatsAppCTA from '../components/WhatsAppCTA.astro';
-import FAQ from '../components/landing/FAQ.astro';
 
 const preguntasFrecuentes = [
   {
     q: '¿Hay algún coste oculto?',
-    a: 'No. 500€ de implementación + 95€/mes de mantenimiento. Esos son los únicos dos números que vas a ver en tu factura. No cobramos por módulo, por usuario ni por volumen de uso.',
+    a: 'No. Pagas la implementacion una vez y el plan mensual que elijas. No cobramos por usuario, por modulo ni por volumen de uso. Lo que ves es lo que pagas.',
   },
   {
-    q: '¿Puedo contratar solo una parte del plan?',
-    a: 'El Plan Zenkai es un sistema integrado. Cada componente depende de los demás: el CRM alimenta al agente de ventas, la facturación se conecta con el CRM, la agenda se sincroniza con la atención al cliente. Separarlos sería como venderte un coche sin ruedas.',
+    q: '¿Puedo cambiar de plan?',
+    a: 'Si. Puedes subir de Starter a Growth o bajar cuando quieras. Solo pagas la diferencia del mes en curso.',
   },
   {
-    q: '¿Cómo funciona la garantía de 14 días?',
-    a: 'Si en las dos primeras semanas no ves resultados, nos escribes y te devolvemos los 500€ de implementación. Sin preguntas, sin letra pequeña. No hemos tenido que hacer ninguna devolución todavía.',
+    q: '¿Como funciona la garantia de 14 dias?',
+    a: 'Si en las dos primeras semanas no ves resultados, nos escribes y te devolvemos la implementacion. Sin preguntas, sin letra pequena.',
   },
   {
-    q: '¿Qué pasa si necesito algo más adelante que no está en el plan?',
-    a: 'Lo construimos. El ecosistema Zenkai tiene 5 productos y si necesitas algo específico para tu sector, lo desarrollamos sobre la misma infraestructura. El coste de personalizaciones se presupuesta aparte.',
+    q: '¿Que incluyen las campanas publicitarias del plan Growth?',
+    a: 'Dos campanas al mes en Meta o Google Ads. El coste de la publicidad esta incluido en tu cuota. Nosotros disenamos, lanzamos y optimizamos.',
   },
   {
-    q: '¿Puedo cancelar el mantenimiento cuando quiera?',
-    a: 'Sí. El mantenimiento de 95€/mes se paga mes a mes, sin permanencia. Si cancelas, el sistema sigue funcionando pero sin actualizaciones ni soporte.',
+    q: '¿Puedo cancelar cuando quiera?',
+    a: 'Si. Todos los planes se pagan mes a mes, sin permanencia.',
   },
 ];
 ---
 
 <WebLayout
-  title="Precios · Plan Zenkai · 500€ + 95€/mes · ZENKAI"
-  description="Un solo plan. Un solo precio. Todo incluido. 500€ de implementación + 95€/mes de mantenimiento. Sin costes ocultos, sin permanencia. Garantía de devolución de 14 días."
+  title="Precios · Planes de IA para empresas · ZENKAI"
+  description="Starter 95€/mes, Growth 440€/mes con campanas publicitarias incluidas, Enterprise custom. Garantia de devolucion de 14 dias. Sin permanencia."
   canonical="https://zenkai.systems/precios/"
 >
   <section class="pt-12 pb-4">
     <div class="max-w-3xl mx-auto px-5 text-center reveal">
       <p class="text-xs font-mono text-zk-muted uppercase tracking-widest mb-4">Precios</p>
       <h1 class="text-4xl md:text-5xl font-bold font-display tracking-tight mb-4">
-        Un plan.<br />
-        <span class="bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">Un precio.</span>
+        Planes que escalan<br />
+        <span class="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">con tu negocio.</span>
       </h1>
       <p class="text-lg text-zk-text2 max-w-xl mx-auto">
-        No vendemos módulos sueltos. No hay planes Basic, Pro ni Enterprise. Hay un sistema completo que incluye todo lo que tu empresa necesita para funcionar con IA.
+        Desde automatizacion basica hasta infraestructura de IA completa.
+        Una sola plataforma. Paga por la capacidad que necesitas.
       </p>
     </div>
   </section>
 
-  <PlanZenkai />
+  <PricingTiers />
 
   <section class="py-16 border-t border-zk-border">
     <div class="max-w-2xl mx-auto px-5">
-      <h2 class="text-2xl font-bold font-display text-center mb-10">Preguntas frecuentes sobre el precio</h2>
+      <h2 class="text-2xl font-bold font-display text-center mb-10">Preguntas frecuentes sobre precios</h2>
       <div class="space-y-3">
         {preguntasFrecuentes.map((item, i) => (
           <details class="border border-zk-border rounded-lg overflow-hidden faq-anim" open={i === 0}>
@@ -73,7 +73,7 @@ const preguntasFrecuentes = [
       <p class="text-zk-text2 mb-6">Sin letra pequeña. Sin sorpresas.</p>
       <WhatsAppCTA
         location="precios-cierre"
-        message="Hola ZENKAI. He visto los precios y quiero empezar con el Plan Zenkai."
+        message="Hola ZENKAI. He visto los precios y quiero empezar."
         label="Hablar por WhatsApp"
         size="lg"
       />

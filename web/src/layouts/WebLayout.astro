@@ -32,9 +32,10 @@ const { title, description, canonical, ogImage, noindex } = Astro.props;
     <link rel="preload" as="font" type="font/woff2" href={soraLatin} crossorigin />
   </head>
   <body class="bg-zk-bg text-zk-text font-sans antialiased noise">
+    <a href="#contenido" class="skip-link">Saltar al contenido</a>
     <ScrollGlow />
     <NavBar />
-    <main><slot /></main>
+    <main id="contenido"><slot /></main>
     <Footer />
 
     <script>
