@@ -28,6 +28,10 @@ const modulos = [
 ---
 
 <section class="nh-root">
+  <!-- Grid de infraestructura -->
+  <div class="nh-grid" aria-hidden="true"></div>
+  <!-- Atmosfera -->
+  <div class="nh-atmos" aria-hidden="true"></div>
   <canvas class="nh-canvas" id="nh-canvas" aria-hidden="true"></canvas>
   <div class="nh-overlay"></div>
 
@@ -96,7 +100,7 @@ const modulos = [
     moduleNodes.forEach(n => {
       n.rx = n.x * w;
       n.ry = n.y * h;
-      n.r = isMobile ? 3 : 4.5;
+      n.r = isMobile ? 4.5 : 6;
     });
   }
 
@@ -138,8 +142,8 @@ const modulos = [
       const midX = (cx + n.rx) / 2 + Math.sin(time * 0.5 + i) * 4;
       const midY = (cy + n.ry) / 2 + Math.cos(time * 0.4 + i) * 4;
       ctx.quadraticCurveTo(midX, midY, n.rx, n.ry);
-      ctx.strokeStyle = `rgba(99, 138, 255, ${alpha * 0.12})`;
-      ctx.lineWidth = isHovered ? 1.2 : 0.5;
+      ctx.strokeStyle = `rgba(99, 138, 255, ${alpha * 0.15})`;
+      ctx.lineWidth = isHovered ? 1.6 : 0.7;
       ctx.stroke();
 
       // Pulso de datos
@@ -154,12 +158,16 @@ const modulos = [
     });
 
     // Nodo central
-    const coreR = isMobile ? 10 : 14;
-    const breathe = 1 + Math.sin(time * 0.8) * 0.06;
+    const coreR = isMobile ? 13 : 18;
+    const breathe = 1 + Math.sin(time * 0.8) * 0.08;
     drawNode(cx, cy, coreR * breathe, 1, true);
+    // Glow exterior
     ctx.beginPath();
-    ctx.arc(cx, cy, coreR * breathe * 2.5, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(99, 138, 255, 0.04)';
+    ctx.arc(cx, cy, coreR * breathe * 3.5, 0, Math.PI * 2);
+    const glow = ctx.createRadialGradient(cx, cy, coreR * breathe, cx, cy, coreR * breathe * 3.5);
+    glow.addColorStop(0, 'rgba(99, 138, 255, 0.12)');
+    glow.addColorStop(1, 'rgba(99, 138, 255, 0)');
+    ctx.fillStyle = glow;
     ctx.fill();
 
     // Nodos perifericos
@@ -204,9 +212,30 @@ const modulos = [
     display: flex;
     align-items: center;
     overflow: hidden;
-    background: radial-gradient(ellipse 80% 60% at 40% 40%, rgba(99,138,255,0.06) 0%, transparent 50%),
-                radial-gradient(ellipse 40% 40% at 70% 70%, rgba(139,92,246,0.04) 0%, transparent 40%),
-                #08080c;
+    background: #06060A;
+  }
+
+  .nh-grid {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-image:
+      linear-gradient(rgba(99, 138, 255, 0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(99, 138, 255, 0.025) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(ellipse 70% 60% at 40% 45%, black 30%, transparent 70%);
+  }
+
+  .nh-atmos {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse 50% 40% at 38% 42%, rgba(99, 138, 255, 0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 30% 25% at 70% 30%, rgba(139, 92, 246, 0.05) 0%, transparent 50%),
+      radial-gradient(ellipse 20% 20% at 20% 80%, rgba(99, 138, 255, 0.03) 0%, transparent 50%);
   }
 
   .nh-canvas {

@@ -22,13 +22,15 @@ body {
   font-family: var(--font-body);
   font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
   overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Below-the-fold: el navegador puede saltarse el layout hasta que haga falta.
    Cada sección es una unidad independiente de contenido. */
 .band {
   content-visibility: auto;
-  contain-intrinsic-size: auto 500px;
+  contain-intrinsic-size: auto 600px;
 }
 
 /* ========================================
@@ -43,12 +45,11 @@ body {
    ======================================== */
 h1, h2 {
   font-family: var(--font-display);
-  /* Sora es más ancha que Geist al mismo cuerpo. Sin apretar el interletraje
-     un titular de tres líneas gana una cuarta. */
-  letter-spacing: -0.025em;
+  letter-spacing: -0.03em;
   text-wrap: balance;
+  line-height: 1.08;
 }
-h3, h4, h5, h6 { font-family: var(--font-body); }
+h3, h4, h5, h6 { font-family: var(--font-body); letter-spacing: -0.01em; }
 
 p { text-wrap: pretty; }
 
