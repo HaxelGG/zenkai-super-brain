@@ -38,6 +38,18 @@ import CursorSpotlight from '../components/landing/CursorSpotlight.astro';
  */
 ---
 
+<script is:inline type="application/ld+json" set:html={JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
+    { '@type': 'Question', name: '¿Cuánto cuesta ZENKAI?', acceptedAnswer: { '@type': 'Answer', text: '500€ de implementación única + 95€ al mes de mantenimiento. Sin costes ocultos. Sin permanencia.' } },
+    { '@type': 'Question', name: '¿Qué incluye?', acceptedAnswer: { '@type': 'Answer', text: 'Web profesional, CRM, agente de ventas IA, atención al cliente 24/7, facturación, agenda automatizada, diagnóstico de marketing y diagnóstico empresarial.' } },
+    { '@type': 'Question', name: '¿Cuánto tarda en estar funcionando?', acceptedAnswer: { '@type': 'Answer', text: '7 días laborables desde que nos das acceso a los datos de tu negocio.' } },
+    { '@type': 'Question', name: '¿Hay garantía?', acceptedAnswer: { '@type': 'Answer', text: '14 días de prueba. Si no ves resultados, te devolvemos los 500€ de implementación.' } },
+    { '@type': 'Question', name: '¿Qué tipo de empresas pueden usarlo?', acceptedAnswer: { '@type': 'Answer', text: 'Clínicas, restaurantes, ecommerce, inmobiliarias, agencias, servicios profesionales. Cualquier empresa que venda, atienda clientes y tenga operaciones.' } },
+  ],
+})} />
+
 <WebLayout
   title="ZENKAI · AI Growth Systems · Infraestructura de IA empresarial"
   description="ZENKAI es infraestructura de inteligencia artificial para empresas. Conecta ventas, atencion y operaciones. 500€ implementacion + 95€/mes."
