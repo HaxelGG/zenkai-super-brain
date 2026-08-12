@@ -1,6 +1,4 @@
 ---
-import { Image } from 'astro:assets';
-import logoSquare from '../../assets/brand/zenkai-logo-square.png';
 import WhatsAppCTA from '../WhatsAppCTA.astro';
 ---
 <section class="py-20 lg:py-24 border-t border-zk-border/50 relative overflow-hidden">
@@ -9,13 +7,11 @@ import WhatsAppCTA from '../WhatsAppCTA.astro';
   <div class="absolute inset-0 spotlight pointer-events-none"></div>
 
   <div class="relative max-w-3xl mx-auto px-5 lg:px-8 text-center reveal">
-    <Image
-      src={logoSquare}
+    <img
+      src="/brand/zenkai-logo-square.png"
       alt="ZENKAI"
-      width={200}
-      height={200}
-      format="webp"
-      class="w-32 h-32 sm:w-40 sm:h-40 mx-auto mb-8 rounded-2xl object-cover ring-2 ring-zk-border shadow-2xl shadow-zk-accent/30"
+      class="mx-auto mb-8 rounded-2xl ring-2 ring-zk-border shadow-2xl shadow-zk-accent/30"
+      style="width:min(300px, 70vw);height:auto;aspect-ratio:1;object-fit:cover"
     />
 
     <h2 class="t-display-l mb-6">Tu empresa merece funcionar sin ti para que tú puedas hacer lo que importa</h2>
