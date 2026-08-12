@@ -17,9 +17,17 @@
         <span class="text-gradient">conversa con tus clientes.</span>
       </h2>
       <p class="lede">
-        Escribe como si fueras un cliente interesado en tu negocio. El agente IA te responde al instante.
-        Esto es lo que tus clientes experimentarían 24/7.
+        Selecciona tu sector y escribe como si fueras un cliente interesado.
+        El agente IA te responde al instante, 24/7.
       </p>
+    </div>
+
+    <div class="sim-sectores reveal" id="sim-sectores">
+      <button class="sim-sector sim-sector--active" data-sector="clinica">Clínica dental</button>
+      <button class="sim-sector" data-sector="restaurante">Restaurante</button>
+      <button class="sim-sector" data-sector="ecommerce">Ecommerce</button>
+      <button class="sim-sector" data-sector="inmobiliaria">Inmobiliaria</button>
+      <button class="sim-sector" data-sector="servicios">Servicios profesionales</button>
     </div>
 
     <div class="sim-phone reveal">
@@ -59,7 +67,28 @@
   const sugerencias = document.getElementById('sim-sugerencias')!;
 
   let loading = false;
+  let sector = 'clinica';
   const history: { role: string; content: string }[] = [];
+
+  const SECTOR_PROMPTS: Record<string, string> = {
+    clinica: 'Eres el agente de atencion de una clinica dental. Habla de citas, tratamientos, precios y horarios. Responde como recepcionista profesional.',
+    restaurante: 'Eres el agente de atencion de un restaurante. Habla de reservas, menu, alergias, grupos y horarios. Responde como anfitrion profesional.',
+    ecommerce: 'Eres el agente de atencion de una tienda online. Habla de pedidos, envios, devoluciones, tallas y stock. Responde como soporte profesional.',
+    inmobiliaria: 'Eres el agente de atencion de una inmobiliaria. Habla de propiedades, visitas, financiacion y documentacion. Responde como asesor profesional.',
+    servicios: 'Eres el agente de atencion de una empresa de servicios profesionales. Habla de presupuestos, proyectos, plazos y consultoria. Responde como consultor profesional.',
+  };
+
+  document.querySelectorAll<HTMLButtonElement>('.sim-sector').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.sim-sector').forEach(b => b.classList.remove('sim-sector--active'));
+      btn.classList.add('sim-sector--active');
+      sector = btn.dataset.sector || 'clinica';
+      // Reiniciar conversacion con el nuevo sector
+      history.length = 0;
+      messagesEl.innerHTML = '';
+      addMsg('agent', 'Hola, soy el agente virtual de Zenkai para tu sector. Preguntame lo que quieras como si fueras un cliente.');
+    });
+  });
 
   function addMsg(role: 'user' | 'agent', text: string, html = false) {
     const div = document.createElement('div');
@@ -98,7 +127,7 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           messages: [
-            { role: 'system', content: 'Eres un agente de ventas de ZENKAI haciendo una demo en vivo en la web. El visitante está probando cómo funciona el agente de ventas IA. Responde como si estuvieras atendiendo a un cliente real interesado en los servicios de Zenkai (500€ + 95€/mes, incluye web, CRM, agente de ventas, atención al cliente, facturación, agenda, diagnóstico). Sé persuasivo pero natural. Si el lead está cualificado, invítalo a hablar por WhatsApp. Máximo 4 frases. Sin markdown.' },
+            { role: 'system', content: SECTOR_PROMPTS[sector] || SECTOR_PROMPTS.clinica },
             ...history.slice(-8),
           ],
         }),
@@ -146,6 +175,23 @@
   .lede {
     font-size: 1rem; line-height: 1.6; color: var(--zk-muted, #a1a1aa);
     text-align: center; max-width: 48rem; margin-inline: auto; margin-bottom: 2rem;
+  }
+
+  .sim-sectores {
+    display: flex; flex-wrap: wrap; justify-content: center;
+    gap: 0.4rem; margin-bottom: 1.5rem;
+  }
+  .sim-sector {
+    padding: 0.4rem 1rem; border-radius: 2rem;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.02); color: var(--zk-text2, #a1a1aa);
+    font-size: 0.8125rem; cursor: pointer;
+    transition: all 0.25s; font: inherit;
+  }
+  .sim-sector:hover { border-color: rgba(99,138,255,0.25); color: #fff; }
+  .sim-sector--active {
+    background: rgba(99,138,255,0.1); border-color: rgba(99,138,255,0.35);
+    color: #fff;
   }
 
   .sim-phone {

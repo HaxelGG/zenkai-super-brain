@@ -1,0 +1,81 @@
+---
+/**
+ * SecuritySection — Trust & Security.
+ * Responde a la pregunta: "¿Puedo confiar en ZENKAI para procesos criticos?"
+ */
+---
+
+<section class="band" aria-labelledby="sec-titulo">
+  <div class="wrap">
+    <div class="reveal">
+      <p class="eyebrow">Confianza y Seguridad</p>
+      <h2 id="sec-titulo" class="h2">
+        Infraestructura en la que<br />
+        <span class="text-gradient">puedes confiar.</span>
+      </h2>
+    </div>
+
+    <div class="sec-grid reveal-stagger">
+      {[
+        { t: 'Proteccion de datos', d: 'Tus datos no se usan para entrenar modelos de terceros. Cada empresa tiene su entorno aislado.', i: 'M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z' },
+        { t: 'Cumplimiento RGPD', d: 'Disenado bajo los principios del RGPD europeo y la AI Act. Consentimiento, transparencia y derecho al olvido.', i: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z' },
+        { t: 'Gobernanza de IA', d: 'Cada agente opera con limites definidos. Los humanos mantienen el control de las decisiones criticas.', i: 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z' },
+        { t: 'Despliegue controlado', d: 'Proceso de implementacion por fases. Testeado antes de entrar en produccion. Sin sorpresas.', i: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' },
+        { t: 'Soporte humano', d: 'Respuesta en menos de 4 horas. Soporte prioritario 24/7 en planes Growth y Enterprise.', i: 'M7.9 20A9 9 0 1 0 4 16.1L2 22Z' },
+        { t: 'Metodologia clara', d: 'Discover, Design, Deploy, Optimize. Sabes exactamente que pasa en cada fase y cuando.', i: 'M3 3v16a2 2 0 002 2h16M18 17V9M13 17V5M8 17v-3' },
+      ].map((item) => (
+        <div class="sec-card">
+          <div class="sec-card__icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d={item.i}/></svg>
+          </div>
+          <h3 class="sec-card__t">{item.t}</h3>
+          <p class="sec-card__d">{item.d}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .band { padding-block: 6rem; border-top: 1px solid rgba(255,255,255,0.05); }
+  .wrap { max-width: 48rem; margin-inline: auto; padding-inline: 1.5rem; }
+  .eyebrow {
+    font-family: var(--font-mono); font-size: 0.6875rem; font-weight: 500;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: rgba(99, 138, 255, 0.7); margin-bottom: 0.75rem; text-align: center;
+  }
+  .h2 {
+    font-family: var(--font-display); font-size: clamp(1.5rem, 4vw, 2.25rem);
+    font-weight: 700; letter-spacing: -0.02em; line-height: 1.15;
+    color: var(--zk-heading, #f5f5fa); text-align: center; margin-bottom: 2.5rem;
+  }
+  .text-gradient {
+    background: linear-gradient(135deg, #638AFF 0%, #8B5CF6 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .sec-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+    gap: 1rem;
+  }
+  .sec-card {
+    padding: 1.5rem; border-radius: 0.75rem;
+    border: 1px solid rgba(255,255,255,0.06);
+    background: rgba(255,255,255,0.012);
+    transition: border-color 0.3s;
+  }
+  .sec-card:hover { border-color: rgba(99,138,255,0.18); }
+  .sec-card__icon {
+    width: 2.25rem; height: 2.25rem; border-radius: 0.5rem;
+    background: rgba(99,138,255,0.08); color: #638AFF;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 0.85rem;
+  }
+  .sec-card__t {
+    font-family: var(--font-display); font-size: 0.9375rem; font-weight: 600;
+    color: var(--zk-heading, #f5f5fa); margin-bottom: 0.4rem;
+  }
+  .sec-card__d {
+    font-size: 0.8125rem; line-height: 1.5; color: var(--zk-text2, #a1a1aa); margin: 0;
+  }
+</style>
