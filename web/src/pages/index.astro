@@ -1,33 +1,44 @@
 ---
 export const prerender = true;
 import WebLayout from '../layouts/WebLayout.astro';
-import HeroNuevo from '../components/landing/HeroNuevo.astro';
-import DiagnosticoSelector from '../components/landing/DiagnosticoSelector.astro';
-import TresPilares from '../components/landing/TresPilares.astro';
-import DemoSection from '../components/landing/DemoSection.astro';
+import HeroSimple from '../components/landing/HeroSimple.astro';
+import AntesDespues from '../components/landing/AntesDespues.astro';
+import ComoFunciona from '../components/landing/ComoFunciona.astro';
+import PlanZenkai from '../components/landing/PlanZenkai.astro';
 import Ecosistema from '../components/landing/Ecosistema.astro';
-import Planes from '../components/landing/Planes.astro';
-import Comparativa from '../components/landing/Comparativa.astro';
 import Transparencia from '../components/landing/Transparencia.astro';
 import FAQ from '../components/landing/FAQ.astro';
 import CTAFinal from '../components/landing/CTAFinal.astro';
 import StickyBar from '../components/landing/StickyBar.astro';
+
+/**
+ * Nueva estructura simplificada.
+ *
+ *  1 Hero          → "Qué es, cuánto cuesta, qué incluye" en 5 segundos
+ *  2 Antes/Después → "Esto es lo que cambia" — el dolor y la solución lado a lado
+ *  3 Cómo funciona → "En 3 pasos" — elimina la fricción de compra
+ *  4 Plan Zenkai    → "Un plan, un precio, todo incluido" — sin decisiones difíciles
+ *  5 Ecosistema     → "5 productos integrados" — prueba de que no es humo
+ *  6 Transparencia  → RGPD + AI Act para el comprador europeo
+ *  7 FAQ            → Últimas objeciones
+ *  8 Cierre         → CTA final
+ *
+ *  Cada bloque añade una capa de valor. El empresario que scrollea entero
+ *  ya está convencido antes de llegar al precio.
+ */
 ---
 
 <WebLayout
-  title="ZENKAI · Agencia de Inteligencia Artificial · Sistemas de IA que devuelven dinero"
-  description="Agencia de IA con 5 productos integrados: motor comercial, atencion al cliente, facturacion, redes sociales automatizadas y stack de agentes IA. Infraestructura completa para empresas."
+  title="ZENKAI · Tu empresa con IA en 7 días · 500€ + 95€/mes"
+  description="Montamos el sistema digital completo de tu negocio: web, CRM, agente de ventas IA, atención al cliente, facturación y agenda. 500€ de implementación + 95€/mes de mantenimiento."
 >
-  <HeroNuevo />
-  <DiagnosticoSelector />
-  <TresPilares />
+  <HeroSimple />
+  <AntesDespues />
+  <ComoFunciona />
+  <PlanZenkai />
   <Ecosistema />
-  <DemoSection />
-  <Planes compacto />
-  <Comparativa />
   <Transparencia />
   <FAQ />
   <CTAFinal />
-
   <StickyBar />
 </WebLayout>

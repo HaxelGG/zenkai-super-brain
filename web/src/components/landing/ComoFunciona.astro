@@ -1,0 +1,150 @@
+---
+import WhatsAppCTA from '../WhatsAppCTA.astro';
+
+const pasos = [
+  {
+    num: '1',
+    titulo: 'Hablamos 15 minutos',
+    desc: 'Por WhatsApp o videollamada. Nos cuentas tu negocio, tus dolores, lo que quieres lograr. Sin compromiso.',
+  },
+  {
+    num: '2',
+    titulo: 'Montamos todo en 7 días',
+    desc: 'Web, CRM, agentes de IA, facturación y agenda. Lo configuramos con los datos de tu empresa. Tú no haces nada.',
+  },
+  {
+    num: '3',
+    titulo: 'Lo mantenemos por 95€ al mes',
+    desc: 'Actualizaciones, mejoras, soporte. Si algo falla, lo arreglamos. Si necesitas más, lo construimos.',
+  },
+];
+---
+
+<section class="band" aria-labelledby="como-titulo">
+  <div class="wrap">
+    <div class="reveal">
+      <p class="eyebrow">Así de simple</p>
+      <h2 id="como-titulo" class="h2">En tres pasos, tu empresa operando con IA</h2>
+    </div>
+
+    <div class="como-grid reveal-stagger">
+      {pasos.map((p) => (
+        <div class="como-card card-3d">
+          <div class="como-card__num">{p.num}</div>
+          <h3 class="como-card__titulo">{p.titulo}</h3>
+          <p class="como-card__desc">{p.desc}</p>
+        </div>
+      ))}
+    </div>
+
+    <div class="como-cta reveal">
+      <WhatsAppCTA
+        location="como-funciona"
+        message="Hola ZENKAI. Quiero empezar con los 3 pasos."
+        label="Empieza hoy, gratis la primera llamada"
+        variant="block"
+        size="lg"
+      />
+    </div>
+  </div>
+</section>
+
+<style>
+  .band {
+    padding-block: 5rem;
+    border-top: 1px solid var(--zk-border, #1f1f2c);
+  }
+
+  .wrap {
+    max-width: 54rem;
+    margin-inline: auto;
+    padding-inline: 1.5rem;
+  }
+
+  .eyebrow {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--zk-accent, #6366f1);
+    margin-bottom: 0.75rem;
+    text-align: center;
+  }
+
+  .h2 {
+    font-family: 'Sora Variable', 'Sora', system-ui, sans-serif;
+    font-size: clamp(1.5rem, 4vw, 2.25rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    color: var(--zk-heading, #f5f5fa);
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+
+  .como-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+    gap: 1.25rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .como-card {
+    padding: 1.75rem;
+    border-radius: 0.75rem;
+    border: 1px solid var(--zk-border, #1f1f2c);
+    background: var(--zk-card, #0d0d1a);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .como-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(400px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(99,102,241,0.05), transparent 40%);
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+  }
+
+  .como-card:hover::before {
+    opacity: 1;
+  }
+
+  .como-card__num {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6366f1, #a855f7);
+    color: white;
+    font-family: 'Sora Variable', 'Sora', system-ui, sans-serif;
+    font-size: 1.125rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+  }
+
+  .como-card__titulo {
+    font-family: 'Sora Variable', 'Sora', system-ui, sans-serif;
+    font-size: 1.0625rem;
+    font-weight: 600;
+    color: var(--zk-heading, #f5f5fa);
+    margin-bottom: 0.5rem;
+  }
+
+  .como-card__desc {
+    font-size: 0.875rem;
+    line-height: 1.55;
+    color: var(--zk-muted, #a1a1aa);
+    margin: 0;
+  }
+
+  .como-cta {
+    text-align: center;
+  }
+</style>
