@@ -27,10 +27,15 @@ body {
 }
 
 /* Below-the-fold: el navegador puede saltarse el layout hasta que haga falta.
-   Cada sección es una unidad independiente de contenido. */
+   Cada seccion es una unidad independiente de contenido. */
 .band {
   content-visibility: auto;
   contain-intrinsic-size: auto 600px;
+}
+
+/* Ritmo visual: secciones alternadas con fondo sutilmente diferente */
+main > .band:nth-of-type(even) {
+  background: rgba(255, 255, 255, 0.008);
 }
 
 /* ========================================
@@ -215,8 +220,80 @@ td.num {
 }
 
 /* ========================================
-   BOTONES compartidos
-   ======================================== */
+    DESIGN SYSTEM UNIFICADO v3
+    Utilidades compartidas para todas las secciones.
+    Un solo lugar para: seccion, header, eyebrow, titulo, lede, card.
+    ======================================== */
+
+/* Seccion estandar */
+.zk-section {
+  padding-block: clamp(4rem, 8vw, 7rem);
+  border-top: 1px solid rgba(255,255,255,0.04);
+}
+.zk-section--alt {
+  background: rgba(255,255,255,0.008);
+}
+
+/* Contenedor estandar */
+.zk-wrap {
+  max-width: 48rem;
+  margin-inline: auto;
+  padding-inline: 1.5rem;
+}
+
+/* Header de seccion estandar */
+.zk-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(99, 138, 255, 0.7);
+  margin-bottom: 0.75rem;
+  text-align: center;
+  display: block;
+}
+.zk-h2 {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 4vw, 2.25rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  color: var(--zk-heading, #f5f5fa);
+  text-align: center;
+  margin: 0 0 1rem;
+  text-wrap: balance;
+}
+.zk-lede {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--zk-text2, #a1a1aa);
+  text-align: center;
+  max-width: 32rem;
+  margin-inline: auto;
+  margin-bottom: 2.5rem;
+}
+.zk-grad {
+  background: linear-gradient(135deg, #638AFF 0%, #8B5CF6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Card estandar */
+.zk-card {
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 0.875rem;
+  background: rgba(255,255,255,0.012);
+  transition: border-color 0.3s, transform 0.3s;
+}
+.zk-card:hover {
+  border-color: rgba(99,138,255,0.18);
+}
+
+/* ========================================
+    BOTONES compartidos
+    ======================================== */
 .btn-primary {
   position: relative;
   overflow: hidden;
