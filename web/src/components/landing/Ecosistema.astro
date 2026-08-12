@@ -1,0 +1,251 @@
+---
+// Ecosistema Zenkai - Bloque que muestra todos los productos conectados
+// Incluye: Zenkai Commercial, AtiendeAI, AuraFact, Social Automation, AI Agency Core
+import WhatsAppCTA from '../WhatsAppCTA.astro';
+
+const productos = [
+  {
+    nombre: "Motor Comercial",
+    descripcion: "Agentes IA que prospectan, califican, contactan y cierran ventas 24/7. Multi-canal, multi-idioma.",
+    cta: "Ver Dashboard Comercial",
+    href: "https://comercial.zenkai.systems",
+    icono: "M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4",
+    activo: true,
+  },
+  {
+    nombre: "AtiendeAI",
+    descripcion: "Atencion al cliente con IA que responde en segundos por WhatsApp, web y redes sociales. Resuelve el 80% de consultas sin humano.",
+    cta: "Ver AtiendeAI",
+    href: "https://atiendeai.com",
+    icono: "M7.9 20A9 9 0 1 0 4 16.1L2 22Z",
+    activo: true,
+  },
+  {
+    nombre: "AuraFact",
+    descripcion: "Facturacion, cobros y gestion financiera automatizada con IA. Factura en segundos, cobra mas rapido.",
+    cta: "Ver AuraFact",
+    href: "https://aurafact.com",
+    icono: "M3 3v16a2 2 0 0 0 2 2h16 M18 17V9 M13 17V5 M8 17v-3",
+    activo: true,
+  },
+  {
+    nombre: "Social Automation",
+    descripcion: "Publicacion automatica en Instagram, Facebook, LinkedIn y TikTok. Contenido generado por IA, programado y publicado sin intervencion.",
+    cta: "Automatizar Redes",
+    href: "https://zenkai.systems/soluciones/vender-mas",
+    icono: "M17 18a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2 M10 22h4 M6 22h12 M12 18v-4 M12 8V2 M4.93 10.93l1.41 1.41 M19.07 10.93l-1.41 1.41 M2 18h2 M20 18h2",
+    activo: true,
+  },
+  {
+    nombre: "AI Agency Core",
+    descripcion: "Infraestructura completa: orquestador de agentes IA, automatizaciones con n8n, y chatbots con RAG por cliente.",
+    cta: "Explorar Stack",
+    href: "https://zenkai.systems/como-trabajamos",
+    icono: "M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z",
+    activo: true,
+  },
+];
+---
+
+<section class="band" aria-labelledby="ecosistema-titulo">
+  <div class="wrap">
+    <div class="reveal">
+      <p class="eyebrow">Ecosistema Conectado</p>
+      <h2 id="ecosistema-titulo" class="h2">
+        Cinco productos.<br />
+        <span class="text-gradient">Una sola infraestructura de IA.</span>
+      </h2>
+      <p class="lede">
+        Cada producto resuelve un problema distinto. Todos comparten los mismos agentes,
+        la misma base de conocimiento y la misma infraestructura. Contratas lo que necesitas,
+        activas lo demas cuando quieras.
+      </p>
+    </div>
+
+    <div class="ecosistema-grid reveal-stagger">
+      {productos.map((p) => (
+        <a
+          href={p.href}
+          class="eco-card card-3d"
+          target={p.href.startsWith('http') ? '_blank' : '_self'}
+          rel={p.href.startsWith('http') ? 'noopener' : ''}
+        >
+          <div class="eco-card__top">
+            <div class="eco-card__icon-wrapper">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                {p.icono.split(' ').map((d, i) => (
+                  <path d={d} />
+                ))}
+              </svg>
+            </div>
+            {p.activo && <span class="eco-card__badge">Activo</span>}
+          </div>
+          <h3 class="eco-card__nombre">{p.nombre}</h3>
+          <p class="eco-card__desc">{p.descripcion}</p>
+          <span class="eco-card__cta">{p.cta} <span aria-hidden="true">&rarr;</span></span>
+        </a>
+      ))}
+    </div>
+
+    <div class="ecosistema-footer reveal">
+      <WhatsAppCTA
+        location="ecosistema"
+        context="Vi el ecosistema de productos y quiero saber como integrarlos"
+        message="Hola ZENKAI, vi el ecosistema de productos y quiero saber como integrar todo para mi empresa"
+        label="Hablar con un arquitecto de IA"
+        variant="block"
+        size="lg"
+      />
+    </div>
+  </div>
+</section>
+
+<style>
+  .band {
+    padding-block: 5rem;
+    border-top: 1px solid var(--zk-border);
+  }
+
+  .wrap {
+    max-width: 72rem;
+    margin-inline: auto;
+    padding-inline: 1.5rem;
+  }
+
+  .eyebrow {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--zk-accent, #6366f1);
+    margin-bottom: 0.75rem;
+  }
+
+  .h2 {
+    font-family: 'Sora Variable', 'Sora', system-ui, sans-serif;
+    font-size: clamp(1.75rem, 4vw, 2.75rem);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin-bottom: 1rem;
+    color: var(--zk-heading, #f5f5fa);
+  }
+
+  .text-gradient {
+    background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .lede {
+    font-size: 1.0625rem;
+    line-height: 1.65;
+    color: var(--zk-muted, #9ca3af);
+    max-width: 38rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .ecosistema-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+    gap: 1.25rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .eco-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    border: 1px solid var(--zk-border, #1f1f2c);
+    background: var(--zk-card, #0d0d1a);
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 0.2s, transform 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .eco-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+      rgba(99, 102, 241, 0.06), transparent 40%);
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+  }
+
+  .eco-card:hover {
+    border-color: var(--zk-accent, #6366f1);
+    transform: translateY(-2px);
+  }
+
+  .eco-card:hover::before {
+    opacity: 1;
+  }
+
+  .eco-card__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .eco-card__icon-wrapper {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.5rem;
+    background: rgba(99, 102, 241, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--zk-accent, #6366f1);
+    flex-shrink: 0;
+  }
+
+  .eco-card__badge {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0.2rem 0.5rem;
+    border-radius: 0.25rem;
+    background: rgba(34, 197, 94, 0.12);
+    color: #22c55e;
+  }
+
+  .eco-card__nombre {
+    font-family: 'Sora Variable', 'Sora', system-ui, sans-serif;
+    font-size: 1.125rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+
+  .eco-card__desc {
+    font-size: 0.875rem;
+    line-height: 1.55;
+    color: var(--zk-muted, #9ca3af);
+    margin: 0;
+    flex: 1;
+  }
+
+  .eco-card__cta {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--zk-accent, #6366f1);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin-top: 0.5rem;
+  }
+
+  .ecosistema-footer {
+    text-align: center;
+    padding-top: 1rem;
+  }
+</style>

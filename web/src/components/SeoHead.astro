@@ -24,13 +24,27 @@ const ogImageUrl = absolute(ogImage);
 const organizationJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
-  name: 'ZENKAI Growth Systems',
+  name: 'ZENKAI',
+  alternateName: 'ZENKAI AI Agency',
   url: 'https://zenkai.systems',
   logo: absolute('/brand/zenkai-logo-horizontal.png'),
   email: 'hola@zenkai.systems',
-  areaServed: ['CO', 'ES', 'MX', 'AR', 'CL', 'PE'],
+  areaServed: ['CO', 'ES', 'MX', 'AR', 'CL', 'PE', 'US'],
   description:
-    'Digitalizamos empresas con inteligencia artificial. Desde una landing page hasta operación completa con IA.',
+    'Agencia de inteligencia artificial con 5 productos integrados: motor comercial, atencion al cliente, facturacion, redes sociales y stack de agentes IA.',
+  foundingDate: '2025',
+  knowsAbout: [
+    'Inteligencia Artificial',
+    'Automatizacion Comercial',
+    'Agentes de IA',
+    'Chatbots',
+    'RAG',
+    'Automatizacion de Redes Sociales',
+    'Facturacion Electronica',
+  ],
+  sameAs: [
+    'https://zenkai.systems',
+  ],
 };
 ---
 <meta charset="utf-8" />

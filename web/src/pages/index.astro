@@ -5,6 +5,7 @@ import HeroNuevo from '../components/landing/HeroNuevo.astro';
 import DiagnosticoSelector from '../components/landing/DiagnosticoSelector.astro';
 import TresPilares from '../components/landing/TresPilares.astro';
 import DemoSection from '../components/landing/DemoSection.astro';
+import Ecosistema from '../components/landing/Ecosistema.astro';
 import Planes from '../components/landing/Planes.astro';
 import Comparativa from '../components/landing/Comparativa.astro';
 import Transparencia from '../components/landing/Transparencia.astro';
@@ -12,51 +13,15 @@ import FAQ from '../components/landing/FAQ.astro';
 import CTAFinal from '../components/landing/CTAFinal.astro';
 import StickyBar from '../components/landing/StickyBar.astro';
 ---
+
 <WebLayout
-  title="ZENKAI · Sistemas de IA que devuelven dinero a tu empresa"
-  description="Construimos sistemas de IA para vender más, atender a todos y operar con menos fricción. Cuéntanos qué te está costando dinero por WhatsApp."
+  title="ZENKAI · Agencia de Inteligencia Artificial · Sistemas de IA que devuelven dinero"
+  description="Agencia de IA con 5 productos integrados: motor comercial, atencion al cliente, facturacion, redes sociales automatizadas y stack de agentes IA. Infraestructura completa para empresas."
 >
-  {/*
-    Orden de bloques, cada uno con un objetivo. Antes eran trece secciones sin
-    jerarquía; ahora cada una hace un trabajo distinto y en secuencia:
-
-     1 Hero               comprensión en 5 segundos + primer clic
-     2 Diagnóstico        autoidentificación y cualificación   ← la clave
-     3 Tres pilares       navegación al catálogo sin saturar
-     4 Demo               prueba de producto (ya no es el CTA principal)
-     5 Precios            cualificación por presupuesto
-     6 Comparativa        diferenciación
-     7 Transparencia      eliminar el riesgo europeo (RGPD + AI Act)
-     8 FAQ                últimas objeciones
-     9 Cierre             última conversión
-
-    ── Qué salió en la segunda ronda ──────────────────────────────────────
-    · ComoFunciona. Ilustraba el flujo de la demo —"cuéntanos → analiza →
-      recibes la propuesta"— justo ANTES de la demo, que es ese mismo flujo
-      funcionando de verdad. Contar algo y a continuación enseñarlo no es
-      refuerzo: es pedir dos veces la misma atención. El proceso completo
-      vive en /como-trabajamos, enlazado desde la navegación. 885 px fuera.
-    · El bloque de compromisos de Planes sale de la home (`compacto`): son
-      cuatro tarjetas de descuento que sólo importan cuando ya has elegido
-      plan, y esa decisión se toma en /precios.
-    · Tres preguntas del FAQ que estaban literalmente repetidas en el FAQ de
-      /precios.
-
-    Fuera de la home a propósito:
-    · StatsReales y Proyeccion90Dias — estadísticas de terceros y proyecciones
-      sin caso publicado detrás. Una cifra que no se puede enlazar resta.
-    · DiagramaNeural — los 12 agentes son cómo trabajamos, no qué compras.
-      Su sitio es /como-trabajamos.
-    · ElProblema — lo sustituye el selector de diagnóstico, que hace el mismo
-      trabajo pero cualifica.
-    · Sectores y VentajasTecnicas — pasaron a sus propias rutas, y sus
-      componentes se han borrado: llevaban meses sin importarse desde ningún
-      sitio y seguían apareciendo en las búsquedas como si fueran código vivo.
-  */}
-
   <HeroNuevo />
   <DiagnosticoSelector />
   <TresPilares />
+  <Ecosistema />
   <DemoSection />
   <Planes compacto />
   <Comparativa />
