@@ -20,14 +20,14 @@ import WhatsAppCTA from '../WhatsAppCTA.astro';
     <div class="zh-eyebrow reveal">Infraestructura de IA Empresarial</div>
     <h1 class="zh-h1 reveal">
       Tu empresa,<br />
-      <span class="zh-grad">impulsada por IA.</span>
+      <span class="zh-grad zk-grad-anim">impulsada por IA.</span>
     </h1>
     <p class="zh-sub reveal">
       ZENKAI conecta ventas, atencion al cliente y operaciones en un solo sistema inteligente
       que funciona con las herramientas que ya usas.
     </p>
     <div class="zh-ctas reveal">
-      <a href="#diagnostico" class="zh-primary">
+      <a href="#diagnostico" class="zh-primary zk-shine zk-glow" id="magnetic-btn">
         Construir mi sistema de IA
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
       </a>
@@ -148,6 +148,22 @@ import WhatsAppCTA from '../WhatsAppCTA.astro';
   canvas.addEventListener('mousemove', (e: MouseEvent) => { const r = canvas.getBoundingClientRect(); targetMX = e.clientX - r.left; targetMY = e.clientY - r.top; }, { passive: true });
   animId = requestAnimationFrame(draw);
   document.addEventListener('astro:before-swap', () => { cancelAnimationFrame(animId); window.removeEventListener('resize', resize); });
+
+  // Boton magnetico (solo desktop)
+  if (matchMedia('(hover: hover) and (pointer: fine)').matches && !mqReduced.matches) {
+    const btn = document.getElementById('magnetic-btn');
+    if (btn) {
+      btn.addEventListener('mousemove', (e: MouseEvent) => {
+        const rect = btn.getBoundingClientRect();
+        const x = ((e.clientX - rect.left) / rect.width - 0.5) * 8;
+        const y = ((e.clientY - rect.top) / rect.height - 0.5) * 8;
+        btn.style.transform = `translate(${x}px, ${y}px)`;
+      });
+      btn.addEventListener('mouseleave', () => {
+        btn.style.transform = '';
+      });
+    }
+  }
 </script>
 
 <style>
@@ -192,8 +208,9 @@ import WhatsAppCTA from '../WhatsAppCTA.astro';
     padding: 0.75rem 1.5rem; border-radius: 0.5rem;
     background: linear-gradient(135deg, #638AFF, #4A6FEF); color: #fff;
     font-size: 0.9375rem; font-weight: 600; text-decoration: none;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s;
     box-shadow: 0 4px 20px rgba(99,138,255,0.25);
+    will-change: transform;
   }
   .zh-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(99,138,255,0.35); }
   .zh-secondary-link { font-size: 0.875rem; color: var(--zk-muted, #a1a1aa); text-decoration: none; transition: color 0.2s; }

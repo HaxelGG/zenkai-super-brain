@@ -187,6 +187,79 @@ td.num {
     Usar cubic-bezier(0.4, 0, 0.2, 1) para elementos interactivos.
     ======================================== */
 
+/* Gradiente shimmer animado para texto destacado */
+.zk-grad-anim {
+  background: linear-gradient(120deg, #638AFF 0%, #8B5CF6 25%, #A78BFA 50%, #8B5CF6 75%, #638AFF 100%);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradShimmer 6s linear infinite;
+}
+@keyframes gradShimmer {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 300% 50%; }
+}
+
+/* Shine sweep para botones primarios */
+.zk-shine {
+  position: relative;
+  overflow: hidden;
+}
+.zk-shine::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -150%;
+  width: 60%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+  transform: skewX(-20deg);
+  animation: shineSweep 3.5s ease-in-out infinite;
+}
+@keyframes shineSweep {
+  0%, 60% { left: -150%; }
+  100% { left: 200%; }
+}
+
+/* Glow pulsante para elementos destacados */
+.zk-glow {
+  animation: glowPulse 3s ease-in-out infinite;
+}
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(99,138,255,0.15); }
+  50% { box-shadow: 0 0 40px rgba(99,138,255,0.3); }
+}
+
+/* Floating sutil para elementos decorativos */
+.zk-float {
+  animation: floatY 6s ease-in-out infinite;
+}
+@keyframes floatY {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+/* Entrada con blur-to-sharp para momentos showcase */
+.zk-blur-in {
+  animation: blurIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes blurIn {
+  from { opacity: 0; filter: blur(12px); transform: scale(0.98); }
+  to { opacity: 1; filter: blur(0); transform: none; }
+}
+
+/* Fade-in simple */
+.zk-fade-in {
+  animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ========================================
+    BOTONES compartidos
+    ======================================== */
+
 /* ========================================
    ATMÓSFERA · orbe y foco
    ======================================== */
