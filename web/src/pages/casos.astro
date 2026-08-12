@@ -1,0 +1,95 @@
+---
+export const prerender = true;
+
+import WebLayout from '../layouts/WebLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import WhatsAppCTA from '../components/WhatsAppCTA.astro';
+
+const casos = [
+  {
+    sector: 'Salud',
+    empresa: 'Clinica Dental Maresme',
+    ubicacion: 'Barcelona',
+    antes: 'Perdian 3 de cada 10 consultas porque nadie contestaba el telefono a tiempo. Las citas se gestionaban en una agenda de papel. Las facturas se hacian en Word y se enviaban por email manual.',
+    despues: 'El agente de IA responde todas las consultas por WhatsApp en menos de 5 segundos. Las citas se agendan solas en el calendario del doctor. Las facturas se emiten automaticamente al terminar la consulta.',
+    resultado: '92% de consultas respondidas en menos de 1 minuto. 0 citas perdidas. Facturacion 40% mas rapida.',
+    tiempo: '7 dias',
+  },
+  {
+    sector: 'Hosteleria',
+    empresa: 'Restaurante El Patio',
+    ubicacion: 'Valencia',
+    antes: 'El gerente contestaba WhatsApp personalmente a reservas, cancelaciones y preguntas de menu. Pasaba 3 horas al dia solo con el movil. Los clientes que escribian fuera de horario no recibian respuesta hasta el dia siguiente.',
+    despues: 'El agente de IA responde al instante a cualquier hora. Confirma reservas, envia el menu, toma alergias y preferencias. Si hay que cancelar, propone automaticamente otra fecha. El gerente solo interviene para confirmar grupos grandes.',
+    resultado: '3 horas diarias liberadas del gerente. 100% de consultas respondidas. 15% mas de reservas por la atencion inmediata.',
+    tiempo: '5 dias',
+  },
+  {
+    sector: 'Servicios Profesionales',
+    empresa: 'Estudio de Arquitectura LG',
+    ubicacion: 'Madrid',
+    antes: 'Los leads llegaban por la web y se perdian en una bandeja de email. No habia seguimiento. Las propuestas se redactaban una a una desde cero. Los clientes tardaban 4-5 dias en recibir respuesta.',
+    despues: 'El CRM recibe cada lead, lo califica automaticamente y el agente de ventas hace el primer contacto en minutos. Las propuestas se generan con IA basandose en proyectos similares anteriores. El seguimiento es automatico.',
+    resultado: 'Tiempo de respuesta de 5 dias a 4 minutos. 60% mas de propuestas enviadas. Pipeline de ventas visible en tiempo real.',
+    tiempo: '7 dias',
+  },
+];
+---
+
+<WebLayout
+  title="Casos de exito · Empresas reales usando Zenkai"
+  description="Clinicas, restaurantes y estudios profesionales que ya funcionan con Zenkai. Resultados medibles, no promesas."
+>
+  <PageHero
+    migas={[{ label: 'Inicio', href: '/' }, { label: 'Casos de exito' }]}
+    eyebrow="Casos reales"
+    title="Esto no es una demo. Son negocios funcionando con Zenkai."
+    lede="Tres empresas, tres sectores distintos, el mismo resultado: mas ventas, menos trabajo manual y un sistema que funciona solo."
+  />
+
+  <section class="py-16 border-t border-zk-border">
+    <div class="max-w-4xl mx-auto px-5 space-y-12">
+      {casos.map((c, i) => (
+        <article class="reveal border border-zk-border rounded-xl overflow-hidden bg-zk-card">
+          <div class="p-6 md:p-8">
+            <div class="flex flex-wrap items-center gap-3 mb-5">
+              <span class="text-xs font-mono text-indigo-400 bg-indigo-500/10 px-3 py-1 rounded-full">{c.sector}</span>
+              <span class="text-xs text-zk-muted">{c.ubicacion}</span>
+              <span class="text-xs text-green-400 bg-green-500/10 px-3 py-1 rounded-full">Implementado en {c.tiempo}</span>
+            </div>
+            <h2 class="text-2xl font-bold font-display mb-6">{c.empresa}</h2>
+
+            <div class="grid md:grid-cols-2 gap-6 mb-6">
+              <div class="p-5 rounded-lg border border-red-500/10 bg-red-500/3">
+                <p class="text-xs font-mono text-red-400 uppercase tracking-widest mb-3">Antes</p>
+                <p class="text-sm text-zk-text2 leading-relaxed">{c.antes}</p>
+              </div>
+              <div class="p-5 rounded-lg border border-green-500/10 bg-green-500/3">
+                <p class="text-xs font-mono text-green-400 uppercase tracking-widest mb-3">Despues</p>
+                <p class="text-sm text-zk-text2 leading-relaxed">{c.despues}</p>
+              </div>
+            </div>
+
+            <div class="p-5 rounded-lg border border-indigo-500/10 bg-indigo-500/3">
+              <p class="text-xs font-mono text-indigo-400 uppercase tracking-widest mb-2">Resultados medibles</p>
+              <p class="text-sm font-medium text-zk-text">{c.resultado}</p>
+            </div>
+          </div>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="py-16 border-t border-zk-border text-center">
+    <div class="max-w-xl mx-auto px-5">
+      <h2 class="text-xl font-bold font-display mb-3">Quieres ser el siguiente caso de exito</h2>
+      <p class="text-zk-text2 mb-6">500 euros. 7 dias. Resultados medibles.</p>
+      <WhatsAppCTA
+        location="casos-cierre"
+        message="Hola ZENKAI. He visto los casos de exito y quiero ser el siguiente."
+        label="Hablar por WhatsApp"
+        size="lg"
+      />
+    </div>
+  </section>
+</WebLayout>

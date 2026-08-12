@@ -1,0 +1,265 @@
+---
+/**
+ * Calculadora ROI — muestra cuánto dinero pierde un negocio SIN Zenkai.
+ *
+ * El visitante ajusta 3 sliders y ve en tiempo real:
+ * 1. Lo que gasta hoy en tareas manuales
+ * 2. Lo que pierde en ventas no atendidas
+ * 3. Lo que ahorraría con Zenkai (500€ + 95€/mes)
+ *
+ * Psicología: primero muestra la pérdida (dolor), luego el ahorro (alivio).
+ */
+import WhatsAppCTA from '../WhatsAppCTA.astro';
+---
+
+<section class="band" aria-labelledby="roi-titulo">
+  <div class="wrap">
+    <div class="reveal">
+      <p class="eyebrow">Calcula tu caso</p>
+      <h2 id="roi-titulo" class="h2">
+        ¿Cuánto dinero estás perdiendo<br />
+        <span class="text-gradient">por no automatizar?</span>
+      </h2>
+      <p class="lede">
+        Ajusta los valores según tu negocio. Los números no mienten.
+      </p>
+    </div>
+
+    <div class="roi-card reveal">
+      <div class="roi-sliders">
+        <!-- Slider 1: Horas en tareas manuales -->
+        <div class="roi-field">
+          <div class="roi-field__header">
+            <label for="roi-horas" class="roi-label">Horas al día que tu equipo gasta en tareas que podría hacer una IA</label>
+            <span class="roi-value" id="roi-horas-val">3h</span>
+          </div>
+          <input type="range" id="roi-horas" class="roi-slider" min="1" max="12" value="3" step="0.5" />
+          <div class="roi-range-labels"><span>1h</span><span>12h</span></div>
+        </div>
+
+        <!-- Slider 2: Coste por hora -->
+        <div class="roi-field">
+          <div class="roi-field__header">
+            <label for="roi-coste" class="roi-label">Coste medio por hora de ese empleado (salario + cargas)</label>
+            <span class="roi-value" id="roi-coste-val">15€/h</span>
+          </div>
+          <input type="range" id="roi-coste" class="roi-slider" min="8" max="50" value="15" step="1" />
+          <div class="roi-range-labels"><span>8€/h</span><span>50€/h</span></div>
+        </div>
+
+        <!-- Slider 3: Ventas perdidas -->
+        <div class="roi-field">
+          <div class="roi-field__header">
+            <label for="roi-ventas" class="roi-label">Consultas de clientes que pierdes al mes por no responder a tiempo</label>
+            <span class="roi-value" id="roi-ventas-val">20</span>
+          </div>
+          <input type="range" id="roi-ventas" class="roi-slider" min="5" max="200" value="20" step="5" />
+          <div class="roi-range-labels"><span>5</span><span>200</span></div>
+        </div>
+      </div>
+
+      <div class="roi-results">
+        <div class="roi-result-item roi-result-item--loss">
+          <div class="roi-result__label">Pierdes al mes en tareas manuales</div>
+          <div class="roi-result__number" id="roi-perdida-manual">0 €</div>
+        </div>
+        <div class="roi-result-item roi-result-item--loss">
+          <div class="roi-result__label">Pierdes al mes en ventas no atendidas</div>
+          <div class="roi-result__number" id="roi-perdida-ventas">0 €</div>
+        </div>
+        <div class="roi-result-item roi-result-item--total-loss">
+          <div class="roi-result__label">Pérdida total mensual</div>
+          <div class="roi-result__number" id="roi-total-perdida">0 €</div>
+        </div>
+        <div class="roi-divider"></div>
+        <div class="roi-result-item roi-result-item--savings">
+          <div class="roi-result__label">Con Zenkai pagarías</div>
+          <div class="roi-result__number" id="roi-coste-zenkai">95 €/mes</div>
+        </div>
+        <div class="roi-result-item roi-result-item--profit">
+          <div class="roi-result__label">Te ahorras cada mes</div>
+          <div class="roi-result__number" id="roi-ahorro">0 €</div>
+        </div>
+      </div>
+
+      <div class="roi-cta">
+        <WhatsAppCTA
+          location="roi-calculator"
+          message="Hola ZENKAI. He calculado mi ROI y quiero dejar de perder dinero."
+          label="Quiero dejar de perder dinero"
+          variant="block"
+          size="lg"
+        />
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  const sliders = {
+    horas: document.getElementById('roi-horas') as HTMLInputElement,
+    coste: document.getElementById('roi-coste') as HTMLInputElement,
+    ventas: document.getElementById('roi-ventas') as HTMLInputElement,
+  };
+
+  const vals = {
+    horas: document.getElementById('roi-horas-val')!,
+    coste: document.getElementById('roi-coste-val')!,
+    ventas: document.getElementById('roi-ventas-val')!,
+  };
+
+  const results = {
+    perdidaManual: document.getElementById('roi-perdida-manual')!,
+    perdidaVentas: document.getElementById('roi-perdida-ventas')!,
+    totalPerdida: document.getElementById('roi-total-perdida')!,
+    costeZenkai: document.getElementById('roi-coste-zenkai')!,
+    ahorro: document.getElementById('roi-ahorro')!,
+  };
+
+  const DIAS_LABORALES = 22;
+  const TICKET_MEDIO = 150;
+
+  function formatEur(n: number) {
+    return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n);
+  }
+
+  function calc() {
+    const horas = parseFloat(sliders.horas.value);
+    const coste = parseInt(sliders.coste.value);
+    const ventas = parseInt(sliders.ventas.value);
+
+    vals.horas.textContent = horas + 'h';
+    vals.coste.textContent = coste + '€/h';
+    vals.ventas.textContent = String(ventas);
+
+    const perdidaManual = horas * coste * DIAS_LABORALES;
+    const perdidaVentas = ventas * (TICKET_MEDIO * 0.3);
+    const totalPerdida = perdidaManual + perdidaVentas;
+    const costeZenkai = 95;
+    const ahorro = totalPerdida - costeZenkai;
+
+    results.perdidaManual.textContent = formatEur(perdidaManual);
+    results.perdidaVentas.textContent = formatEur(perdidaVentas);
+    results.totalPerdida.textContent = formatEur(totalPerdida);
+    results.costeZenkai.textContent = formatEur(costeZenkai) + '/mes';
+    results.ahorro.textContent = formatEur(Math.max(0, ahorro));
+
+    const profitEl = results.ahorro.parentElement!;
+    profitEl.classList.toggle('roi-result-item--huge-savings', ahorro > 1000);
+  }
+
+  Object.values(sliders).forEach(s => s.addEventListener('input', calc));
+  calc();
+</script>
+
+<style>
+  .band { padding-block: 5rem; border-top: 1px solid var(--zk-border, #1f1f2c); }
+  .wrap { max-width: 44rem; margin-inline: auto; padding-inline: 1.5rem; }
+
+  .eyebrow {
+    font-size: 0.8125rem; font-weight: 600; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--zk-accent, #6366f1);
+    margin-bottom: 0.75rem; text-align: center;
+  }
+  .h2 {
+    font-family: 'Sora Variable', 'Sora', system-ui, sans-serif;
+    font-size: clamp(1.5rem, 4vw, 2.25rem); font-weight: 700;
+    letter-spacing: -0.02em; line-height: 1.15;
+    color: var(--zk-heading, #f5f5fa); text-align: center; margin-bottom: 1rem;
+  }
+  .text-gradient {
+    background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .lede {
+    font-size: 1rem; line-height: 1.6; color: var(--zk-muted, #a1a1aa);
+    text-align: center; max-width: 28rem; margin-inline: auto; margin-bottom: 2rem;
+  }
+
+  .roi-card {
+    border: 1px solid var(--zk-border, #1f1f2c);
+    border-radius: 1rem;
+    background: var(--zk-card, #0d0d1a);
+    overflow: hidden;
+  }
+
+  .roi-sliders {
+    padding: 1.75rem 1.75rem 1.25rem;
+    display: grid; gap: 1.5rem;
+  }
+
+  .roi-field__header {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 0.65rem;
+  }
+  .roi-label {
+    font-size: 0.875rem; color: var(--zk-text2, #a1a1aa);
+  }
+  .roi-value {
+    font-family: 'Sora Variable', 'Sora', system-ui, sans-serif;
+    font-size: 1.0625rem; font-weight: 700; color: var(--zk-heading, #f5f5fa);
+    min-width: 4rem; text-align: right;
+  }
+
+  .roi-slider {
+    width: 100%; height: 6px;
+    -webkit-appearance: none; appearance: none;
+    background: var(--zk-border, #1f1f2c); border-radius: 3px;
+    outline: none; cursor: pointer;
+  }
+  .roi-slider::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 20px; height: 20px; border-radius: 50%;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    border: 2px solid #0d0d1a; cursor: pointer;
+    box-shadow: 0 0 12px rgba(99,102,241,0.4);
+  }
+  .roi-range-labels {
+    display: flex; justify-content: space-between;
+    font-size: 0.6875rem; color: var(--zk-muted, #52525b);
+    margin-top: 0.35rem;
+  }
+
+  .roi-results {
+    padding: 1.5rem 1.75rem;
+    border-top: 1px solid var(--zk-border, #1f1f2c);
+    border-bottom: 1px solid var(--zk-border, #1f1f2c);
+    display: grid; gap: 0.85rem;
+  }
+
+  .roi-result-item {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: 0.5rem 0;
+  }
+  .roi-result__label {
+    font-size: 0.875rem; color: var(--zk-muted, #a1a1aa);
+  }
+  .roi-result__number {
+    font-family: 'Sora Variable', 'Sora', system-ui, sans-serif;
+    font-size: 1.125rem; font-weight: 700;
+    color: var(--zk-heading, #f5f5fa);
+  }
+  .roi-result-item--loss .roi-result__number { color: #ef4444; }
+  .roi-result-item--total-loss {
+    padding: 0.75rem;
+    background: rgba(239,68,68,0.06); border-radius: 0.5rem;
+  }
+  .roi-result-item--total-loss .roi-result__number {
+    font-size: 1.5rem; color: #ef4444;
+  }
+  .roi-divider { height: 1px; background: var(--zk-border, #1f1f2c); margin: 0.25rem 0; }
+  .roi-result-item--savings .roi-result__number { color: #6366f1; font-size: 1.25rem; }
+  .roi-result-item--profit .roi-result__number { color: #22c55e; font-size: 1.5rem; }
+  .roi-result-item--huge-savings .roi-result__number {
+    animation: roiPulse 2s ease infinite;
+  }
+  @keyframes roiPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.04); }
+  }
+
+  .roi-cta {
+    padding: 1.5rem 1.75rem 1.75rem;
+    text-align: center;
+  }
+</style>

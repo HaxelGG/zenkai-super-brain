@@ -10,6 +10,7 @@ import LeadCapture from '../components/landing/LeadCapture.astro';
 import Ecosistema from '../components/landing/Ecosistema.astro';
 import FAQ from '../components/landing/FAQ.astro';
 import SalesSimulator from '../components/landing/SalesSimulator.astro';
+import ROICalculator from '../components/landing/ROICalculator.astro';
 import CTAFinal from '../components/landing/CTAFinal.astro';
 import StickyBar from '../components/landing/StickyBar.astro';
 import ChatWidget from '../components/landing/ChatWidget.astro';
@@ -31,6 +32,18 @@ import ChatWidget from '../components/landing/ChatWidget.astro';
  */
 ---
 
+<script is:inline type="application/ld+json" set:html={JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
+    { '@type': 'Question', name: '¿Cuánto cuesta el Plan Zenkai?', acceptedAnswer: { '@type': 'Answer', text: '500€ de implementación única + 95€ al mes de mantenimiento. Sin costes ocultos.' } },
+    { '@type': 'Question', name: '¿Qué incluye el Plan Zenkai?', acceptedAnswer: { '@type': 'Answer', text: 'Web profesional o tienda online, CRM, agente de ventas IA, atención al cliente 24/7, agente de facturación, agenda automatizada, diagnóstico de marketing digital y diagnóstico empresarial.' } },
+    { '@type': 'Question', name: '¿Cuánto tarda en estar funcionando?', acceptedAnswer: { '@type': 'Answer', text: '7 días laborables desde que nos das acceso a los datos básicos de tu negocio.' } },
+    { '@type': 'Question', name: '¿Hay permanencia?', acceptedAnswer: { '@type': 'Answer', text: 'No. El mantenimiento de 95€/mes puede cancelarse en cualquier momento. Sin contratos de permanencia.' } },
+    { '@type': 'Question', name: '¿Tienen garantía?', acceptedAnswer: { '@type': 'Answer', text: 'Sí. 14 días de prueba. Si no ves resultados, te devolvemos los 500€ de implementación.' } },
+  ],
+})} />
+
 <WebLayout
   title="ZENKAI · Tu empresa con IA en 7 días · 500€ + 95€/mes · Garantía 14 días"
   description="Montamos el sistema digital completo de tu negocio: web, CRM, agente de ventas IA, atención al cliente, facturación y agenda. 500€ de implementación + 95€/mes. Con garantía de devolución."
@@ -38,6 +51,7 @@ import ChatWidget from '../components/landing/ChatWidget.astro';
   <HeroSimple />
   <AntesDespues />
   <Confianza />
+  <ROICalculator />
   <ComoFunciona />
   <PlanZenkai />
   <LeadCapture />
