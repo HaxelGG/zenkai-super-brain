@@ -154,9 +154,10 @@ const enSoluciones = activo('/soluciones') || activo('/modulos');
     position: fixed; top: 0; left: 0; right: 0; z-index: 50;
     background: transparent;
     border-bottom: 1px solid transparent;
-    transition: background 0.4s cubic-bezier(0.16,1,0.3,1), 
+    transition: background 0.4s cubic-bezier(0.16,1,0.3,1),
                 border-color 0.4s cubic-bezier(0.16,1,0.3,1),
-                backdrop-filter 0.4s cubic-bezier(0.16,1,0.3,1);
+                backdrop-filter 0.4s cubic-bezier(0.16,1,0.3,1),
+                transform 0.35s cubic-bezier(0.16,1,0.3,1);
   }
   .nav--scrolled {
     background: rgba(8, 8, 12, 0.78);
@@ -164,11 +165,20 @@ const enSoluciones = activo('/soluciones') || activo('/modulos');
     -webkit-backdrop-filter: blur(20px) saturate(160%);
     border-bottom-color: rgba(255, 255, 255, 0.06);
   }
+  /* Se esconde al bajar, reaparece al subir */
+  .nav--hidden {
+    transform: translateY(-100%);
+  }
   .nav__bar {
     max-width: 80rem; margin: 0 auto;
     padding-inline: 1.25rem;
     height: 68px;
     display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    transition: height 0.35s cubic-bezier(0.16,1,0.3,1);
+  }
+  /* Compacto al hacer scroll */
+  .nav--scrolled .nav__bar {
+    height: 56px;
   }
   @media (min-width: 1024px) { .nav__bar { padding-inline: 2rem; } }
 
@@ -192,22 +202,30 @@ const enSoluciones = activo('/soluciones') || activo('/modulos');
     color: var(--zk-text-2);
     font: inherit; font-size: 0.9375rem; font-weight: 500;
     text-decoration: none; cursor: pointer; border-radius: var(--zk-r-sm);
-    transition: color 0.2s, background 0.2s;
+    transition: color 0.25s, background 0.25s;
+    position: relative;
   }
-  .nav__link:hover { color: var(--zk-text); background: rgba(255, 255, 255, 0.04); }
-  .nav__link:focus-visible { outline: 2px solid var(--zk-growth); outline-offset: -2px; }
-
-  /* Dónde estoy · subrayado fino en el acento, no un cambio de fondo.
-     A esta escala una barra de 2px orienta mejor que un bloque de color. */
-  .nav__link.is-here { color: var(--zk-text); }
-  .nav__link.is-here::after {
+  /* Underline gradiente animado al hover */
+  .nav__link::after {
     content: '';
     position: absolute;
-    left: 0.875rem; right: 0.875rem; bottom: 6px;
+    left: 0.875rem; right: 0.875rem; bottom: 4px;
     height: 2px; border-radius: 2px;
-    background: var(--zk-growth);
+    background: linear-gradient(90deg, #638AFF, #8B5CF6);
+    transform: scaleX(0);
+    transform-origin: center;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
-  .nav__link { position: relative; }
+  .nav__link:hover { color: var(--zk-text); background: rgba(255, 255, 255, 0.04); }
+  .nav__link:hover::after { transform: scaleX(1); }
+  .nav__link:focus-visible { outline: 2px solid var(--zk-growth); outline-offset: -2px; }
+
+  /* Dónde estoy · subrayado fino en el acento, no un cambio de fondo. */
+  .nav__link.is-here { color: var(--zk-text); }
+  .nav__link.is-here::after {
+    transform: scaleX(1);
+    background: linear-gradient(90deg, #638AFF, #8B5CF6);
+  }
   .nav__link--btn[aria-expanded='true'] { color: var(--zk-text); background: rgba(255, 255, 255, 0.06); }
   .nav__link--btn[aria-expanded='true'] svg { transform: rotate(180deg); }
   .nav__link svg { transition: transform 0.2s; }
@@ -338,13 +356,20 @@ const enSoluciones = activo('/soluciones') || activo('/modulos');
 </style>
 
 <script>
-  // ── Scroll behavior ──────────────────────────────────────────────────────
+  // ── Scroll behavior: glass + compacto + hide/reveal ───────────────────────
   const nav = document.querySelector('.nav')!;
   let lastScroll = 0;
   let ticking = false;
   const updateNav = () => {
     const y = window.scrollY;
     nav.classList.toggle('nav--scrolled', y > 40);
+    // Hide al bajar (despues de 400px), reveal al subir
+    if (y > 400 && y > lastScroll) {
+      nav.classList.add('nav--hidden');
+    } else {
+      nav.classList.remove('nav--hidden');
+    }
+    lastScroll = y;
     ticking = false;
   };
   window.addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(updateNav); } }, { passive: true });
