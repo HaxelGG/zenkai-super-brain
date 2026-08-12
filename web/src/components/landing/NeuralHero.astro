@@ -95,8 +95,8 @@ const modulos = [
     canvas.style.width = w + 'px';
     canvas.style.height = h + 'px';
     ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
-    cx = w * 0.38;
-    cy = h * 0.42;
+    cx = w * 0.5;
+    cy = h * 0.38;
     moduleNodes.forEach(n => {
       n.rx = n.x * w;
       n.ry = n.y * h;
@@ -224,7 +224,7 @@ const modulos = [
       linear-gradient(rgba(99, 138, 255, 0.025) 1px, transparent 1px),
       linear-gradient(90deg, rgba(99, 138, 255, 0.025) 1px, transparent 1px);
     background-size: 48px 48px;
-    mask-image: radial-gradient(ellipse 70% 60% at 40% 45%, black 30%, transparent 70%);
+    mask-image: radial-gradient(ellipse 70% 60% at 50% 45%, black 30%, transparent 70%);
   }
 
   .nh-atmos {
@@ -233,9 +233,9 @@ const modulos = [
     z-index: 0;
     pointer-events: none;
     background:
-      radial-gradient(ellipse 50% 40% at 38% 42%, rgba(99, 138, 255, 0.08) 0%, transparent 60%),
-      radial-gradient(ellipse 30% 25% at 70% 30%, rgba(139, 92, 246, 0.05) 0%, transparent 50%),
-      radial-gradient(ellipse 20% 20% at 20% 80%, rgba(99, 138, 255, 0.03) 0%, transparent 50%);
+      radial-gradient(ellipse 50% 40% at 50% 38%, rgba(99, 138, 255, 0.10) 0%, transparent 60%),
+      radial-gradient(ellipse 30% 25% at 75% 35%, rgba(139, 92, 246, 0.06) 0%, transparent 50%),
+      radial-gradient(ellipse 20% 20% at 25% 75%, rgba(99, 138, 255, 0.04) 0%, transparent 50%);
   }
 
   .nh-canvas {
@@ -259,8 +259,9 @@ const modulos = [
     position: relative;
     z-index: 3;
     max-width: 48rem;
-    margin-left: 8%;
+    margin-inline: auto;
     padding: 2rem 1.5rem;
+    text-align: center;
     pointer-events: none;
   }
   .nh-content > * { pointer-events: auto; }
@@ -272,7 +273,7 @@ const modulos = [
     letter-spacing: 0.2em;
     text-transform: uppercase;
     color: rgba(99, 138, 255, 0.7);
-    margin-bottom: 1.25rem;
+    margin-bottom: 1rem;
   }
 
   .nh-h1 {
@@ -282,7 +283,7 @@ const modulos = [
     letter-spacing: -0.03em;
     line-height: 1.05;
     color: var(--zk-heading, #f5f5fa);
-    margin-bottom: 1.25rem;
+    margin-bottom: 1rem;
     text-wrap: balance;
   }
 
@@ -298,7 +299,8 @@ const modulos = [
     line-height: 1.6;
     color: var(--zk-text2, #a1a1aa);
     max-width: 34rem;
-    margin-bottom: 2rem;
+    margin-inline: auto;
+    margin-bottom: 1.5rem;
   }
   .nh-sub strong {
     color: var(--zk-heading, #f5f5fa);
@@ -332,11 +334,9 @@ const modulos = [
 
   @media (max-width: 768px) {
     .nh-content {
-      margin-left: 0;
-      text-align: center;
       padding: 4rem 1.25rem;
     }
-    .nh-h1 { font-size: clamp(2rem, 8vw, 3rem); }
+    .nh-h1 { font-size: clamp(2rem, 8vw, 2.75rem); }
     .nh-sub { max-width: 100%; }
     .nh-ctas { justify-content: center; flex-direction: column; }
     .nh-trust { justify-content: center; }
