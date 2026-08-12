@@ -1,0 +1,169 @@
+---
+/**
+ * TrustStack — Arquitectura visual del sistema ZENKAI.
+ *
+ * Muestra la infraestructura como un stack tecnológico real:
+ * ZENKAI CORE → AI Models → Automation → Integrations → Business Systems
+ *
+ * Conecta visualmente con el hero (mismo lenguaje de nodos y conexiones).
+ */
+---
+
+<section class="band" aria-labelledby="stack-titulo">
+  <div class="wrap">
+    <div class="reveal">
+      <p class="eyebrow">Infraestructura</p>
+      <h2 id="stack-titulo" class="h2">
+        No son herramientas.<br />
+        <span class="text-gradient">Es un sistema.</span>
+      </h2>
+      <p class="lede">
+        Cada módulo se conecta con los demás. Los datos fluyen entre ventas, atención y operaciones sin intervención humana. Una sola infraestructura, funcionando como un sistema nervioso empresarial.
+      </p>
+    </div>
+
+    <div class="stack-visual reveal">
+      <!-- Capa 1: Business Systems -->
+      <div class="stack-layer" style="--delay:0">
+        <div class="stack-layer__label">Business Systems</div>
+        <div class="stack-layer__items">
+          <span>WhatsApp</span><span>Email</span><span>CRM</span><span>ERP</span><span>Calendar</span><span>Ecommerce</span>
+        </div>
+      </div>
+
+      <!-- Capa 2: Integrations -->
+      <div class="stack-connector" style="--delay:1">
+        <svg width="20" height="12" viewBox="0 0 20 12"><path d="M10 0v8M6 6l4 4 4-4" stroke="rgba(99,138,255,0.3)" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="stack-layer" style="--delay:1">
+        <div class="stack-layer__label">Integrations</div>
+        <div class="stack-layer__items">
+          <span>APIs</span><span>Webhooks</span><span>n8n</span><span>Zapier</span><span>Make</span>
+        </div>
+      </div>
+
+      <!-- Capa 3: Automation -->
+      <div class="stack-connector" style="--delay:2">
+        <svg width="20" height="12" viewBox="0 0 20 12"><path d="M10 0v8M6 6l4 4 4-4" stroke="rgba(99,138,255,0.3)" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="stack-layer" style="--delay:2">
+        <div class="stack-layer__label">Automation</div>
+        <div class="stack-layer__items">
+          <span>Workflows</span><span>Agents</span><span>Scheduler</span><span>Triggers</span><span>Pipelines</span>
+        </div>
+      </div>
+
+      <!-- Capa 4: AI Models -->
+      <div class="stack-connector" style="--delay:3">
+        <svg width="20" height="12" viewBox="0 0 20 12"><path d="M10 0v8M6 6l4 4 4-4" stroke="rgba(139,92,246,0.3)" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="stack-layer stack-layer--ai" style="--delay:3">
+        <div class="stack-layer__label">AI Models</div>
+        <div class="stack-layer__items">
+          <span>DeepSeek</span><span>Claude</span><span>GPT-4</span><span>Gemini</span><span>Whisper</span><span>ElevenLabs</span>
+        </div>
+      </div>
+
+      <!-- Capa 5: ZENKAI CORE -->
+      <div class="stack-connector" style="--delay:4">
+        <svg width="20" height="12" viewBox="0 0 20 12"><path d="M10 0v8M6 6l4 4 4-4" stroke="rgba(99,138,255,0.5)" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="stack-core" style="--delay:4">
+        <div class="stack-core__dot"></div>
+        <div class="stack-core__label">ZENKAI CORE</div>
+        <p class="stack-core__sub">Orquestación · Memoria · Seguridad · Multi-tenant</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .band { padding-block: 5rem; border-top: 1px solid rgba(255,255,255,0.05); }
+  .wrap { max-width: 44rem; margin-inline: auto; padding-inline: 1.5rem; }
+
+  .eyebrow {
+    font-family: var(--font-mono); font-size: 0.6875rem; font-weight: 500;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: rgba(99, 138, 255, 0.7); margin-bottom: 0.75rem; text-align: center;
+  }
+  .h2 {
+    font-family: var(--font-display); font-size: clamp(1.5rem, 4vw, 2.25rem);
+    font-weight: 700; letter-spacing: -0.02em; line-height: 1.15;
+    color: var(--zk-heading, #f5f5fa); text-align: center; margin-bottom: 1rem;
+  }
+  .text-gradient {
+    background: linear-gradient(135deg, #638AFF 0%, #8B5CF6 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .lede {
+    font-size: 1rem; line-height: 1.6; color: var(--zk-text2, #a1a1aa);
+    text-align: center; max-width: 30rem; margin-inline: auto; margin-bottom: 2.5rem;
+  }
+
+  .stack-visual {
+    display: flex; flex-direction: column; align-items: center; gap: 0;
+  }
+
+  .stack-layer {
+    width: 100%; max-width: 38rem;
+    padding: 1rem 1.25rem;
+    border-radius: 0.625rem;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.012);
+    transition: border-color 0.3s, background 0.3s;
+    animation: stackFadeIn 0.5s cubic-bezier(0.16,1,0.3,1) calc(var(--delay, 0) * 0.1s) both;
+  }
+  @keyframes stackFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  .stack-layer:hover {
+    border-color: rgba(99, 138, 255, 0.15);
+    background: rgba(99, 138, 255, 0.02);
+  }
+  .stack-layer--ai {
+    border-color: rgba(139, 92, 246, 0.12);
+    background: rgba(139, 92, 246, 0.02);
+  }
+
+  .stack-layer__label {
+    font-family: var(--font-mono); font-size: 0.6875rem; font-weight: 500;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--zk-muted, #71717a); margin-bottom: 0.6rem;
+  }
+  .stack-layer__items {
+    display: flex; flex-wrap: wrap; gap: 0.5rem;
+  }
+  .stack-layer__items span {
+    font-size: 0.8125rem; color: var(--zk-text2, #a1a1aa);
+    padding: 0.3rem 0.7rem; border-radius: 0.35rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+  }
+
+  .stack-connector {
+    padding: 0.25rem 0;
+    display: flex; justify-content: center;
+    animation: stackFadeIn 0.5s cubic-bezier(0.16,1,0.3,1) calc(var(--delay, 0) * 0.1s + 0.05s) both;
+  }
+
+  .stack-core {
+    text-align: center; padding: 1.5rem 0 0.5rem;
+    animation: stackFadeIn 0.6s cubic-bezier(0.16,1,0.3,1) calc(var(--delay, 0) * 0.1s) both;
+  }
+  .stack-core__dot {
+    width: 12px; height: 12px; border-radius: 50%;
+    background: #638AFF; margin: 0 auto 0.75rem;
+    box-shadow: 0 0 20px rgba(99, 138, 255, 0.3);
+    animation: corePulse 2s ease-in-out infinite;
+  }
+  @keyframes corePulse {
+    0%, 100% { box-shadow: 0 0 12px rgba(99, 138, 255, 0.2); }
+    50% { box-shadow: 0 0 24px rgba(99, 138, 255, 0.4); }
+  }
+  .stack-core__label {
+    font-family: var(--font-display); font-size: 1.25rem; font-weight: 700;
+    color: var(--zk-heading, #f5f5fa); letter-spacing: 0.1em;
+    margin-bottom: 0.35rem;
+  }
+  .stack-core__sub {
+    font-size: 0.8125rem; color: var(--zk-muted, #71717a); margin: 0;
+  }
+</style>

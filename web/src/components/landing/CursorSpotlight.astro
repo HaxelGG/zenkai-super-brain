@@ -1,0 +1,52 @@
+---
+/**
+ * CursorSpotlight — Efecto de cursor premium.
+ *
+ * Un gradiente radial que sigue al cursor sutilmente.
+ * Solo en desktop (hover: hover).
+ * Sin JS: no hace nada (degradación elegante).
+ */
+---
+
+<div class="cs-spot" aria-hidden="true"></div>
+
+<script>
+  if (matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    const spot = document.querySelector<HTMLDivElement>('.cs-spot')!;
+    let mx = 0, my = 0;
+    let tx = 0, ty = 0;
+    let raf = 0;
+
+    function lerp() {
+      mx += (tx - mx) * 0.06;
+      my += (ty - my) * 0.06;
+      spot.style.setProperty('--cs-x', mx + 'px');
+      spot.style.setProperty('--cs-y', my + 'px');
+      raf = requestAnimationFrame(lerp);
+    }
+
+    document.addEventListener('mousemove', (e: MouseEvent) => {
+      tx = e.clientX;
+      ty = e.clientY;
+    }, { passive: true });
+
+    raf = requestAnimationFrame(lerp);
+
+    document.addEventListener('astro:before-swap', () => cancelAnimationFrame(raf));
+  }
+</script>
+
+<style>
+  .cs-spot {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background: radial-gradient(
+      circle 600px at var(--cs-x, 50%) var(--cs-y, 50%),
+      rgba(99, 138, 255, 0.025) 0%,
+      transparent 50%
+    );
+    transition: opacity 0.5s;
+  }
+</style>

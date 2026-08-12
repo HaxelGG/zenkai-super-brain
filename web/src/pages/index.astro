@@ -2,60 +2,56 @@
 export const prerender = true;
 import WebLayout from '../layouts/WebLayout.astro';
 import NeuralHero from '../components/landing/NeuralHero.astro';
-import AntesDespues from '../components/landing/AntesDespues.astro';
-import Confianza from '../components/landing/Confianza.astro';
+import ProblemSelector from '../components/landing/ProblemSelector.astro';
+import TrustStack from '../components/landing/TrustStack.astro';
 import ComoFunciona from '../components/landing/ComoFunciona.astro';
 import PlanZenkai from '../components/landing/PlanZenkai.astro';
 import LeadCapture from '../components/landing/LeadCapture.astro';
-import Ecosistema from '../components/landing/Ecosistema.astro';
-import FAQ from '../components/landing/FAQ.astro';
 import SalesSimulator from '../components/landing/SalesSimulator.astro';
 import ROICalculator from '../components/landing/ROICalculator.astro';
+import Confianza from '../components/landing/Confianza.astro';
+import Ecosistema from '../components/landing/Ecosistema.astro';
+import FAQ from '../components/landing/FAQ.astro';
 import CTAFinal from '../components/landing/CTAFinal.astro';
 import StickyBar from '../components/landing/StickyBar.astro';
 import ChatWidget from '../components/landing/ChatWidget.astro';
+import CursorSpotlight from '../components/landing/CursorSpotlight.astro';
 
 /**
- * Estructura optimizada para conversion.
+ * ZENKAI — AI Growth Systems
  *
- *  1 Hero          → Propuesta de valor + precio + urgencia en 5s
- *  2 Antes/Después → Dolor vs solucion visual
- *  3 Confianza      → Testimonios reales + garantia + sectores
- *  4 Como funciona  → 3 pasos, elimina friccion
- *  5 Plan Zenkai    → Precio detallado + devolucion 14 dias
- *  6 Demo Ventas    → Simulador interactivo del agente de ventas
- *  7 Ecosistema     → Prueba de que no es humo
- *  8 FAQ            → Ultimas objeciones
- *  9 Cierre         → WhatsApp + email
+ * Estructura enterprise:
+ *  1 NeuralHero      — Sistema neuronal vivo. Identidad visual de la marca.
+ *  2 ProblemSelector — Diagnostico interactivo: "Que frena tu crecimiento?"
+ *  3 TrustStack      — Arquitectura del sistema: no son herramientas, es infraestructura.
+ *  4 Como funciona   — 3 pasos, elimina friccion.
+ *  5 Plan Zenkai     — El plan unico con precio transparente.
+ *  6 LeadCapture     — Captura leads que no estan listos para comprar.
+ *  7 SalesSimulator  — Demo interactiva del agente de ventas.
+ *  8 ROI Calculator  — Cuanto pierdes sin automatizar.
+ *  9 Confianza       — Testimonios + garantias reales.
+ * 10 Ecosistema      — Los 5 productos integrados.
+ * 11 FAQ             — Ultimas objeciones.
+ * 12 CTA Final       — WhatsApp + email.
  *
- *  Flotante: ChatWidget (asistente IA siempre disponible)
+ * Capa flotante: ChatWidget (asistente IA), CursorSpotlight (luz ambiental).
  */
 ---
-
-<script is:inline type="application/ld+json" set:html={JSON.stringify({
-  '@context': 'https://schema.org',
-  '@type': 'FAQPage',
-  mainEntity: [
-    { '@type': 'Question', name: '¿Cuánto cuesta el Plan Zenkai?', acceptedAnswer: { '@type': 'Answer', text: '500€ de implementación única + 95€ al mes de mantenimiento. Sin costes ocultos.' } },
-    { '@type': 'Question', name: '¿Qué incluye el Plan Zenkai?', acceptedAnswer: { '@type': 'Answer', text: 'Web profesional o tienda online, CRM, agente de ventas IA, atención al cliente 24/7, agente de facturación, agenda automatizada, diagnóstico de marketing digital y diagnóstico empresarial.' } },
-    { '@type': 'Question', name: '¿Cuánto tarda en estar funcionando?', acceptedAnswer: { '@type': 'Answer', text: '7 días laborables desde que nos das acceso a los datos básicos de tu negocio.' } },
-    { '@type': 'Question', name: '¿Hay permanencia?', acceptedAnswer: { '@type': 'Answer', text: 'No. El mantenimiento de 95€/mes puede cancelarse en cualquier momento. Sin contratos de permanencia.' } },
-    { '@type': 'Question', name: '¿Tienen garantía?', acceptedAnswer: { '@type': 'Answer', text: 'Sí. 14 días de prueba. Si no ves resultados, te devolvemos los 500€ de implementación.' } },
-  ],
-})} />
 
 <WebLayout
   title="ZENKAI · AI Growth Systems · Infraestructura de IA empresarial"
   description="ZENKAI es infraestructura de inteligencia artificial para empresas. Conecta ventas, atencion y operaciones. 500€ implementacion + 95€/mes."
 >
+  <CursorSpotlight />
   <NeuralHero />
-  <AntesDespues />
-  <Confianza />
-  <ROICalculator />
+  <ProblemSelector />
+  <TrustStack />
   <ComoFunciona />
   <PlanZenkai />
   <LeadCapture />
   <SalesSimulator />
+  <ROICalculator />
+  <Confianza />
   <Ecosistema />
   <FAQ />
   <CTAFinal />
