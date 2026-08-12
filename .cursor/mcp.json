@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "n8n-mcp": {
+      "type": "http",
+      "url": "https://zenkai-growth-systems.app.n8n.cloud/mcp-server/http",
+      "headers": {
+        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkNzkyZTNjNS0xMzMwLTRlNTAtYjI0ZS0xYWRlYTI2Nzk0OGYiLCJpc3MiOiJuOG4iLCJhdWQiOiJtY3Atc2VydmVyLWFwaSIsImp0aSI6IjI5MDIyZDQyLTFlOTEtNGVkOS04MDllLTlhYzg3OTRjNWM4ZiIsImlhdCI6MTc4MTk1ODM4MX0.Zw5Ka-tpF_E5v1_A2TWmJec9V6pVqcp_KnroEhQdqZk",
+        "Accept": "application/json, text/event-stream"
+      }
+    },
+    "windmill-mcp": {
+      "type": "http",
+      "url": "https://app.windmill.dev/api/mcp/w/zenkai/mcp?token=maps82cXgz7n4IWNrXMHOEHAjBrqlHMz",
+      "headers": {
+        "Accept": "application/json, text/event-stream"
+      }
+    }
+  }
+}
