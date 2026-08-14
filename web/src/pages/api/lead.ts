@@ -4,11 +4,56 @@ export const prerender = false;
 
 const N8N_WEBHOOK = import.meta.env.N8N_LEAD_WEBHOOK || '';
 const RESEND_KEY = import.meta.env.RESEND_API_KEY || '';
+const DEEPSEEK_KEY = import.meta.env.DEEPSEEK_API_KEY || '';
 const NOTIFY_EMAIL = 'hola@zenkai.systems';
 
 const ipAttempts = new Map<string, { count: number; reset: number }>();
 const RATE_LIMIT = 5;
 const RATE_WINDOW = 60_000;
+
+async function generateReport(nombre: string): Promise<string | null> {
+  if (!DEEPSEEK_KEY) return null;
+  try {
+    const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${DEEPSEEK_KEY}`,
+      },
+      body: JSON.stringify({
+        model: 'deepseek-chat',
+        messages: [
+          {
+            role: 'system',
+            content: `Eres el Analista de Oportunidades de IA de ZENKAI. Genera un Informe de Oportunidades de IA personalizado para un lead empresarial.
+Formato HTML limpio (usa <h3>, <p>, <ul>, <li>, <strong>, sin markdown).
+El informe debe incluir:
+1. Saludo personalizado con el nombre del lead
+2. Las 3 principales oportunidades de IA para su empresa
+3. Areas de impacto estimadas (tiempo ahorrado, potencial de ingresos, reduccion de costes) usando rangos realistas como "tipicamente 10-20 horas ahorradas por semana", nunca metricas exactas inventadas
+4. Soluciones ZENKAI recomendadas
+5. CTA claro para el siguiente paso
+
+Contexto de planes: Starter (95€/mes) = web, CRM, 1 agente IA, diagnosticos. Growth (440€/mes) = 4 agentes IA, 2 campanas publicitarias incluidas, 12 piezas de contenido, SEO, gestor de resenas, analisis competitivo. Enterprise = custom.
+Menos de 500 palabras. Profesional, en espanol.`,
+          },
+          {
+            role: 'user',
+            content: `Genera un informe para: Nombre: ${nombre}`,
+          },
+        ],
+        max_tokens: 900,
+        temperature: 0.7,
+      }),
+    });
+    if (!response.ok) return null;
+    const data = await response.json();
+    return data.choices?.[0]?.message?.content || null;
+  } catch (e) {
+    console.error('Report generation error:', e);
+    return null;
+  }
+}
 
 export const POST: APIRoute = async ({ request }) => {
   try {
@@ -40,8 +85,9 @@ export const POST: APIRoute = async ({ request }) => {
       });
     }
 
+    const cleanNombre = String(nombre).trim();
     const lead = {
-      nombre: String(nombre).trim(),
+      nombre: cleanNombre,
       email: String(email).trim().toLowerCase(),
       fuente: String(fuente || 'web-oferta-sorpresa'),
       pagina: String(pagina || ''),
@@ -57,6 +103,9 @@ export const POST: APIRoute = async ({ request }) => {
       }).catch(() => {});
     }
 
+    // Generar informe IA
+    const report = await generateReport(cleanNombre);
+
     if (RESEND_KEY) {
       // Email al equipo
       fetch('https://api.resend.com/emails', {
@@ -66,37 +115,39 @@ export const POST: APIRoute = async ({ request }) => {
           from: 'Zenkai Leads <leads@zenkai.systems>',
           to: [NOTIFY_EMAIL],
           subject: `Nuevo lead: ${lead.nombre}`,
-          html: `<h2>Nuevo lead desde la web</h2><p><strong>Nombre:</strong> ${lead.nombre}</p><p><strong>Email:</strong> ${lead.email}</p><p><strong>Fuente:</strong> ${lead.fuente}</p><p><strong>Pagina:</strong> ${lead.pagina}</p><p><strong>Fecha:</strong> ${lead.timestamp}</p>`,
+          html: `<h2>Nuevo lead desde la web</h2><p><strong>Nombre:</strong> ${lead.nombre}</p><p><strong>Email:</strong> ${lead.email}</p><p><strong>Fuente:</strong> ${lead.fuente}</p><p><strong>Informe IA generado:</strong> ${report ? 'Si' : 'No (fallback)'}</p>`,
         }),
       }).catch(() => {});
 
-      // Email de bienvenida al lead
+      // Email al lead con el informe IA
+      const leadHtml = report
+        ? `<div style="font-family:system-ui,sans-serif;max-width:540px;margin:0 auto;padding:24px;color:#e4e4e7;background:#0d0d1a;border-radius:12px;border:1px solid #1f1f2c">
+            <h2 style="color:#f5f5fa;margin:0 0 4px">Tu Informe de Oportunidades de IA</h2>
+            <p style="color:#a1a1aa;margin:0 0 20px;font-size:14px">Preparado por ZENKAI para ${lead.nombre}</p>
+            ${report}
+            <hr style="border:none;border-top:1px solid #1f1f2c;margin:20px 0" />
+            <p style="color:#a1a1aa;font-size:12px">ZENKAI · Infraestructura de IA Empresarial · hola@zenkai.systems</p>
+          </div>`
+        : `<div style="font-family:system-ui,sans-serif;max-width:540px;margin:0 auto;padding:24px;color:#e4e4e7;background:#0d0d1a;border-radius:12px">
+            <h2 style="color:#f5f5fa">Gracias por tu interes, ${lead.nombre}!</h2>
+            <p style="color:#a1a1aa">Hemos recibido tus datos. Nuestro equipo te contactara en menos de 4 horas laborables.</p>
+          </div>`;
+
       fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${RESEND_KEY}` },
         body: JSON.stringify({
           from: 'Zenkai <hola@zenkai.systems>',
           to: [lead.email],
-          subject: 'Tu oferta sorpresa de Zenkai',
-          html: `<div style="font-family:sans-serif;max-width:500px;margin:0 auto;padding:20px;color:#e4e4e7;background:#0d0d1a;border-radius:12px;border:1px solid #1f1f2c">
-            <h2 style="color:#f5f5fa">Hola ${lead.nombre},</h2>
-            <p style="color:#a1a1aa;line-height:1.6">Gracias por dejar tus datos en zenkai.systems. Como prometido, aqui tienes tu <strong style="color:#f5f5fa">oferta sorpresa</strong>:</p>
-            <div style="background:linear-gradient(135deg,rgba(99,102,241,0.1),rgba(168,85,247,0.05));border:1px solid rgba(99,102,241,0.2);border-radius:8px;padding:20px;margin:16px 0">
-              <p style="font-size:24px;font-weight:700;color:#f5f5fa;margin:0 0 8px">Plan Zenkai por 450€</p>
-              <p style="color:#a1a1aa;margin:0;font-size:14px">50€ de descuento sobre el precio normal de implementacion. Solo por haber llegado hasta aqui.</p>
-            </div>
-            <p style="color:#a1a1aa;line-height:1.6">El plan incluye <strong style="color:#f5f5fa">todo</strong>: web, CRM, agente de ventas IA, atencion al cliente, facturacion, agenda y diagnosticos.</p>
-            <p style="color:#a1a1aa;line-height:1.6">Si quieres activarlo, solo tienes que responder a este email o escribirnos por WhatsApp al <strong style="color:#22c55e">+34 622 874 482</strong>.</p>
-            <p style="color:#a1a1aa;line-height:1.6">La oferta expira en 48 horas. Luego el precio vuelve a 500€.</p>
-            <p style="color:#71717a;font-size:12px;margin-top:20px">Zenkai Growth Systems · Sin spam, sin llamadas · Te das de baja cuando quieras</p>
-          </div>`,
+          subject: 'Tu Informe de Oportunidades de IA',
+          html: leadHtml,
         }),
       }).catch(() => {});
     }
 
-    console.log(JSON.stringify({ event: 'lead_capturado', ...lead }));
+    console.log(JSON.stringify({ event: 'lead_capturado', ...lead, reportGenerated: !!report }));
 
-    return new Response(JSON.stringify({ success: true, message: 'Lead registrado' }), {
+    return new Response(JSON.stringify({ success: true, message: 'Lead registrado', reportGenerated: !!report }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });
