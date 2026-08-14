@@ -8,13 +8,13 @@ import WhatsAppCTA from '../WhatsAppCTA.astro';
 
 const tiers = [
   {
-    name: 'Starter', price: '95', period: '/mes', setup: '500',
+    name: 'Starter', price: '95', annualPrice: '47', period: '/mes', setup: '500',
     desc: 'Para pequenas empresas listas para automatizar.',
     features: ['Web o tienda online', 'CRM', '1 Agente de IA (Ventas y Atencion)', 'Automatizacion basica', 'Diagnostico de marketing digital', 'Diagnostico empresarial completo', 'Soporte por email'],
     cta: 'Empezar', highlight: false,
   },
   {
-    name: 'Growth', price: '440', period: '/mes', setup: '500',
+    name: 'Growth', price: '440', annualPrice: '220', period: '/mes', setup: '500',
     desc: 'Para empresas que quieren crecer con IA y marketing automatizado.',
     features: [
       'Todo lo de Starter',
@@ -41,7 +41,7 @@ const tiers = [
     cta: 'Empezar', highlight: true,
   },
   {
-    name: 'Enterprise', price: 'Custom', period: '', setup: '',
+    name: 'Enterprise', price: 'Custom', annualPrice: '', period: '', setup: '',
     desc: 'Para despliegues a gran escala con infraestructura dedicada.',
     features: ['Todo lo de Growth', 'Agentes de IA ilimitados', 'Infraestructura dedicada', 'Modelos de IA personalizados', 'Despliegue on-premise', 'Seguridad y cumplimiento avanzados', 'Opcion white-label', 'SLAs personalizados'],
     cta: 'Contactanos', highlight: false,
@@ -63,6 +63,14 @@ const tiers = [
       </p>
     </div>
 
+    <div class="billing-toggle reveal" role="tablist" aria-label="Periodo de facturacion">
+      <button class="billing-btn billing-btn--active" id="billing-monthly" role="tab" aria-selected="true">Mensual</button>
+      <button class="billing-btn" id="billing-annual" role="tab" aria-selected="false">
+        Anual
+        <span class="billing-save">-50%</span>
+      </button>
+    </div>
+
     <div class="pricing-grid reveal-stagger">
       {tiers.map((t) => (
         <div class:list={['pricing-card', t.highlight && 'pricing-card--featured']}>
@@ -72,9 +80,12 @@ const tiers = [
             <p class="pricing-card__desc">{t.desc}</p>
           </div>
           <div class="pricing-card__price">
-            <span class="pricing-card__amount">€{t.price}</span>
-            <span class="pricing-card__period">{t.period}</span>
+            <span class="pricing-card__amount" data-monthly={t.price} data-annual={t.annualPrice}>€{t.price}</span>
+            <span class="pricing-card__period" data-period>{t.period}</span>
           </div>
+          {t.annualPrice && t.annualPrice !== '' && (
+            <p class="pricing-card__annual-note" hidden>Facturado anualmente: <strong>€{(parseInt(t.annualPrice) * 12).toLocaleString('es-ES')}/año</strong></p>
+          )}
           {t.setup && <p class="pricing-card__setup">{t.setup}€ de implementacion unica</p>}
           <ul class="pricing-card__features">
             {t.features.map((f) => (
@@ -96,8 +107,42 @@ const tiers = [
     </div>
 
     <p class="pricing-note reveal">Todos los planes incluyen garantia de devolucion de 14 dias. Sin costes ocultos. Cancela cuando quieras.</p>
+    <p class="pricing-promo reveal"><strong>Promocion:</strong> paga 1 año por adelantado y obtienes <strong>50% de descuento</strong> en todos los planes.</p>
   </div>
 </section>
+
+<script>
+  const monthlyBtn = document.getElementById('billing-monthly')!;
+  const annualBtn = document.getElementById('billing-annual')!;
+
+  function setBilling(annual: boolean) {
+    monthlyBtn.classList.toggle('billing-btn--active', !annual);
+    annualBtn.classList.toggle('billing-btn--active', annual);
+    monthlyBtn.setAttribute('aria-selected', String(!annual));
+    annualBtn.setAttribute('aria-selected', String(annual));
+
+    document.querySelectorAll<HTMLElement>('.pricing-card__amount').forEach(el => {
+      const monthly = el.dataset.monthly;
+      const annualPrice = el.dataset.annual;
+      if (annual && annualPrice && annualPrice !== '') {
+        el.textContent = '€' + annualPrice;
+      } else if (!annual) {
+        el.textContent = '€' + monthly;
+      }
+    });
+
+    document.querySelectorAll<HTMLElement>('.pricing-card__period').forEach(el => {
+      el.textContent = annual ? '/mes (anual)' : '/mes';
+    });
+
+    document.querySelectorAll<HTMLElement>('.pricing-card__annual-note').forEach(el => {
+      el.hidden = !annual;
+    });
+  }
+
+  monthlyBtn.addEventListener('click', () => setBilling(false));
+  annualBtn.addEventListener('click', () => setBilling(true));
+</script>
 
 <style>
   .band { padding-block: 6rem; border-top: 1px solid rgba(255,255,255,0.05); }
@@ -205,6 +250,52 @@ const tiers = [
 
   .pricing-note {
     text-align: center; font-size: 0.8125rem; color: var(--zk-muted, #52525b);
+  }
+  .pricing-promo {
+    text-align: center; font-size: 0.875rem; color: #f59e0b;
+    margin-top: 0.75rem;
+  }
+  .pricing-promo strong { color: #fbbf24; }
+
+  .billing-toggle {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+  }
+  .billing-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.55rem 1.5rem;
+    border-radius: 2rem;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.02);
+    color: var(--zk-text2, #a1a1aa);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.25s;
+    font: inherit;
+  }
+  .billing-btn:hover { border-color: rgba(99,138,255,0.25); color: #fff; }
+  .billing-btn--active {
+    background: rgba(99,138,255,0.1);
+    border-color: rgba(99,138,255,0.35);
+    color: #fff;
+  }
+  .billing-save {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    color: #22c55e;
+    background: rgba(34,197,94,0.12);
+    padding: 0.15rem 0.45rem;
+    border-radius: 1rem;
+  }
+  .pricing-card__annual-note {
+    font-size: 0.75rem;
+    color: #22c55e;
+    margin: 0 0 0.5rem;
   }
   @media (max-width: 768px) {
     .pricing-grid { grid-template-columns: 1fr; }
