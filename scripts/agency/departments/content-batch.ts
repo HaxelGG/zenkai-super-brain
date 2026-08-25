@@ -164,9 +164,17 @@ Responde SOLO JSON array (sin markdown):
 export async function executeApprovedJob(
   jobId: string,
   approvedBy = "founder",
-): Promise<{ jobId: string; published: number; skipped: number; errors: string[] }> {
+): Promise<{ jobId: string; published: number; skipped: number; errors: string[]; built?: boolean; phase?: string }> {
   const { getJob } = await import("../jobs.js");
   const job = await getJob(jobId);
+  if (job && job.intent === "PROJECT_PROPOSAL") {
+    await updateJob(jobId, {
+      status: "approved",
+      approved_by: approvedBy,
+      approved_at: new Date().toISOString(),
+    });
+    return { jobId, published: 0, skipped: 0, errors: [], built: false, phase: "2-pending" };
+  }
   if (!job?.artifacts?.posts?.length) {
     throw new Error("Job not found or empty artifacts");
   }

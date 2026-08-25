@@ -31,6 +31,7 @@
     "agency:agent": "tsx scripts/agency/cli.ts agent",
     "agency:tick": "tsx scripts/agency/cli.ts tick",
     "agency:setup-schema": "tsx scripts/airtable/setup-agency-schema.ts",
+    "test:plan": "tsx scripts/agency/test-plan.ts",
     "vercel:sync-env": "tsx scripts/vercel/sync-env.ts"
   },
   "dependencies": {

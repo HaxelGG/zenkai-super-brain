@@ -36,6 +36,9 @@ export type JobArtifacts = {
   channel: string;
   topic: string;
   publish_results?: unknown[];
+  // Fase 1 cockpit · propuesta/clasificación de un job PROJECT_PROPOSAL (D1)
+  proposal?: Record<string, unknown>;
+  classification?: Record<string, unknown>;
 };
 
 export type AgencyJob = {

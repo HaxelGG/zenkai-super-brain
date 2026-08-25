@@ -2,6 +2,7 @@
  * JARVIS · Director de Operaciones · enruta instrucciones a departamentos
  */
 import { runAgent } from "./agent-runner.js";
+import { logRun } from "./activity.js";
 import { runFinancePipeline } from "./departments/finance.js";
 import { runForgeDevTask, runIaPipeline } from "./departments/ia.js";
 import { runMarketingCalendarPipeline } from "./departments/marketing-calendar.js";
@@ -112,7 +113,9 @@ export async function directorRoute(
         }),
       );
     } else {
-      results.push(await runAgent({ ...input, instruction: trimmed, agentId: explicitAgent || "ARES" }));
+      results.push(
+        await runAgent({ ...input, instruction: trimmed, agentId: explicitAgent || "ARES" }, { logActivity: false }),
+      );
     }
   } else if (department === "sales") {
     results.push(await runSalesPipeline(trimmed));
@@ -129,15 +132,21 @@ export async function directorRoute(
   } else if (department === "operations" && /tasks?|tareas|goals?|metas/i.test(trimmed)) {
     const [tasks, goals] = await Promise.all([listOpsTasks(), getOpsGoals()]);
     results.push(
-      await runAgent({
-        instruction: `${trimmed}\n\n[TAREAS]\n${JSON.stringify(tasks.tasks.slice(0, 8))}\n[GOALS]\n${JSON.stringify(goals)}`,
-        agentId: "ATLAS",
-      }),
+      await runAgent(
+        {
+          instruction: `${trimmed}\n\n[TAREAS]\n${JSON.stringify(tasks.tasks.slice(0, 8))}\n[GOALS]\n${JSON.stringify(goals)}`,
+          agentId: "ATLAS",
+        },
+        { logActivity: false },
+      ),
     );
   } else {
     const agentId = explicitAgent || (department ? pickLeadAgent(department) : "ATLAS");
-    results.push(await runAgent({ ...input, instruction: trimmed, agentId }));
+    results.push(await runAgent({ ...input, instruction: trimmed, agentId }, { logActivity: false }));
   }
+
+  // Persistir cada run del orquestador en el feed (best-effort, no bloquea).
+  await Promise.allSettled(results.map((r) => logRun(r, "director")));
 
   return {
     department: department || results[0]?.department || "operations",

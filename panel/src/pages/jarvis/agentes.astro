@@ -27,7 +27,7 @@ const totalOps = data.agentStatuses.reduce((s, a) => s + a.opsToday, 0);
       <div class="jv-label mt-1 opacity-70">Master</div>
     </HudPanel>
     <HudPanel padding="sm" class="text-center">
-      <div class="jv-metric-value jv-metric-value-lg text-[var(--jv-success)]" data-count-up={String(active)}>{active}</div>
+      <div class="jv-metric-value jv-metric-value-lg text-[var(--jv-success)]" data-jv-agents="active" data-count-up={String(active)}>{active}</div>
       <div class="jv-label mt-1 opacity-70">Activos</div>
     </HudPanel>
     <HudPanel padding="sm" class="text-center">
@@ -38,7 +38,9 @@ const totalOps = data.agentStatuses.reduce((s, a) => s + a.opsToday, 0);
 
   <HudPanel animate={3}>
     <h2 class="jv-heading-section mb-5">Estado en tiempo real</h2>
-    <AgentStatusGrid statuses={data.agentStatuses} />
+    <div id="jv-agents-grid" data-compact="false">
+      <AgentStatusGrid statuses={data.agentStatuses} />
+    </div>
   </HudPanel>
 
   <HudPanel class="mt-5" animate={4}>

@@ -2,6 +2,7 @@
  * Motor autónomo · tick programado (cron Vercel / Windmill / manual)
  */
 import { listCalendarDue } from "./calendar.js";
+import { logActivity } from "./activity.js";
 import { auditRequiredKeys } from "./keys-audit.js";
 import { runMarketingPublishPipeline } from "./departments/marketing-publish.js";
 import { directorRoute } from "./director.js";
@@ -23,6 +24,14 @@ export async function runAgencySchedulerTick(): Promise<SchedulerTickResult> {
       name: "keys-audit",
       ok: false,
       detail: `Faltan: ${audit.criticalMissing.join(", ")}`,
+    });
+    await logActivity({
+      type: "alert",
+      agent: "JARVIS",
+      department: "operations",
+      message: `Tick bloqueado · faltan keys: ${audit.criticalMissing.join(", ")}`,
+      status: "blocked",
+      source: "scheduler",
     });
     return { ts, keysReady: false, actions };
   }
@@ -49,6 +58,16 @@ export async function runAgencySchedulerTick(): Promise<SchedulerTickResult> {
   }
 
   await dispatchAgencyEvent("agency.scheduler.tick", { ts, actions });
+
+  const okCount = actions.filter((a) => a.ok).length;
+  await logActivity({
+    type: "task",
+    agent: "JARVIS",
+    department: "operations",
+    message: `Tick autónomo · ${okCount}/${actions.length} acciones ok`,
+    status: "done",
+    source: "scheduler",
+  });
 
   return { ts, keysReady: true, actions };
 }

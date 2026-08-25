@@ -54,3 +54,12 @@ web/.astro/
 
 # Ignore Smart Environment folder
 .smart-env
+
+# Tooling local · puede contener tokens (n8n / Windmill) · NUNCA commitear
+.cursor/mcp.json
+
+# Vercel link dirs (cualquier ubicación)
+**/.vercel/
+
+# API keys de clientes · NUNCA commitear (ver docs/jarvis/ESTADO-Y-PLAN.md §5)
+**/API keys/

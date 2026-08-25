@@ -84,6 +84,20 @@ const TABLES: Record<string, { fields: FieldDef[] }> = {
       { name: "deadline", type: "date", options: { dateFormat: { name: "iso" } } },
     ],
   },
+  Activity: {
+    // Log durable del feed: cada run del orquestador + tick del scheduler.
+    // `message` va primero (campo primario · singleLineText).
+    fields: [
+      { name: "message", type: "singleLineText" },
+      { name: "ts", type: "dateTime", options: { dateFormat: { name: "iso" }, timeFormat: { name: "24hour" }, timeZone: "client" } },
+      { name: "type", type: "singleLineText" },
+      { name: "agent", type: "singleLineText" },
+      { name: "department", type: "singleLineText" },
+      { name: "status", type: "singleLineText" },
+      { name: "source", type: "singleLineText" },
+      { name: "ref", type: "singleLineText" },
+    ],
+  },
 };
 
 type MetaTable = { id: string; name: string; fields: { name: string }[] };

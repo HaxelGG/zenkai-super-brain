@@ -2,6 +2,7 @@
  * Ejecutor de agente individual por ID
  */
 import { fetchJarvisOps, formatJarvisOpsContext } from "../jarvis/ops-context.js";
+import { logRun } from "./activity.js";
 import { callAgencyLlm } from "./llm.js";
 import { dispatchAgencyEvent, dispatchToN8nResult } from "./dispatch.js";
 import { getAgent } from "./registry.js";
@@ -17,7 +18,10 @@ Responde en español LATAM, estratégico y accionable. 3-6 frases.
 Si proponés tareas concretas, listalas al final como bullets cortos.`;
 }
 
-export async function runAgent(input: AgencyRunInput): Promise<AgencyRunResult> {
+export async function runAgent(
+  input: AgencyRunInput,
+  opts: { logActivity?: boolean } = {},
+): Promise<AgencyRunResult> {
   const agentId = input.agentId;
   if (!agentId) throw new Error("agentId required");
 
@@ -52,7 +56,7 @@ export async function runAgent(input: AgencyRunInput): Promise<AgencyRunResult> 
     status: "working",
   });
 
-  return {
+  const result: AgencyRunResult = {
     id: `agent_${agentId}_${Date.now()}`,
     agent: agentId,
     department: agent.department,
@@ -65,4 +69,7 @@ export async function runAgent(input: AgencyRunInput): Promise<AgencyRunResult> 
     dispatch,
     meta: { contextLive: ops.live },
   };
+
+  if (opts.logActivity !== false) await logRun(result, "agent");
+  return result;
 }
