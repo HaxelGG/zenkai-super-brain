@@ -92,8 +92,9 @@ export const POST: APIRoute = async ({ request }) => {
         ],
         max_tokens: 1800,
         temperature: 0.6,
+        stream: body.stream === true,
       }),
-      signal: AbortSignal.timeout(60_000),
+      signal: AbortSignal.timeout(90_000),
     });
 
     if (!upstream.ok) {
@@ -102,6 +103,72 @@ export const POST: APIRoute = async ({ request }) => {
       return new Response(JSON.stringify({ error: 'No se pudo generar el informe. Inténtalo de nuevo.' }), {
         status: 502,
         headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    const sse = (data: string): Uint8Array =>
+      new TextEncoder().encode(`data: ${JSON.stringify({ d: data })}\n\n`);
+
+    if (body.stream === true) {
+      if (!upstream.body) {
+        return new Response(JSON.stringify({ error: 'Sin cuerpo de streaming' }), {
+          status: 502,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+      const encoder = new TextEncoder();
+      const stream = new ReadableStream<Uint8Array>({
+        async start(controller) {
+          const reader = upstream.body!.getReader();
+          const decoder = new TextDecoder();
+          let buffer = '';
+          let total = 0;
+          try {
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
+              buffer += decoder.decode(value, { stream: true });
+              const lines = buffer.split('\n');
+              buffer = lines.pop() ?? '';
+              for (const line of lines) {
+                const trimmed = line.trim();
+                if (!trimmed.startsWith('data:')) continue;
+                const payload = trimmed.slice(5).trim();
+                if (payload === '[DONE]') continue;
+                try {
+                  const parsed = JSON.parse(payload);
+                  const delta: string = parsed?.choices?.[0]?.delta?.content ?? '';
+                  if (delta) {
+                    total += delta.length;
+                    controller.enqueue(sse(delta));
+                  }
+                } catch {
+                  // chunk parcial, se ignora
+                }
+              }
+            }
+          } catch (err) {
+            console.error('Informe stream read error', err);
+          } finally {
+            reader.releaseLock();
+          }
+          if (total === 0) {
+            controller.enqueue(
+              sse(JSON.stringify({ error: 'Respuesta vacía del proveedor' }))
+            );
+          }
+          controller.enqueue(encoder.encode('data: [DONE]\n\n'));
+          controller.close();
+        },
+      });
+      return new Response(stream, {
+        status: 200,
+        headers: {
+          'Content-Type': 'text/event-stream; charset=utf-8',
+          'Cache-Control': 'no-cache, no-transform',
+          Connection: 'keep-alive',
+          'X-Accel-Buffering': 'no',
+        },
       });
     }
 
