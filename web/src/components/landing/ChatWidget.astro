@@ -1,32 +1,59 @@
 ---
 /**
- * ChatWidget — asistente IA flotante.
+ * ChatWidget — asistente IA flotante "Alex" (rediseño premium).
  *
- * Botón circular abajo-derecha. Al abrirse muestra un chat completo con
- * historial, input y typing indicator. Usa /api/chat como backend.
+ * Botón circular abajo-derecha con pulso de atención y badge de conversación.
+ * Panel con animación de entrada/salida, cabecera con minimizar/cerrar,
+ * streaming en vivo, burbujas diferenciadas, markdown enriquecido (negritas,
+ * viñetas y enlaces), preguntas rápidas CONTEXTUALES según el sector del
+ * visitante y el tema de la conversación, y cierre por WhatsApp.
+ * Teaser de invitación a los 9 segundos.
  */
 ---
 
 <button id="cw-trigger" class="cw-trigger" aria-label="Abrir chat de ayuda" title="¿Necesitas ayuda?">
-  <svg class="cw-trigger__open" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+  <span class="cw-trigger__ping"></span>
+  <span class="cw-trigger__dot"></span>
+  <svg class="cw-trigger__open" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-8 8 8.4 8.4 0 0 1-3.6-.8L4 20l1.2-5.4A8 8 0 1 1 21 12z"/><path d="M12 8.5v4M10 10.5h4"/></svg>
   <svg class="cw-trigger__close" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
 </button>
 
-<div id="cw-panel" class="cw-panel" aria-hidden="true" role="dialog" aria-label="Chat de ayuda Zenkai">
+<div id="cw-teaser" class="cw-teaser" hidden>
+  <p>👋 ¿Sabes cuánto te cuesta <strong>no automatizar</strong> tu negocio?</p>
+  <span>Pregúntame, es gratis →</span>
+</div>
+
+<div id="cw-panel" class="cw-panel" aria-hidden="true" role="dialog" aria-label="Chat con Alex, asesor de ZENKAI">
   <div class="cw-header">
-    <div class="cw-header__avatar">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5a3 3 0 1 0-5.997.125A4 4 0 0 0 3.477 10.896 4 4 0 0 0 4.033 17.484A3 3 0 1 0 12 18Z M12 5a3 3 0 1 1 5.997.125A4 4 0 0 1 20.523 10.896a4 4 0 0 1-.556 6.588A3 3 0 1 1 12 18Z M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4"/></svg>
+    <div class="cw-header__ring">
+      <div class="cw-header__avatar">ZK</div>
+      <span class="cw-header__dot"></span>
     </div>
-    <div>
-      <div class="cw-header__title">Asistente Zenkai</div>
-      <div class="cw-header__sub">Respuesta inmediata · IA</div>
+    <div class="cw-header__info">
+      <div class="cw-header__title">Alex · Asesor ZENKAI</div>
+      <div class="cw-header__sub" id="cw-status">En línea · IA real · responde al instante</div>
+    </div>
+    <div class="cw-header__acciones">
+      <button id="cw-min" class="cw-icon-btn" aria-label="Minimizar chat" title="Minimizar">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg>
+      </button>
+      <button id="cw-close" class="cw-icon-btn" aria-label="Cerrar chat" title="Cerrar">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
     </div>
   </div>
   <div id="cw-messages" class="cw-messages"></div>
+  <div id="cw-chips" class="cw-chips" hidden></div>
+  <div id="cw-wa" class="cw-wa" hidden>
+    <a href="https://wa.me/34622874482" target="_blank" rel="noopener noreferrer" id="cw-wa-link">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.7 15L2 22l5.2-1.4A10 10 0 1 0 12 2zm5.4 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.6-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.4.2.5.7 1.8.8 1.9.1.1.1.3 0 .5-.4.7-.9 1-.7 1.4.9 1.6 2 2.6 3.5 3.4.3.2.5.1.7-.1l.9-1c.2-.3.4-.2.7-.1l1.9.9c.3.1.5.2.5.4.1.1.1.6-.1 1.1z"/></svg>
+      Hablar con un asesor por WhatsApp
+    </a>
+  </div>
   <div class="cw-input-area">
-    <input id="cw-input" type="text" class="cw-input" placeholder="Escribe tu pregunta..." maxlength="500" autocomplete="off" />
+    <input id="cw-input" type="text" class="cw-input" placeholder="Escribe tu mensaje…" maxlength="500" autocomplete="off" />
     <button id="cw-send" class="cw-send" aria-label="Enviar">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21 23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21 23 12 2.01 3 2 10l15 2-15 2z"/></svg>
     </button>
   </div>
 </div>
@@ -37,17 +64,62 @@
   const messagesEl = document.getElementById('cw-messages')!;
   const input = document.getElementById('cw-input') as HTMLInputElement;
   const sendBtn = document.getElementById('cw-send')!;
+  const chipsEl = document.getElementById('cw-chips')!;
+  const waEl = document.getElementById('cw-wa')!;
+  const waLink = document.getElementById('cw-wa-link') as HTMLAnchorElement;
+  const statusEl = document.getElementById('cw-status')!;
+  const teaser = document.getElementById('cw-teaser')!;
+  const closeBtn = document.getElementById('cw-close')!;
+  const minBtn = document.getElementById('cw-min')!;
 
   let open = false;
   let loading = false;
+  let usado = false;
+  let verExtras = false;
+  let sectorActivo: string | null = null;
   const history: { role: 'user' | 'assistant'; content: string }[] = [];
 
-  const WELCOME = '¡Hola! Soy el asistente de Zenkai. Pregúntame lo que quieras sobre nuestros servicios, precios o cómo funciona todo.';
+  const WELCOME = '¡Hola! Soy **Alex**, el asesor de ZENKAI 👋\n\nCuéntame: ¿qué negocio tienes y qué te está costando más hoy: **vender más**, **atender a tus clientes** o **operar tu día a día**?';
+
+  const WA_NUM = '34622874482';
+  const waTexto = (msg: string, origen: string) =>
+    `https://wa.me/${WA_NUM}?text=${encodeURIComponent(msg + '\n\n(origen: ' + origen + ')')}`;
+
+  const escapeHtml = (t: string) =>
+    t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+  function renderMarkdown(t: string): string {
+    const esc = escapeHtml(t);
+    return esc
+      .split('\n')
+      .map((linea) => {
+        if (!linea.trim()) return '<span class="cw-blank"></span>';
+        const esBullet = /^[-•*]\s+/.test(linea.trim());
+        const cuerpo = esBullet ? linea.trim().replace(/^[-•*]\s+/, '') : linea;
+        const conLinks = cuerpo.replace(
+          /(https?:\/\/[^\s<]+)/g,
+          '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>'
+        );
+        const conBold = conLinks.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+        if (esBullet) {
+          return `<span class="cw-line"><span class="cw-bullet"></span>${conBold}</span>`;
+        }
+        return `<span class="cw-line">${conBold}</span>`;
+      })
+      .join('');
+  }
+
+  const hora = () =>
+    new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
 
   function addMessage(role: 'user' | 'assistant', text: string) {
     const div = document.createElement('div');
     div.className = `cw-msg cw-msg--${role}`;
-    div.textContent = text;
+    if (role === 'assistant') {
+      div.innerHTML = `<span class="cw-avatar">ZK</span><div class="cw-bubble">${renderMarkdown(text)}</div><span class="cw-time">${hora()}</span>`;
+    } else {
+      div.innerHTML = `<div class="cw-bubble">${renderMarkdown(text)}</div><span class="cw-time">${hora()}</span>`;
+    }
     messagesEl.appendChild(div);
     messagesEl.scrollTop = messagesEl.scrollHeight;
   }
@@ -55,7 +127,7 @@
   function addTyping() {
     const div = document.createElement('div');
     div.className = 'cw-msg cw-msg--assistant cw-typing';
-    div.innerHTML = '<span></span><span></span><span></span>';
+    div.innerHTML = '<span class="cw-avatar">ZK</span><div class="cw-bubble"><span></span><span></span><span></span></div>';
     div.id = 'cw-typing';
     messagesEl.appendChild(div);
     messagesEl.scrollTop = messagesEl.scrollHeight;
@@ -65,12 +137,221 @@
     document.getElementById('cw-typing')?.remove();
   }
 
+  async function leerStream(resp: Response, onChunk: (t: string) => void): Promise<string> {
+    const reader = resp.body!.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    let completo = '';
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop() ?? '';
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed.startsWith('data:')) continue;
+        const payload = trimmed.slice(5).trim();
+        if (payload === '[DONE]') continue;
+        try {
+          const obj = JSON.parse(payload);
+          if (typeof obj.d === 'string') {
+            completo += obj.d;
+            onChunk(obj.d);
+          } else if (obj.error) {
+            throw new Error(String(obj.error));
+          }
+        } catch (err) {
+          if (err instanceof SyntaxError) continue;
+          throw err;
+        }
+      }
+    }
+    return completo;
+  }
+
+  interface Chip {
+    texto: string;
+    emoji?: string;
+    href?: string;
+  }
+
+  const SECTORES: { id: string; label: string; kw: string[] }[] = [
+    { id: 'clinica', label: 'Clínica dental', kw: ['dent', 'clínica', 'clinica', 'salud', 'paciente', 'consulta', 'cita', 'odont', 'médic', 'medic', 'doctor'] },
+    { id: 'restaurante', label: 'Restaurante', kw: ['restaur', 'hostal', 'hotel', 'bar', 'cafeter', 'chef', 'mesa', 'reserva', 'pedido', 'hosteler', 'cocina'] },
+    { id: 'ecommerce', label: 'Ecommerce', kw: ['ecommerce', 'e-commerce', 'tienda', 'shopify', 'woocommerce', 'woo', 'online', 'carrito', 'envío', 'envio', 'stock', 'vendo', 'dropshipping'] },
+    { id: 'inmobiliaria', label: 'Inmobiliaria', kw: ['inmobiliar', 'propiedad', 'piso', 'alquiler', 'vender casa', 'departamento', 'visita', 'arrendamiento'] },
+    { id: 'servicios', label: 'Servicios profesionales', kw: ['agencia', 'consultor', 'abogad', 'estudio', 'cotización', 'cotizacion', 'factur', 'asesor', 'profesional', 'arquitecto'] },
+    { id: 'talleres', label: 'Taller / servicios técnicos', kw: ['taller', 'mecánic', 'mecanic', 'técnico', 'tecnico', 'reparación', 'reparacion', 'mantenimiento'] },
+  ];
+
+  function detectarSector(): string | null {
+    const texto = history
+      .filter((m) => m.role === 'user')
+      .map((m) => m.content)
+      .join(' ')
+      .toLowerCase();
+    let mejor: string | null = null;
+    let mejorN = 0;
+    for (const s of SECTORES) {
+      const n = s.kw.filter((k) => texto.includes(k)).length;
+      if (n > mejorN) {
+        mejorN = n;
+        mejor = s.label;
+      }
+    }
+    return mejorN > 0 ? mejor : null;
+  }
+
+  const iniciales: Chip[] = [
+    { texto: 'Tengo una clínica dental', emoji: '🦷' },
+    { texto: 'Tengo un restaurante', emoji: '🍽️' },
+    { texto: 'Vendo online', emoji: '🛒' },
+    { texto: 'Soy inmobiliaria', emoji: '🏢' },
+  ];
+
+  const extras: Chip[] = [
+    { texto: '¿Cuánto cuesta y qué incluye?', emoji: '💰' },
+    { texto: '¿En cuánto tiempo lo implementan?', emoji: '⚡' },
+    { texto: '¿Cómo funciona la garantía de 14 días?', emoji: '🛡️' },
+    { texto: '¿Se integra con lo que ya uso?', emoji: '🔌' },
+  ];
+
+  const porSector: Record<string, Chip[]> = {
+    'Clínica dental': [
+      { texto: 'Perdemos citas por ausencias, ¿cómo lo resuelven?', emoji: '📅' },
+      { texto: '¿Qué incluye y cuánto cuesta?', emoji: '💰' },
+    ],
+    Restaurante: [
+      { texto: 'Las reservas llegan por teléfono, ¿lo pueden gestionar?', emoji: '📞' },
+      { texto: '¿Qué incluye y cuánto cuesta?', emoji: '💰' },
+    ],
+    Ecommerce: [
+      { texto: 'Se me llenan los carritos abandonados, ¿cómo los recupero?', emoji: '🛒' },
+      { texto: '¿Se integra con Shopify?', emoji: '🔌' },
+    ],
+    Inmobiliaria: [
+      { texto: 'Pierdo leads por responder tarde, ¿cómo lo arreglan?', emoji: '⚡' },
+      { texto: '¿Hacen seguimiento automático a clientes fríos?', emoji: '🔄' },
+    ],
+    'Servicios profesionales': [
+      { texto: 'Tardo días en mandar cotizaciones, ¿se automatiza?', emoji: '📄' },
+      { texto: '¿La facturación se automatiza sola?', emoji: '🧾' },
+    ],
+    'Taller / servicios técnicos': [
+      { texto: 'Los presupuestos tardan mucho, ¿se automatizan?', emoji: '🔧' },
+      { texto: '¿Qué incluye y cuánto cuesta?', emoji: '💰' },
+    ],
+  };
+
+  function contextuales(ultimo: string): Chip[] {
+    const t = ultimo.toLowerCase();
+    const lista: Chip[] = [];
+
+    if (sectorActivo && porSector[sectorActivo]) {
+      lista.push(...porSector[sectorActivo]);
+    }
+
+    if (/precio|cuesta|costo|coste|€|usd|\$|starter|growth|plan/.test(t)) {
+      lista.push(
+        { texto: '¿Qué incluye cada plan?', emoji: '📦' },
+        { texto: '¿Hay descuento por pago anual?', emoji: '🎁' }
+      );
+    } else if (/implement|tiempo|días|dias|semana|montar|configur/.test(t)) {
+      lista.push(
+        { texto: '¿Quién configura todo?', emoji: '🛠️' },
+        { texto: '¿Necesito saber de tecnología?', emoji: '🧠' }
+      );
+    } else if (/garant|devoluci|riesgo|prueba/.test(t)) {
+      lista.push(
+        { texto: '¿Hay permanencia o puedo cancelar?', emoji: '🔓' }
+      );
+    } else if (/informe|diagnóstico|diagnostico|reporte/.test(t)) {
+      lista.push(
+        { texto: '¿Me lo mandan por WhatsApp?', emoji: '📱' }
+      );
+    } else if (/whatsapp|hablar|asesor|equipo|humano/.test(t)) {
+      lista.push(
+        { texto: 'Quiero mi informe gratis', emoji: '📄', href: '#oferta' }
+      );
+    }
+
+    lista.push(
+      { texto: 'Quiero mi informe gratis', emoji: '📄', href: '#oferta' },
+      { texto: 'Ver precios', emoji: '💰', href: '/precios/' },
+      { texto: 'Hablar por WhatsApp', emoji: '📱', href: waTexto('Hola ZENKAI. Vengo del chat de la web y quiero hablar con alguien del equipo.', 'widget-chat-chip') }
+    );
+
+    const vistos = new Set<string>();
+    return lista
+      .filter((c) => (vistos.has(c.texto) ? false : (vistos.add(c.texto), true)))
+      .slice(0, 4);
+  }
+
+  function chipsActuales(): Chip[] {
+    if (verExtras) return extras;
+    const ultimo = [...history].reverse().find((m) => m.role === 'assistant' && m.content.trim());
+    if (ultimo) return contextuales(ultimo.content);
+    return iniciales;
+  }
+
+  function renderChips() {
+    chipsEl.innerHTML = '';
+    const chips = chipsActuales();
+    for (const chip of chips) {
+      const etiqueta = `${chip.emoji ? chip.emoji + ' ' : ''}${chip.texto}`;
+      if (chip.href) {
+        const a = document.createElement('a');
+        a.className = 'cw-chip cw-chip--link';
+        a.href = chip.href;
+        a.textContent = etiqueta;
+        if (chip.href.startsWith('http')) a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        if (chip.href.startsWith('#')) {
+          a.addEventListener('click', () => cerrar());
+        }
+        chipsEl.appendChild(a);
+      } else {
+        const btn = document.createElement('button');
+        btn.className = 'cw-chip';
+        btn.type = 'button';
+        btn.textContent = etiqueta;
+        btn.addEventListener('click', () => {
+          input.value = chip.texto;
+          send();
+        });
+        chipsEl.appendChild(btn);
+      }
+    }
+    const toggle = document.createElement('button');
+    toggle.className = 'cw-chips__toggle';
+    toggle.type = 'button';
+    toggle.textContent = verExtras ? '◀ Volver a sugerencias' : '❓ Otras preguntas';
+    toggle.addEventListener('click', () => {
+      verExtras = !verExtras;
+      renderChips();
+    });
+    chipsEl.appendChild(toggle);
+    const ultimoMsg = history[history.length - 1];
+    chipsEl.hidden = loading || !ultimoMsg || ultimoMsg.role !== 'assistant';
+  }
+
+  function actualizarEstado() {
+    statusEl.textContent = loading
+      ? 'Escribiendo…'
+      : sectorActivo
+        ? `En línea · te ayudo con ${sectorActivo}`
+        : 'En línea · IA real · responde al instante';
+  }
+
   async function send() {
     const text = input.value.trim();
     if (!text || loading) return;
     input.value = '';
     loading = true;
+    usado = true;
     sendBtn.setAttribute('disabled', '');
+    actualizarEstado();
     addMessage('user', text);
     history.push({ role: 'user', content: text });
     addTyping();
@@ -79,157 +360,363 @@
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: history }),
+        body: JSON.stringify({ stream: true, sector: sectorActivo ?? '', messages: history.slice(-12) }),
       });
-      const data = await res.json();
+      if (!res.ok || !res.body) {
+        const data = await res.json().catch(() => null);
+        throw new Error(data?.error || 'Error');
+      }
       removeTyping();
-      const reply = data.reply || 'Lo siento, ha ocurrido un error. ¿Puedes intentarlo de nuevo?';
-      addMessage('assistant', reply);
-      history.push({ role: 'assistant', content: reply });
-    } catch {
+      const div = document.createElement('div');
+      div.className = 'cw-msg cw-msg--assistant';
+      div.innerHTML = `<span class="cw-avatar">ZK</span><div class="cw-bubble"></div><span class="cw-time">${hora()}</span>`;
+      messagesEl.appendChild(div);
+      const bubble = div.querySelector('.cw-bubble')!;
+      let texto = '';
+      const pinta = () => {
+        bubble.innerHTML = renderMarkdown(texto);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+      };
+      await leerStream(res, (chunk) => {
+        texto += chunk;
+        pinta();
+      });
+      if (!texto.trim()) throw new Error('vacío');
+      history.push({ role: 'assistant', content: texto });
+    } catch (err) {
+      console.error('Widget error', err);
       removeTyping();
-      addMessage('assistant', 'Parece que hay un problema de conexión. Puedes escribirnos directamente por WhatsApp al +34 622 874 482.');
+      addMessage('assistant', 'Perdona, estoy teniendo un momento técnico 🙈. Escríbenos por WhatsApp y te atiende el equipo en menos de 4 horas: **+34 622 874 482**.');
     }
     loading = false;
+    sectorActivo = detectarSector();
     sendBtn.removeAttribute('disabled');
+    actualizarEstado();
+    renderChips();
+    actualizarWa();
   }
 
-  trigger.addEventListener('click', () => {
-    open = !open;
-    panel.setAttribute('aria-hidden', String(!open));
-    trigger.classList.toggle('cw-trigger--open', open);
-    if (open && history.length === 0) {
+  function actualizarWa() {
+    const ultimo = history.length > 0 ? history[history.length - 1].content.slice(0, 100) : '';
+    const texto = `Hola ZENKAI. Vengo del chat de la web y quiero hablar con alguien del equipo. Último mensaje: "${ultimo}"`;
+    waLink.href = waTexto(texto, 'widget-chat');
+    waEl.hidden = history.filter((m) => m.role === 'user').length === 0;
+  }
+
+  const abrir = () => {
+    open = true;
+    usado = true;
+    trigger.classList.add('cw-trigger--used');
+    panel.setAttribute('aria-hidden', 'false');
+    trigger.classList.add('cw-trigger--open');
+    teaser.hidden = true;
+    sectorActivo = detectarSector();
+    if (history.length === 0) {
       addMessage('assistant', WELCOME);
       history.push({ role: 'assistant', content: WELCOME });
     }
-    if (open) input.focus();
+    actualizarEstado();
+    renderChips();
+    actualizarWa();
+    input.focus();
+  };
+
+  const cerrar = () => {
+    if (!open) return;
+    open = false;
+    trigger.classList.remove('cw-trigger--open');
+    panel.classList.add('cw-panel--closing');
+    window.setTimeout(() => {
+      panel.classList.remove('cw-panel--closing');
+      panel.setAttribute('aria-hidden', 'true');
+    }, 180);
+  };
+
+  trigger.addEventListener('click', () => {
+    if (open) cerrar();
+    else abrir();
   });
+
+  closeBtn.addEventListener('click', cerrar);
+  minBtn.addEventListener('click', cerrar);
 
   sendBtn.addEventListener('click', send);
   input.addEventListener('keydown', (e) => { if (e.key === 'Enter') send(); });
 
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && open) { trigger.click(); }
+    if (e.key === 'Escape' && open) cerrar();
+  });
+
+  setTimeout(() => {
+    if (!usado && !open && !sessionStorage.getItem('zk_widget_teaser')) {
+      teaser.hidden = false;
+      try { sessionStorage.setItem('zk_widget_teaser', '1'); } catch { /* storage bloqueado */ }
+    }
+  }, 9000);
+
+  teaser.addEventListener('click', () => {
+    teaser.hidden = true;
+    abrir();
   });
 </script>
 
-<style>
+<style is:global>
   .cw-trigger {
-    position: fixed;
-    bottom: 1.5rem;
-    right: 1.5rem;
-    z-index: 100;
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    border: 1px solid rgba(99,102,241,0.4);
-    background: linear-gradient(135deg, #6366f1, #8b5cf6);
-    color: white;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 8px 32px rgba(99,102,241,0.35);
+    position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 100;
+    width: 56px; height: 56px; border-radius: 50%;
+    border: 1px solid rgba(74,158,255,0.5);
+    background: linear-gradient(135deg, #4a9eff, #8b5cf6);
+    color: white; cursor: pointer; padding: 0;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 8px 32px rgba(74,158,255,0.35);
     transition: transform 0.3s cubic-bezier(0.16,1,0.3,1), box-shadow 0.3s;
-    padding: 0;
   }
-  .cw-trigger:hover {
-    transform: scale(1.08);
-    box-shadow: 0 12px 40px rgba(99,102,241,0.5);
+  .cw-trigger__ping {
+    position: absolute; inset: 0; border-radius: 50%;
+    background: rgba(74,158,255,0.5); z-index: -1;
+    animation: cwPing 2.6s cubic-bezier(0,0,0.2,1) infinite;
   }
+  .cw-trigger--used .cw-trigger__ping { display: none; }
+  @keyframes cwPing {
+    0% { transform: scale(1); opacity: 0.8; }
+    80%, 100% { transform: scale(1.9); opacity: 0; }
+  }
+  .cw-trigger__dot {
+    position: absolute; top: 0; right: 0;
+    width: 11px; height: 11px; border-radius: 50%;
+    background: #22c55e; border: 2px solid #0a0a0f;
+    display: none;
+  }
+  .cw-trigger:not(.cw-trigger--open).cw-trigger--used .cw-trigger__dot { display: block; }
+  .cw-trigger:hover { transform: scale(1.08); box-shadow: 0 12px 40px rgba(74,158,255,0.5); }
   .cw-trigger__close { display: none; }
   .cw-trigger--open .cw-trigger__open { display: none; }
   .cw-trigger--open .cw-trigger__close { display: block; }
 
-  .cw-panel {
-    position: fixed;
-    bottom: 5.5rem;
-    right: 1.5rem;
-    z-index: 99;
-    width: min(380px, calc(100vw - 2rem));
-    height: 520px;
-    max-height: calc(100vh - 8rem);
-    border-radius: 1rem;
-    border: 1px solid var(--zk-border, #1f1f2c);
-    background: var(--zk-card, #0d0d1a);
-    display: none;
-    flex-direction: column;
-    overflow: hidden;
-    box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+  .cw-teaser {
+    position: fixed; bottom: 6.2rem; right: 1.5rem; z-index: 99;
+    max-width: 264px; padding: 0.85rem 1.05rem;
+    border-radius: 1rem 1rem 1rem 0.25rem;
+    border: 1px solid var(--zk-border-hi);
+    background: rgba(18,18,26,0.92);
+    backdrop-filter: blur(14px);
+    box-shadow: 0 16px 50px rgba(0,0,0,0.5);
+    cursor: pointer;
+    animation: cwTeaserIn 0.4s cubic-bezier(0.16,1,0.3,1);
+    transition: border-color 0.2s;
   }
-  .cw-panel[aria-hidden="false"] { display: flex; }
+  .cw-teaser:hover { border-color: rgba(74,158,255,0.5); }
+  @keyframes cwTeaserIn {
+    from { opacity: 0; transform: translateY(12px) scale(0.95); }
+    to { opacity: 1; transform: none; }
+  }
+  .cw-teaser p {
+    margin: 0; font-size: 0.8125rem; line-height: 1.45; color: var(--zk-text);
+  }
+  .cw-teaser span { font-size: 0.75rem; color: var(--zk-growth, #4A9EFF); font-weight: 600; }
+
+  .cw-panel {
+    position: fixed; bottom: 5.5rem; right: 1.5rem; z-index: 99;
+    width: min(380px, calc(100vw - 2rem));
+    height: min(560px, calc(100dvh - 9rem));
+    border-radius: 1.25rem;
+    border: 1px solid var(--zk-border-hi);
+    background: rgba(16,16,24,0.94);
+    backdrop-filter: blur(20px);
+    display: none; flex-direction: column; overflow: hidden;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.55);
+  }
+  .cw-panel[aria-hidden="false"] {
+    display: flex;
+    transform-origin: bottom right;
+    animation: cwPanelIn 0.32s cubic-bezier(0.22,1,0.36,1);
+  }
+  .cw-panel--closing {
+    transform-origin: bottom right;
+    animation: cwPanelOut 0.18s ease-in forwards;
+  }
+  @keyframes cwPanelIn {
+    from { opacity: 0; transform: scale(0.94) translateY(16px); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes cwPanelOut {
+    from { opacity: 1; transform: none; }
+    to { opacity: 0; transform: scale(0.96) translateY(12px); }
+  }
 
   .cw-header {
-    display: flex; align-items: center; gap: 0.75rem;
-    padding: 1rem 1.25rem;
-    border-bottom: 1px solid var(--zk-border, #1f1f2c);
-    background: rgba(99,102,241,0.06);
+    display: flex; align-items: center; gap: 0.7rem;
+    padding: 0.9rem 1rem;
+    border-bottom: 1px solid var(--zk-border);
+    background: linear-gradient(180deg, rgba(74,158,255,0.1), transparent);
+  }
+  .cw-header__ring {
+    position: relative; padding: 2px; border-radius: 50%;
+    background: linear-gradient(135deg, #4a9eff, #8b5cf6); flex-shrink: 0;
+    box-shadow: 0 4px 14px rgba(74,158,255,0.35);
   }
   .cw-header__avatar {
-    width: 36px; height: 36px; border-radius: 0.5rem;
-    background: rgba(99,102,241,0.15); color: var(--zk-accent, #6366f1);
+    width: 34px; height: 34px; border-radius: 50%;
+    background: var(--zk-bg-2, #0C0C12); color: var(--zk-text);
+    font-weight: 700; font-size: 0.6875rem;
     display: flex; align-items: center; justify-content: center;
   }
-  .cw-header__title { font-size: 0.9375rem; font-weight: 600; color: var(--zk-heading, #f5f5fa); }
-  .cw-header__sub { font-size: 0.75rem; color: var(--zk-muted, #71717a); }
+  .cw-header__dot {
+    position: absolute; right: -1px; bottom: -1px;
+    width: 9px; height: 9px; border-radius: 50%;
+    background: #22c55e; border: 2px solid var(--zk-surface, #12121A);
+    animation: cwPulse 2.4s ease-in-out infinite;
+  }
+  @keyframes cwPulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+  .cw-header__info { min-width: 0; }
+  .cw-header__title { font-size: 0.875rem; font-weight: 600; color: var(--zk-text); }
+  .cw-header__sub { font-size: 0.6875rem; color: #22c55e; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cw-header__acciones { margin-left: auto; display: flex; gap: 0.3rem; }
+  .cw-icon-btn {
+    width: 30px; height: 30px; border-radius: 0.5rem;
+    border: 1px solid var(--zk-border); background: transparent;
+    color: var(--zk-muted); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: color 0.2s, border-color 0.2s, background 0.2s;
+  }
+  .cw-icon-btn:hover { color: var(--zk-text); border-color: var(--zk-border-hi); background: rgba(255,255,255,0.04); }
 
   .cw-messages {
-    flex: 1; overflow-y: auto; padding: 1rem;
-    display: flex; flex-direction: column; gap: 0.75rem;
+    flex: 1; overflow-y: auto; padding: 0.9rem;
+    display: flex; flex-direction: column; gap: 0.65rem;
+    background: radial-gradient(ellipse at top, rgba(74,158,255,0.05), transparent 60%), rgba(0,0,0,0.2);
+    scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.15) transparent;
   }
+  .cw-messages::-webkit-scrollbar { width: 5px; }
+  .cw-messages::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 999px; }
+
   .cw-msg {
-    max-width: 85%; padding: 0.65rem 0.9rem; border-radius: 0.75rem;
-    font-size: 0.875rem; line-height: 1.5; animation: cwFadeIn 0.3s ease;
+    display: flex; align-items: flex-end; gap: 0.4rem;
+    max-width: 90%; animation: cwFadeIn 0.3s ease;
   }
-  @keyframes cwFadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
-  .cw-msg--assistant {
-    align-self: flex-start;
-    background: rgba(99,102,241,0.08);
-    color: var(--zk-text, #e4e4e7);
+  @keyframes cwFadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: none; }
+  }
+  .cw-msg--assistant { align-self: flex-start; }
+  .cw-msg--user { align-self: flex-end; flex-direction: row-reverse; }
+
+  .cw-avatar {
+    width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0;
+    background: linear-gradient(135deg, #4a9eff, #8b5cf6);
+    color: #fff; font-size: 0.5rem; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  }
+  .cw-bubble {
+    padding: 0.55rem 0.8rem; border-radius: 0.85rem;
+    font-size: 0.8125rem; line-height: 1.55; white-space: pre-line;
+    overflow-wrap: anywhere;
+  }
+  .cw-bubble strong { color: var(--zk-text); font-weight: 600; }
+  .cw-bubble a { color: var(--zk-growth, #4A9EFF); text-decoration: underline; text-decoration-color: rgba(74,158,255,0.4); text-underline-offset: 2px; }
+  .cw-line { display: block; }
+  .cw-blank { display: block; height: 0.5rem; }
+  .cw-bullet {
+    display: inline-block; width: 5px; height: 5px; border-radius: 50%;
+    background: var(--zk-growth, #4A9EFF);
+    margin-right: 8px; vertical-align: middle;
+  }
+  .cw-msg--assistant .cw-bubble {
+    background: var(--zk-surface-2, #181822);
+    border: 1px solid var(--zk-border);
     border-bottom-left-radius: 0.25rem;
+    color: var(--zk-text-2);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.3);
   }
-  .cw-msg--user {
-    align-self: flex-end;
-    background: rgba(99,102,241,0.2);
-    color: #fff;
+  .cw-msg--user .cw-bubble {
+    background: var(--zk-whatsapp, #25D366);
+    color: var(--zk-whatsapp-ink, #05270F); font-weight: 500;
     border-bottom-right-radius: 0.25rem;
+    box-shadow: 0 6px 18px -6px rgba(37,211,102,0.5);
   }
-  .cw-typing { display: flex; gap: 4px; padding: 0.75rem 1rem; }
-  .cw-typing span {
-    width: 6px; height: 6px; border-radius: 50%;
-    background: var(--zk-muted, #71717a);
-    animation: cwBounce 1.2s infinite;
+  .cw-msg--user .cw-bubble strong { color: var(--zk-whatsapp-ink, #05270F); }
+  .cw-time {
+    font-family: var(--font-mono); font-size: 0.6rem;
+    color: var(--zk-muted); opacity: 0.75; margin-bottom: 0.1rem;
   }
-  .cw-typing span:nth-child(2) { animation-delay: 0.2s; }
-  .cw-typing span:nth-child(3) { animation-delay: 0.4s; }
-  @keyframes cwBounce { 0%,60%,100% { transform: translateY(0); } 30% { transform: translateY(-6px); } }
+  .cw-typing .cw-bubble { display: flex; gap: 4px; padding: 0.75rem 0.9rem; }
+  .cw-typing .cw-bubble span {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--zk-muted); animation: cwBounce 1.2s infinite;
+  }
+  .cw-typing .cw-bubble span:nth-child(2) { animation-delay: 0.2s; }
+  .cw-typing .cw-bubble span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes cwBounce {
+    0%,60%,100% { transform: translateY(0); }
+    30% { transform: translateY(-5px); }
+  }
+
+  .cw-chips {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem;
+    padding: 0.55rem 0.8rem; border-top: 1px solid var(--zk-border);
+    background: rgba(0,0,0,0.12);
+  }
+  .cw-chip {
+    font-size: 0.6875rem; padding: 0.4rem 0.75rem; border-radius: 2rem;
+    border: 1px solid var(--zk-border);
+    background: rgba(74,158,255,0.07); color: var(--zk-text-2);
+    cursor: pointer; transition: all 0.2s; font: inherit;
+    text-decoration: none; display: inline-flex; align-items: center;
+  }
+  .cw-chip:hover {
+    border-color: var(--zk-accent); background: rgba(74,158,255,0.16); color: #fff;
+  }
+  .cw-chip--link { color: var(--zk-growth, #4A9EFF); border-color: rgba(74,158,255,0.25); }
+  .cw-chips__toggle {
+    font-size: 0.625rem; padding: 0.3rem 0.5rem; border-radius: 2rem;
+    border: none; background: transparent; color: var(--zk-muted);
+    cursor: pointer; transition: color 0.2s; font: inherit;
+  }
+  .cw-chips__toggle:hover { color: var(--zk-text); }
+
+  .cw-wa { padding: 0.4rem 0.8rem; background: rgba(0,0,0,0.12); }
+  .cw-wa a {
+    display: flex; align-items: center; justify-content: center; gap: 0.45rem;
+    padding: 0.55rem; border-radius: 0.6rem;
+    background: rgba(37,211,102,0.1); color: var(--zk-whatsapp, #25D366);
+    font-size: 0.75rem; font-weight: 600; text-decoration: none;
+    border: 1px solid rgba(37,211,102,0.3);
+    transition: background 0.2s;
+  }
+  .cw-wa a:hover { background: rgba(37,211,102,0.18); }
 
   .cw-input-area {
     display: flex; align-items: center; gap: 0.5rem;
-    padding: 0.75rem 1rem;
-    border-top: 1px solid var(--zk-border, #1f1f2c);
+    padding: 0.7rem 0.8rem;
+    padding-bottom: max(0.7rem, env(safe-area-inset-bottom));
+    border-top: 1px solid var(--zk-border);
   }
   .cw-input {
-    flex: 1; padding: 0.6rem 0.9rem;
-    border-radius: 0.5rem; border: 1px solid var(--zk-border, #1f1f2c);
-    background: rgba(255,255,255,0.03); color: var(--zk-text, #e4e4e7);
-    font-size: 0.875rem; outline: none;
-    transition: border-color 0.2s;
+    flex: 1; padding: 0.6rem 1rem; border-radius: 1.5rem;
+    border: 1px solid var(--zk-border);
+    background: rgba(255,255,255,0.04); color: var(--zk-text);
+    font-size: 0.8125rem; outline: none; font: inherit;
+    transition: border-color 0.2s, box-shadow 0.2s;
   }
-  .cw-input:focus { border-color: var(--zk-accent, #6366f1); }
-  .cw-input::placeholder { color: var(--zk-muted, #52525b); }
+  .cw-input:focus {
+    border-color: rgba(74,158,255,0.6);
+    box-shadow: 0 0 0 3px rgba(74,158,255,0.12);
+  }
+  .cw-input::placeholder { color: var(--zk-muted); }
   .cw-send {
-    width: 38px; height: 38px; border-radius: 0.5rem;
-    border: none; background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    width: 36px; height: 36px; border-radius: 50%; border: none; flex-shrink: 0;
+    background: linear-gradient(135deg, #4a9eff, #8b5cf6);
     color: white; cursor: pointer;
     display: flex; align-items: center; justify-content: center;
-    transition: opacity 0.2s; flex-shrink: 0;
+    transition: transform 0.2s, opacity 0.2s;
   }
-  .cw-send:hover { opacity: 0.9; }
-  .cw-send[disabled] { opacity: 0.4; cursor: not-allowed; }
+  .cw-send:hover { transform: scale(1.06); opacity: 0.92; }
+  .cw-send[disabled] { opacity: 0.4; cursor: not-allowed; transform: none; }
 
   @media (max-width: 480px) {
-    .cw-trigger { bottom: 5rem; }
-    .cw-panel { bottom: 9rem; right: 0.5rem; height: 440px; }
+    .cw-trigger { bottom: 4.8rem; right: 0.9rem; }
+    .cw-teaser { bottom: 9rem; right: 0.9rem; max-width: 224px; }
+    .cw-panel { bottom: 9rem; right: 0.5rem; }
   }
 </style>

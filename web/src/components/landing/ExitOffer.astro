@@ -1,0 +1,175 @@
+---
+/**
+ * ExitOffer — popup de intención de salida.
+ *
+ * Desktop: mouseout por el borde superior. Móvil: subir rápido tras leer
+ * bastante, o cambiar de pestaña/app. Una vez por sesión. Hook: diagnóstico
+ * empresarial gratuito por WhatsApp, con escape al informe online.
+ */
+---
+
+<div id="eo-overlay" class="eo-overlay" role="dialog" aria-modal="true" aria-label="Oferta de diagnóstico gratuito" hidden>
+  <button id="eo-backdrop" class="eo-backdrop" aria-label="Cerrar"></button>
+  <div class="eo-card">
+    <button id="eo-close" class="eo-close" aria-label="Cerrar oferta">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+    <span class="eo-gift" aria-hidden="true">🎁</span>
+    <h3 class="eo-titulo">Espera, no te vayas…</h3>
+    <p class="eo-texto">
+      Te regalamos un <strong>Diagnóstico Empresarial gratuito</strong> hecho por
+      nuestros consultores: analizamos tu negocio y te decimos exactamente
+      <strong>qué automatizar primero y cuánto te ahorraría</strong>.
+    </p>
+    <ul class="eo-lista">
+      <li><span>✔</span> Dónde pierdes dinero hoy (con cifras)</li>
+      <li><span>✔</span> Las 3 automatizaciones de mayor impacto</li>
+      <li><span>✔</span> Plan de implementación y precio cerrado</li>
+    </ul>
+    <a id="eo-wa" class="eo-cta" href="https://wa.me/34622874482?text=Hola%20ZENKAI.%20Quiero%20mi%20diagn%C3%B3stico%20empresarial%20gratuito.%20Vengo%20de%20la%20web%20y%20me%20gustar%C3%ADa%20saber%20qu%C3%A9%20automatizar%20primero%20en%20mi%20negocio.%0A%0A(origen%3A%20exit-intent)" target="_blank" rel="noopener noreferrer">
+      Quiero mi diagnóstico gratis
+    </a>
+    <button id="eo-informe" class="eo-alt" type="button">Prefiero mi informe online</button>
+    <p class="eo-nota">Por WhatsApp · en menos de 24h · sin llamadas · sin compromiso</p>
+  </div>
+</div>
+
+<script>
+  const overlay = document.getElementById('eo-overlay')!;
+  const KEY = 'zk_exit_shown';
+  let mostrado = false;
+  let cerradoManual = false;
+  let activo = false;
+
+  const abrir = () => {
+    if (mostrado || cerradoManual) return;
+    if (sessionStorage.getItem(KEY)) return;
+    mostrado = true;
+    try { sessionStorage.setItem(KEY, '1'); } catch {}
+    overlay.hidden = false;
+    document.body.style.overflow = 'hidden';
+  };
+
+  const cerrar = () => {
+    cerradoManual = true;
+    overlay.hidden = true;
+    document.body.style.overflow = '';
+  };
+
+  document.getElementById('eo-close')!.addEventListener('click', cerrar);
+  document.getElementById('eo-backdrop')!.addEventListener('click', cerrar);
+  document.getElementById('eo-informe')!.addEventListener('click', () => {
+    cerrar();
+    document.getElementById('oferta')?.scrollIntoView({ behavior: 'smooth' });
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !overlay.hidden) cerrar();
+  });
+
+  setTimeout(() => { activo = true; }, 7000);
+
+  const esTouch = matchMedia('(pointer: coarse)').matches;
+
+  document.addEventListener('mouseout', (e: MouseEvent) => {
+    if (!activo || esTouch) return;
+    if (!e.relatedTarget && e.clientY <= 0) abrir();
+  });
+
+  let profundo = false;
+  window.addEventListener('scroll', () => {
+    if (!activo || !esTouch) return;
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = max > 0 ? window.scrollY / max : 0;
+    if (pct > 0.4) profundo = true;
+    if (profundo && pct < 0.08) abrir();
+  }, { passive: true });
+
+  document.addEventListener('visibilitychange', () => {
+    if (activo && document.hidden) abrir();
+  });
+</script>
+
+<style>
+  .eo-overlay {
+    position: fixed; inset: 0; z-index: 200;
+    display: flex; align-items: center; justify-content: center;
+    padding: 1rem;
+    animation: eoFade 0.25s ease-out;
+  }
+  .eo-overlay[hidden] { display: none; }
+  @keyframes eoFade { from { opacity: 0; } to { opacity: 1; } }
+  .eo-backdrop {
+    position: absolute; inset: 0;
+    background: rgba(0,0,0,0.78); backdrop-filter: blur(4px);
+    border: none; cursor: default;
+  }
+  .eo-card {
+    position: relative; width: 100%; max-width: 26rem;
+    border-radius: 1.5rem; padding: 2rem 1.6rem 1.6rem;
+    background:
+      linear-gradient(var(--zk-bg-2, #0C0C12), var(--zk-bg-2, #0C0C12)) padding-box,
+      linear-gradient(135deg, #4a9eff, #8b5cf6, #f59e0b) border-box;
+    border: 1.5px solid transparent;
+    text-align: center;
+    box-shadow: 0 24px 90px -20px rgba(74,158,255,0.5);
+    animation: eoPop 0.38s cubic-bezier(0.22,1,0.36,1);
+  }
+  @keyframes eoPop {
+    from { opacity: 0; transform: scale(0.92) translateY(14px); }
+    to { opacity: 1; transform: none; }
+  }
+  .eo-close {
+    position: absolute; top: 0.9rem; right: 0.9rem;
+    width: 34px; height: 34px; border-radius: 50%;
+    border: 1px solid var(--zk-border);
+    background: transparent; color: var(--zk-muted);
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .eo-close:hover { color: var(--zk-text); border-color: var(--zk-border-hi); }
+  .eo-gift {
+    display: flex; align-items: center; justify-content: center;
+    width: 64px; height: 64px; margin: 0 auto;
+    border-radius: 50%; font-size: 1.9rem;
+    background: radial-gradient(circle at 30% 30%, rgba(74,158,255,0.25), rgba(139,92,246,0.15));
+    animation: eoFloat 3.2s ease-in-out infinite;
+  }
+  @keyframes eoFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+  .eo-titulo {
+    font-family: var(--font-display);
+    font-size: 1.45rem; font-weight: 700; letter-spacing: -0.02em;
+    color: var(--zk-text); margin: 1rem 0 0.5rem;
+  }
+  .eo-texto { font-size: 0.90625rem; line-height: 1.6; color: var(--zk-text-2); margin: 0; }
+  .eo-texto strong { color: var(--zk-text); font-weight: 600; }
+  .eo-lista {
+    list-style: none; margin: 1.1rem 0 0; padding: 0;
+    display: flex; flex-direction: column; gap: 0.55rem;
+  }
+  .eo-lista li {
+    display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+    font-size: 0.8125rem; color: var(--zk-text-2);
+  }
+  .eo-lista span { color: #22c55e; font-weight: 700; }
+  .eo-cta {
+    display: block; margin-top: 1.3rem; padding: 0.85rem 1.25rem;
+    border-radius: 0.75rem;
+    background: linear-gradient(135deg, #25d366, #1fba59);
+    color: #05270f; font-weight: 700; font-size: 0.9375rem; text-decoration: none;
+    box-shadow: 0 6px 24px rgba(37,211,102,0.35);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .eo-cta:hover { transform: translateY(-1px); box-shadow: 0 10px 32px rgba(37,211,102,0.45); }
+  .eo-alt {
+    display: block; margin: 0.6rem auto 0;
+    background: none; border: 1px solid var(--zk-border);
+    border-radius: 0.75rem; padding: 0.7rem 1.25rem;
+    color: var(--zk-text-2); font-size: 0.8125rem; cursor: pointer; font: inherit;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .eo-alt:hover { border-color: var(--zk-accent); color: var(--zk-text); }
+  .eo-nota {
+    margin: 0.9rem 0 0; font-family: var(--font-mono);
+    font-size: 0.6875rem; color: var(--zk-muted);
+  }
+</style>

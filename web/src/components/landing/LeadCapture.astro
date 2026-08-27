@@ -1,16 +1,11 @@
 ---
 /**
- * LeadCapture — Captura de leads con psicología del consumidor.
+ * LeadCapture — Informe de Oportunidades de IA generado EN PANTALLA.
  *
- * Estrategia:
- * 1. Escasez: "Solo 5 ofertas disponibles esta semana"
- * 2. Curiosidad: "Oferta sorpresa" — no revela el descuento hasta que dejan el email
- * 3. Reciprocidad: "Te damos algo GRATIS antes de que compres"
- * 4. Urgencia: contador regresivo de tiempo limitado
- * 5. Baja fricción: solo nombre + email (ni teléfono, ni empresa)
- *
- * El formulario envía a /api/lead que guarda en n8n/Airtable
- * y dispara una secuencia de emails automática.
+ * El visitante responde 2 preguntas y la IA (DeepSeek) genera el informe al
+ * instante, visible en la propia página, con descarga .txt y envío por
+ * WhatsApp. Además se registra el lead en /api/lead para la secuencia de
+ * emails existente.
  */
 ---
 
@@ -27,8 +22,8 @@
         <span class="text-gradient">Informe de Oportunidades de IA.</span>
       </h2>
       <p class="lede">
-        Descubre donde la IA podria ahorrar tiempo, reducir costes y generar ingresos en tu empresa.
-        Gratis. Sin compromiso.
+        Responde 2 preguntas y la IA analiza tu caso <strong>al instante, en tu pantalla</strong>.
+        Descubre donde ahorrar tiempo, reducir costes y generar ingresos. Gratis. Sin compromiso. Sin llamadas.
       </p>
     </div>
 
@@ -38,88 +33,193 @@
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="11" rx="1"/><path d="M12 8V22"/><path d="M8 8c0-2.2 1.8-4 4-4s4 1.8 4 4"/><path d="M3 12h18"/></svg>
         </div>
         <div>
-        <h3 class="lead-card__title">Informe de Oportunidades de IA</h3>
-        <p class="lead-card__subtitle">Analisis personalizado para tu empresa · Confidencial</p>
+          <h3 class="lead-card__title">Informe de Oportunidades de IA</h3>
+          <p class="lead-card__subtitle">Analisis personalizado para tu empresa · Se genera al instante en tu pantalla</p>
         </div>
       </div>
 
       <form id="lead-form" class="lead-form">
         <div class="lead-form__fields">
-          <input
-            type="text"
-            name="nombre"
-            id="lead-nombre"
-            class="lead-input"
-            placeholder="Tu nombre"
-            required
-            autocomplete="given-name"
-          />
-          <input
-            type="email"
-            name="email"
-            id="lead-email"
-            class="lead-input"
-            placeholder="tu@email.com"
-            required
-            autocomplete="email"
-          />
+          <input type="text" name="nombre" id="lead-nombre" class="lead-input" placeholder="Tu nombre" required autocomplete="given-name" />
+          <input type="email" name="email" id="lead-email" class="lead-input" placeholder="tu@email.com" required autocomplete="email" />
         </div>
+        <select id="lead-sector" class="lead-input lead-select" aria-label="Sector">
+          <option value="">¿Cuál es tu sector?</option>
+          <option>Clínica dental / salud</option>
+          <option>Restaurante / hostelería</option>
+          <option>Ecommerce / tienda online</option>
+          <option>Inmobiliaria</option>
+          <option>Servicios profesionales (agencia, estudio, consultora)</option>
+          <option>Taller / servicios técnicos</option>
+          <option>Otro</option>
+        </select>
+        <textarea id="lead-dolores" class="lead-input lead-textarea" rows="3" maxlength="800" placeholder='¿Qué te está costando? Ej: "atendemos los WhatsApp a mano y perdemos clientes", "las facturas nos quitan horas", "los carritos abandonados no se recuperan"...' aria-label="Qué te gustaría automatizar"></textarea>
 
         <button type="submit" class="lead-submit" id="lead-submit">
-          <span>Generar mi informe</span>
+          <span id="lead-submit-texto">Generar mi informe gratis</span>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </button>
 
-        <div id="lead-success" class="lead-success" hidden>
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4 12 14.01l-3-3"/></svg>
-          <h4>Informe en camino</h4>
-          <p>Tu Informe de Oportunidades de IA se esta generando. Revisa tu bandeja de entrada en unos minutos.</p>
+        <div id="lead-loading" class="lead-loading" hidden>
+          <span class="lead-loading__spinner"></span>
+          <p>Analizando tu negocio con IA… esto tarda unos segundos</p>
+        </div>
+
+        <div id="lead-error" class="lead-error" hidden>
+          <p id="lead-error-texto">No pudimos generar tu informe.</p>
+          <button type="button" id="lead-reintentar" class="lead-reintentar">Reintentar</button>
+        </div>
+
+        <div id="lead-resultado" class="lead-resultado" hidden>
+          <div class="lead-resultado__ok">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4 12 14.01l-3-3"/></svg>
+            <h4>Tu informe está listo</h4>
+          </div>
+          <div id="lead-informe" class="lead-informe"></div>
+          <div class="lead-acciones">
+            <button type="button" id="lead-descargar" class="lead-accion">Descargar (.txt)</button>
+            <a id="lead-wa" class="lead-accion lead-accion--wa" href="https://wa.me/34622874482" target="_blank" rel="noopener noreferrer">Pedir por WhatsApp</a>
+          </div>
         </div>
       </form>
 
       <div class="lead-trust">
-        <span>Sin spam. Sin llamadas. Te das de baja cuando quieras.</span>
-        <span class="lead-counter" id="lead-counter">Gratis · Confidencial · Sin compromiso</span>
+        <span>Sin spam. Sin llamadas. No te pedimos tarjeta ni compromiso.</span>
+        <span class="lead-counter">Gratis · Confidencial · Sin compromiso</span>
       </div>
     </div>
-
   </div>
 </section>
 
 <script>
   const form = document.getElementById('lead-form') as HTMLFormElement;
   const submitBtn = document.getElementById('lead-submit') as HTMLButtonElement;
-  const success = document.getElementById('lead-success')!;
+  const submitTexto = document.getElementById('lead-submit-texto')!;
+  const loadingEl = document.getElementById('lead-loading')!;
+  const errorEl = document.getElementById('lead-error')!;
+  const errorTexto = document.getElementById('lead-error-texto')!;
+  const resultado = document.getElementById('lead-resultado')!;
+  const informeEl = document.getElementById('lead-informe')!;
+  const descargarBtn = document.getElementById('lead-descargar')!;
+  const waLink = document.getElementById('lead-wa') as HTMLAnchorElement;
+  let informeActual = '';
+
+  const escapeHtml = (t: string) =>
+    t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const inlineMd = (t: string) =>
+    escapeHtml(t).replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+
+  function renderInforme(md: string) {
+    informeEl.innerHTML = '';
+    const lineas = md.split('\n');
+    let lista: HTMLUListElement | null = null;
+    const cerrarLista = () => { lista = null; };
+    for (const linea of lineas) {
+      const t = linea.trim();
+      if (!t) { cerrarLista(); continue; }
+      if (t.startsWith('### ')) {
+        cerrarLista();
+        const h = document.createElement('h5');
+        h.innerHTML = inlineMd(t.slice(4));
+        informeEl.appendChild(h);
+        continue;
+      }
+      if (t.startsWith('## ')) {
+        cerrarLista();
+        const h = document.createElement('h4');
+        h.innerHTML = inlineMd(t.slice(3));
+        informeEl.appendChild(h);
+        continue;
+      }
+      if (t.startsWith('# ')) {
+        cerrarLista();
+        const h = document.createElement('h3');
+        h.innerHTML = inlineMd(t.slice(2));
+        informeEl.appendChild(h);
+        continue;
+      }
+      if (t.startsWith('• ') || t.startsWith('- ')) {
+        if (!lista) {
+          lista = document.createElement('ul');
+          informeEl.appendChild(lista);
+        }
+        const li = document.createElement('li');
+        li.innerHTML = inlineMd(t.replace(/^[•-]\s+/, ''));
+        lista.appendChild(li);
+        continue;
+      }
+      cerrarLista();
+      const p = document.createElement('p');
+      p.innerHTML = inlineMd(t);
+      informeEl.appendChild(p);
+    }
+    informeEl.scrollTop = 0;
+  }
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const nombre = (document.getElementById('lead-nombre') as HTMLInputElement).value.trim();
     const email = (document.getElementById('lead-email') as HTMLInputElement).value.trim();
+    const sector = (document.getElementById('lead-sector') as HTMLSelectElement).value;
+    const dolores = (document.getElementById('lead-dolores') as HTMLTextAreaElement).value.trim();
     if (!nombre || !email) return;
 
-    submitBtn.setAttribute('disabled', '');
-    submitBtn.innerHTML = '<span>Enviando...</span>';
+    resultado.hidden = true;
+    errorEl.hidden = true;
+    loadingEl.hidden = false;
+    submitBtn.setAttribute('hidden', '');
+
+    // Lead para la secuencia de emails existente (fire-and-forget).
+    fetch('/api/lead', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nombre, email, sector, dolores, fuente: 'ai-opportunity-report', pagina: location.pathname }),
+    }).catch(() => {});
 
     try {
-      await fetch('/api/lead', {
+      const res = await fetch('/api/informe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nombre, email, fuente: 'ai-opportunity-report', pagina: location.pathname }),
+        body: JSON.stringify({ nombre, email, sector, dolores }),
       });
-      // Track conversion
-      try { window.va?.('event', { name: 'lead_captured', data: { source: 'oferta-sorpresa' } }); } catch {}
-      form.querySelector('.lead-form__fields')!.setAttribute('hidden', '');
-      submitBtn.setAttribute('hidden', '');
-      success.removeAttribute('hidden');
-    } catch {
-      submitBtn.removeAttribute('disabled');
-      submitBtn.innerHTML = '<span>Quiero la oferta sorpresa</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
-      alert('Error al enviar. Prueba de nuevo o escríbenos por WhatsApp.');
+      const data = await res.json();
+      if (!res.ok || !data.informe) throw new Error(data?.error || 'Error generando informe');
+      informeActual = data.informe;
+      renderInforme(informeActual);
+      loadingEl.hidden = true;
+      resultado.hidden = false;
+      try { window.va?.('event', { name: 'lead_captured', data: { source: 'informe-ia' } }); } catch {}
+    } catch (err) {
+      loadingEl.hidden = true;
+      submitBtn.removeAttribute('hidden');
+      errorTexto.textContent = err instanceof Error ? err.message : 'No pudimos generar tu informe.';
+      errorEl.hidden = false;
     }
+  });
+
+  document.getElementById('lead-reintentar')!.addEventListener('click', () => {
+    errorEl.hidden = true;
+    submitBtn.removeAttribute('hidden');
+  });
+
+  descargarBtn.addEventListener('click', () => {
+    const blob = new Blob([informeActual], { type: 'text/markdown;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'informe-oportunidades-ia.txt';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  waLink.addEventListener('click', () => {
+    const sector = (document.getElementById('lead-sector') as HTMLSelectElement).value;
+    const texto = `Hola ZENKAI. Acabo de generar mi Informe de Oportunidades de IA en la web${sector ? ` (sector: ${sector})` : ''}. Quiero que me ayuden a implementarlo.`;
+    waLink.href = `https://wa.me/34622874482?text=${encodeURIComponent(texto + '\n\n(origen: informe)')}`;
   });
 </script>
 
-<style>
+<style is:global>
   .band { padding-block: clamp(4rem, 8vw, 7rem); }
   .wrap { max-width: 48rem; margin-inline: auto; padding-inline: 1.5rem; }
 
@@ -133,31 +233,31 @@
     margin-bottom: 1.25rem;
   }
   .h2 {
-    font-family: 'Sora Variable', 'Sora', system-ui, sans-serif;
-    font-size: clamp(1.5rem, 4vw, 2.25rem); font-weight: 700;
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 4vw, 2.5rem); font-weight: 700;
     letter-spacing: -0.02em; line-height: 1.15;
-    color: var(--zk-heading, #f5f5fa); text-align: center; margin-bottom: 1rem;
+    color: var(--zk-text); text-align: center; margin-bottom: 1rem;
   }
   .text-gradient {
-    background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+    background: linear-gradient(135deg, #4a9eff 0%, #a855f7 100%);
     -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
   }
   .lede {
-    font-size: 1rem; line-height: 1.6; color: var(--zk-muted, #a1a1aa);
+    font-size: 1rem; line-height: 1.6; color: var(--zk-text-2);
     text-align: center; max-width: 48rem; margin-inline: auto; margin-bottom: 2rem;
   }
-  .lede strong { color: var(--zk-heading, #f5f5fa); font-weight: 600; }
+  .lede strong { color: var(--zk-text); font-weight: 600; }
 
   .lead-card {
     border: 1px solid rgba(245,158,11,0.2);
     border-radius: 1rem;
-    background: linear-gradient(135deg, rgba(245,158,11,0.04) 0%, rgba(99,102,241,0.03) 100%);
+    background: linear-gradient(135deg, rgba(245,158,11,0.04) 0%, rgba(74,158,255,0.03) 100%);
     overflow: hidden;
   }
   .lead-card__header {
     display: flex; align-items: flex-start; gap: 1rem;
     padding: 1.5rem 1.5rem 1.25rem;
-    border-bottom: 1px solid var(--zk-border, #1f1f2c);
+    border-bottom: 1px solid var(--zk-border);
   }
   .lead-card__gift {
     width: 48px; height: 48px; border-radius: 0.75rem;
@@ -166,69 +266,128 @@
     flex-shrink: 0;
   }
   .lead-card__title {
-    font-family: 'Sora Variable', 'Sora', system-ui, sans-serif;
-    font-size: 1.25rem; font-weight: 700; color: var(--zk-heading, #f5f5fa);
+    font-family: var(--font-display);
+    font-size: 1.25rem; font-weight: 700; color: var(--zk-text);
     margin-bottom: 0.2rem;
   }
-  .lead-card__subtitle {
-    font-size: 0.8125rem; color: var(--zk-muted, #a1a1aa); margin: 0;
-  }
+  .lead-card__subtitle { font-size: 0.8125rem; color: var(--zk-text-2); margin: 0; }
 
-  .lead-form { padding: 1.5rem; }
+  .lead-form { padding: 1.5rem; display: flex; flex-direction: column; gap: 0.75rem; }
   .lead-form__fields {
     display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;
-    margin-bottom: 1rem;
   }
   @media (max-width: 480px) {
     .lead-form__fields { grid-template-columns: 1fr; }
   }
   .lead-input {
     padding: 0.75rem 1rem; border-radius: 0.5rem;
-    border: 1px solid var(--zk-border, #1f1f2c);
-    background: rgba(255,255,255,0.03); color: var(--zk-text, #e4e4e7);
+    border: 1px solid var(--zk-border);
+    background: rgba(255,255,255,0.03); color: var(--zk-text);
     font-size: 0.9375rem; outline: none; width: 100%; box-sizing: border-box;
-    transition: border-color 0.2s;
+    transition: border-color 0.2s; font: inherit;
   }
-  .lead-input:focus { border-color: var(--zk-accent, #6366f1); }
-  .lead-input::placeholder { color: var(--zk-muted, #52525b); }
+  .lead-input:focus { border-color: var(--zk-accent); }
+  .lead-input::placeholder { color: var(--zk-muted); }
+  .lead-select { appearance: none; cursor: pointer; }
+  .lead-select option { background: var(--zk-bg-2, #0C0C12); color: var(--zk-text); }
+  .lead-textarea { resize: vertical; min-height: 84px; line-height: 1.5; }
 
   .lead-submit {
     width: 100%; padding: 0.9rem 1.5rem; border-radius: 0.75rem; border: none;
     background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
     color: #0f172a; font-size: 1rem; font-weight: 700;
     cursor: pointer; display: flex; align-items: center; justify-content: center;
-    gap: 0.5rem;
+    gap: 0.5rem; font: inherit;
     transition: transform 0.2s, box-shadow 0.2s;
     box-shadow: 0 4px 16px rgba(245,158,11,0.3);
   }
-  .lead-submit:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 8px 24px rgba(245,158,11,0.4);
-  }
+  .lead-submit:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(245,158,11,0.4); }
   .lead-submit:active { transform: scale(0.98); }
-  .lead-submit[disabled] { opacity: 0.6; cursor: not-allowed; }
 
-  .lead-success {
-    text-align: center; padding: 1rem 0;
-    animation: leadFadeIn 0.5s ease;
+  .lead-loading {
+    display: flex; flex-direction: column; align-items: center; gap: 0.8rem;
+    padding: 1.5rem 0; animation: leadFadeIn 0.4s ease;
   }
-  @keyframes leadFadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: none; } }
-  .lead-success h4 {
-    font-family: 'Sora Variable', 'Sora', system-ui, sans-serif;
+  .lead-loading__spinner {
+    width: 34px; height: 34px; border-radius: 50%;
+    border: 3px solid rgba(245,158,11,0.2); border-top-color: #f59e0b;
+    animation: leadSpin 0.9s linear infinite;
+  }
+  @keyframes leadSpin { to { transform: rotate(360deg); } }
+  .lead-loading p { margin: 0; font-size: 0.875rem; color: var(--zk-text-2); }
+
+  .lead-error { padding: 1rem 0; text-align: center; }
+  .lead-error p { margin: 0 0 0.8rem; font-size: 0.875rem; color: #f87171; }
+  .lead-reintentar {
+    padding: 0.6rem 1.2rem; border-radius: 0.6rem; border: 1px solid var(--zk-border);
+    background: transparent; color: var(--zk-text); cursor: pointer; font: inherit;
+    transition: border-color 0.2s;
+  }
+  .lead-reintentar:hover { border-color: var(--zk-accent); }
+
+  .lead-resultado { animation: leadFadeIn 0.5s ease; }
+  @keyframes leadFadeIn { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: none; } }
+  .lead-resultado__ok { text-align: center; padding: 0.5rem 0 1rem; }
+  .lead-resultado__ok h4 {
+    font-family: var(--font-display);
     font-size: 1.125rem; font-weight: 700;
-    color: var(--zk-heading, #f5f5fa); margin: 0.75rem 0 0.5rem;
+    color: var(--zk-text); margin: 0.6rem 0 0;
   }
-  .lead-success p {
-    font-size: 0.875rem; color: var(--zk-muted, #a1a1aa); margin: 0;
+  .lead-informe {
+    max-height: 460px; overflow-y: auto; text-align: left;
+    padding: 1.1rem 1.25rem;
+    border: 1px solid var(--zk-border);
+    border-radius: 0.75rem;
+    background: rgba(0,0,0,0.25);
+    scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.15) transparent;
   }
+  .lead-informe::-webkit-scrollbar { width: 5px; }
+  .lead-informe::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 999px; }
+  .lead-informe h3 {
+    font-family: var(--font-display); font-size: 1.0625rem;
+    color: var(--zk-text); margin: 0 0 0.8rem;
+  }
+  .lead-informe h4 {
+    font-family: var(--font-display); font-size: 0.9375rem;
+    color: var(--zk-text); margin: 1.2rem 0 0.5rem;
+  }
+  .lead-informe h5 {
+    font-size: 0.875rem; color: var(--zk-growth, #4A9EFF);
+    margin: 1.1rem 0 0.4rem; font-weight: 600;
+  }
+  .lead-informe p { font-size: 0.84375rem; line-height: 1.6; color: var(--zk-text-2); margin: 0.5rem 0; }
+  .lead-informe p strong, .lead-informe li strong { color: var(--zk-text); font-weight: 600; }
+  .lead-informe ul { margin: 0.4rem 0; padding-left: 0; list-style: none; }
+  .lead-informe li {
+    display: flex; gap: 0.5rem; align-items: flex-start;
+    font-size: 0.84375rem; line-height: 1.6; color: var(--zk-text-2);
+    margin-bottom: 0.35rem;
+  }
+  .lead-informe li::before {
+    content: '•'; color: #f59e0b; flex-shrink: 0; font-weight: 700;
+  }
+  .lead-acciones { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-top: 0.9rem; }
+  @media (max-width: 420px) { .lead-acciones { grid-template-columns: 1fr; } }
+  .lead-accion {
+    display: flex; align-items: center; justify-content: center;
+    padding: 0.7rem 1rem; border-radius: 0.6rem;
+    font-size: 0.8125rem; font-weight: 600; text-decoration: none;
+    border: 1px solid var(--zk-border);
+    background: rgba(255,255,255,0.03); color: var(--zk-text);
+    cursor: pointer; transition: border-color 0.2s; font: inherit;
+  }
+  .lead-accion:hover { border-color: var(--zk-accent); }
+  .lead-accion--wa {
+    border: 1px solid rgba(37,211,102,0.4);
+    background: rgba(37,211,102,0.1); color: var(--zk-whatsapp, #25D366);
+  }
+  .lead-accion--wa:hover { background: rgba(37,211,102,0.18); border-color: rgba(37,211,102,0.6); }
 
   .lead-trust {
     display: flex; flex-direction: column; align-items: center; gap: 0.25rem;
     padding: 1rem 1.5rem 1.25rem;
-    border-top: 1px solid var(--zk-border, #1f1f2c);
-    font-size: 0.75rem; color: var(--zk-muted, #52525b);
+    border-top: 1px solid var(--zk-border);
+    font-size: 0.75rem; color: var(--zk-muted);
   }
-  .lead-counter {
-    color: #f59e0b; font-weight: 500; font-size: 0.8125rem;
-  }
+  .lead-counter { color: #f59e0b; font-weight: 500; font-size: 0.8125rem; }
 </style>
